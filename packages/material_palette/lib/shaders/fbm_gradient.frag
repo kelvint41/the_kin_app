@@ -1,0 +1,382 @@
+#include <flutter/runtime_effect.glsl>
+
+precision highp float;
+
+// Core uniforms
+uniform vec2 uSize;
+uniform float uTime;
+
+// Gradient settings
+uniform float uGradientAngle;
+uniform float uGradientScale;
+uniform float uGradientOffset;
+
+// Noise settings
+uniform vec4 uNoiseParams; // x=noiseIntensity, y=ditherStrength, z=ditherScale, w=animSpeed
+
+// FBM-specific
+uniform float uOctaves;
+uniform float uLacunarity;
+uniform float uPersistence;
+uniform float uNoiseScale;
+
+// Color palette (10 stops, premultiplied alpha)
+uniform vec4 uColor0;
+uniform vec4 uColor1;
+uniform vec4 uColor2;
+uniform vec4 uColor3;
+uniform vec4 uColor4;
+uniform vec4 uColor5;
+uniform vec4 uColor6;
+uniform vec4 uColor7;
+uniform vec4 uColor8;
+uniform vec4 uColor9;
+uniform vec2 uColorMeta; // x=colorCount, y=softness
+
+// Post-processing
+uniform vec2 uPostProcess; // x=exposure, y=contrast
+
+// Lighting uniforms
+uniform vec4 uLighting1; // x=bumpStrength, yzw=lightDir
+uniform vec4 uLighting2; // x=lightIntensity, y=ambient, z=specular, w=shininess
+uniform vec4 uLighting3; // x=metallic, y=roughness, z=edgeFade, w=edgeFadeMode
+
+out vec4 fragColor;
+
+// ============ COLOR SPACE CONVERSION ============
+
+float srgbToLinear(float c) {
+    return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4);
+}
+
+vec3 srgbToLinear(vec3 c) {
+    return vec3(srgbToLinear(c.r), srgbToLinear(c.g), srgbToLinear(c.b));
+}
+
+float linearToSrgb(float c) {
+    return c <= 0.0031308 ? c * 12.92 : 1.055 * pow(c, 1.0 / 2.4) - 0.055;
+}
+
+vec3 linearToSrgb(vec3 c) {
+    return vec3(linearToSrgb(c.r), linearToSrgb(c.g), linearToSrgb(c.b));
+}
+
+// ============ HASH FUNCTIONS ============
+
+vec2 hash22(vec2 p) {
+    vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return fract((p3.xx + p3.yz) * p3.zy) * 2.0 - 1.0;
+}
+
+// 3D hash function returning 3D gradient
+vec3 hash33(vec3 p) {
+    p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+    p += dot(p, p.yxz + 33.33);
+    return fract((p.xxy + p.yxx) * p.zyx) * 2.0 - 1.0;
+}
+
+// ============ ANTI-ALIASING ============
+
+float getAASmoothing(vec2 uv, float scale) {
+    // Approximate AA based on scale (higher scale = more smoothing needed)
+    return clamp(scale * 0.006, 0.0, 0.3);
+}
+
+// ============ EDGE ATTENUATION ============
+
+float edgeAttenuation(float t, float strength, float mode) {
+    if (strength <= 0.0) return 1.0;
+
+    float dist;
+    if (mode < 0.5) {
+        // Both ends - fade at t=0 and t=1
+        dist = abs(t - 0.5) * 2.0;
+    } else if (mode < 1.5) {
+        // Start only - fade near t=0
+        dist = 1.0 - t;
+    } else {
+        // End only - fade near t=1
+        dist = t;
+    }
+
+    // Quadratic curve for smooth falloff
+    float curve = dist * dist;
+
+    // Scale by strength - only fully clip at max strength (3.0)
+    float fadeAmount = curve * (strength / 3.0);
+
+    return clamp(1.0 - fadeAmount, 0.0, 1.0);
+}
+
+// ============ PERLIN NOISE ============
+
+float perlinNoise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+    float a = dot(hash22(i), f);
+    float b = dot(hash22(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));
+    float c = dot(hash22(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));
+    float d = dot(hash22(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));
+
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.5 + 0.5;
+}
+
+// 3D Perlin noise - evolves over time without translation
+float perlinNoise3D(vec3 p) {
+    vec3 i = floor(p);
+    vec3 f = fract(p);
+
+    // Quintic interpolation
+    vec3 u = f * f * f * (f * (f * 6.0 - 15.0) + 10.0);
+
+    // Eight corners of the cube
+    float n000 = dot(hash33(i + vec3(0.0, 0.0, 0.0)), f - vec3(0.0, 0.0, 0.0));
+    float n100 = dot(hash33(i + vec3(1.0, 0.0, 0.0)), f - vec3(1.0, 0.0, 0.0));
+    float n010 = dot(hash33(i + vec3(0.0, 1.0, 0.0)), f - vec3(0.0, 1.0, 0.0));
+    float n110 = dot(hash33(i + vec3(1.0, 1.0, 0.0)), f - vec3(1.0, 1.0, 0.0));
+    float n001 = dot(hash33(i + vec3(0.0, 0.0, 1.0)), f - vec3(0.0, 0.0, 1.0));
+    float n101 = dot(hash33(i + vec3(1.0, 0.0, 1.0)), f - vec3(1.0, 0.0, 1.0));
+    float n011 = dot(hash33(i + vec3(0.0, 1.0, 1.0)), f - vec3(0.0, 1.0, 1.0));
+    float n111 = dot(hash33(i + vec3(1.0, 1.0, 1.0)), f - vec3(1.0, 1.0, 1.0));
+
+    // Trilinear interpolation
+    float n00 = mix(n000, n100, u.x);
+    float n01 = mix(n001, n101, u.x);
+    float n10 = mix(n010, n110, u.x);
+    float n11 = mix(n011, n111, u.x);
+
+    float n0 = mix(n00, n10, u.y);
+    float n1 = mix(n01, n11, u.y);
+
+    return mix(n0, n1, u.z) * 0.5 + 0.5;
+}
+
+// ============ FBM (Fractional Brownian Motion) ============
+
+float fbmNoise(vec2 p, int octaves, float lacunarity, float persistence) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    float maxValue = 0.0;
+
+    // Rotation matrix for domain warping between octaves
+    mat2 rot = mat2(0.8, 0.6, -0.6, 0.8);
+
+    for (int i = 0; i < 8; i++) {
+        if (i >= octaves) break;
+
+        value += amplitude * perlinNoise(p * frequency);
+        maxValue += amplitude;
+        amplitude *= persistence;
+        frequency *= lacunarity;
+        p = rot * p;
+    }
+
+    return value / maxValue;
+}
+
+// 3D FBM - noise evolves over time without translation
+float fbmNoise3D(vec3 p, int octaves, float lacunarity, float persistence) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    float frequency = 1.0;
+    float maxValue = 0.0;
+
+    // 3D rotation matrix for domain warping
+    mat3 rot = mat3(
+        0.8, 0.6, 0.0,
+        -0.6, 0.8, 0.0,
+        0.0, 0.0, 1.0
+    );
+
+    for (int i = 0; i < 8; i++) {
+        if (i >= octaves) break;
+
+        value += amplitude * perlinNoise3D(p * frequency);
+        maxValue += amplitude;
+        amplitude *= persistence;
+        frequency *= lacunarity;
+        p = rot * p;
+    }
+
+    return value / maxValue;
+}
+
+// Animated FBM using time as Z coordinate - noise evolves in place
+float animatedFbm(vec2 p, float time, int octaves, float lacunarity, float persistence) {
+    return fbmNoise3D(vec3(p, time * 0.3), octaves, lacunarity, persistence);
+}
+
+// ============ DITHER ============
+
+// Proper 4x4 Bayer ordered dither (16 distinct thresholds)
+float orderedDither(vec2 p) {
+    vec2 cell = mod(floor(p), 4.0);
+    float bx0 = mod(cell.x, 2.0);
+    float by0 = mod(cell.y, 2.0);
+    float bx1 = floor(cell.x / 2.0);
+    float by1 = floor(cell.y / 2.0);
+    float fine   = mod(bx0 * 2.0 + by0 * 3.0, 4.0);
+    float coarse = mod(bx1 * 2.0 + by1 * 3.0, 4.0);
+    float bayer = (fine * 4.0 + coarse + 0.5) / 16.0;
+    return (bayer - 0.5) * 2.0;
+}
+
+// ============ GRADIENT FUNCTION ============
+
+float calculateGradient(vec2 uv) {
+    float aspect = uSize.x / uSize.y;
+    float angle = uGradientAngle * 3.14159265 / 180.0;
+    vec2 dir = normalize(vec2(cos(angle) / aspect, sin(angle)));
+    vec2 centered = (uv - 0.5) / uGradientScale;
+    float t = dot(centered, dir) + 0.5 + uGradientOffset;
+    return clamp(t, 0.0, 1.0);
+}
+
+// ============ COLOR INTERPOLATION ============
+
+vec4 getColorStop(int i) {
+    if (i == 0) return uColor0; if (i == 1) return uColor1;
+    if (i == 2) return uColor2; if (i == 3) return uColor3;
+    if (i == 4) return uColor4; if (i == 5) return uColor5;
+    if (i == 6) return uColor6; if (i == 7) return uColor7;
+    if (i == 8) return uColor8; return uColor9;
+}
+
+vec4 gradientColor(float t) {
+    int count = int(uColorMeta.x);
+    if (count < 2) count = 2; if (count > 10) count = 10;
+    float stopT = t * float(count - 1);
+    int idx = int(floor(stopT));
+    if (idx >= count - 1) idx = count - 2;
+    float frac = stopT - float(idx);
+    vec4 sA = getColorStop(idx); vec4 sB = getColorStop(idx + 1);
+    vec3 linA = srgbToLinear(sA.rgb); vec3 linB = srgbToLinear(sB.rgb);
+    vec4 pmA = vec4(linA * sA.a, sA.a); vec4 pmB = vec4(linB * sB.a, sB.a);
+    float blend;
+    if (uColorMeta.y >= 0.999) { blend = frac; }
+    else if (uColorMeta.y <= 0.001) { blend = step(0.5, frac); }
+    else { float edge = 0.5 * uColorMeta.y; blend = smoothstep(0.5 - edge, 0.5 + edge, frac); }
+    return mix(pmA, pmB, blend);
+}
+
+// ============ NORMAL MAP FROM NOISE ============
+
+vec3 computeNormal(vec2 uv, float time, int octaves, float bumpStrength) {
+    vec2 noiseCoord = uv * uNoiseScale;
+    float eps = 0.01;
+
+    float center = animatedFbm(noiseCoord, time, octaves, uLacunarity, uPersistence);
+    float right = animatedFbm(noiseCoord + vec2(eps, 0.0), time, octaves, uLacunarity, uPersistence);
+    float up = animatedFbm(noiseCoord + vec2(0.0, eps), time, octaves, uLacunarity, uPersistence);
+
+    float dx = (right - center) / eps;
+    float dy = (up - center) / eps;
+
+    vec3 normal = normalize(vec3(-dx * bumpStrength, -dy * bumpStrength, 1.0));
+    return normal;
+}
+
+// ============ LIGHTING ============
+
+vec3 applyLighting(vec3 color, vec3 normal) {
+    if (uLighting1.x < 0.001) return color;
+
+    vec3 lightDir = normalize(uLighting1.yzw);
+    vec3 viewDir = vec3(0.0, 0.0, 1.0);
+
+    // Roughness affects shininess (squared for perceptual linearity)
+    float roughness2 = uLighting3.y * uLighting3.y;
+    float effectiveShininess = mix(uLighting2.w, 2.0, roughness2);
+
+    // Metal: specular = base color, reduced diffuse
+    // Dielectric: specular = white, full diffuse
+    vec3 specularColor = mix(vec3(1.0), color, uLighting3.x);
+    float diffuseFactor = 1.0 - uLighting3.x * 0.9;
+
+    // Ambient
+    vec3 ambient = color * uLighting2.y;
+
+    // Diffuse (Lambertian, reduced for metals)
+    float diff = max(dot(normal, lightDir), 0.0);
+    vec3 diffuse = color * diff * (1.0 - uLighting2.y) * diffuseFactor;
+
+    // Specular (Blinn-Phong with roughness)
+    vec3 halfDir = normalize(lightDir + viewDir);
+    float NdotH = max(dot(normal, halfDir), 0.0);
+    float specIntensity = mix(1.0, 0.2, roughness2);
+    float spec = pow(NdotH, effectiveShininess) * specIntensity;
+    vec3 specular = specularColor * spec * uLighting2.z;
+
+    return (ambient + diffuse + specular) * uLighting2.x;
+}
+
+// ============ MAIN ============
+
+void main() {
+    vec2 fragCoord = FlutterFragCoord().xy;
+    float time = uTime * uNoiseParams.w;
+
+    // Dither pixel grid: quantize sampling when dither is enabled
+    vec2 sampleCoord = fragCoord;
+    vec2 cellCoord = fragCoord;
+    if (uNoiseParams.y > 0.0) {
+        float cellSize = 1.0 / max(uNoiseParams.z, 0.001);
+        cellCoord = floor(fragCoord / cellSize);
+        sampleCoord = (cellCoord + 0.5) * cellSize;
+    }
+
+    vec2 uv = sampleCoord / uSize;
+    float aspect = uSize.x / uSize.y;
+    vec2 uvAspect = vec2(uv.x * aspect, uv.y);
+
+    // Calculate base gradient position
+    float gradientT = calculateGradient(uv);
+
+    // Edge attenuation for noise and bump
+    float edgeAtten = edgeAttenuation(gradientT, uLighting3.z, uLighting3.w);
+
+    // Generate FBM noise
+    vec2 noiseCoord = uvAspect * uNoiseScale;
+    int octaves = int(uOctaves);
+    float noise = animatedFbm(noiseCoord, time, octaves, uLacunarity, uPersistence);
+
+    // AA: smooth noise based on screen-space derivatives
+    float aaFactor = getAASmoothing(uv, uNoiseScale);
+    noise = mix(noise, smoothstep(0.0, 1.0, noise), aaFactor);
+
+    // Add ordered dither (skip sampling when disabled)
+    float dither = uNoiseParams.y > 0.0 ? orderedDither(cellCoord) * uNoiseParams.y * 0.05 : 0.0;
+
+    // Modulate gradient with noise (attenuated at edges)
+    float noiseMod = (noise - 0.5) * 2.0 * uNoiseParams.x * edgeAtten;
+    float noisyT = clamp(gradientT + noiseMod + dither, 0.0, 1.0);
+
+    // Get gradient color (premultiplied alpha)
+    vec4 pmColor = gradientColor(noisyT);
+    float alpha = pmColor.a;
+    vec3 color = alpha > 0.001 ? pmColor.rgb / alpha : vec3(0.0);
+
+    // Compute normal with attenuated bump and apply lighting
+    float attenuatedBump = uLighting1.x * edgeAtten;
+    vec3 normal = computeNormal(uvAspect, time, octaves, attenuatedBump);
+    color = applyLighting(color, normal);
+
+    // Apply contrast
+    color = mix(vec3(0.5), color, uPostProcess.y);
+
+    // Apply exposure
+    color *= uPostProcess.x;
+
+    // Clamp to [0,1] before sRGB conversion
+    color = clamp(color, 0.0, 1.0);
+
+    // Convert back to sRGB
+    color = linearToSrgb(color);
+    color = clamp(color, 0.0, 1.0);
+
+    fragColor = vec4(color * alpha, alpha);
+}

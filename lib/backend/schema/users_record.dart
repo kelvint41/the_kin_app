@@ -1,0 +1,222 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+
+import '/backend/schema/util/firestore_util.dart';
+import '/backend/schema/util/schema_util.dart';
+
+import 'index.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+
+class UsersRecord extends FirestoreRecord {
+  UsersRecord._(
+    DocumentReference reference,
+    Map<String, dynamic> data,
+  ) : super(reference, data) {
+    _initializeFields();
+  }
+
+  // "email" field.
+  String? _email;
+  String get email => _email ?? '';
+  bool hasEmail() => _email != null;
+
+  // "display_name" field.
+  String? _displayName;
+  String get displayName => _displayName ?? '';
+  bool hasDisplayName() => _displayName != null;
+
+  // "photo_url" field.
+  String? _photoUrl;
+  String get photoUrl => _photoUrl ?? '';
+  bool hasPhotoUrl() => _photoUrl != null;
+
+  // "uid" field.
+  String? _uid;
+  String get uid => _uid ?? '';
+  bool hasUid() => _uid != null;
+
+  // "created_time" field.
+  DateTime? _createdTime;
+  DateTime? get createdTime => _createdTime;
+  bool hasCreatedTime() => _createdTime != null;
+
+  // "phone_number" field.
+  String? _phoneNumber;
+  String get phoneNumber => _phoneNumber ?? '';
+  bool hasPhoneNumber() => _phoneNumber != null;
+
+  // "owned_business" field.
+  DocumentReference? _ownedBusiness;
+  DocumentReference? get ownedBusiness => _ownedBusiness;
+  bool hasOwnedBusiness() => _ownedBusiness != null;
+
+  // "subscription_status" field.
+  String? _subscriptionStatus;
+  String get subscriptionStatus => _subscriptionStatus ?? '';
+  bool hasSubscriptionStatus() => _subscriptionStatus != null;
+
+  // "isEliteFounder" field.
+  bool? _isEliteFounder;
+  bool get isEliteFounder => _isEliteFounder ?? false;
+  bool hasIsEliteFounder() => _isEliteFounder != null;
+
+  // "account_created_at" field.
+  DateTime? _accountCreatedAt;
+  DateTime? get accountCreatedAt => _accountCreatedAt;
+  bool hasAccountCreatedAt() => _accountCreatedAt != null;
+
+  // "is_active" field.
+  bool? _isActive;
+  bool get isActive => _isActive ?? false;
+  bool hasIsActive() => _isActive != null;
+
+  // "last_login" field.
+  DateTime? _lastLogin;
+  DateTime? get lastLogin => _lastLogin;
+  bool hasLastLogin() => _lastLogin != null;
+
+  // "verified_check_ins" field.
+  String? _verifiedCheckIns;
+  String get verifiedCheckIns => _verifiedCheckIns ?? '';
+  bool hasVerifiedCheckIns() => _verifiedCheckIns != null;
+
+  // "social_share_config" field.
+  Map<String, dynamic>? _socialShareConfig;
+  Map<String, dynamic> get socialShareConfig => _socialShareConfig ?? const {};
+  bool hasSocialShareConfig() => _socialShareConfig != null;
+
+  void _initializeFields() {
+    _email = snapshotData['email'] as String?;
+    _displayName = snapshotData['display_name'] as String?;
+    _photoUrl = snapshotData['photo_url'] as String?;
+    _uid = snapshotData['uid'] as String?;
+    _createdTime = snapshotData['created_time'] as DateTime?;
+    _phoneNumber = snapshotData['phone_number'] as String?;
+    _ownedBusiness = snapshotData['owned_business'] as DocumentReference?;
+    _subscriptionStatus = snapshotData['subscription_status'] as String?;
+    _isEliteFounder = snapshotData['isEliteFounder'] as bool?;
+    _accountCreatedAt = snapshotData['account_created_at'] as DateTime?;
+    _isActive = snapshotData['is_active'] as bool?;
+    _lastLogin = snapshotData['last_login'] as DateTime?;
+    _verifiedCheckIns = snapshotData['verified_check_ins'] as String?;
+    _socialShareConfig =
+        castToType<Map<String, dynamic>>(snapshotData['social_share_config']);
+  }
+
+  static CollectionReference get collection =>
+      FirebaseFirestore.instance.collection('users');
+
+  static Stream<UsersRecord> getDocument(DocumentReference ref) =>
+      ref.snapshots().map((s) => UsersRecord.fromSnapshot(s));
+
+  static Future<UsersRecord> getDocumentOnce(DocumentReference ref) =>
+      ref.get().then((s) => UsersRecord.fromSnapshot(s));
+
+  static UsersRecord fromSnapshot(DocumentSnapshot snapshot) => UsersRecord._(
+        snapshot.reference,
+        mapFromFirestore(snapshot.data() as Map<String, dynamic>),
+      );
+
+  static UsersRecord getDocumentFromData(
+    Map<String, dynamic> data,
+    DocumentReference reference,
+  ) =>
+      UsersRecord._(reference, mapFromFirestore(data));
+
+  @override
+  String toString() =>
+      'UsersRecord(reference: ${reference.path}, data: $snapshotData)';
+
+  @override
+  int get hashCode => reference.path.hashCode;
+
+  @override
+  bool operator ==(other) =>
+      other is UsersRecord &&
+      reference.path.hashCode == other.reference.path.hashCode;
+}
+
+Map<String, dynamic> createUsersRecordData({
+  String? email,
+  String? displayName,
+  String? photoUrl,
+  String? uid,
+  DateTime? createdTime,
+  String? phoneNumber,
+  DocumentReference? ownedBusiness,
+  String? subscriptionStatus,
+  bool? isEliteFounder,
+  DateTime? accountCreatedAt,
+  bool? isActive,
+  DateTime? lastLogin,
+  String? verifiedCheckIns,
+  Map<String, dynamic>? socialShareConfig,
+}) {
+  final firestoreData = mapToFirestore(
+    <String, dynamic>{
+      'email': email,
+      'display_name': displayName,
+      'photo_url': photoUrl,
+      'uid': uid,
+      'created_time': createdTime,
+      'phone_number': phoneNumber,
+      'owned_business': ownedBusiness,
+      'subscription_status': subscriptionStatus,
+      'isEliteFounder': isEliteFounder,
+      'account_created_at': accountCreatedAt,
+      'is_active': isActive,
+      'last_login': lastLogin,
+      'verified_check_ins': verifiedCheckIns,
+      'social_share_config': socialShareConfig,
+    }.withoutNulls,
+  );
+
+  return firestoreData;
+}
+
+class UsersRecordDocumentEquality implements Equality<UsersRecord> {
+  const UsersRecordDocumentEquality();
+
+  @override
+  bool equals(UsersRecord? e1, UsersRecord? e2) {
+    return e1?.email == e2?.email &&
+        e1?.displayName == e2?.displayName &&
+        e1?.photoUrl == e2?.photoUrl &&
+        e1?.uid == e2?.uid &&
+        e1?.createdTime == e2?.createdTime &&
+        e1?.phoneNumber == e2?.phoneNumber &&
+        e1?.ownedBusiness == e2?.ownedBusiness &&
+        e1?.subscriptionStatus == e2?.subscriptionStatus &&
+        e1?.isEliteFounder == e2?.isEliteFounder &&
+        e1?.accountCreatedAt == e2?.accountCreatedAt &&
+        e1?.isActive == e2?.isActive &&
+        e1?.lastLogin == e2?.lastLogin &&
+        e1?.verifiedCheckIns == e2?.verifiedCheckIns &&
+        const MapEquality().equals(
+          e1?.socialShareConfig,
+          e2?.socialShareConfig,
+        );
+  }
+
+  @override
+  int hash(UsersRecord? e) => const ListEquality().hash([
+        e?.email,
+        e?.displayName,
+        e?.photoUrl,
+        e?.uid,
+        e?.createdTime,
+        e?.phoneNumber,
+        e?.ownedBusiness,
+        e?.subscriptionStatus,
+        e?.isEliteFounder,
+        e?.accountCreatedAt,
+        e?.isActive,
+        e?.lastLogin,
+        e?.verifiedCheckIns,
+        e?.socialShareConfig,
+      ]);
+
+  @override
+  bool isValidKey(Object? o) => o is UsersRecord;
+}

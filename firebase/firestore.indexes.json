@@ -1,0 +1,18 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "businesses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "city",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "kindex_score",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "887624550714",
+    "project_id": "cs-poc-zmueu0dydq2css28xexjlfq",
+    "storage_bucket": "cs-poc-zmueu0dydq2css28xexjlfq.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:887624550714:android:f0a596a99512c330fe6803",
+        "android_client_info": {
+          "package_name": "com.mycompany.thekinapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbc5QrvUxN-Sx8hzU99wcSbz6sk0hEg7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
