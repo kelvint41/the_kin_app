@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'policy_section_model.dart';
 export 'policy_section_model.dart';
 
@@ -74,7 +71,7 @@ class _PolicySectionWidgetState extends State<PolicySectionWidget> {
                 ),
                 Text(
                   valueOrDefault<String>(
-                    widget!.title,
+                    widget.title,
                     'Introduction',
                   ),
                   style: FlutterFlowTheme.of(context).titleLarge.override(
@@ -95,7 +92,7 @@ class _PolicySectionWidgetState extends State<PolicySectionWidget> {
             ),
             Text(
               valueOrDefault<String>(
-                widget!.content,
+                widget.content,
                 'Welcome to The KIN App. We are committed to protecting your personal information and your right to privacy. This policy outlines how we handle your data when you use our fintech services.',
               ),
               style: FlutterFlowTheme.of(context).bodyMedium.override(

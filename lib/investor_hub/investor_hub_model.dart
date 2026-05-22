@@ -3,14 +3,9 @@ import '/components/investment_item_refined_widget.dart';
 import '/components/local_punch_card_section_widget.dart';
 import '/components/portfolio_impact_card_widget.dart';
 import '/components/profile_header_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'investor_hub_widget.dart' show InvestorHubWidget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class InvestorHubModel extends FlutterFlowModel<InvestorHubWidget> {
   ///  State fields for stateful widgets in this page.

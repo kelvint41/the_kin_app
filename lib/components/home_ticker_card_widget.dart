@@ -1,11 +1,8 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'home_ticker_card_model.dart';
 export 'home_ticker_card_model.dart';
 
@@ -152,7 +149,7 @@ class _HomeTickerCardWidgetState extends State<HomeTickerCardWidget> {
                         children: [
                           Text(
                             valueOrDefault<String>(
-                              widget!.businessRecord?.name,
+                              widget.businessRecord?.name,
                               'Business Name',
                             ),
                             style: FlutterFlowTheme.of(context)

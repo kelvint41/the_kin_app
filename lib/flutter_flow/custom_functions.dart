@@ -9,19 +9,35 @@ import 'lat_lng.dart';
 import 'place.dart';
 import 'uploaded_file.dart';
 import '/backend/backend.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '/auth/firebase_auth/auth_util.dart';
-import '/models/kin_business_profile.dart';
 
 int updateKindexScore(
   double? currentScore,
   int? reviewRatings,
 ) {
-  if (reviewRatings == null) {
-    return (currentScore ?? 100.0).round().clamp(100, 750);
+  double scoreChange = 0.0;
+  double score = currentScore ?? 100.0;
+
+  if (reviewRatings == null) return score.toInt();
+
+  switch (reviewRatings) {
+    case 5:
+      scoreChange = 15.0;
+      break;
+    case 4:
+      scoreChange = 5.0;
+      break;
+    case 1:
+      scoreChange = -15.0;
+      break;
+    case 2:
+      scoreChange = -5.0;
+      break;
+    default:
+      scoreChange = 0.0;
   }
 
-  return KinBusinessProfile.applyReviewToKindexScore(
-    currentScore: currentScore ?? 100.0,
-    reviewRating: reviewRatings,
-  );
+  double newScore = score + scoreChange;
+  return newScore.round().clamp(100, 750);
 }

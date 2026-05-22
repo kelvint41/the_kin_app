@@ -3,13 +3,11 @@ import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'sleek_powerful_background_page_model.dart';
 export 'sleek_powerful_background_page_model.dart';
 
@@ -465,7 +463,7 @@ class _SleekPowerfulBackgroundPageWidgetState
                                                         4.0,
                                                         5.0,
                                                         6.0
-                                                      ])!,
+                                                      ]),
                                                       yData: ([
                                                         20.0,
                                                         45.0,
@@ -474,7 +472,7 @@ class _SleekPowerfulBackgroundPageWidgetState
                                                         55.0,
                                                         80.0,
                                                         95.0
-                                                      ])!,
+                                                      ]),
                                                       settings:
                                                           LineChartBarData(
                                                         color:
@@ -512,7 +510,7 @@ class _SleekPowerfulBackgroundPageWidgetState
                                                     'F',
                                                     'S',
                                                     'S'
-                                                  ])!,
+                                                  ]),
                                                   xAxisLabelInfo: AxisLabelInfo(
                                                     showLabels: true,
                                                     labelTextStyle:

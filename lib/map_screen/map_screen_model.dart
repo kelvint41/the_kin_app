@@ -1,16 +1,8 @@
-import '/backend/backend.dart';
-import '/components/map_pop_up_card_widget.dart';
 import '/components/premium_business_pin_widget.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'map_screen_widget.dart' show MapScreenWidget;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class MapScreenModel extends FlutterFlowModel<MapScreenWidget> {
   ///  State fields for stateful widgets in this page.

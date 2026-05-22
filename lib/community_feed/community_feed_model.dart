@@ -1,16 +1,8 @@
 import '/components/premium_story_widget.dart';
 import '/components/refined_post_widget.dart';
-import '/components/kin_bottom_nav_widget.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'community_feed_widget.dart' show CommunityFeedWidget;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class CommunityFeedModel extends FlutterFlowModel<CommunityFeedWidget> {
   ///  State fields for stateful widgets in this page.
@@ -31,8 +23,6 @@ class CommunityFeedModel extends FlutterFlowModel<CommunityFeedWidget> {
   late RefinedPostModel refinedPostModel2;
   // Model for RefinedPost component.
   late RefinedPostModel refinedPostModel3;
-  // Model for KinBottomNav component.
-  late KinBottomNavModel kinBottomNavModel;
 
   @override
   void initState(BuildContext context) {
@@ -44,7 +34,6 @@ class CommunityFeedModel extends FlutterFlowModel<CommunityFeedWidget> {
     refinedPostModel1 = createModel(context, () => RefinedPostModel());
     refinedPostModel2 = createModel(context, () => RefinedPostModel());
     refinedPostModel3 = createModel(context, () => RefinedPostModel());
-    kinBottomNavModel = createModel(context, () => KinBottomNavModel());
   }
 
   @override
@@ -57,6 +46,5 @@ class CommunityFeedModel extends FlutterFlowModel<CommunityFeedWidget> {
     refinedPostModel1.dispose();
     refinedPostModel2.dispose();
     refinedPostModel3.dispose();
-    kinBottomNavModel.dispose();
   }
 }

@@ -1,10 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'legacy_featured_card_model.dart';
 export 'legacy_featured_card_model.dart';
 
@@ -187,7 +185,7 @@ class _LegacyFeaturedCardWidgetState extends State<LegacyFeaturedCardWidget> {
                             ),
                             Text(
                               valueOrDefault<String>(
-                                widget!.name,
+                                widget.name,
                                 'Hair Maddness LLC',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -223,7 +221,7 @@ class _LegacyFeaturedCardWidgetState extends State<LegacyFeaturedCardWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.location,
+                                    widget.location,
                                     'Converse, TX',
                                   ),
                                   style: FlutterFlowTheme.of(context)

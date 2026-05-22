@@ -5,12 +5,10 @@ import '/components/review_button_widget.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_dashboard2_model.dart';
 export 'business_dashboard2_model.dart';
 
@@ -887,7 +885,7 @@ class _BusinessDashboard2WidgetState extends State<BusinessDashboard2Widget> {
                                               4.0,
                                               5.0,
                                               6.0
-                                            ])!,
+                                            ]),
                                             yData: ([
                                               20.0,
                                               45.0,
@@ -896,7 +894,7 @@ class _BusinessDashboard2WidgetState extends State<BusinessDashboard2Widget> {
                                               55.0,
                                               80.0,
                                               95.0
-                                            ])!,
+                                            ]),
                                             settings: LineChartBarData(
                                               color:
                                                   FlutterFlowTheme.of(context)
@@ -928,7 +926,7 @@ class _BusinessDashboard2WidgetState extends State<BusinessDashboard2Widget> {
                                           'F',
                                           'S',
                                           'S'
-                                        ])!,
+                                        ]),
                                         xAxisLabelInfo: AxisLabelInfo(
                                           showLabels: true,
                                           labelTextStyle: TextStyle(

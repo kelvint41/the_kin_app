@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'premium_story_model.dart';
 export 'premium_story_model.dart';
 
@@ -92,7 +89,7 @@ class _PremiumStoryWidgetState extends State<PremiumStoryWidget> {
                       fadeInDuration: Duration(milliseconds: 0),
                       fadeOutDuration: Duration(milliseconds: 0),
                       imageUrl: valueOrDefault<String>(
-                        widget!.img_desc,
+                        widget.img_desc,
                         'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
                       ),
                       fit: BoxFit.cover,
@@ -105,7 +102,7 @@ class _PremiumStoryWidgetState extends State<PremiumStoryWidget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'The Grind',
           ),
           maxLines: 1,

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'google_review_card2dca92d0_a25702c22_model.dart';
 export 'google_review_card2dca92d0_a25702c22_model.dart';
 
@@ -149,7 +146,7 @@ class _GoogleReviewCard2dca92d0A25702c22WidgetState
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.user_name,
+                  widget.user_name,
                   'James Chen',
                 ),
                 style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -168,7 +165,7 @@ class _GoogleReviewCard2dca92d0A25702c22WidgetState
                     ),
               ),
               Text(
-                widget!.review_text!,
+                widget.review_text!,
                 maxLines: 3,
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       font: GoogleFonts.playfairDisplay(

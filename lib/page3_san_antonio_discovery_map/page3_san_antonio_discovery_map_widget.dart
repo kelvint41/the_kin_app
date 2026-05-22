@@ -1,6 +1,11 @@
+import '/backend/backend.dart';
+import '/components/floating_search_widget.dart';
+import '/components/kin_bottom_nav_widget.dart';
+import '/flutter_flow/flutter_flow_google_map.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/page_map_home/page_map_home.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 import 'page3_san_antonio_discovery_map_model.dart';
 export 'page3_san_antonio_discovery_map_model.dart';
 
@@ -38,17 +43,92 @@ class _Page3SanAntonioDiscoveryMapWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      body: PageMapHome(
-        floatingSearchModel: _model.floatingSearchModel,
-        kinBottomNavModel: _model.kinBottomNavModel,
-        googleMapsController: _model.googleMapsController,
-        externalFeedPayload: _model.externalFeedPayload,
-        googleMapsCenter: _model.googleMapsCenter,
-        onGoogleMapsCenterChanged: (latLng) =>
-            _model.googleMapsCenter = latLng,
-      ),
+    return StreamBuilder<List<BusinessesRecord>>(
+      stream: queryBusinessesRecord(),
+      builder: (context, snapshot) {
+        // Customize what your widget looks like when it's loading.
+        if (!snapshot.hasData) {
+          return Scaffold(
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            body: Center(
+              child: SizedBox(
+                width: 50.0,
+                height: 50.0,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    FlutterFlowTheme.of(context).primary,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        List<BusinessesRecord> page3SanAntonioDiscoveryMapBusinessesRecordList =
+            snapshot.data!;
+
+        return Scaffold(
+          key: scaffoldKey,
+          resizeToAvoidBottomInset: false,
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          body: Container(
+            width: double.infinity,
+            height: double.infinity,
+            child: Stack(
+              children: [
+                Align(
+                  alignment: AlignmentDirectional(0.0, 0.0),
+                  child: FlutterFlowGoogleMap(
+                    controller: _model.googleMapsController,
+                    onCameraIdle: (latLng) => _model.googleMapsCenter = latLng,
+                    initialLocation: _model.googleMapsCenter ??=
+                        LatLng(29.4241, -98.4936),
+                    markers: page3SanAntonioDiscoveryMapBusinessesRecordList
+                        .map(
+                          (marker) => FlutterFlowMarker(
+                            marker.reference.path,
+                            marker.businessLocation!,
+                          ),
+                        )
+                        .toList(),
+                    markerColor: GoogleMarkerColor.violet,
+                    mapType: MapType.normal,
+                    style: GoogleMapStyle.retro,
+                    initialZoom: 13.0,
+                    allowInteraction: true,
+                    allowZoom: true,
+                    showZoomControls: true,
+                    showLocation: true,
+                    showCompass: false,
+                    showMapToolbar: false,
+                    showTraffic: false,
+                    centerMapOnMarkerTap: true,
+                    mapTakesGesturePreference: false,
+                  ),
+                ),
+                PointerInterceptor(
+                  intercepting: isWeb,
+                  child: wrapWithModel(
+                    model: _model.floatingSearchModel,
+                    updateCallback: () => safeSetState(() {}),
+                    child: FloatingSearchWidget(),
+                  ),
+                ),
+                Align(
+                  alignment: AlignmentDirectional(0.0, 1.0),
+                  child: PointerInterceptor(
+                    intercepting: isWeb,
+                    child: wrapWithModel(
+                      model: _model.kinBottomNavModel,
+                      updateCallback: () => safeSetState(() {}),
+                      child: KinBottomNavWidget(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

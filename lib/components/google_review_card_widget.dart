@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'google_review_card_model.dart';
 export 'google_review_card_model.dart';
 
@@ -146,7 +143,7 @@ class _GoogleReviewCardWidgetState extends State<GoogleReviewCardWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.user_name,
+                  widget.user_name,
                   'James Chen',
                 ),
                 style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -166,7 +163,7 @@ class _GoogleReviewCardWidgetState extends State<GoogleReviewCardWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.review_text,
+                  widget.review_text,
                   'Absolutely stunning collection. The personal styling session was top-tier. Highly recommend for luxury finds in SA.',
                 ),
                 maxLines: 3,

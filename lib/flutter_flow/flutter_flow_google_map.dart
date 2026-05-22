@@ -59,16 +59,10 @@ class MarkerImage {
 }
 
 class FlutterFlowMarker {
-  const FlutterFlowMarker(
-    this.markerId,
-    this.location, [
-    this.onTap,
-    this.icon,
-  ]);
+  const FlutterFlowMarker(this.markerId, this.location, [this.onTap]);
   final String markerId;
   final latlng.LatLng location;
   final Future Function()? onTap;
-  final BitmapDescriptor? icon;
 }
 
 class FlutterFlowGoogleMap extends StatefulWidget {
@@ -225,9 +219,7 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
               (m) => Marker(
                 markerId: MarkerId(m.markerId),
                 position: m.location.toGoogleMaps(),
-                icon: m.icon ??
-                    _markerDescriptor ??
-                    BitmapDescriptor.defaultMarker,
+                icon: _markerDescriptor ?? BitmapDescriptor.defaultMarker,
                 onTap: () async {
                   if (widget.centerMapOnMarkerTap) {
                     final controller = await _controller.future;

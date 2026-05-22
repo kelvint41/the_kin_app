@@ -1,9 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'duration_chip_model.dart';
 export 'duration_chip_model.dart';
 
@@ -49,7 +47,7 @@ class _DurationChipWidgetState extends State<DurationChipWidget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: widget!.selected == false
+        color: widget.selected == false
             ? FlutterFlowTheme.of(context).secondaryBackground
             : FlutterFlowTheme.of(context).primary,
         borderRadius: BorderRadius.circular(
@@ -68,7 +66,7 @@ class _DurationChipWidgetState extends State<DurationChipWidget> {
             FlutterFlowTheme.of(context).designToken.spacing.md),
         child: Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             '1h',
           ),
           style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -77,7 +75,7 @@ class _DurationChipWidgetState extends State<DurationChipWidget> {
                       FlutterFlowTheme.of(context).labelLarge.fontWeight,
                   fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
                 ),
-                color: widget!.selected == false
+                color: widget.selected == false
                     ? FlutterFlowTheme.of(context).primaryText
                     : FlutterFlowTheme.of(context).primaryBackground,
                 letterSpacing: 0.0,

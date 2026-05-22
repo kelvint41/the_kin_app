@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
-import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -106,11 +105,6 @@ class BusinessesRecord extends FirestoreRecord {
   bool get isPremium => _isPremium ?? false;
   bool hasIsPremium() => _isPremium != null;
 
-  // "is_featured" field.
-  bool? _isFeatured;
-  bool get isFeatured => _isFeatured ?? false;
-  bool hasIsFeatured() => _isFeatured != null;
-
   // "created_at" field.
   DateTime? _createdAt;
   DateTime? get createdAt => _createdAt;
@@ -196,16 +190,6 @@ class BusinessesRecord extends FirestoreRecord {
   bool get isEcommerce => _isEcommerce ?? false;
   bool hasIsEcommerce() => _isEcommerce != null;
 
-  // "verified_check_ins" field.
-  String? _verifiedCheckIns;
-  String get verifiedCheckIns => _verifiedCheckIns ?? '';
-  bool hasVerifiedCheckIns() => _verifiedCheckIns != null;
-
-  // "social_share_config" field.
-  Map<String, dynamic>? _socialShareConfig;
-  Map<String, dynamic> get socialShareConfig => _socialShareConfig ?? const {};
-  bool hasSocialShareConfig() => _socialShareConfig != null;
-
   void _initializeFields() {
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
     _name = snapshotData['name'] as String?;
@@ -225,7 +209,6 @@ class BusinessesRecord extends FirestoreRecord {
     _description = snapshotData['description'] as String?;
     _phoneNumber = snapshotData['phone_number'] as String?;
     _isPremium = snapshotData['is_premium'] as bool?;
-    _isFeatured = snapshotData['is_featured'] as bool?;
     _createdAt = snapshotData['created_at'] as DateTime?;
     _city = snapshotData['city'] as String?;
     _latitude = castToType<double>(snapshotData['Latitude']);
@@ -243,9 +226,6 @@ class BusinessesRecord extends FirestoreRecord {
     _isOpen = snapshotData['is_open'] as bool?;
     _isVeteran = snapshotData['is_veteran'] as bool?;
     _isEcommerce = snapshotData['is_ecommerce'] as bool?;
-    _verifiedCheckIns = snapshotData['verified_check_ins'] as String?;
-    _socialShareConfig =
-        castToType<Map<String, dynamic>>(snapshotData['social_share_config']);
   }
 
   static CollectionReference get collection =>
@@ -301,7 +281,6 @@ Map<String, dynamic> createBusinessesRecordData({
   String? description,
   String? phoneNumber,
   bool? isPremium,
-  bool? isFeatured,
   DateTime? createdAt,
   String? city,
   double? latitude,
@@ -319,8 +298,6 @@ Map<String, dynamic> createBusinessesRecordData({
   bool? isOpen,
   bool? isVeteran,
   bool? isEcommerce,
-  String? verifiedCheckIns,
-  Map<String, dynamic>? socialShareConfig,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -342,7 +319,6 @@ Map<String, dynamic> createBusinessesRecordData({
       'description': description,
       'phone_number': phoneNumber,
       'is_premium': isPremium,
-      'is_featured': isFeatured,
       'created_at': createdAt,
       'city': city,
       'Latitude': latitude,
@@ -360,8 +336,6 @@ Map<String, dynamic> createBusinessesRecordData({
       'is_open': isOpen,
       'is_veteran': isVeteran,
       'is_ecommerce': isEcommerce,
-      'verified_check_ins': verifiedCheckIns,
-      'social_share_config': socialShareConfig,
     }.withoutNulls,
   );
 
@@ -391,7 +365,6 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.description == e2?.description &&
         e1?.phoneNumber == e2?.phoneNumber &&
         e1?.isPremium == e2?.isPremium &&
-        e1?.isFeatured == e2?.isFeatured &&
         e1?.createdAt == e2?.createdAt &&
         e1?.city == e2?.city &&
         e1?.latitude == e2?.latitude &&
@@ -408,12 +381,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.coordinates == e2?.coordinates &&
         e1?.isOpen == e2?.isOpen &&
         e1?.isVeteran == e2?.isVeteran &&
-        e1?.isEcommerce == e2?.isEcommerce &&
-        e1?.verifiedCheckIns == e2?.verifiedCheckIns &&
-        const MapEquality().equals(
-          e1?.socialShareConfig,
-          e2?.socialShareConfig,
-        );
+        e1?.isEcommerce == e2?.isEcommerce;
   }
 
   @override
@@ -436,7 +404,6 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.description,
         e?.phoneNumber,
         e?.isPremium,
-        e?.isFeatured,
         e?.createdAt,
         e?.city,
         e?.latitude,
@@ -453,9 +420,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.coordinates,
         e?.isOpen,
         e?.isVeteran,
-        e?.isEcommerce,
-        e?.verifiedCheckIns,
-        e?.socialShareConfig,
+        e?.isEcommerce
       ]);
 
   @override

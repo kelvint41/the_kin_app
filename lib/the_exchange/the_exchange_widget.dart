@@ -7,12 +7,9 @@ import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'the_exchange_model.dart';
 export 'the_exchange_model.dart';
 
@@ -462,7 +459,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                   4.0,
                                                                   5.0,
                                                                   6.0
-                                                                ])!,
+                                                                ]),
                                                                 yData: ([
                                                                   10.0,
                                                                   12.0,
@@ -471,7 +468,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                   18.0,
                                                                   17.0,
                                                                   22.0
-                                                                ])!,
+                                                                ]),
                                                                 settings:
                                                                     LineChartBarData(
                                                                   color: FlutterFlowTheme.of(
@@ -1192,7 +1189,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                   4.0,
                                                                   5.0,
                                                                   6.0
-                                                                ])!,
+                                                                ]),
                                                                 yData: ([
                                                                   25.0,
                                                                   22.0,
@@ -1201,7 +1198,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                   15.0,
                                                                   12.0,
                                                                   10.0
-                                                                ])!,
+                                                                ]),
                                                                 settings:
                                                                     LineChartBarData(
                                                                   color: FlutterFlowTheme.of(

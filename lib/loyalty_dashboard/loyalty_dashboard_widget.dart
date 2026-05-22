@@ -1,15 +1,11 @@
-import '/components/kin_bottom_nav_widget.dart';
 import '/components/visit_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_palette/material_palette.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:provider/provider.dart';
 import 'loyalty_dashboard_model.dart';
 export 'loyalty_dashboard_model.dart';
 
@@ -48,13 +44,9 @@ class _LoyaltyDashboardWidgetState extends State<LoyaltyDashboardWidget> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            primary: false,
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 90.0),
-              child: Column(
+      body: SingleChildScrollView(
+        primary: false,
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1909,23 +1901,7 @@ class _LoyaltyDashboardWidgetState extends State<LoyaltyDashboardWidget> {
               ),
             ),
           ],
-              ),
-            ),
-          ),
-          Align(
-            alignment: AlignmentDirectional(0.0, 1.0),
-            child: PointerInterceptor(
-              intercepting: isWeb,
-              child: wrapWithModel(
-                model: _model.kinBottomNavModel,
-                updateCallback: () => safeSetState(() {}),
-                child: KinBottomNavWidget(
-                  activeTab: KinBottomNavTab.loyalty,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

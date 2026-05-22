@@ -1,10 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'stat_ticker_item_model.dart';
 export 'stat_ticker_item_model.dart';
 
@@ -96,14 +94,14 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                         height: 48.0,
                         decoration: BoxDecoration(
                           color: valueOrDefault<Color>(
-                            widget!.iconBg,
+                            widget.iconBg,
                             Color(0x332D4A3E),
                           ),
                           borderRadius: BorderRadius.circular(14.0),
                           shape: BoxShape.rectangle,
                         ),
                         alignment: AlignmentDirectional(0.0, 0.0),
-                        child: widget!.icon!,
+                        child: widget.icon!,
                       ),
                       Expanded(
                         flex: 1,
@@ -114,7 +112,7 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                           children: [
                             Text(
                               valueOrDefault<String>(
-                                widget!.label,
+                                widget.label,
                                 'Total Network Volume',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -142,7 +140,7 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                             ),
                             Text(
                               valueOrDefault<String>(
-                                widget!.value,
+                                widget.value,
                                 '\$2,842,190.00',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -169,7 +167,7 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          color: widget!.trendUp
+                          color: widget.trendUp
                               ? Color(0x332D4A3E)
                               : Color(0x00000000),
                           borderRadius: BorderRadius.circular(9999.0),
@@ -190,20 +188,20 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                                   child: Stack(
                                     alignment: AlignmentDirectional(0.0, 0.0),
                                     children: [
-                                      if (widget!.trendUp ? true : false)
+                                      if (widget.trendUp ? true : false)
                                         Icon(
                                           Icons.trending_up_rounded,
-                                          color: widget!.trendUp
+                                          color: widget.trendUp
                                               ? FlutterFlowTheme.of(context)
                                                   .success
                                               : FlutterFlowTheme.of(context)
                                                   .info,
                                           size: 14.0,
                                         ),
-                                      if (widget!.trendUp ? false : true)
+                                      if (widget.trendUp ? false : true)
                                         Icon(
                                           Icons.trending_flat_rounded,
-                                          color: widget!.trendUp
+                                          color: widget.trendUp
                                               ? FlutterFlowTheme.of(context)
                                                   .success
                                               : FlutterFlowTheme.of(context)
@@ -215,7 +213,7 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.trend,
+                                    widget.trend,
                                     '+12.4%',
                                   ),
                                   style: FlutterFlowTheme.of(context)
@@ -231,7 +229,7 @@ class _StatTickerItemWidgetState extends State<StatTickerItemWidget> {
                                                   .labelSmall
                                                   .fontStyle,
                                         ),
-                                        color: widget!.trendUp
+                                        color: widget.trendUp
                                             ? FlutterFlowTheme.of(context)
                                                 .success
                                             : FlutterFlowTheme.of(context).info,

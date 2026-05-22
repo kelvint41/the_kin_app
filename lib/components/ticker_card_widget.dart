@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_card_model.dart';
 export 'ticker_card_model.dart';
 
@@ -75,7 +72,7 @@ class _TickerCardWidgetState extends State<TickerCardWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.title,
+                  widget.title,
                   'NETWORK GROWTH',
                 ),
                 style: FlutterFlowTheme.of(context).labelMedium.override(
@@ -99,7 +96,7 @@ class _TickerCardWidgetState extends State<TickerCardWidget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.value,
+                      widget.value,
                       '1,284',
                     ),
                     style: FlutterFlowTheme.of(context).headlineLarge.override(
@@ -110,7 +107,7 @@ class _TickerCardWidgetState extends State<TickerCardWidget> {
                                 .fontStyle,
                           ),
                           color: valueOrDefault<Color>(
-                            widget!.color,
+                            widget.color,
                             Color(0xFFC5A039),
                           ),
                           letterSpacing: 0.0,
@@ -123,7 +120,7 @@ class _TickerCardWidgetState extends State<TickerCardWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.label,
+                      widget.label,
                       'REGISTERED BUSINESSES',
                     ),
                     style: FlutterFlowTheme.of(context).labelSmall.override(

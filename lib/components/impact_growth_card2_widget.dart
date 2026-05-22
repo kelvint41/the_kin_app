@@ -1,11 +1,9 @@
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'impact_growth_card2_model.dart';
 export 'impact_growth_card2_model.dart';
 
@@ -183,8 +181,8 @@ class _ImpactGrowthCard2WidgetState extends State<ImpactGrowthCard2Widget> {
                   child: FlutterFlowLineChart(
                     data: [
                       FFLineChartData(
-                        xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])!,
-                        yData: ([12.0, 18.0, 15.0, 22.0, 28.0, 24.0, 35.0])!,
+                        xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+                        yData: ([12.0, 18.0, 15.0, 22.0, 28.0, 24.0, 35.0]),
                         settings: LineChartBarData(
                           color: FlutterFlowTheme.of(context).primary,
                           barWidth: 3.0,

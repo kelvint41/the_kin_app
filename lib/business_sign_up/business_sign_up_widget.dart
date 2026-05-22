@@ -1,16 +1,12 @@
-import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:provider/provider.dart';
 import 'business_sign_up_model.dart';
 export 'business_sign_up_model.dart';
 
@@ -599,7 +595,7 @@ class _BusinessSignUpWidgetState extends State<BusinessSignUpWidget> {
                                 value: _model.veteranOwnedValue!,
                                 onChanged: (newValue) async {
                                   safeSetState(() =>
-                                      _model.veteranOwnedValue = newValue!);
+                                      _model.veteranOwnedValue = newValue);
                                 },
                                 activeColor:
                                     FlutterFlowTheme.of(context).primary,

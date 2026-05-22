@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
-import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -76,16 +75,6 @@ class UsersRecord extends FirestoreRecord {
   DateTime? get lastLogin => _lastLogin;
   bool hasLastLogin() => _lastLogin != null;
 
-  // "verified_check_ins" field.
-  String? _verifiedCheckIns;
-  String get verifiedCheckIns => _verifiedCheckIns ?? '';
-  bool hasVerifiedCheckIns() => _verifiedCheckIns != null;
-
-  // "social_share_config" field.
-  Map<String, dynamic>? _socialShareConfig;
-  Map<String, dynamic> get socialShareConfig => _socialShareConfig ?? const {};
-  bool hasSocialShareConfig() => _socialShareConfig != null;
-
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -99,9 +88,6 @@ class UsersRecord extends FirestoreRecord {
     _accountCreatedAt = snapshotData['account_created_at'] as DateTime?;
     _isActive = snapshotData['is_active'] as bool?;
     _lastLogin = snapshotData['last_login'] as DateTime?;
-    _verifiedCheckIns = snapshotData['verified_check_ins'] as String?;
-    _socialShareConfig =
-        castToType<Map<String, dynamic>>(snapshotData['social_share_config']);
   }
 
   static CollectionReference get collection =>
@@ -150,8 +136,6 @@ Map<String, dynamic> createUsersRecordData({
   DateTime? accountCreatedAt,
   bool? isActive,
   DateTime? lastLogin,
-  String? verifiedCheckIns,
-  Map<String, dynamic>? socialShareConfig,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -167,8 +151,6 @@ Map<String, dynamic> createUsersRecordData({
       'account_created_at': accountCreatedAt,
       'is_active': isActive,
       'last_login': lastLogin,
-      'verified_check_ins': verifiedCheckIns,
-      'social_share_config': socialShareConfig,
     }.withoutNulls,
   );
 
@@ -191,12 +173,7 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.isEliteFounder == e2?.isEliteFounder &&
         e1?.accountCreatedAt == e2?.accountCreatedAt &&
         e1?.isActive == e2?.isActive &&
-        e1?.lastLogin == e2?.lastLogin &&
-        e1?.verifiedCheckIns == e2?.verifiedCheckIns &&
-        const MapEquality().equals(
-          e1?.socialShareConfig,
-          e2?.socialShareConfig,
-        );
+        e1?.lastLogin == e2?.lastLogin;
   }
 
   @override
@@ -212,9 +189,7 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.isEliteFounder,
         e?.accountCreatedAt,
         e?.isActive,
-        e?.lastLogin,
-        e?.verifiedCheckIns,
-        e?.socialShareConfig,
+        e?.lastLogin
       ]);
 
   @override

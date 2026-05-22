@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'premium_business_pin_model.dart';
 export 'premium_business_pin_model.dart';
 
@@ -101,7 +98,7 @@ class _PremiumBusinessPinWidgetState extends State<PremiumBusinessPinWidget> {
                         fadeInDuration: Duration(milliseconds: 0),
                         fadeOutDuration: Duration(milliseconds: 0),
                         imageUrl: valueOrDefault<String>(
-                          widget!.logo_desc,
+                          widget.logo_desc,
                           'https://dimg.dreamflow.cloud/v1/image/minimalist%20elegant%20coffee%20bean%20logo%20gold%20and%20black',
                         ),
                         width: 32.0,

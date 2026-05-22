@@ -1,11 +1,8 @@
 import '/components/punch_slot_loyalty_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'local_punch_card_model.dart';
 export 'local_punch_card_model.dart';
 
@@ -70,7 +67,7 @@ class _LocalPunchCardWidgetState extends State<LocalPunchCardWidget> {
               children: [
                 Text(
                   valueOrDefault<String>(
-                    widget!.business_name,
+                    widget.business_name,
                     'The Southern Grind',
                   ),
                   style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -121,7 +118,7 @@ class _LocalPunchCardWidgetState extends State<LocalPunchCardWidget> {
                     FlutterFlowTheme.of(context).designToken.spacing.sm,
                     FlutterFlowTheme.of(context).designToken.spacing.xs),
                 child: Text(
-                  '${widget!.completed?.toString()} / ${widget!.total?.toString()}',
+                  '${widget.completed?.toString()} / ${widget.total?.toString()}',
                   style: FlutterFlowTheme.of(context).titleMedium.override(
                         font: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w800,
@@ -280,7 +277,7 @@ class _LocalPunchCardWidgetState extends State<LocalPunchCardWidget> {
                             flex: 1,
                             child: Text(
                               valueOrDefault<String>(
-                                widget!.reward_text,
+                                widget.reward_text,
                                 '4 more visits until your free signature latte!',
                               ),
                               style: FlutterFlowTheme.of(context)

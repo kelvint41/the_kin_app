@@ -1,9 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'category_filter_model.dart';
 export 'category_filter_model.dart';
 
@@ -52,7 +50,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
           0.0, 0.0, FlutterFlowTheme.of(context).designToken.spacing.sm, 0.0),
       child: Container(
         decoration: BoxDecoration(
-          color: widget!.selected == false
+          color: widget.selected == false
               ? FlutterFlowTheme.of(context).secondaryBackground
               : FlutterFlowTheme.of(context).primary,
           borderRadius: BorderRadius.circular(
@@ -70,7 +68,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
               FlutterFlowTheme.of(context).designToken.spacing.md),
           child: Text(
             valueOrDefault<String>(
-              widget!.label,
+              widget.label,
               'Retail',
             ),
             style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -79,7 +77,7 @@ class _CategoryFilterWidgetState extends State<CategoryFilterWidget> {
                     fontStyle:
                         FlutterFlowTheme.of(context).labelLarge.fontStyle,
                   ),
-                  color: widget!.selected == false
+                  color: widget.selected == false
                       ? FlutterFlowTheme.of(context).secondaryText
                       : FlutterFlowTheme.of(context).primaryBackground,
                   fontSize: 14.0,

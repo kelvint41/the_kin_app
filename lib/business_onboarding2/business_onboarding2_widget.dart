@@ -4,16 +4,10 @@ import '/flutter_flow/flutter_flow_place_picker.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/place.dart';
-import 'dart:io';
-import 'dart:ui';
-import '/index.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_onboarding2_model.dart';
 export 'business_onboarding2_model.dart';
 
@@ -419,7 +413,7 @@ class _BusinessOnboarding2WidgetState extends State<BusinessOnboarding2Widget> {
                                     value: _model.switchValue!,
                                     onChanged: (newValue) async {
                                       safeSetState(
-                                          () => _model.switchValue = newValue!);
+                                          () => _model.switchValue = newValue);
                                     },
                                     activeColor:
                                         FlutterFlowTheme.of(context).primary,

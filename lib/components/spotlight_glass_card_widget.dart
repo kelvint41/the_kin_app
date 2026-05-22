@@ -1,10 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'spotlight_glass_card_model.dart';
 export 'spotlight_glass_card_model.dart';
 
@@ -166,7 +164,7 @@ class _SpotlightGlassCardWidgetState extends State<SpotlightGlassCardWidget> {
                     children: [
                       Text(
                         valueOrDefault<String>(
-                          widget!.business_name,
+                          widget.business_name,
                           'Heritage BBQ',
                         ),
                         style: FlutterFlowTheme.of(context)
@@ -190,7 +188,7 @@ class _SpotlightGlassCardWidgetState extends State<SpotlightGlassCardWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.location,
+                          widget.location,
                           'East Side, San Antonio',
                         ),
                         style: FlutterFlowTheme.of(context).bodyMedium.override(

@@ -83,7 +83,7 @@ Future launchMap({
     );
   }
   return MapLauncher.showMarker(
-    mapType: mapType!,
+    mapType: mapType,
     coords: coords,
     title: title,
     extraParams: extraParams,
@@ -314,7 +314,7 @@ Future<LatLng?> queryCurrentUserLocation() async {
   }
 
   final position = await Geolocator.getCurrentPosition();
-  return position != null && position.latitude != 0 && position.longitude != 0
+  return position.latitude != 0 && position.longitude != 0
       ? LatLng(position.latitude, position.longitude)
       : null;
 }
@@ -392,7 +392,7 @@ extension FFStringExt on String {
       case TextCapitalization.words:
         return split(' ').map(toBeginningOfSentenceCase).join(' ');
       case TextCapitalization.sentences:
-        return toBeginningOfSentenceCase(this) ?? this;
+        return toBeginningOfSentenceCase(this);
       case TextCapitalization.characters:
         return toUpperCase();
     }
@@ -471,7 +471,7 @@ void fixStatusBarOniOS16AndBelow(BuildContext context) {
 }
 
 extension ColorOpacityExt on Color {
-  Color applyAlpha(double val) => withOpacity(val);
+  Color applyAlpha(double val) => withValues(alpha: val);
 }
 
 String roundTo(double value, int decimalPoints) {

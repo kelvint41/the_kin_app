@@ -1,12 +1,10 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'refined_post_model.dart';
 export 'refined_post_model.dart';
 
@@ -121,7 +119,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 fadeInDuration: Duration(milliseconds: 0),
                                 fadeOutDuration: Duration(milliseconds: 0),
                                 imageUrl: valueOrDefault<String>(
-                                  widget!.owner_photo,
+                                  widget.owner_photo,
                                   'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
                                 ),
                                 fit: BoxFit.cover,
@@ -140,7 +138,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 children: [
                                   Text(
                                     valueOrDefault<String>(
-                                      widget!.business_name,
+                                      widget.business_name,
                                       'The Southern Grind',
                                     ),
                                     style: FlutterFlowTheme.of(context)
@@ -176,7 +174,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                               ),
                               Text(
                                 valueOrDefault<String>(
-                                  widget!.location,
+                                  widget.location,
                                   'East Side',
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -233,7 +231,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                         fadeInDuration: Duration(milliseconds: 0),
                         fadeOutDuration: Duration(milliseconds: 0),
                         imageUrl: valueOrDefault<String>(
-                          widget!.post_image,
+                          widget.post_image,
                           'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop%20interior%20gold%20accents',
                         ),
                         height: 380.0,
@@ -409,7 +407,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Liked by Kinvest and ${widget!.likes} others',
+                        'Liked by Kinvest and ${widget.likes} others',
                         style: FlutterFlowTheme.of(context)
                             .labelMedium
                             .override(
@@ -445,7 +443,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                               children: [
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.business_name,
+                                    widget.business_name,
                                     'The Southern Grind',
                                   ),
                                   style: FlutterFlowTheme.of(context)
@@ -469,7 +467,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.caption,
+                                    widget.caption,
                                     'Morning light and fresh brews. Our new Champagne Gold roast is officially served. ✨☕️',
                                   ),
                                   maxLines: 3,
@@ -508,7 +506,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 .xs)),
                       ),
                       Text(
-                        'View all ${widget!.comments?.toString()} comments',
+                        'View all ${widget.comments?.toString()} comments',
                         style: FlutterFlowTheme.of(context).bodySmall.override(
                               font: GoogleFonts.playfairDisplay(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -533,7 +531,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                             EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
                         child: Text(
                           valueOrDefault<String>(
-                            widget!.timestamp,
+                            widget.timestamp,
                             '2 HOURS AGO',
                           ),
                           style:

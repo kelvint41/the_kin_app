@@ -1,11 +1,8 @@
 import '/components/local_punch_slot_gold_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'local_punch_card_section_model.dart';
 export 'local_punch_card_section_model.dart';
 
@@ -85,7 +82,7 @@ class _LocalPunchCardSectionWidgetState
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.business_name,
+                        widget.business_name,
                         'The Southern Grind',
                       ),
                       style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -107,7 +104,7 @@ class _LocalPunchCardSectionWidgetState
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.reward_text,
+                        widget.reward_text,
                         '10th Coffee is on the house',
                       ),
                       style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -146,7 +143,7 @@ class _LocalPunchCardSectionWidgetState
                         FlutterFlowTheme.of(context).designToken.spacing.md,
                         FlutterFlowTheme.of(context).designToken.spacing.xs),
                     child: Text(
-                      '${widget!.completed?.toString()} / ${widget!.total?.toString()}',
+                      '${widget.completed?.toString()} / ${widget.total?.toString()}',
                       style: FlutterFlowTheme.of(context).labelMedium.override(
                             font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.w600,

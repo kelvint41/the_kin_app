@@ -4,9 +4,6 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
-import 'package:map_launcher/map_launcher.dart' as $ml;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -71,7 +68,7 @@ class _BusinessProfile2WidgetState extends State<BusinessProfile2Widget> {
     context.watch<FFAppState>();
 
     return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget!.businessRef!),
+      stream: BusinessesRecord.getDocument(widget.businessRef!),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {

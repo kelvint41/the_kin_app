@@ -3,19 +3,14 @@ import '/components/black_owned_badge_widget.dart';
 import '/components/cat_chip2_widget.dart';
 import '/components/floating_search2_widget.dart';
 import '/components/kin_bottom_nav2_widget.dart';
-import '/components/kin_bottom_nav_widget.dart' show KinBottomNavTab;
 import '/components/verified_map_pin_widget.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pointer_interceptor/pointer_interceptor.dart';
-import 'package:provider/provider.dart';
 import 'page3_san_antonio_discovery_map2_model.dart';
 export 'page3_san_antonio_discovery_map2_model.dart';
 
@@ -1096,13 +1091,21 @@ class _Page3SanAntonioDiscoveryMap2WidgetState
               ),
               Align(
                 alignment: AlignmentDirectional(0.0, 1.0),
-                child: PointerInterceptor(
-                  intercepting: isWeb,
-                  child: wrapWithModel(
-                    model: _model.kinBottomNav2Model,
-                    updateCallback: () => safeSetState(() {}),
-                    child: KinBottomNav2Widget(
-                      activeTab: KinBottomNavTab.map,
+                child: Container(
+                  height: 90.0,
+                  alignment: AlignmentDirectional(0.0, 1.0),
+                  child: InkWell(
+                    splashColor: Colors.transparent,
+                    focusColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    onTap: () async {
+                      context.pushNamed(LocalGemsWidget.routeName);
+                    },
+                    child: wrapWithModel(
+                      model: _model.kinBottomNav2Model,
+                      updateCallback: () => safeSetState(() {}),
+                      child: KinBottomNav2Widget(),
                     ),
                   ),
                 ),

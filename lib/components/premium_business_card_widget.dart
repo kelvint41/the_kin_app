@@ -1,11 +1,9 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'premium_business_card_model.dart';
 export 'premium_business_card_model.dart';
 
@@ -77,7 +75,7 @@ class _PremiumBusinessCardWidgetState extends State<PremiumBusinessCardWidget> {
                       fadeInDuration: Duration(milliseconds: 0),
                       fadeOutDuration: Duration(milliseconds: 0),
                       imageUrl: valueOrDefault<String>(
-                        widget!.img_desc,
+                        widget.img_desc,
                         'https://dimg.dreamflow.cloud/v1/image/modern%20luxury%20coffee%20shop%20interior%20with%20plants',
                       ),
                       height: 180.0,
@@ -202,7 +200,7 @@ class _PremiumBusinessCardWidgetState extends State<PremiumBusinessCardWidget> {
                           children: [
                             Text(
                               valueOrDefault<String>(
-                                widget!.name,
+                                widget.name,
                                 'The Southern Grind',
                               ),
                               maxLines: 1,
@@ -242,7 +240,7 @@ class _PremiumBusinessCardWidgetState extends State<PremiumBusinessCardWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.location,
+                                    widget.location,
                                     'East Side, San Antonio',
                                   ),
                                   style: FlutterFlowTheme.of(context)

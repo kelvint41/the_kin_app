@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'highlight_box_model.dart';
 export 'highlight_box_model.dart';
 
@@ -85,7 +82,7 @@ class _HighlightBoxWidgetState extends State<HighlightBoxWidget> {
                       children: [
                         Text(
                           valueOrDefault<String>(
-                            widget!.title,
+                            widget.title,
                             'Financial Privacy Guarantee',
                           ),
                           style: FlutterFlowTheme.of(context)
@@ -108,7 +105,7 @@ class _HighlightBoxWidgetState extends State<HighlightBoxWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.content,
+                            widget.content,
                             'The KIN App does not track, store, or access your personal bank login credentials or individual transaction history. Your financial institution data remains strictly between you and your bank.',
                           ),
                           style: FlutterFlowTheme.of(context)

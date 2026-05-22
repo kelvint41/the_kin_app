@@ -2,17 +2,9 @@ import '/components/feature_bullet_widget.dart';
 import '/components/local_punch_card_widget.dart';
 import '/components/loyalty_header_widget.dart';
 import '/components/visit_item2_widget.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'page4_membership_pricing_widget.dart' show Page4MembershipPricingWidget;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:material_palette/material_palette.dart';
-import 'package:provider/provider.dart';
 
 class Page4MembershipPricingModel
     extends FlutterFlowModel<Page4MembershipPricingWidget> {

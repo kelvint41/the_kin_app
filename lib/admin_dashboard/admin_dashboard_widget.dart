@@ -3,11 +3,8 @@ import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'admin_dashboard_model.dart';
 export 'admin_dashboard_model.dart';
 
@@ -494,7 +491,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                                       4.0,
                                       5.0,
                                       6.0
-                                    ])!,
+                                    ]),
                                     yData: ([
                                       20.0,
                                       45.0,
@@ -503,7 +500,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                                       55.0,
                                       80.0,
                                       95.0
-                                    ])!,
+                                    ]),
                                     settings: LineChartBarData(
                                       color:
                                           FlutterFlowTheme.of(context).primary,
@@ -525,7 +522,7 @@ class _AdminDashboardWidgetState extends State<AdminDashboardWidget> {
                                   minY: 0.0,
                                   maxY: 114.0,
                                 ),
-                                xLabels: (['M', 'T', 'W', 'T', 'F', 'S', 'S'])!,
+                                xLabels: (['M', 'T', 'W', 'T', 'F', 'S', 'S']),
                                 xAxisLabelInfo: AxisLabelInfo(
                                   showLabels: true,
                                   labelTextStyle: TextStyle(

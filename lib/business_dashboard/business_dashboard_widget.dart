@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -1085,8 +1082,8 @@ class _BusinessDashboardWidgetState extends State<BusinessDashboardWidget> {
                                   child: FlutterFlowLineChart(
                                     data: [
                                       FFLineChartData(
-                                        xData: ([1, 2, 3, 4, 5])!,
-                                        yData: ([10, 20, 30, 40, 50])!,
+                                        xData: ([1, 2, 3, 4, 5]),
+                                        yData: ([10, 20, 30, 40, 50]),
                                         settings: LineChartBarData(
                                           color: FlutterFlowTheme.of(context)
                                               .primary,

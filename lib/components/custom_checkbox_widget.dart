@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'custom_checkbox_model.dart';
 export 'custom_checkbox_model.dart';
 
@@ -57,7 +54,7 @@ class _CustomCheckboxWidgetState extends State<CustomCheckboxWidget> {
           width: 22.0,
           height: 22.0,
           decoration: BoxDecoration(
-            color: widget!.active == false
+            color: widget.active == false
                 ? Colors.transparent
                 : FlutterFlowTheme.of(context).primary,
             borderRadius: BorderRadius.circular(
@@ -78,7 +75,7 @@ class _CustomCheckboxWidgetState extends State<CustomCheckboxWidget> {
           flex: 1,
           child: Text(
             valueOrDefault<String>(
-              widget!.label,
+              widget.label,
               'I agree to the Terms of Service and Privacy Policy',
             ),
             maxLines: 2,

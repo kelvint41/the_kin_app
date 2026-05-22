@@ -1,14 +1,7 @@
 import '/components/ticker_pulse_item_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'page1_welcome_mission_widget.dart' show Page1WelcomeMissionWidget;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:material_palette/material_palette.dart';
-import 'package:provider/provider.dart';
 
 class Page1WelcomeMissionModel
     extends FlutterFlowModel<Page1WelcomeMissionWidget> {

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'admin_campaign_card_model.dart';
 export 'admin_campaign_card_model.dart';
 
@@ -92,7 +89,7 @@ class _AdminCampaignCardWidgetState extends State<AdminCampaignCardWidget> {
                       children: [
                         Text(
                           valueOrDefault<String>(
-                            widget!.business_name,
+                            widget.business_name,
                             'Kinvest Guidance LLC',
                           ),
                           maxLines: 1,
@@ -120,7 +117,7 @@ class _AdminCampaignCardWidgetState extends State<AdminCampaignCardWidget> {
                         ),
                         Container(
                           decoration: BoxDecoration(
-                            color: widget!.status == 'paid'
+                            color: widget.status == 'paid'
                                 ? Color(0x00000000)
                                 : FlutterFlowTheme.of(context)
                                     .primaryBackground,
@@ -150,7 +147,7 @@ class _AdminCampaignCardWidgetState extends State<AdminCampaignCardWidget> {
                                     .xs),
                             child: Text(
                               valueOrDefault<String>(
-                                widget!.status,
+                                widget.status,
                                 'Paid',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -164,7 +161,7 @@ class _AdminCampaignCardWidgetState extends State<AdminCampaignCardWidget> {
                                           .labelSmall
                                           .fontStyle,
                                     ),
-                                    color: widget!.status == 'paid'
+                                    color: widget.status == 'paid'
                                         ? FlutterFlowTheme.of(context).success
                                         : FlutterFlowTheme.of(context)
                                             .secondaryText,
@@ -194,9 +191,9 @@ class _AdminCampaignCardWidgetState extends State<AdminCampaignCardWidget> {
                       Switch(
                         value: _model.switchValue!,
                         onChanged: (newValue) async {
-                          safeSetState(() => _model.switchValue = newValue!);
+                          safeSetState(() => _model.switchValue = newValue);
                         },
-                        activeColor: FlutterFlowTheme.of(context).primary,
+                        activeThumbColor: FlutterFlowTheme.of(context).primary,
                         activeTrackColor: FlutterFlowTheme.of(context).accent1,
                         inactiveTrackColor:
                             FlutterFlowTheme.of(context).secondaryBackground,

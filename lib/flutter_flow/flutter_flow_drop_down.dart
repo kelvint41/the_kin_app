@@ -196,7 +196,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
 
   Widget _buildLegacyDropdown() {
     return DropdownButtonFormField<T>(
-      value: currentValue,
+      initialValue: currentValue,
       hint: _createHintText(),
       items: _createMenuItems(),
       elevation: widget.elevation.toInt(),
@@ -287,8 +287,8 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
       .toList();
 
   Widget _buildDropdown() {
-    final overlayColor = MaterialStateProperty.resolveWith<Color?>((states) =>
-        states.contains(MaterialState.focused) ? Colors.transparent : null);
+    final overlayColor = WidgetStateProperty.resolveWith<Color?>((states) =>
+        states.contains(WidgetState.focused) ? Colors.transparent : null);
     final menuItemOverlayColor = kIsWeb ? null : overlayColor;
     final iconStyleData = widget.icon != null
         ? IconStyleData(icon: widget.icon!)

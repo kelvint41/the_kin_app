@@ -17,6 +17,7 @@ export '/new_screen1/new_screen1_widget.dart' show NewScreen1Widget;
 export '/boost_your_business/boost_your_business_widget.dart'
     show BoostYourBusinessWidget;
 export '/admin_dashboard/admin_dashboard_widget.dart' show AdminDashboardWidget;
+export '/the_k_i_n_app/the_k_i_n_app_widget.dart' show TheKINAppWidget;
 export '/welcome_mission_f_i_n_a_l/welcome_mission_f_i_n_a_l_widget.dart'
     show WelcomeMissionFINALWidget;
 export '/the_exchange/the_exchange_widget.dart' show TheExchangeWidget;
@@ -39,6 +40,7 @@ export '/business_dashboard2/business_dashboard2_widget.dart'
     show BusinessDashboard2Widget;
 export '/page1_welcome_mission_copy/page1_welcome_mission_copy_widget.dart'
     show Page1WelcomeMissionCopyWidget;
+export '/pilot_main_flow/pilot_main_flow_widget.dart' show PilotMainFlowWidget;
 export '/the_exchange2/the_exchange2_widget.dart' show TheExchange2Widget;
 export '/age_verification_s_b24202/age_verification_s_b24202_widget.dart'
     show AgeVerificationSB24202Widget;
@@ -101,6 +103,8 @@ export '/homescreen2/homescreen2_widget.dart' show Homescreen2Widget;
 export '/v_i_p_showcase_final/v_i_p_showcase_final_widget.dart'
     show VIPShowcaseFinalWidget;
 export '/components/k_i_n_v_i_p_final_widget.dart' show KINVIPFinalWidget;
+export '/admin_dashboard_final/admin_dashboard_final_widget.dart'
+    show AdminDashboardFinalWidget;
 export '/business_directory/business_directory_widget.dart'
     show BusinessDirectoryWidget;
 export '/business_collection/business_collection_widget.dart'

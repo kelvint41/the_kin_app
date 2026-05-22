@@ -1,13 +1,8 @@
 import '/components/local_punch_slot_gold2_widget.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'local_punch_card_section2_widget.dart'
     show LocalPunchCardSection2Widget;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class LocalPunchCardSection2Model
     extends FlutterFlowModel<LocalPunchCardSection2Widget> {

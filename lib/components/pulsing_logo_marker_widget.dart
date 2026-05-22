@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:math' as math;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'pulsing_logo_marker_model.dart';
 export 'pulsing_logo_marker_model.dart';
 
@@ -137,7 +134,7 @@ class _PulsingLogoMarkerWidgetState extends State<PulsingLogoMarkerWidget> {
                             fadeInDuration: Duration(milliseconds: 0),
                             fadeOutDuration: Duration(milliseconds: 0),
                             imageUrl: valueOrDefault<String>(
-                              widget!.logo_desc,
+                              widget.logo_desc,
                               'https://dimg.dreamflow.cloud/v1/image/Kinship%20Botanicals%20logo%2C%20elegant%20gold%20and%20black%20floral%20typography%2C%20minimalist%20and%20premium%2C%20high-end%20aesthetic',
                             ),
                             fit: BoxFit.cover,
