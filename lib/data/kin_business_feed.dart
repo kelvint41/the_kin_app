@@ -7,12 +7,28 @@ class KinBusinessFeed {
   KinBusinessFeed._();
 
   static Stream<List<KinBusinessProfile>> watchProfiles() =>
-      queryBusinessesRecord().map(KinBusinessDataMapper.fromFirestoreList);
+      queryBusinessesRecord()
+          .map(KinBusinessDataMapper.fromFirestoreList)
+          .map(sortProfiles);
 
   static List<KinBusinessProfile> profilesFromRecords(
     List<BusinessesRecord> records,
   ) =>
-      KinBusinessDataMapper.fromFirestoreList(records);
+      sortProfiles(KinBusinessDataMapper.fromFirestoreList(records));
+
+  /// Featured businesses first, then highest Kindex score.
+  static int compareProfiles(KinBusinessProfile a, KinBusinessProfile b) {
+    if (a.isFeatured != b.isFeatured) {
+      return a.isFeatured ? -1 : 1;
+    }
+
+    return b.kindexScore.compareTo(a.kindexScore);
+  }
+
+  static List<KinBusinessProfile> sortProfiles(
+    List<KinBusinessProfile> profiles,
+  ) =>
+      profiles.toList()..sort(compareProfiles);
 
   /// Merge Firestore profiles with an external partner/API payload.
   static List<KinBusinessProfile> mergeProfiles({
@@ -28,17 +44,16 @@ class KinBusinessFeed {
       final prior = merged[profile.id];
       merged[profile.id] = prior == null
           ? profile
-          : profile.withPreservedGrowthMetrics(prior.growthMetrics);
+          : profile.withPreservedFirestoreMetadata(prior);
     }
 
-    return merged.values.toList()
-      ..sort((a, b) => b.kindexScore.compareTo(a.kindexScore));
+    return sortProfiles(merged.values.toList());
   }
 
   static Future<List<KinBusinessProfile>> loadExternalFeed(
     List<Map<String, dynamic>> payload,
   ) async =>
-      KinBusinessDataMapper.fromExternalFeedList(payload);
+      sortProfiles(KinBusinessDataMapper.fromExternalFeedList(payload));
 
   /// Live Google Places lookup for a single Black-owned business profile.
   static Future<KinBusinessProfile?> loadProfileFromGooglePlaces({

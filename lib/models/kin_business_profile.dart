@@ -98,6 +98,7 @@ class KinBusinessProfile {
     required this.tickerSymbol,
     required this.isBlackOwned,
     required this.isBobVerified,
+    required this.isFeatured,
     required this.phone,
     required this.website,
     required this.description,
@@ -119,6 +120,7 @@ class KinBusinessProfile {
   final String? tickerSymbol;
   final bool isBlackOwned;
   final bool isBobVerified;
+  final bool isFeatured;
   final String? phone;
   final String? website;
   final String? description;
@@ -146,12 +148,41 @@ class KinBusinessProfile {
       tickerSymbol: tickerSymbol,
       isBlackOwned: isBlackOwned,
       isBobVerified: isBobVerified,
+      isFeatured: isFeatured,
       phone: phone,
       website: website,
       description: description,
       reviews: reviews,
       averageReviewRating: averageReviewRating,
       growthMetrics: metrics,
+    );
+  }
+
+  /// Applies Firestore-only metadata when merging an external feed profile.
+  KinBusinessProfile withPreservedFirestoreMetadata(
+    KinBusinessProfile prior,
+  ) {
+    return KinBusinessProfile(
+      id: id,
+      displayName: displayName,
+      category: category,
+      address: address,
+      city: city,
+      state: state,
+      heroImageUrl: heroImageUrl,
+      galleryImageUrls: galleryImageUrls,
+      location: location,
+      kindexScore: kindexScore,
+      tickerSymbol: tickerSymbol,
+      isBlackOwned: isBlackOwned,
+      isBobVerified: isBobVerified,
+      isFeatured: prior.isFeatured || isFeatured,
+      phone: phone,
+      website: website,
+      description: description,
+      reviews: reviews,
+      averageReviewRating: averageReviewRating,
+      growthMetrics: prior.growthMetrics,
     );
   }
 
@@ -243,6 +274,7 @@ class KinBusinessProfile {
       tickerSymbol: _firstNonEmpty([record.tickerSymbol]),
       isBlackOwned: record.isBlackOwned,
       isBobVerified: record.isBobVerified,
+      isFeatured: record.isFeatured,
       phone: _firstNonEmpty([record.phoneNumber, record.phone]),
       website: _firstNonEmpty([record.website]),
       description: record.description,
@@ -294,6 +326,9 @@ class KinBusinessProfile {
           true,
       isBobVerified: json['is_bob_verified'] as bool? ??
           json['isBobVerified'] as bool? ??
+          false,
+      isFeatured: json['is_featured'] as bool? ??
+          json['isFeatured'] as bool? ??
           false,
       phone: _firstNonEmpty([
         json['phone_number'] as String?,

@@ -106,6 +106,11 @@ class BusinessesRecord extends FirestoreRecord {
   bool get isPremium => _isPremium ?? false;
   bool hasIsPremium() => _isPremium != null;
 
+  // "is_featured" field.
+  bool? _isFeatured;
+  bool get isFeatured => _isFeatured ?? false;
+  bool hasIsFeatured() => _isFeatured != null;
+
   // "created_at" field.
   DateTime? _createdAt;
   DateTime? get createdAt => _createdAt;
@@ -220,6 +225,7 @@ class BusinessesRecord extends FirestoreRecord {
     _description = snapshotData['description'] as String?;
     _phoneNumber = snapshotData['phone_number'] as String?;
     _isPremium = snapshotData['is_premium'] as bool?;
+    _isFeatured = snapshotData['is_featured'] as bool?;
     _createdAt = snapshotData['created_at'] as DateTime?;
     _city = snapshotData['city'] as String?;
     _latitude = castToType<double>(snapshotData['Latitude']);
@@ -295,6 +301,7 @@ Map<String, dynamic> createBusinessesRecordData({
   String? description,
   String? phoneNumber,
   bool? isPremium,
+  bool? isFeatured,
   DateTime? createdAt,
   String? city,
   double? latitude,
@@ -335,6 +342,7 @@ Map<String, dynamic> createBusinessesRecordData({
       'description': description,
       'phone_number': phoneNumber,
       'is_premium': isPremium,
+      'is_featured': isFeatured,
       'created_at': createdAt,
       'city': city,
       'Latitude': latitude,
@@ -383,6 +391,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.description == e2?.description &&
         e1?.phoneNumber == e2?.phoneNumber &&
         e1?.isPremium == e2?.isPremium &&
+        e1?.isFeatured == e2?.isFeatured &&
         e1?.createdAt == e2?.createdAt &&
         e1?.city == e2?.city &&
         e1?.latitude == e2?.latitude &&
@@ -427,6 +436,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.description,
         e?.phoneNumber,
         e?.isPremium,
+        e?.isFeatured,
         e?.createdAt,
         e?.city,
         e?.latitude,

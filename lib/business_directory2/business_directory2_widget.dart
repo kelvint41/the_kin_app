@@ -111,8 +111,10 @@ class _BusinessDirectory2WidgetState extends State<BusinessDirectory2Widget> {
                     KinBusinessFeed.profilesFromRecords(snapshot.data!),
                 externalPayload: _model.externalFeedPayload,
               )
-            : KinBusinessDataMapper.fromExternalFeedList(
-                _model.externalFeedPayload,
+            : KinBusinessFeed.sortProfiles(
+                KinBusinessDataMapper.fromExternalFeedList(
+                  _model.externalFeedPayload,
+                ),
               );
 
         return GestureDetector(
