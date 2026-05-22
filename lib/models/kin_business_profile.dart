@@ -99,6 +99,7 @@ class KinBusinessProfile {
     required this.isBlackOwned,
     required this.isBobVerified,
     required this.isFeatured,
+    required this.isVeteran,
     required this.phone,
     required this.website,
     required this.description,
@@ -121,6 +122,7 @@ class KinBusinessProfile {
   final bool isBlackOwned;
   final bool isBobVerified;
   final bool isFeatured;
+  final bool isVeteran;
   final String? phone;
   final String? website;
   final String? description;
@@ -149,6 +151,7 @@ class KinBusinessProfile {
       isBlackOwned: isBlackOwned,
       isBobVerified: isBobVerified,
       isFeatured: isFeatured,
+      isVeteran: isVeteran,
       phone: phone,
       website: website,
       description: description,
@@ -174,9 +177,10 @@ class KinBusinessProfile {
       location: location,
       kindexScore: kindexScore,
       tickerSymbol: tickerSymbol,
-      isBlackOwned: isBlackOwned,
+      isBlackOwned: prior.isBlackOwned || isBlackOwned,
       isBobVerified: isBobVerified,
       isFeatured: prior.isFeatured || isFeatured,
+      isVeteran: prior.isVeteran || isVeteran,
       phone: phone,
       website: website,
       description: description,
@@ -275,6 +279,7 @@ class KinBusinessProfile {
       isBlackOwned: record.isBlackOwned,
       isBobVerified: record.isBobVerified,
       isFeatured: record.isFeatured,
+      isVeteran: record.isVeteran,
       phone: _firstNonEmpty([record.phoneNumber, record.phone]),
       website: _firstNonEmpty([record.website]),
       description: record.description,
@@ -329,6 +334,9 @@ class KinBusinessProfile {
           false,
       isFeatured: json['is_featured'] as bool? ??
           json['isFeatured'] as bool? ??
+          false,
+      isVeteran: json['is_veteran'] as bool? ??
+          json['isVeteran'] as bool? ??
           false,
       phone: _firstNonEmpty([
         json['phone_number'] as String?,

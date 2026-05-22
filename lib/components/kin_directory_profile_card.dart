@@ -1,3 +1,4 @@
+import '/components/kin_business_ownership_badges.dart';
 import '/models/kin_business_profile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -194,37 +195,13 @@ class KinDirectoryProfileCard extends StatelessWidget {
                   ),
               ],
             ),
-            if (profile.isBlackOwned || profile.isBobVerified) ...[
+            if (profile.isBlackOwned ||
+                profile.isVeteran ||
+                profile.isBobVerified) ...[
               const SizedBox(height: 10.0),
-              Wrap(
-                spacing: 8.0,
-                children: [
-                  if (profile.isBlackOwned)
-                    _badge('Black-owned', const Color(0xFF1A3A5C)),
-                  if (profile.isBobVerified)
-                    _badge('KIN Verified', const Color(0xFFE87040)),
-                ],
-              ),
+              KinBusinessOwnershipBadges(profile: profile),
             ],
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _badge(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.plusJakartaSans(
-          color: Colors.white,
-          fontSize: 10.0,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -1,3 +1,4 @@
+import '/components/kin_business_ownership_badges.dart';
 import '/models/kin_business_profile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -115,6 +116,15 @@ class KinMapProfilePreview extends StatelessWidget {
                               color: const Color(0xFF6B7C8F),
                               fontSize: 12.0,
                             ),
+                          ),
+                        ],
+                        if (profile.isBlackOwned ||
+                            profile.isVeteran ||
+                            profile.isBobVerified) ...[
+                          const SizedBox(height: 6.0),
+                          KinBusinessOwnershipBadges(
+                            profile: profile,
+                            compact: true,
                           ),
                         ],
                         if (profile.formattedAddress.isNotEmpty) ...[
