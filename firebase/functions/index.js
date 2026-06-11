@@ -5,5 +5,12 @@ admin.initializeApp();
 exports.onUserDeleted = functions.auth.user().onDelete(async (user) => {
   let firestore = admin.firestore();
   let userRef = firestore.doc("users/" + user.uid);
-  await firestore.collection("users").doc(user.uid).delete();
+  try {
+    await userRef.delete();
+  } catch (error) {
+    functions.logger.error("Failed to delete Firestore user document", {
+      uid: user.uid,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 });

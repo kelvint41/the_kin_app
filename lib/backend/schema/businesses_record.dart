@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import '/backend/schema/util/firestore_util.dart';
 
 import 'index.dart';
+import '/app_constants.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
 class BusinessesRecord extends FirestoreRecord {
@@ -82,7 +83,8 @@ class BusinessesRecord extends FirestoreRecord {
 
   // "kindex_score" field.
   double? _kindexScore;
-  double get kindexScore => _kindexScore ?? 0.0;
+  double get kindexScore =>
+      _kindexScore ?? FFAppConstants.kindexDefaultScore;
   bool hasKindexScore() => _kindexScore != null;
 
   // "owner" field.

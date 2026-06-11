@@ -1,3 +1,4 @@
+import '/app_constants.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -297,7 +298,9 @@ class _VIPShowcaseWidgetState extends State<VIPShowcaseWidget> {
                                       ),
                                 ),
                                 Text(
-                                  FFAppState().kindexscore.toString(),
+                                  (widget.activeBusiness?.kindexScore ??
+                                          FFAppConstants.kindexDefaultScore)
+                                      .toStringAsFixed(0),
                                   style: FlutterFlowTheme.of(context)
                                       .displaySmall
                                       .override(
@@ -656,7 +659,9 @@ class _VIPShowcaseWidgetState extends State<VIPShowcaseWidget> {
                                     ),
                               ),
                               Text(
-                                FFAppState().kindexscore.toString(),
+                                (widget.activeBusiness?.kindexScore ??
+                                        FFAppConstants.kindexDefaultScore)
+                                    .toStringAsFixed(0),
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(

@@ -34,6 +34,9 @@ class TheMembershipSuiteWidget extends StatefulWidget {
 }
 
 class _TheMembershipSuiteWidgetState extends State<TheMembershipSuiteWidget> {
+  static const String _proSubscriptionStatus = 'Pro';
+  static const String _eliteSubscriptionStatus = 'Elite';
+
   late TheMembershipSuiteModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -62,6 +65,68 @@ class _TheMembershipSuiteWidgetState extends State<TheMembershipSuiteWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _purchasePlan({
+    required String? packageIdentifier,
+    required String subscriptionStatus,
+    required void Function(bool purchaseResult) setPurchaseResult,
+  }) async {
+    try {
+      if (packageIdentifier == null || packageIdentifier.isEmpty) {
+        showSnackbar(
+          context,
+          'Unable to load subscription details. Please try again.',
+        );
+        return;
+      }
+
+      final userReference = currentUserReference;
+      if (userReference == null) {
+        showSnackbar(
+          context,
+          'Please sign in before choosing a subscription plan.',
+        );
+        return;
+      }
+
+      final purchaseResult = await revenue_cat.purchasePackage(
+        packageIdentifier,
+      );
+      setPurchaseResult(purchaseResult);
+
+      if (!purchaseResult) {
+        if (mounted) {
+          showSnackbar(
+            context,
+            'Unable to complete purchase. Please try again.',
+          );
+        }
+        safeSetState(() {});
+        return;
+      }
+
+      await userReference.update(createUsersRecordData(
+        subscriptionStatus: subscriptionStatus,
+      ));
+      if (!mounted) {
+        return;
+      }
+      if (Navigator.of(context).canPop()) {
+        context.pop();
+      }
+      context.pushNamed(BusinessDashboard3Widget.routeName);
+
+      safeSetState(() {});
+    } catch (_) {
+      if (mounted) {
+        showSnackbar(
+          context,
+          'Unable to update subscription. Please check your connection and try again.',
+        );
+      }
+      safeSetState(() {});
+    }
   }
 
   @override
@@ -874,21 +939,14 @@ class _TheMembershipSuiteWidgetState extends State<TheMembershipSuiteWidget> {
                                 ),
                                 FFButtonWidget(
                                   onPressed: () async {
-                                    _model.proPurchase = await revenue_cat
-                                        .purchasePackage(revenue_cat.offerings!
-                                            .current!.monthly!.identifier);
-
-                                    await currentUserReference!
-                                        .update(createUsersRecordData(
-                                      subscriptionStatus: 'Pro',
-                                    ));
-                                    if (Navigator.of(context).canPop()) {
-                                      context.pop();
-                                    }
-                                    context.pushNamed(
-                                        BusinessDashboard3Widget.routeName);
-
-                                    safeSetState(() {});
+                                    await _purchasePlan(
+                                      packageIdentifier: revenue_cat
+                                          .offerings?.current?.monthly?.identifier,
+                                      subscriptionStatus:
+                                          _proSubscriptionStatus,
+                                      setPurchaseResult: (purchaseResult) =>
+                                          _model.proPurchase = purchaseResult,
+                                    );
                                   },
                                   text: 'Choose Plan',
                                   options: FFButtonOptions(
@@ -1320,21 +1378,13 @@ class _TheMembershipSuiteWidgetState extends State<TheMembershipSuiteWidget> {
                             ),
                             FFButtonWidget(
                               onPressed: () async {
-                                _model.elitePurchase = await revenue_cat
-                                    .purchasePackage(revenue_cat.offerings!
-                                        .current!.annual!.identifier);
-
-                                await currentUserReference!
-                                    .update(createUsersRecordData(
-                                  subscriptionStatus: 'Pro',
-                                ));
-                                if (Navigator.of(context).canPop()) {
-                                  context.pop();
-                                }
-                                context.pushNamed(
-                                    BusinessDashboard3Widget.routeName);
-
-                                safeSetState(() {});
+                                await _purchasePlan(
+                                  packageIdentifier: revenue_cat
+                                      .offerings?.current?.annual?.identifier,
+                                  subscriptionStatus: _eliteSubscriptionStatus,
+                                  setPurchaseResult: (purchaseResult) =>
+                                      _model.elitePurchase = purchaseResult,
+                                );
                               },
                               text: 'Choose Plan',
                               options: FFButtonOptions(

@@ -1,3 +1,4 @@
+import '/app_constants.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -35,6 +36,21 @@ class _VIPShowcase2WidgetState extends State<VIPShowcase2Widget> {
   late VIPShowcase2Model _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  double get _kindexScore =>
+      (widget.activeBusiness ?? FFAppConstants.kindexDefaultScore)
+          .clamp(
+            FFAppConstants.kindexMinimumScore,
+            FFAppConstants.kindexMaximumScore,
+          )
+          .toDouble();
+
+  double get _kindexProgress =>
+      ((_kindexScore - FFAppConstants.kindexMinimumScore) /
+              (FFAppConstants.kindexMaximumScore -
+                  FFAppConstants.kindexMinimumScore))
+          .clamp(0.0, 1.0)
+          .toDouble();
 
   @override
   void initState() {
@@ -299,7 +315,7 @@ class _VIPShowcase2WidgetState extends State<VIPShowcase2Widget> {
                               child: Align(
                                 alignment: AlignmentDirectional(0.0, 0.0),
                                 child: Text(
-                                  FFAppState().kindexscore.toString(),
+                                  _kindexScore.toStringAsFixed(0),
                                   style: FlutterFlowTheme.of(context)
                                       .titleMedium
                                       .override(
@@ -323,7 +339,7 @@ class _VIPShowcase2WidgetState extends State<VIPShowcase2Widget> {
                           ],
                         ),
                         LinearPercentIndicator(
-                          percent: widget.activeBusiness!,
+                          percent: _kindexProgress,
                           width: MediaQuery.sizeOf(context).width * 1.0,
                           lineHeight: 10.0,
                           animation: true,
@@ -505,7 +521,7 @@ class _VIPShowcase2WidgetState extends State<VIPShowcase2Widget> {
                                                 ),
                                           ),
                                           Text(
-                                            widget.activeBusiness.toString(),
+                                            _kindexScore.toStringAsFixed(0),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
@@ -601,7 +617,7 @@ class _VIPShowcase2WidgetState extends State<VIPShowcase2Widget> {
                                                 ),
                                           ),
                                           Text(
-                                            widget.activeBusiness.toString(),
+                                            _kindexScore.toStringAsFixed(0),
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(

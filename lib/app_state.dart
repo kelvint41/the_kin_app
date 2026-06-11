@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_constants.dart';
 import '/backend/backend.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'flutter_flow/flutter_flow_util.dart';
@@ -91,10 +92,15 @@ class FFAppState extends ChangeNotifier {
     _tickersymbol = value;
   }
 
-  int _kindexscore = 0;
-  int get kindexscore => _kindexscore;
-  set kindexscore(int value) {
-    _kindexscore = value;
+  double _kindexscore = FFAppConstants.kindexDefaultScore;
+  double get kindexscore => _kindexscore;
+  set kindexscore(double value) {
+    _kindexscore = value
+        .clamp(
+          FFAppConstants.kindexMinimumScore,
+          FFAppConstants.kindexMaximumScore,
+        )
+        .toDouble();
   }
 
   String _phone = '';

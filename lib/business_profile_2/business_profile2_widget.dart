@@ -1,13 +1,10 @@
 import '/backend/backend.dart';
-import '/backend/gemini/gemini.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_profile2_model.dart';
 export 'business_profile2_model.dart';
 
@@ -43,16 +40,6 @@ class _BusinessProfile2WidgetState extends State<BusinessProfile2Widget> {
     super.initState();
     _model = createModel(context, () => BusinessProfile2Model());
 
-    // On page load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await geminiGenerateText(
-        context,
-        'Write one short, professional sentence explaining why a${FFAppState().category}business with a Kindex score of${FFAppState().kindexscore.toString()}is a vital pillar of economic growth in San Antonio. Keep the tone premium and avoid clichés.',
-      ).then((generatedText) {
-        safeSetState(() => _model.aiInsight = generatedText);
-      });
-    });
-
     WidgetsBinding.instance.addPostFrameCallback((_) => safeSetState(() {}));
   }
 
@@ -65,10 +52,21 @@ class _BusinessProfile2WidgetState extends State<BusinessProfile2Widget> {
 
   @override
   Widget build(BuildContext context) {
-    context.watch<FFAppState>();
+    final businessRef = widget.businessRef;
+    if (businessRef == null) {
+      return Scaffold(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: Center(
+          child: Text(
+            'Business details are unavailable.',
+            style: FlutterFlowTheme.of(context).bodyMedium,
+          ),
+        ),
+      );
+    }
 
     return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget.businessRef!),
+      stream: BusinessesRecord.getDocument(businessRef),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {

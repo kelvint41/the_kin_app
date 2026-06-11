@@ -48,6 +48,16 @@ async function makeApiRequest({
       };
     })
     .catch(function (error) {
+      if (!error.response) {
+        return {
+          statusCode: 408,
+          headers: {},
+          error:
+            error.message ||
+            "Connection timeout. Please check your connection and try again.",
+        };
+      }
+
       return {
         statusCode: error.response.status,
         headers: error.response.headers,

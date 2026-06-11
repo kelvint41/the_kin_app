@@ -1,3 +1,5 @@
+import '/app_constants.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -609,13 +611,76 @@ class _BusinessSignUpWidgetState extends State<BusinessSignUpWidget> {
                             ),
                             FFButtonWidget(
                               onPressed: () async {
-                                await BusinessesRecord.collection
-                                    .doc()
-                                    .set(createBusinessesRecordData(
-                                      isVeteran: _model.veteranOwnedValue,
+                                try {
+                                  if (!(_model.formKey.currentState
+                                          ?.validate() ??
+                                      false)) {
+                                    return;
+                                  }
+
+                                  final businessName =
+                                      _model.textController1.text.trim();
+                                  final ownerName =
+                                      _model.textController2.text.trim();
+                                  final emailAddress =
+                                      _model.textController3.text.trim();
+                                  final phoneNumber =
+                                      _model.textController4.text.trim();
+                                  final ownerNameParts = ownerName
+                                      .split(RegExp(r'\s+'))
+                                      .where((namePart) => namePart.isNotEmpty)
+                                      .toList();
+                                  final ownerFirstName =
+                                      ownerNameParts.isNotEmpty
+                                          ? ownerNameParts.first
+                                          : '';
+                                  final ownerLastName =
+                                      ownerNameParts.length > 1
+                                          ? ownerNameParts.skip(1).join(' ')
+                                          : '';
+
+                                  final businessReference =
+                                      BusinessesRecord.collection.doc();
+                                  await businessReference
+                                      .set(createBusinessesRecordData(
+                                        name: businessName,
+                                        businessName: businessName,
+                                        ownerFirstName: ownerFirstName,
+                                        ownerLastName: ownerLastName,
+                                        email: emailAddress,
+                                        phone: phoneNumber,
+                                        phoneNumber: phoneNumber,
+                                        kindexScore:
+                                            FFAppConstants.kindexDefaultScore,
+                                        owner: currentUserReference,
+                                        isVeteran: _model.veteranOwnedValue,
+                                        isBlackOwned: true,
+                                        isBobVerified: false,
+                                        isActivelyPulsing: false,
+                                        hasPhysicalLocation: false,
+                                        isPremium: false,
+                                        isOpen: false,
+                                        isEcommerce: false,
+                                        createdAt: getCurrentTimestamp,
+                                      ));
+                                  final userReference = currentUserReference;
+                                  if (userReference != null) {
+                                    await userReference
+                                        .update(createUsersRecordData(
+                                      ownedBusiness: businessReference,
                                     ));
+                                  }
+                                } catch (_) {
+                                  if (mounted) {
+                                    showSnackbar(
+                                      context,
+                                      'Unable to submit request. Please check your connection and try again.',
+                                    );
+                                  }
+                                }
                               },
                               text: 'Submit Request',
+                              showLoadingIndicator: true,
                               options: FFButtonOptions(
                                 width: double.infinity,
                                 height: 56.0,

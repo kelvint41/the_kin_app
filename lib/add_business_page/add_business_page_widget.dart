@@ -1,3 +1,5 @@
+import '/app_constants.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -34,6 +36,7 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
   late AddBusinessPageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _isSavingBusinessDetails = false;
 
   @override
   void initState() {
@@ -353,7 +356,7 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Business Ticker',
+                        'Initial Kindex Score',
                         style:
                             FlutterFlowTheme.of(context).labelMedium.override(
                                   font: GoogleFonts.plusJakartaSans(
@@ -400,7 +403,7 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
                                       .labelMedium
                                       .fontStyle,
                                 ),
-                            hintText: 'TextField',
+                            hintText: '100',
                             hintStyle: FlutterFlowTheme.of(context)
                                 .labelMedium
                                 .override(
@@ -478,7 +481,7 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
                         ),
                       ),
                       Text(
-                        'Your unique ticker symbol on the KIN Network (3–5 characters recommended)',
+                        'Enter a score from 100 to 750. Blank or invalid values start at 100.',
                         style: FlutterFlowTheme.of(context).labelSmall.override(
                               font: GoogleFonts.plusJakartaSans(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -1090,25 +1093,64 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await BusinessesRecord.collection
-                          .doc()
-                          .set(createBusinessesRecordData(
-                            name: _model.textController1.text,
-                            tickerSymbol: _model.textController1.text,
-                            isBlackOwned: false,
-                            category: '',
-                            website: '',
-                            loyaltyOffer: '',
-                            heroImage: '',
-                            businessLocation: FFAppState().location,
-                            address: '',
-                            isBobVerified: false,
-                            isActivelyPulsing: false,
-                            tierLevel: '',
-                            hasPhysicalLocation: false,
-                          ));
+                      if (_isSavingBusinessDetails) {
+                        return;
+                      }
 
-                      context.pushNamed(HomeScreenWidget.routeName);
+                      safeSetState(() => _isSavingBusinessDetails = true);
+                      try {
+                        final enteredKindexScore = double.tryParse(
+                          _model.kindexScoreTextController.text.trim(),
+                        );
+                        final kindexScore = (enteredKindexScore ??
+                                FFAppConstants.kindexDefaultScore)
+                            .clamp(
+                              FFAppConstants.kindexMinimumScore,
+                              FFAppConstants.kindexMaximumScore,
+                            )
+                            .toDouble();
+                        final businessReference =
+                            BusinessesRecord.collection.doc();
+
+                        await businessReference.set(
+                          createBusinessesRecordData(
+                              name: _model.textController1.text,
+                              kindexScore: kindexScore,
+                              owner: currentUserReference,
+                              isBlackOwned: false,
+                              category: '',
+                              website: '',
+                              loyaltyOffer: '',
+                              heroImage: '',
+                              businessLocation: FFAppState().location,
+                              address: '',
+                              isBobVerified: false,
+                              isActivelyPulsing: false,
+                              tierLevel: '',
+                              hasPhysicalLocation: false,
+                            ),
+                        );
+                        final userReference = currentUserReference;
+                        if (userReference != null) {
+                          await userReference.update(createUsersRecordData(
+                            ownedBusiness: businessReference,
+                          ));
+                        }
+
+                        if (!mounted) {
+                          return;
+                        }
+                        context.pushNamed(HomeScreenWidget.routeName);
+                      } catch (_) {
+                        if (mounted) {
+                          showSnackbar(
+                            context,
+                            'Unable to save business details. Please check your connection and try again.',
+                          );
+                        }
+                      } finally {
+                        safeSetState(() => _isSavingBusinessDetails = false);
+                      }
                     },
                     child: Container(
                       width: double.infinity,
@@ -1138,13 +1180,27 @@ class _AddBusinessPageWidgetState extends State<AddBusinessPageWidget> {
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.send_rounded,
-                              color: Color(0xFF121212),
-                              size: 22.0,
-                            ),
+                            if (_isSavingBusinessDetails)
+                              SizedBox(
+                                width: 22.0,
+                                height: 22.0,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.0,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF121212),
+                                  ),
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.send_rounded,
+                                color: Color(0xFF121212),
+                                size: 22.0,
+                              ),
                             Text(
-                              'Submit to KIN Network',
+                              _isSavingBusinessDetails
+                                  ? 'Saving...'
+                                  : 'Submit to KIN Network',
                               style: FlutterFlowTheme.of(context)
                                   .titleMedium
                                   .override(

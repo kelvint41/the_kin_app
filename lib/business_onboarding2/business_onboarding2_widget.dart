@@ -1,3 +1,4 @@
+import '/app_constants.dart';
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_place_picker.dart';
@@ -733,26 +734,29 @@ class _BusinessOnboarding2WidgetState extends State<BusinessOnboarding2Widget> {
                           ),
                           FFButtonWidget(
                             onPressed: () async {
-                              var businessesRecordReference =
-                                  BusinessesRecord.collection.doc();
-                              await businessesRecordReference
-                                  .set(createBusinessesRecordData(
-                                name: _model.textController1.text,
-                                kindexScore: 500.0,
-                                tickerSymbol:
-                                    _model.kindexTextFieldTextController.text,
-                                owner: currentUserReference,
-                                isBlackOwned: true,
-                                category: '',
-                                isBobVerified: false,
-                                tierLevel: '',
-                                city: 'San Antonio',
-                              ));
-                              _model.newBusiness =
-                                  BusinessesRecord.getDocumentFromData(
+                              try {
+                                final businessesRecordReference =
+                                    BusinessesRecord.collection.doc();
+                                await businessesRecordReference
+                                    .set(createBusinessesRecordData(
+                                  name: _model.textController1.text,
+                                  kindexScore:
+                                      FFAppConstants.kindexDefaultScore,
+                                  tickerSymbol:
+                                      _model.kindexTextFieldTextController.text,
+                                  owner: currentUserReference,
+                                  isBlackOwned: true,
+                                  category: '',
+                                  isBobVerified: false,
+                                  tierLevel: '',
+                                  city: FFAppConstants.SanAntonio,
+                                ));
+                                _model.newBusiness =
+                                    BusinessesRecord.getDocumentFromData(
                                       createBusinessesRecordData(
                                         name: _model.textController1.text,
-                                        kindexScore: 500.0,
+                                        kindexScore:
+                                            FFAppConstants.kindexDefaultScore,
                                         tickerSymbol: _model
                                             .kindexTextFieldTextController.text,
                                         owner: currentUserReference,
@@ -760,14 +764,32 @@ class _BusinessOnboarding2WidgetState extends State<BusinessOnboarding2Widget> {
                                         category: '',
                                         isBobVerified: false,
                                         tierLevel: '',
-                                        city: 'San Antonio',
+                                        city: FFAppConstants.SanAntonio,
                                       ),
                                       businessesRecordReference);
+                                final userReference = currentUserReference;
+                                if (userReference != null) {
+                                  await userReference
+                                      .update(createUsersRecordData(
+                                    ownedBusiness: businessesRecordReference,
+                                  ));
+                                }
 
-                              context.pushNamed(
-                                  BusinessOnboarding2Widget.routeName);
+                                if (!mounted) {
+                                  return;
+                                }
+                                context.pushNamed(
+                                    BusinessOnboarding2Widget.routeName);
 
-                              safeSetState(() {});
+                                safeSetState(() {});
+                              } catch (_) {
+                                if (mounted) {
+                                  showSnackbar(
+                                    context,
+                                    'Unable to create business profile. Please check your connection and try again.',
+                                  );
+                                }
+                              }
                             },
                             text: 'Next →',
                             options: FFButtonOptions(

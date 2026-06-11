@@ -11,15 +11,19 @@ import 'uploaded_file.dart';
 import '/backend/backend.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/app_constants.dart';
 
-int updateKindexScore(
+double updateKindexScore(
   double? currentScore,
   int? reviewRatings,
 ) {
   double scoreChange = 0.0;
-  double score = currentScore ?? 100.0;
+  final score = (currentScore ?? FFAppConstants.kindexDefaultScore).clamp(
+    FFAppConstants.kindexMinimumScore,
+    FFAppConstants.kindexMaximumScore,
+  );
 
-  if (reviewRatings == null) return score.toInt();
+  if (reviewRatings == null) return score.toDouble();
 
   switch (reviewRatings) {
     case 5:
@@ -38,6 +42,11 @@ int updateKindexScore(
       scoreChange = 0.0;
   }
 
-  double newScore = score + scoreChange;
-  return newScore.round().clamp(100, 750);
+  final newScore = score + scoreChange;
+  return newScore
+      .clamp(
+        FFAppConstants.kindexMinimumScore,
+        FFAppConstants.kindexMaximumScore,
+      )
+      .toDouble();
 }
