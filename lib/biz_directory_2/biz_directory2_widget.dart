@@ -351,53 +351,56 @@ class _BizDirectory2WidgetState extends State<BizDirectory2Widget> {
                               ),
                             ),
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Color(0xFF2A2A2A),
-                              borderRadius: BorderRadius.circular(20.0),
-                              border: Border.all(
-                                color: Color(0xFF3A3A3A),
-                                width: 1.0,
+                          InkWell(
+                            onTap: () {},
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xFF2A2A2A),
+                                borderRadius: BorderRadius.circular(20.0),
+                                border: Border.all(
+                                  color: Color(0xFF3A3A3A),
+                                  width: 1.0,
+                                ),
                               ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 8.0, 16.0, 8.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.local_shipping_outlined,
-                                    color: Color(0xFFC9A84C),
-                                    size: 16.0,
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        6.0, 0.0, 6.0, 0.0),
-                                    child: Text(
-                                      'Logistics',
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    16.0, 8.0, 16.0, 8.0),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.local_shipping_outlined,
+                                      color: Color(0xFFC9A84C),
+                                      size: 16.0,
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          6.0, 0.0, 6.0, 0.0),
+                                      child: Text(
+                                        'Logistics',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.w500,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                              color: Color(0xFFE0E0E0),
+                                              fontSize: 13.0,
+                                              letterSpacing: 0.0,
                                               fontWeight: FontWeight.w500,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
                                                       .bodyMedium
                                                       .fontStyle,
                                             ),
-                                            color: Color(0xFFE0E0E0),
-                                            fontSize: 13.0,
-                                            letterSpacing: 0.0,
-                                            fontWeight: FontWeight.w500,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
