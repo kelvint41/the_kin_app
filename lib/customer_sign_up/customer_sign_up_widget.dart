@@ -172,6 +172,7 @@ class _CustomerSignUpWidgetState extends State<CustomerSignUpWidget> {
                       label: 'Password',
                       hint: 'Create a password',
                       icon: 'lock_outline_rounded',
+                      isPassword: true,
                     ),
                   ),
                   Row(

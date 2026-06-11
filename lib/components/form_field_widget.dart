@@ -11,11 +11,13 @@ class FormFieldWidget extends StatefulWidget {
     this.label,
     this.hint,
     this.icon,
+    this.isPassword = false,
   });
 
   final String? label;
   final String? hint;
   final String? icon;
+  final bool isPassword;
 
   @override
   State<FormFieldWidget> createState() => _FormFieldWidgetState();
@@ -115,7 +117,10 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
                           child: TextFormField(
                             controller: _model.textController,
                             focusNode: _model.textFieldFocusNode,
-                            obscureText: false,
+                            obscureText: widget.isPassword,
+                            autofillHints: widget.isPassword
+                                ? const [AutofillHints.newPassword]
+                                : null,
                             decoration: InputDecoration(
                               hintText: 'Enter your name',
                               hintStyle: TextStyle(

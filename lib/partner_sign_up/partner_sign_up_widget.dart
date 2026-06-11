@@ -652,7 +652,10 @@ class _PartnerSignUpWidgetState extends State<PartnerSignUpWidget> {
                                             controller: _model.textController4,
                                             focusNode:
                                                 _model.textFieldFocusNode4,
-                                            obscureText: false,
+                                            obscureText: true,
+                                            autofillHints: const [
+                                              AutofillHints.newPassword,
+                                            ],
                                             decoration: InputDecoration(
                                               hintText: '••••••••',
                                               hintStyle: TextStyle(

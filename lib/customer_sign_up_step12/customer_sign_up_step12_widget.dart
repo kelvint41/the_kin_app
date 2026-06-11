@@ -545,7 +545,10 @@ class _CustomerSignUpStep12WidgetState
                                             controller: _model.textController3,
                                             focusNode:
                                                 _model.textFieldFocusNode3,
-                                            obscureText: false,
+                                            obscureText: true,
+                                            autofillHints: const [
+                                              AutofillHints.newPassword,
+                                            ],
                                             decoration: InputDecoration(
                                               hintText:
                                                   'Create a strong password',
