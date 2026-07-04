@@ -12,16 +12,13 @@ import 'package:flutter/material.dart';
 Future<double> calculateRealTimeKindex(
   double currentScore,
   int newStarRating,
-  String businessName,
+  bool isPremiumBusiness,
 ) async {
   const double standardBaseline = 500.0;
   const double premiumBaseline = 850.0;
   const double minimumScore = 0.0;
   const double standardMaximumScore = 750.0;
   const double premiumMaximumScore = 900.0;
-  const String premiumBusinessName = 'Hair Maddness LLC';
-
-  final bool isPremiumBusiness = businessName.trim() == premiumBusinessName;
 
   // Determine the correct starting baseline for this business.
   final double baseline =

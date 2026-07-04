@@ -572,7 +572,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
                                               .kindexScore,
                                           _model.ratingBarValue!.round(),
                                           businessProfileV2BusinessesRecord
-                                              .businessName,
+                                              .isPremium,
                                         );
                                         FFAppState().kindexscore =
                                             _model.updatedScore!;
@@ -1593,7 +1593,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
                                   businessProfileV2BusinessesRecord.kindexScore,
                                   _model.ratingBarValue!.round(),
                                   businessProfileV2BusinessesRecord
-                                      .businessName,
+                                      .isPremium,
                                 );
 
                                 safeSetState(() {});
