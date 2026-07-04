@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:replace="android:maxSdkVersion"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32" tools:replace="android:maxSdkVersion"/>
 
     <application
         android:label="The KIN App"
@@ -56,7 +59,7 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyC15e22EaRQ7xu5eC832JtNrx2tTHgk8zc"/>
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go"/>
 
 
 

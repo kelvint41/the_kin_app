@@ -1,7 +1,6 @@
+import 'package:flutter/material.dart';
+import 'flutter_flow/flutter_flow_util.dart';
 
 abstract class FFAppConstants {
   static const String SanAntonio = 'San Antonio';
-  static const double kindexDefaultScore = 100.0;
-  static const double kindexMinimumScore = 100.0;
-  static const double kindexMaximumScore = 750.0;
 }

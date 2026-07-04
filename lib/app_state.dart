@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'app_constants.dart';
 import '/backend/backend.dart';
+import '/backend/schema/structs/index.dart';
+import '/backend/api_requests/api_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'flutter_flow/flutter_flow_util.dart';
+import 'dart:convert';
 
 class FFAppState extends ChangeNotifier {
   static FFAppState _instance = FFAppState._internal();
@@ -79,7 +81,7 @@ class FFAppState extends ChangeNotifier {
     _zipcode = value;
   }
 
-  int _userPoints = 785;
+  int _userPoints = 0;
   int get userPoints => _userPoints;
   set userPoints(int value) {
     _userPoints = value;
@@ -90,17 +92,6 @@ class FFAppState extends ChangeNotifier {
   String get tickersymbol => _tickersymbol;
   set tickersymbol(String value) {
     _tickersymbol = value;
-  }
-
-  double _kindexscore = FFAppConstants.kindexDefaultScore;
-  double get kindexscore => _kindexscore;
-  set kindexscore(double value) {
-    _kindexscore = value
-        .clamp(
-          FFAppConstants.kindexMinimumScore,
-          FFAppConstants.kindexMaximumScore,
-        )
-        .toDouble();
   }
 
   String _phone = '';
@@ -148,6 +139,30 @@ class FFAppState extends ChangeNotifier {
 
   void insertAtIndexInBusinessReviews(int index, dynamic value) {
     businessReviews.insert(index, value);
+  }
+
+  String _sessionId = '';
+  String get sessionId => _sessionId;
+  set sessionId(String value) {
+    _sessionId = value;
+  }
+
+  double _kindexscore = 500.0;
+  double get kindexscore => _kindexscore;
+  set kindexscore(double value) {
+    _kindexscore = value;
+  }
+
+  String _currentCity = '';
+  String get currentCity => _currentCity;
+  set currentCity(String value) {
+    _currentCity = value;
+  }
+
+  String _signupType = '';
+  String get signupType => _signupType;
+  set signupType(String value) {
+    _signupType = value;
   }
 }
 

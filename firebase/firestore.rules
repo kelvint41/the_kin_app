@@ -2,18 +2,10 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /businesses/{document} {
-      allow create: if request.auth != null
-        && request.resource.data.kindex_score is number
-        && request.resource.data.kindex_score >= 100
-        && request.resource.data.kindex_score <= 750;
+      allow create: if request.auth != null;
       allow read: if true;
-      allow update: if request.auth != null
-        && request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['kindex_score'])
-        && request.resource.data.kindex_score is number
-        && request.resource.data.kindex_score >= 100
-        && request.resource.data.kindex_score <= 750;
-      allow delete: if false;
+      allow write: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
     match /users/{document} {
@@ -21,6 +13,148 @@ service cloud.firestore {
       allow read: if request.auth.uid == document;
       allow write: if request.auth.uid == document;
       allow delete: if request.auth.uid == document;
+    }
+
+    match /bug_reports/{document} {
+      allow create: if request.auth != null;
+      allow read: if false;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /analytics_events/{document} {
+      allow create: if request.auth != null;
+      allow read: if false;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /claim_requests/{document} {
+      allow create: if request.auth != null;
+      allow read: if false;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /marketing_requests/{document} {
+      allow create: if request.auth != null;
+      allow read: if false;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /orders/{document} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /agency_queue/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /exchange_posts/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && get(request.resource.data.business_ref).data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && get(request.resource.data.business_ref).data.is_verified == true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /activity_logs/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /analytics_daily/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /legal_metadata/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /exchange_promotions/{document} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /connections/{document} {
+      allow create: if request.auth != null;
+      allow read: if request.auth != null;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /tier_privileges/{document} {
+      allow create: if false;
+      allow read: if request.auth.uid == resource.data.owner_id;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /entitlements/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /uservisits/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /reviews/{document} {
+      allow create: if true;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /UserEngagementEvents/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && !('points_awarded' in request.resource.data)
+        && !('weight_version' in request.resource.data)
+        && !('processed_at' in request.resource.data);
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /KindexScores/{document} {
+      allow create: if false;
+      allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /kindex_config/{document} {
+      allow create: if false;
+      allow read: if request.auth != null;
+      allow write: if false;
+      allow delete: if false;
     }
   }
 }

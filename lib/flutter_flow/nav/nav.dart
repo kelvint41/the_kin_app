@@ -1,12 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import '/backend/backend.dart';
+import '/backend/schema/structs/index.dart';
 
 import '/auth/base_auth_user_provider.dart';
 
+import '/main.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/lat_lng.dart';
+import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import 'serialization_util.dart';
 
 import '/index.dart';
 
@@ -76,355 +84,28 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
       errorBuilder: (context, state) => appStateNotifier.loggedIn
-          ? Page3SanAntonioDiscoveryMapWidget()
-          : Page1WelcomeMissionCopyWidget(),
+          ? GoogleMapPageWidget()
+          : OnboardingSelectionCardWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
-              ? Page3SanAntonioDiscoveryMapWidget()
-              : Page1WelcomeMissionCopyWidget(),
+              ? GoogleMapPageWidget()
+              : OnboardingSelectionCardWidget(),
         ),
         FFRoute(
-          name: HomeScreenWidget.routeName,
-          path: HomeScreenWidget.routePath,
-          builder: (context, params) => HomeScreenWidget(),
-        ),
-        FFRoute(
-          name: MapScreenWidget.routeName,
-          path: MapScreenWidget.routePath,
-          builder: (context, params) => MapScreenWidget(),
-        ),
-        FFRoute(
-          name: CommunityFeedWidget.routeName,
-          path: CommunityFeedWidget.routePath,
-          builder: (context, params) => CommunityFeedWidget(),
-        ),
-        FFRoute(
-          name: LoyaltyDashboardWidget.routeName,
-          path: LoyaltyDashboardWidget.routePath,
-          builder: (context, params) => LoyaltyDashboardWidget(),
-        ),
-        FFRoute(
-          name: WelcomeScreenWidget.routeName,
-          path: WelcomeScreenWidget.routePath,
-          builder: (context, params) => WelcomeScreenWidget(),
-        ),
-        FFRoute(
-          name: CustomerSignUpWidget.routeName,
-          path: CustomerSignUpWidget.routePath,
-          builder: (context, params) => CustomerSignUpWidget(),
-        ),
-        FFRoute(
-          name: PartnerSignUpWidget.routeName,
-          path: PartnerSignUpWidget.routePath,
-          builder: (context, params) => PartnerSignUpWidget(),
-        ),
-        FFRoute(
-          name: BusinessDashboardWidget.routeName,
-          path: BusinessDashboardWidget.routePath,
-          builder: (context, params) => BusinessDashboardWidget(
-            businessProfile: params.getParam(
-              'businessProfile',
+          name: TheExchangeWidget.routeName,
+          path: TheExchangeWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => TheExchangeWidget(
+            businessRef: params.getParam(
+              'businessRef',
               ParamType.DocumentReference,
               isList: false,
               collectionNamePath: ['businesses'],
             ),
           ),
-        ),
-        FFRoute(
-          name: BusinessManagerUpgradeWidget.routeName,
-          path: BusinessManagerUpgradeWidget.routePath,
-          builder: (context, params) => BusinessManagerUpgradeWidget(),
-        ),
-        FFRoute(
-          name: NewScreen1Widget.routeName,
-          path: NewScreen1Widget.routePath,
-          builder: (context, params) => NewScreen1Widget(),
-        ),
-        FFRoute(
-          name: BoostYourBusinessWidget.routeName,
-          path: BoostYourBusinessWidget.routePath,
-          builder: (context, params) => BoostYourBusinessWidget(),
-        ),
-        FFRoute(
-          name: AdminDashboardWidget.routeName,
-          path: AdminDashboardWidget.routePath,
-          builder: (context, params) => AdminDashboardWidget(),
-        ),
-        FFRoute(
-          name: TheKINAppWidget.routeName,
-          path: TheKINAppWidget.routePath,
-          builder: (context, params) => TheKINAppWidget(),
-        ),
-        FFRoute(
-          name: WelcomeMissionFINALWidget.routeName,
-          path: WelcomeMissionFINALWidget.routePath,
-          builder: (context, params) => WelcomeMissionFINALWidget(),
-        ),
-        FFRoute(
-          name: TheExchangeWidget.routeName,
-          path: TheExchangeWidget.routePath,
-          builder: (context, params) => TheExchangeWidget(),
-        ),
-        FFRoute(
-          name: AgeVerificationSB2420Widget.routeName,
-          path: AgeVerificationSB2420Widget.routePath,
-          builder: (context, params) => AgeVerificationSB2420Widget(),
-        ),
-        FFRoute(
-          name: BusinessOwnerRegistrationWidget.routeName,
-          path: BusinessOwnerRegistrationWidget.routePath,
-          builder: (context, params) => BusinessOwnerRegistrationWidget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeMissionWidget.routeName,
-          path: Page1WelcomeMissionWidget.routePath,
-          builder: (context, params) => Page1WelcomeMissionWidget(),
-        ),
-        FFRoute(
-          name: CustomerSignUpStep1Widget.routeName,
-          path: CustomerSignUpStep1Widget.routePath,
-          builder: (context, params) => CustomerSignUpStep1Widget(),
-        ),
-        FFRoute(
-          name: Page3SanAntonioDiscoveryMapWidget.routeName,
-          path: Page3SanAntonioDiscoveryMapWidget.routePath,
-          builder: (context, params) => Page3SanAntonioDiscoveryMapWidget(),
-        ),
-        FFRoute(
-          name: CustomerSignUpStep2Widget.routeName,
-          path: CustomerSignUpStep2Widget.routePath,
-          builder: (context, params) => CustomerSignUpStep2Widget(),
-        ),
-        FFRoute(
-          name: Page4MembershipPricingWidget.routeName,
-          path: Page4MembershipPricingWidget.routePath,
-          builder: (context, params) => Page4MembershipPricingWidget(),
-        ),
-        FFRoute(
-          name: InvestorHubWidget.routeName,
-          path: InvestorHubWidget.routePath,
-          builder: (context, params) => InvestorHubWidget(),
-        ),
-        FFRoute(
-          name: BusinessDashboard2Widget.routeName,
-          path: BusinessDashboard2Widget.routePath,
-          builder: (context, params) => BusinessDashboard2Widget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeMissionCopyWidget.routeName,
-          path: Page1WelcomeMissionCopyWidget.routePath,
-          builder: (context, params) => Page1WelcomeMissionCopyWidget(),
-        ),
-        FFRoute(
-          name: PilotMainFlowWidget.routeName,
-          path: PilotMainFlowWidget.routePath,
-          builder: (context, params) => PilotMainFlowWidget(),
-        ),
-        FFRoute(
-          name: TheExchange2Widget.routeName,
-          path: TheExchange2Widget.routePath,
-          builder: (context, params) => TheExchange2Widget(),
-        ),
-        FFRoute(
-          name: AgeVerificationSB24202Widget.routeName,
-          path: AgeVerificationSB24202Widget.routePath,
-          builder: (context, params) => AgeVerificationSB24202Widget(),
-        ),
-        FFRoute(
-          name: BusinessOwnerRegistration2Widget.routeName,
-          path: BusinessOwnerRegistration2Widget.routePath,
-          builder: (context, params) => BusinessOwnerRegistration2Widget(),
-        ),
-        FFRoute(
-          name: CustomerSignUpStep12Widget.routeName,
-          path: CustomerSignUpStep12Widget.routePath,
-          builder: (context, params) => CustomerSignUpStep12Widget(),
-        ),
-        FFRoute(
-          name: Page3SanAntonioDiscoveryMap2Widget.routeName,
-          path: Page3SanAntonioDiscoveryMap2Widget.routePath,
-          builder: (context, params) => Page3SanAntonioDiscoveryMap2Widget(),
-        ),
-        FFRoute(
-          name: CustomerSignUpStep22Widget.routeName,
-          path: CustomerSignUpStep22Widget.routePath,
-          builder: (context, params) => CustomerSignUpStep22Widget(),
-        ),
-        FFRoute(
-          name: Page4MembershipPricing2Widget.routeName,
-          path: Page4MembershipPricing2Widget.routePath,
-          builder: (context, params) => Page4MembershipPricing2Widget(),
-        ),
-        FFRoute(
-          name: OnboardingStep1Widget.routeName,
-          path: OnboardingStep1Widget.routePath,
-          builder: (context, params) => OnboardingStep1Widget(),
-        ),
-        FFRoute(
-          name: InvestorHub2Widget.routeName,
-          path: InvestorHub2Widget.routePath,
-          builder: (context, params) => InvestorHub2Widget(),
-        ),
-        FFRoute(
-          name: BusinessDashboard3Widget.routeName,
-          path: BusinessDashboard3Widget.routePath,
-          builder: (context, params) => BusinessDashboard3Widget(),
-        ),
-        FFRoute(
-          name: OnboardingStep2Widget.routeName,
-          path: OnboardingStep2Widget.routePath,
-          builder: (context, params) => OnboardingStep2Widget(),
-        ),
-        FFRoute(
-          name: OnboardingStep3Widget.routeName,
-          path: OnboardingStep3Widget.routePath,
-          builder: (context, params) => OnboardingStep3Widget(),
-        ),
-        FFRoute(
-          name: BusinessPreviewBottomSheetWidget.routeName,
-          path: BusinessPreviewBottomSheetWidget.routePath,
-          builder: (context, params) => BusinessPreviewBottomSheetWidget(),
-        ),
-        FFRoute(
-          name: KINSpotlightWidget.routeName,
-          path: KINSpotlightWidget.routePath,
-          builder: (context, params) => KINSpotlightWidget(),
-        ),
-        FFRoute(
-          name: GrowthImpactPitchWidget.routeName,
-          path: GrowthImpactPitchWidget.routePath,
-          builder: (context, params) => GrowthImpactPitchWidget(),
-        ),
-        FFRoute(
-          name: VerifiedBadgeComponentWidget.routeName,
-          path: VerifiedBadgeComponentWidget.routePath,
-          builder: (context, params) => VerifiedBadgeComponentWidget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeMissionCopy2Widget.routeName,
-          path: Page1WelcomeMissionCopy2Widget.routePath,
-          builder: (context, params) => Page1WelcomeMissionCopy2Widget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeMission2Widget.routeName,
-          path: Page1WelcomeMission2Widget.routePath,
-          builder: (context, params) => Page1WelcomeMission2Widget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeMissionFINALWidget.routeName,
-          path: Page1WelcomeMissionFINALWidget.routePath,
-          builder: (context, params) => Page1WelcomeMissionFINALWidget(),
-        ),
-        FFRoute(
-          name: Page1WelcomeFINALWidget.routeName,
-          path: Page1WelcomeFINALWidget.routePath,
-          builder: (context, params) => Page1WelcomeFINALWidget(),
-        ),
-        FFRoute(
-          name: LocalGemsWidget.routeName,
-          path: LocalGemsWidget.routePath,
-          builder: (context, params) => LocalGemsWidget(),
-        ),
-        FFRoute(
-          name: BusinessRFCMarketplaceWidget.routeName,
-          path: BusinessRFCMarketplaceWidget.routePath,
-          builder: (context, params) => BusinessRFCMarketplaceWidget(),
-        ),
-        FFRoute(
-          name: AddBusinessPageWidget.routeName,
-          path: AddBusinessPageWidget.routePath,
-          builder: (context, params) => AddBusinessPageWidget(),
-        ),
-        FFRoute(
-          name: BusinessVIPShowcaseWidget.routeName,
-          path: BusinessVIPShowcaseWidget.routePath,
-          builder: (context, params) => BusinessVIPShowcaseWidget(),
-        ),
-        FFRoute(
-          name: BusinessActionsWidget.routeName,
-          path: BusinessActionsWidget.routePath,
-          asyncParams: {
-            'activeBusiness':
-                getDoc(['businesses'], BusinessesRecord.fromSnapshot),
-          },
-          builder: (context, params) => BusinessActionsWidget(
-            activeBusiness: params.getParam(
-              'activeBusiness',
-              ParamType.Document,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: MarketplaceHomeWidget.routeName,
-          path: MarketplaceHomeWidget.routePath,
-          builder: (context, params) => MarketplaceHomeWidget(),
-        ),
-        FFRoute(
-          name: VIPShowcaseWidget.routeName,
-          path: VIPShowcaseWidget.routePath,
-          asyncParams: {
-            'activeBusiness':
-                getDoc(['businesses'], BusinessesRecord.fromSnapshot),
-          },
-          builder: (context, params) => VIPShowcaseWidget(
-            activeBusiness: params.getParam(
-              'activeBusiness',
-              ParamType.Document,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: MarketplaceHome2Widget.routeName,
-          path: MarketplaceHome2Widget.routePath,
-          builder: (context, params) => MarketplaceHome2Widget(),
-        ),
-        FFRoute(
-          name: BusinessProfileWidget.routeName,
-          path: BusinessProfileWidget.routePath,
-          builder: (context, params) => BusinessProfileWidget(),
-        ),
-        FFRoute(
-          name: MarketplacePremiumWidget.routeName,
-          path: MarketplacePremiumWidget.routePath,
-          builder: (context, params) => MarketplacePremiumWidget(),
-        ),
-        FFRoute(
-          name: MarketplaceHome3Widget.routeName,
-          path: MarketplaceHome3Widget.routePath,
-          builder: (context, params) => MarketplaceHome3Widget(),
-        ),
-        FFRoute(
-          name: VIPShowcase2Widget.routeName,
-          path: VIPShowcase2Widget.routePath,
-          builder: (context, params) => VIPShowcase2Widget(
-            activeBusiness: params.getParam(
-              'activeBusiness',
-              ParamType.double,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: VIPShowcase3Widget.routeName,
-          path: VIPShowcase3Widget.routePath,
-          builder: (context, params) => VIPShowcase3Widget(
-            activeBusiness: params.getParam(
-              'activeBusiness',
-              ParamType.double,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: Homescreen2Widget.routeName,
-          path: Homescreen2Widget.routePath,
-          builder: (context, params) => Homescreen2Widget(),
-        ),
-        FFRoute(
-          name: VIPShowcaseFinalWidget.routeName,
-          path: VIPShowcaseFinalWidget.routePath,
-          builder: (context, params) => VIPShowcaseFinalWidget(),
         ),
         FFRoute(
           name: KINVIPFinalWidget.routeName,
@@ -432,190 +113,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => KINVIPFinalWidget(),
         ),
         FFRoute(
-          name: AdminDashboardFinalWidget.routeName,
-          path: AdminDashboardFinalWidget.routePath,
-          builder: (context, params) => AdminDashboardFinalWidget(),
-        ),
-        FFRoute(
-          name: BusinessDirectoryWidget.routeName,
-          path: BusinessDirectoryWidget.routePath,
-          builder: (context, params) => BusinessDirectoryWidget(),
-        ),
-        FFRoute(
-          name: BusinessCollectionWidget.routeName,
-          path: BusinessCollectionWidget.routePath,
-          builder: (context, params) => BusinessCollectionWidget(),
-        ),
-        FFRoute(
-          name: FlashBenefitManagerWidget.routeName,
-          path: FlashBenefitManagerWidget.routePath,
-          builder: (context, params) => FlashBenefitManagerWidget(),
-        ),
-        FFRoute(
-          name: DiscoverMapWidget.routeName,
-          path: DiscoverMapWidget.routePath,
-          builder: (context, params) => DiscoverMapWidget(),
-        ),
-        FFRoute(
-          name: DestinationWidget.routeName,
-          path: DestinationWidget.routePath,
-          builder: (context, params) => DestinationWidget(),
-        ),
-        FFRoute(
-          name: BizDirectoryWidget.routeName,
-          path: BizDirectoryWidget.routePath,
-          builder: (context, params) => BizDirectoryWidget(),
-        ),
-        FFRoute(
-          name: BusinessProfile2Widget.routeName,
-          path: BusinessProfile2Widget.routePath,
-          builder: (context, params) => BusinessProfile2Widget(
-            businessRef: params.getParam(
-              'businessRef',
-              ParamType.DocumentReference,
-              isList: false,
-              collectionNamePath: ['businesses'],
-            ),
-          ),
-        ),
-        FFRoute(
-          name: BizDirectory2Widget.routeName,
-          path: BizDirectory2Widget.routePath,
-          builder: (context, params) => BizDirectory2Widget(),
-        ),
-        FFRoute(
-          name: BusinessOnboardingWidget.routeName,
-          path: BusinessOnboardingWidget.routePath,
-          builder: (context, params) => BusinessOnboardingWidget(),
-        ),
-        FFRoute(
-          name: SABizDirectoryWidget.routeName,
-          path: SABizDirectoryWidget.routePath,
-          builder: (context, params) => SABizDirectoryWidget(),
-        ),
-        FFRoute(
-          name: BizSetupPageWidget.routeName,
-          path: BizSetupPageWidget.routePath,
-          builder: (context, params) => BizSetupPageWidget(),
-        ),
-        FFRoute(
-          name: BizDirectory3Widget.routeName,
-          path: BizDirectory3Widget.routePath,
-          builder: (context, params) => BizDirectory3Widget(),
-        ),
-        FFRoute(
-          name: MapScreen3Widget.routeName,
-          path: MapScreen3Widget.routePath,
-          builder: (context, params) => MapScreen3Widget(),
-        ),
-        FFRoute(
-          name: OnboardingFormWidget.routeName,
-          path: OnboardingFormWidget.routePath,
-          builder: (context, params) => OnboardingFormWidget(),
-        ),
-        FFRoute(
-          name: BusinessDetailPageWidget.routeName,
-          path: BusinessDetailPageWidget.routePath,
-          builder: (context, params) => BusinessDetailPageWidget(),
-        ),
-        FFRoute(
-          name: OnboardingForm2Widget.routeName,
-          path: OnboardingForm2Widget.routePath,
-          builder: (context, params) => OnboardingForm2Widget(
-            businessRef: params.getParam(
-              'businessRef',
-              ParamType.DocumentReference,
-              isList: false,
-              collectionNamePath: ['businesses'],
-            ),
-          ),
-        ),
-        FFRoute(
-          name: BusinessOnboarding2Widget.routeName,
-          path: BusinessOnboarding2Widget.routePath,
-          builder: (context, params) => BusinessOnboarding2Widget(),
-        ),
-        FFRoute(
-          name: LandingPageWidget.routeName,
-          path: LandingPageWidget.routePath,
-          builder: (context, params) => LandingPageWidget(),
-        ),
-        FFRoute(
-          name: BusinessDirectory2Widget.routeName,
-          path: BusinessDirectory2Widget.routePath,
-          builder: (context, params) => BusinessDirectory2Widget(),
-        ),
-        FFRoute(
-          name: BusinessDirectory3Widget.routeName,
-          path: BusinessDirectory3Widget.routePath,
-          builder: (context, params) => BusinessDirectory3Widget(),
-        ),
-        FFRoute(
-          name: MobileSearchWidget.routeName,
-          path: MobileSearchWidget.routePath,
-          builder: (context, params) => MobileSearchWidget(),
-        ),
-        FFRoute(
-          name: BusinessProfileTemplateWidget.routeName,
-          path: BusinessProfileTemplateWidget.routePath,
-          builder: (context, params) => BusinessProfileTemplateWidget(
-            businessName: params.getParam(
-              'businessName',
-              ParamType.String,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: CardDraftPageWidget.routeName,
-          path: CardDraftPageWidget.routePath,
-          builder: (context, params) => CardDraftPageWidget(),
-        ),
-        FFRoute(
           name: BusinessSignUpWidget.routeName,
           path: BusinessSignUpWidget.routePath,
           builder: (context, params) => BusinessSignUpWidget(),
         ),
         FFRoute(
-          name: LeadCaptureWidget.routeName,
-          path: LeadCaptureWidget.routePath,
-          builder: (context, params) => LeadCaptureWidget(),
+          name: PrivacyPolicyPageWidget.routeName,
+          path: PrivacyPolicyPageWidget.routePath,
+          builder: (context, params) => PrivacyPolicyPageWidget(),
         ),
         FFRoute(
-          name: KindexFeedCardWidget.routeName,
-          path: KindexFeedCardWidget.routePath,
-          builder: (context, params) => KindexFeedCardWidget(),
+          name: OnboardingSelectionCardWidget.routeName,
+          path: OnboardingSelectionCardWidget.routePath,
+          builder: (context, params) => OnboardingSelectionCardWidget(),
         ),
         FFRoute(
-          name: LegalPrivacyPageWidget.routeName,
-          path: LegalPrivacyPageWidget.routePath,
-          builder: (context, params) => LegalPrivacyPageWidget(),
-        ),
-        FFRoute(
-          name: KINAnalyticsWidget.routeName,
-          path: KINAnalyticsWidget.routePath,
-          builder: (context, params) => KINAnalyticsWidget(),
-        ),
-        FFRoute(
-          name: TheMembershipSuiteWidget.routeName,
-          path: TheMembershipSuiteWidget.routePath,
-          builder: (context, params) => TheMembershipSuiteWidget(),
-        ),
-        FFRoute(
-          name: KindexShowcaseWidget.routeName,
-          path: KindexShowcaseWidget.routePath,
-          builder: (context, params) => KindexShowcaseWidget(),
-        ),
-        FFRoute(
-          name: AdminPulseWidget.routeName,
-          path: AdminPulseWidget.routePath,
-          builder: (context, params) => AdminPulseWidget(),
-        ),
-        FFRoute(
-          name: BusinessPageWidget.routeName,
-          path: BusinessPageWidget.routePath,
-          builder: (context, params) => BusinessPageWidget(
-            businessRecord: params.getParam(
-              'businessRecord',
+          name: BusinessProfileV2Widget.routeName,
+          path: BusinessProfileV2Widget.routePath,
+          builder: (context, params) => BusinessProfileV2Widget(
+            businessDocument: params.getParam(
+              'businessDocument',
               ParamType.DocumentReference,
               isList: false,
               collectionNamePath: ['businesses'],
@@ -623,14 +140,28 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: BusinessInputFormPageWidget.routeName,
-          path: BusinessInputFormPageWidget.routePath,
-          builder: (context, params) => BusinessInputFormPageWidget(),
+          name: BusinessProfileOwnerWidget.routeName,
+          path: BusinessProfileOwnerWidget.routePath,
+          builder: (context, params) => BusinessProfileOwnerWidget(
+            businessRef: params.getParam(
+              'businessRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['businesses'],
+            ),
+          ),
         ),
         FFRoute(
-          name: ProfessionalPrivacyPolicyPageWidget.routeName,
-          path: ProfessionalPrivacyPolicyPageWidget.routePath,
-          builder: (context, params) => ProfessionalPrivacyPolicyPageWidget(),
+          name: MerchantPricingSuiteWidget.routeName,
+          path: MerchantPricingSuiteWidget.routePath,
+          builder: (context, params) => MerchantPricingSuiteWidget(
+            businessRef: params.getParam(
+              'businessRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['businesses'],
+            ),
+          ),
         ),
         FFRoute(
           name: TermsOfServicePageWidget.routeName,
@@ -638,29 +169,110 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => TermsOfServicePageWidget(),
         ),
         FFRoute(
-          name: DarkThemedMobilePageWidget.routeName,
-          path: DarkThemedMobilePageWidget.routePath,
-          builder: (context, params) => DarkThemedMobilePageWidget(),
+          name: PartnerLOIPageWidget.routeName,
+          path: PartnerLOIPageWidget.routePath,
+          builder: (context, params) => PartnerLOIPageWidget(),
         ),
         FFRoute(
-          name: BusinessWelcomeWidget.routeName,
-          path: BusinessWelcomeWidget.routePath,
-          builder: (context, params) => BusinessWelcomeWidget(),
+          name: DeliveryStatusWidget.routeName,
+          path: DeliveryStatusWidget.routePath,
+          builder: (context, params) => DeliveryStatusWidget(),
         ),
         FFRoute(
-          name: CinematicHighContrastPageWidget.routeName,
-          path: CinematicHighContrastPageWidget.routePath,
-          builder: (context, params) => CinematicHighContrastPageWidget(),
+          name: MerchantSuccessScreenWidget.routeName,
+          path: MerchantSuccessScreenWidget.routePath,
+          builder: (context, params) => MerchantSuccessScreenWidget(),
         ),
         FFRoute(
-          name: SleekPowerfulBackgroundPageWidget.routeName,
-          path: SleekPowerfulBackgroundPageWidget.routePath,
-          builder: (context, params) => SleekPowerfulBackgroundPageWidget(),
+          name: ProfessionalLandingPageWidget.routeName,
+          path: ProfessionalLandingPageWidget.routePath,
+          builder: (context, params) => ProfessionalLandingPageWidget(),
         ),
         FFRoute(
-          name: PremiumMobileUserPageWidget.routeName,
-          path: PremiumMobileUserPageWidget.routePath,
-          builder: (context, params) => PremiumMobileUserPageWidget(),
+          name: AppBuilder1Widget.routeName,
+          path: AppBuilder1Widget.routePath,
+          builder: (context, params) => AppBuilder1Widget(),
+        ),
+        FFRoute(
+          name: FullyFunctionalPremiumPageWidget.routeName,
+          path: FullyFunctionalPremiumPageWidget.routePath,
+          builder: (context, params) => FullyFunctionalPremiumPageWidget(),
+        ),
+        FFRoute(
+          name: BusinessSetupPageWidget.routeName,
+          path: BusinessSetupPageWidget.routePath,
+          builder: (context, params) => BusinessSetupPageWidget(),
+        ),
+        FFRoute(
+          name: GoogleMapPageWidget.routeName,
+          path: GoogleMapPageWidget.routePath,
+          builder: (context, params) => GoogleMapPageWidget(),
+        ),
+        FFRoute(
+          name: ExecutiveDashboardWidget.routeName,
+          path: ExecutiveDashboardWidget.routePath,
+          builder: (context, params) => ExecutiveDashboardWidget(),
+        ),
+        FFRoute(
+          name: CustomerProfilePageWidget.routeName,
+          path: CustomerProfilePageWidget.routePath,
+          builder: (context, params) => CustomerProfilePageWidget(
+            businessRef: params.getParam(
+              'businessRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['businesses'],
+            ),
+          ),
+        ),
+        FFRoute(
+          name: OwnerProfileWidget.routeName,
+          path: OwnerProfileWidget.routePath,
+          builder: (context, params) => OwnerProfileWidget(),
+        ),
+        FFRoute(
+          name: CommunityPrestigeWidget.routeName,
+          path: CommunityPrestigeWidget.routePath,
+          builder: (context, params) => CommunityPrestigeWidget(),
+        ),
+        FFRoute(
+          name: SignInPageWidget.routeName,
+          path: SignInPageWidget.routePath,
+          builder: (context, params) => SignInPageWidget(),
+        ),
+        FFRoute(
+          name: CleanPremiumDarkPageWidget.routeName,
+          path: CleanPremiumDarkPageWidget.routePath,
+          builder: (context, params) => CleanPremiumDarkPageWidget(),
+        ),
+        FFRoute(
+          name: CustomersignupPageWidget.routeName,
+          path: CustomersignupPageWidget.routePath,
+          builder: (context, params) => CustomersignupPageWidget(),
+        ),
+        FFRoute(
+          name: MobileSignUpPageWidget.routeName,
+          path: MobileSignUpPageWidget.routePath,
+          builder: (context, params) => MobileSignUpPageWidget(),
+        ),
+        FFRoute(
+          name: BusinessShowcaseWidget.routeName,
+          path: BusinessShowcaseWidget.routePath,
+          asyncParams: {
+            'businessRecord':
+                getDoc(['businesses'], BusinessesRecord.fromSnapshot),
+          },
+          builder: (context, params) => BusinessShowcaseWidget(
+            businessRecord: params.getParam(
+              'businessRecord',
+              ParamType.Document,
+            ),
+          ),
+        ),
+        FFRoute(
+          name: MobileCalledPowerPageWidget.routeName,
+          path: MobileCalledPowerPageWidget.routePath,
+          builder: (context, params) => MobileCalledPowerPageWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
@@ -780,6 +392,7 @@ class FFParameters {
     ParamType type, {
     bool isList = false,
     List<String>? collectionNamePath,
+    StructBuilder<T>? structBuilder,
   }) {
     if (futureParamValues.containsKey(paramName)) {
       return futureParamValues[paramName];
@@ -798,6 +411,7 @@ class FFParameters {
       type,
       isList,
       collectionNamePath: collectionNamePath,
+      structBuilder: structBuilder,
     );
   }
 }
@@ -831,7 +445,7 @@ class FFRoute {
 
           if (requireAuth && !appStateNotifier.loggedIn) {
             appStateNotifier.setRedirectLocationIfUnset(state.uri.toString());
-            return '/page1WelcomeMissionCopy';
+            return '/onboardingSelectionCard';
           }
           return null;
         },
@@ -849,7 +463,7 @@ class FFRoute {
                   color: Colors.transparent,
                   child: Image.asset(
                     'assets/images/Untitled_design_(1).png',
-                    fit: BoxFit.cover,
+                    fit: BoxFit.contain,
                   ),
                 )
               : page;

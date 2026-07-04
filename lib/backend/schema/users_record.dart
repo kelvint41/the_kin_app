@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
+import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -75,6 +76,16 @@ class UsersRecord extends FirestoreRecord {
   DateTime? get lastLogin => _lastLogin;
   bool hasLastLogin() => _lastLogin != null;
 
+  // "ar_tours_completed" field.
+  int? _arToursCompleted;
+  int get arToursCompleted => _arToursCompleted ?? 0;
+  bool hasArToursCompleted() => _arToursCompleted != null;
+
+  // "is_admin" field.
+  bool? _isAdmin;
+  bool get isAdmin => _isAdmin ?? false;
+  bool hasIsAdmin() => _isAdmin != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -88,6 +99,8 @@ class UsersRecord extends FirestoreRecord {
     _accountCreatedAt = snapshotData['account_created_at'] as DateTime?;
     _isActive = snapshotData['is_active'] as bool?;
     _lastLogin = snapshotData['last_login'] as DateTime?;
+    _arToursCompleted = castToType<int>(snapshotData['ar_tours_completed']);
+    _isAdmin = snapshotData['is_admin'] as bool?;
   }
 
   static CollectionReference get collection =>
@@ -136,6 +149,8 @@ Map<String, dynamic> createUsersRecordData({
   DateTime? accountCreatedAt,
   bool? isActive,
   DateTime? lastLogin,
+  int? arToursCompleted,
+  bool? isAdmin,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -151,6 +166,8 @@ Map<String, dynamic> createUsersRecordData({
       'account_created_at': accountCreatedAt,
       'is_active': isActive,
       'last_login': lastLogin,
+      'ar_tours_completed': arToursCompleted,
+      'is_admin': isAdmin,
     }.withoutNulls,
   );
 
@@ -173,7 +190,9 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.isEliteFounder == e2?.isEliteFounder &&
         e1?.accountCreatedAt == e2?.accountCreatedAt &&
         e1?.isActive == e2?.isActive &&
-        e1?.lastLogin == e2?.lastLogin;
+        e1?.lastLogin == e2?.lastLogin &&
+        e1?.arToursCompleted == e2?.arToursCompleted &&
+        e1?.isAdmin == e2?.isAdmin;
   }
 
   @override
@@ -189,7 +208,9 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.isEliteFounder,
         e?.accountCreatedAt,
         e?.isActive,
-        e?.lastLogin
+        e?.lastLogin,
+        e?.arToursCompleted,
+        e?.isAdmin
       ]);
 
   @override

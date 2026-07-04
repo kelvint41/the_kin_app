@@ -13,6 +13,66 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "reviews",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "business_ref",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "businesses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "is_black_owned",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "is_priority_pinned",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "kindex_score",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "UserEngagementEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "user_ref",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created_at",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "UserEngagementEvents",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "business_ref",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created_at",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ]
 }
