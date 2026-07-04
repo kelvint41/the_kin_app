@@ -1,0 +1,100 @@
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'status_badge_model.dart';
+export 'status_badge_model.dart';
+
+class StatusBadgeWidget extends StatefulWidget {
+  const StatusBadgeWidget({
+    super.key,
+    this.icon,
+    String? label,
+  }) : this.label = label ?? 'Priority Member';
+
+  final Widget? icon;
+  final String label;
+
+  @override
+  State<StatusBadgeWidget> createState() => _StatusBadgeWidgetState();
+}
+
+class _StatusBadgeWidgetState extends State<StatusBadgeWidget> {
+  late StatusBadgeModel _model;
+
+  @override
+  void setState(VoidCallback callback) {
+    super.setState(callback);
+    _model.onUpdate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => StatusBadgeModel());
+  }
+
+  @override
+  void dispose() {
+    _model.maybeDispose();
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFFFF6B00),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 12.0,
+            color: Color(0x33FF6B00),
+            offset: Offset(
+              0.0,
+              4.0,
+            ),
+            spreadRadius: 0.0,
+          )
+        ],
+        borderRadius: BorderRadius.circular(9999.0),
+        shape: BoxShape.rectangle,
+      ),
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(16.0, 4.0, 16.0, 4.0),
+        child: Container(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              widget!.icon!,
+              Text(
+                valueOrDefault<String>(
+                  widget!.label,
+                  'Priority Member',
+                ),
+                style: FlutterFlowTheme.of(context).labelSmall.override(
+                      font: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                        fontStyle:
+                            FlutterFlowTheme.of(context).labelSmall.fontStyle,
+                      ),
+                      color: Colors.white,
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.bold,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).labelSmall.fontStyle,
+                      lineHeight: 1.4,
+                    ),
+              ),
+            ].divide(SizedBox(width: 4.0)),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,4 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
+import '../cloud_functions/cloud_functions.dart';
+import '../schema/structs/index.dart';
+
 import 'package:flutter/foundation.dart';
 
 import '/flutter_flow/flutter_flow_util.dart';
@@ -10,24 +14,35 @@ const _kPrivateApiFunctionName = 'ffPrivateApiCall';
 
 class GetBusinessDetailsCall {
   static Future<ApiCallResponse> call({
-    String? placeID = '',
+    String? placeId = '',
   }) async {
-    return ApiManager.instance.makeApiCall(
-      callName: 'getBusinessDetails',
-      apiUrl: 'https://places.googleapis.com/v1/places/${placeID}',
-      callType: ApiCallType.GET,
-      headers: {
-        'X-Goog-Api-Key': 'AIzaSyC15e22EaRQ7xu5eC832JtNrx2tTHgk8zc',
-        'X-Goog-FieldMask': 'displayName,rating,reviews,photos',
+    final response = await makeCloudCall(
+      _kPrivateApiFunctionName,
+      {
+        'callName': 'GetBusinessDetailsCall',
+        'variables': {
+          'placeId': placeId,
+        },
       },
-      params: {},
-      returnBody: true,
-      encodeBodyUtf8: false,
-      decodeUtf8: false,
-      cache: false,
-      isStreamingApi: false,
-      alwaysAllowBody: false,
     );
+    return ApiCallResponse.fromCloudCallResponse(response);
+  }
+}
+
+class GooglePlacesAutocompleteCall {
+  static Future<ApiCallResponse> call({
+    String? searchQuery = '',
+  }) async {
+    final response = await makeCloudCall(
+      _kPrivateApiFunctionName,
+      {
+        'callName': 'GooglePlacesAutocompleteCall',
+        'variables': {
+          'searchQuery': searchQuery,
+        },
+      },
+    );
+    return ApiCallResponse.fromCloudCallResponse(response);
   }
 }
 
