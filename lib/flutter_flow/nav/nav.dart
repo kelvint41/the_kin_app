@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:page_transition/page_transition.dart';
@@ -78,11 +79,30 @@ class AppStateNotifier extends ChangeNotifier {
   }
 }
 
+/// Set by main.dart's debug-only dev-bypass sign-in (see
+/// _maybeSignInDevBypass), via --dart-define=DEV_ROUTE=... - defaults to
+/// the Business Sign Up page since a fresh dev account has no business
+/// yet. When non-null and the dev account is signed in, `/` redirects
+/// here instead of the normal post-login landing page, so you land on
+/// whatever you're testing immediately after launch. Change the
+/// DEV_ROUTE dart-define per run to point at a different test page -
+/// no code edit needed. Always null in release/profile builds.
+String? devBypassTargetRoute;
+
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
+      redirect: (context, state) {
+        if (kDebugMode &&
+            devBypassTargetRoute != null &&
+            appStateNotifier.loggedIn &&
+            state.uri.path == '/') {
+          return devBypassTargetRoute;
+        }
+        return null;
+      },
       errorBuilder: (context, state) => appStateNotifier.loggedIn
           ? GoogleMapPageWidget()
           : OnboardingSelectionCardWidget(),

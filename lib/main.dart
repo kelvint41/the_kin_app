@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'auth/firebase_auth/firebase_user_provider.dart';
 import 'auth/firebase_auth/auth_util.dart';
 
@@ -39,10 +40,53 @@ void main() async {
     FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   }
 
+  await _maybeSignInDevBypass();
+
   runApp(ChangeNotifierProvider(
     create: (context) => appState,
     child: MyApp(),
   ));
+}
+
+/// Debug-only auto sign-in for local testing, so you don't have to log in
+/// manually every run. Gated on kDebugMode, a real compile-time constant -
+/// this whole function is dead code (eliminated by the compiler) in
+/// release/profile builds, so it can never activate for a real user.
+///
+/// No credentials are hardcoded here - DEV_PASSWORD has no default, so
+/// the bypass silently no-ops unless you explicitly supply one:
+///
+///   flutter run -d chrome --dart-define=DEV_PASSWORD=yourTestPassword
+///
+/// DEV_EMAIL defaults to the test account kelvin@apptest.com; override
+/// with --dart-define=DEV_EMAIL=... for a different one. DEV_ROUTE
+/// controls where you land after sign-in (see devBypassTargetRoute in
+/// nav.dart) - defaults to the Business Sign Up page, override with
+/// --dart-define=DEV_ROUTE=/somePagePath to point at a different test
+/// page without any code change.
+Future<void> _maybeSignInDevBypass() async {
+  if (!kDebugMode) return;
+  const password = String.fromEnvironment('DEV_PASSWORD');
+  if (password.isEmpty) return;
+
+  const email =
+      String.fromEnvironment('DEV_EMAIL', defaultValue: 'kelvin@apptest.com');
+  // Literal, not BusinessSignUpWidget.routePath - String.fromEnvironment's
+  // defaultValue must be a compile-time constant, and routePath is a
+  // mutable static field. Keep this in sync if that route path changes.
+  const route =
+      String.fromEnvironment('DEV_ROUTE', defaultValue: '/businessSignUp');
+
+  if (FirebaseAuth.instance.currentUser == null) {
+    try {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+    } catch (e) {
+      debugPrint('DevBypass sign-in failed: $e');
+      return;
+    }
+  }
+  devBypassTargetRoute = route;
 }
 
 class MyApp extends StatefulWidget {
