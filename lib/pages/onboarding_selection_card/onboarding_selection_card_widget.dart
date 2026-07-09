@@ -147,61 +147,28 @@ class _OnboardingSelectionCardWidgetState
             body: Stack(
               alignment: AlignmentDirectional(-1.0, -1.0),
               children: [
-                Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 70.0,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                24.0, 0.0, 24.0, 0.0),
-                            child: Container(
-                              child: Container(
-                                height: 75.0,
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 1.0,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              shape: BoxShape.rectangle,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      flex: 1,
+                LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight),
                       child: Padding(
                         padding: EdgeInsets.all(24.0),
                         child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: Image.asset(
-                                'assets/images/background_removal#TUFITExheklwdGcjMSM2Y2FmMjhhNTNhMzRiYzBiNTFlMTQ3ZGQxNmEyZTRmMCMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
+                                'assets/images/Untitled_design_(1).png',
                                 width: 200.0,
                                 height: 208.1,
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            Spacer(),
+                            SizedBox(height: 32.0),
                             Column(
                               mainAxisSize: MainAxisSize.min,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -393,12 +360,11 @@ class _OnboardingSelectionCardWidgetState
                                     ),
                               ),
                             ),
-                            Spacer(flex: 2),
                           ].divide(SizedBox(height: 32.0)),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ],
             ),
