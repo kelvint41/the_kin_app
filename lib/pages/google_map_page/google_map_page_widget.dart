@@ -141,11 +141,18 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     initialLocation: _model.mapGoogleMapsCenter ??=
                         LatLng(29.4241, -98.4936),
                     markers: googleMapPageBusinessesRecordList
+                        // Some businesses (e.g. bulk-imported rows with
+                        // corrupted source coordinates) have no
+                        // business_location - skip them rather than
+                        // crashing the whole map on a null pin location.
+                        .where((record) => record.businessLocation != null)
                         .map(
                           (marker) => FlutterFlowMarker(
                             marker.reference.path,
                             marker.businessLocation!,
                             () async {
+                              print(
+                                  'GoogleMapPageWidget: business pin tapped (${marker.businessName})');
                               context.pushNamed(
                                 BusinessShowcaseWidget.routeName,
                                 queryParameters: {
@@ -914,17 +921,26 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       size: 24.0,
                                     ),
                                     onPressed: () async {
+                                      print(
+                                          'GoogleMapPageWidget: green arrow (Explore Exchange) button tapped');
+                                      final matchedBusinessRef =
+                                          googleMapPageBusinessesRecordList
+                                              .where((e) =>
+                                                  e.businessName ==
+                                                  FFAppState().businessname)
+                                              .toList()
+                                              .elementAtOrNull(0)
+                                              ?.reference;
+                                      if (matchedBusinessRef == null) {
+                                        print(
+                                            'GoogleMapPageWidget: no business matches FFAppState().businessname ("${FFAppState().businessname}"), not navigating to avoid a null businessRef crash');
+                                        return;
+                                      }
                                       context.pushNamed(
                                         TheExchangeWidget.routeName,
                                         queryParameters: {
                                           'businessRef': serializeParam(
-                                            googleMapPageBusinessesRecordList
-                                                .where((e) =>
-                                                    e.businessName ==
-                                                    FFAppState().businessname)
-                                                .toList()
-                                                .elementAtOrNull(0)
-                                                ?.reference,
+                                            matchedBusinessRef,
                                             ParamType.DocumentReference,
                                           ),
                                         }.withoutNulls,
@@ -951,6 +967,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 ),
               ],
             ),
+            bottomNavigationBar: KinBottomNav2Widget(),
           ),
         );
       },
