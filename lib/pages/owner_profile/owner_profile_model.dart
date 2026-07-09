@@ -37,6 +37,8 @@ class OwnerProfileModel extends FlutterFlowModel<OwnerProfileWidget> {
   late ActionBtnModel actionBtnModel3;
   // Model for ActionBtn.
   late ActionBtnModel actionBtnModel4;
+  // Model for ActionBtn.
+  late ActionBtnModel actionBtnModel5;
 
   @override
   void initState(BuildContext context) {
@@ -49,6 +51,7 @@ class OwnerProfileModel extends FlutterFlowModel<OwnerProfileWidget> {
     actionBtnModel2 = createModel(context, () => ActionBtnModel());
     actionBtnModel3 = createModel(context, () => ActionBtnModel());
     actionBtnModel4 = createModel(context, () => ActionBtnModel());
+    actionBtnModel5 = createModel(context, () => ActionBtnModel());
   }
 
   @override
@@ -62,5 +65,6 @@ class OwnerProfileModel extends FlutterFlowModel<OwnerProfileWidget> {
     actionBtnModel2.dispose();
     actionBtnModel3.dispose();
     actionBtnModel4.dispose();
+    actionBtnModel5.dispose();
   }
 }

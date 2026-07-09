@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/section_header_widget.dart';
 import '/components/step_indicator3_widget.dart';
+import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_place_picker.dart';
@@ -86,6 +87,57 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  Widget _buildSetupTextField({
+    required TextEditingController? controller,
+    required FocusNode? focusNode,
+    required String labelText,
+    required String hintText,
+    TextInputType keyboardType = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextFormField(
+      controller: controller,
+      focusNode: focusNode,
+      autofocus: false,
+      enabled: true,
+      obscureText: false,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      decoration: InputDecoration(
+        isDense: true,
+        labelText: labelText,
+        labelStyle: FlutterFlowTheme.of(context).labelMedium,
+        hintText: hintText,
+        hintStyle: FlutterFlowTheme.of(context).labelMedium,
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: FlutterFlowTheme.of(context).alternate,
+            width: 1.0,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: FlutterFlowTheme.of(context).primaryText,
+            width: 1.0,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: FlutterFlowTheme.of(context).error,
+            width: 1.0,
+          ),
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        filled: true,
+        fillColor: FlutterFlowTheme.of(context).primary,
+      ),
+      style: FlutterFlowTheme.of(context).bodyMedium,
+      cursorColor: FlutterFlowTheme.of(context).primaryText,
+    );
   }
 
   @override
@@ -194,6 +246,19 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 0.0, 0.0, 16.0),
+                              child: _buildSetupTextField(
+                                controller:
+                                    _model.businessNameTextController ??=
+                                        TextEditingController(),
+                                focusNode: _model.businessNameFocusNode ??=
+                                    FocusNode(),
+                                labelText: 'Business Name',
+                                hintText: 'Enter your business name',
+                              ),
+                            ),
                             FlutterFlowDropDown<String>(
                               controller: _model.dropdownValueController ??=
                                   FormFieldController<String>(
@@ -313,45 +378,76 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                   verticalDirection: VerticalDirection.down,
                                   clipBehavior: Clip.none,
                                   children: [
-                                    Container(
-                                      height: 34.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () => safeSetState(() => _model
+                                          .businessType = 'Sole Proprietor'),
+                                      child: Container(
+                                        height: 34.0,
+                                        decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          width: 1.0,
+                                              .primary,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                            color: _model.businessType ==
+                                                    'Sole Proprietor'
+                                                ? FlutterFlowTheme.of(context)
+                                                    .primaryText
+                                                : FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            width: 1.0,
+                                          ),
                                         ),
-                                      ),
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.check_rounded,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
+                                        alignment:
+                                            AlignmentDirectional(0.0, 0.0),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (_model.businessType ==
+                                                  'Sole Proprietor')
+                                                Icon(
+                                                  Icons.check_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
                                                       .primaryText,
-                                              size: 16.0,
-                                            ),
-                                            Text(
-                                              'Sole Proprietor',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .plusJakartaSans(
+                                                  size: 16.0,
+                                                ),
+                                              Text(
+                                                'Sole Proprietor',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .plusJakartaSans(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -362,62 +458,82 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                                       context)
                                                                   .labelMedium
                                                                   .fontStyle,
+                                                          lineHeight: 1.4,
                                                         ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                        lineHeight: 1.4,
-                                                      ),
-                                            ),
-                                          ].divide(SizedBox(width: 6.0)),
+                                              ),
+                                            ].divide(SizedBox(width: 6.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 34.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () => safeSetState(
+                                          () => _model.businessType = 'LLC'),
+                                      child: Container(
+                                        height: 34.0,
+                                        decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
-                                              .alternate,
-                                          width: 1.0,
+                                              .primary,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                            color: _model.businessType == 'LLC'
+                                                ? FlutterFlowTheme.of(context)
+                                                    .primaryText
+                                                : FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            width: 1.0,
+                                          ),
                                         ),
-                                      ),
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'LLC',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .plusJakartaSans(
+                                        alignment:
+                                            AlignmentDirectional(0.0, 0.0),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (_model.businessType == 'LLC')
+                                                Icon(
+                                                  Icons.check_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  size: 16.0,
+                                                ),
+                                              Text(
+                                                'LLC',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .plusJakartaSans(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -428,62 +544,84 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                                       context)
                                                                   .labelMedium
                                                                   .fontStyle,
+                                                          lineHeight: 1.4,
                                                         ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                        lineHeight: 1.4,
-                                                      ),
-                                            ),
-                                          ].divide(SizedBox(width: 6.0)),
+                                              ),
+                                            ].divide(SizedBox(width: 6.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 34.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () => safeSetState(() =>
+                                          _model.businessType = 'Corporation'),
+                                      child: Container(
+                                        height: 34.0,
+                                        decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
-                                              .alternate,
-                                          width: 1.0,
+                                              .primary,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                            color: _model.businessType ==
+                                                    'Corporation'
+                                                ? FlutterFlowTheme.of(context)
+                                                    .primaryText
+                                                : FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            width: 1.0,
+                                          ),
                                         ),
-                                      ),
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Corporation',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .plusJakartaSans(
+                                        alignment:
+                                            AlignmentDirectional(0.0, 0.0),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (_model.businessType ==
+                                                  'Corporation')
+                                                Icon(
+                                                  Icons.check_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  size: 16.0,
+                                                ),
+                                              Text(
+                                                'Corporation',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .plusJakartaSans(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -494,62 +632,84 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                                       context)
                                                                   .labelMedium
                                                                   .fontStyle,
+                                                          lineHeight: 1.4,
                                                         ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                        lineHeight: 1.4,
-                                                      ),
-                                            ),
-                                          ].divide(SizedBox(width: 6.0)),
+                                              ),
+                                            ].divide(SizedBox(width: 6.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
-                                    Container(
-                                      height: 34.0,
-                                      decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .primary,
-                                        borderRadius:
-                                            BorderRadius.circular(8.0),
-                                        border: Border.all(
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () => safeSetState(() =>
+                                          _model.businessType = 'Partnership'),
+                                      child: Container(
+                                        height: 34.0,
+                                        decoration: BoxDecoration(
                                           color: FlutterFlowTheme.of(context)
-                                              .alternate,
-                                          width: 1.0,
+                                              .primary,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          border: Border.all(
+                                            color: _model.businessType ==
+                                                    'Partnership'
+                                                ? FlutterFlowTheme.of(context)
+                                                    .primaryText
+                                                : FlutterFlowTheme.of(context)
+                                                    .alternate,
+                                            width: 1.0,
+                                          ),
                                         ),
-                                      ),
-                                      alignment: AlignmentDirectional(0.0, 0.0),
-                                      child: Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            12.0, 0.0, 12.0, 0.0),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Partnership',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        font: GoogleFonts
-                                                            .plusJakartaSans(
+                                        alignment:
+                                            AlignmentDirectional(0.0, 0.0),
+                                        child: Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  12.0, 0.0, 12.0, 0.0),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              if (_model.businessType ==
+                                                  'Partnership')
+                                                Icon(
+                                                  Icons.check_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  size: 16.0,
+                                                ),
+                                              Text(
+                                                'Partnership',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .labelMedium
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .plusJakartaSans(
+                                                            fontWeight:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontWeight,
+                                                            fontStyle:
+                                                                FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelMedium
+                                                                    .fontStyle,
+                                                          ),
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .primaryText,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.0,
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
@@ -560,33 +720,43 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                                       context)
                                                                   .labelMedium
                                                                   .fontStyle,
+                                                          lineHeight: 1.4,
                                                         ),
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        fontSize: 14.0,
-                                                        letterSpacing: 0.0,
-                                                        fontWeight:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontWeight,
-                                                        fontStyle:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .fontStyle,
-                                                        lineHeight: 1.4,
-                                                      ),
-                                            ),
-                                          ].divide(SizedBox(width: 6.0)),
+                                              ),
+                                            ].divide(SizedBox(width: 6.0)),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ].divide(SizedBox(height: 8.0)),
+                            ),
+                            _buildSetupTextField(
+                              controller: _model.phoneNumberTextController ??=
+                                  TextEditingController(),
+                              focusNode: _model.phoneNumberFocusNode ??=
+                                  FocusNode(),
+                              labelText: 'Phone Number',
+                              hintText: '(555) 555-5555',
+                              keyboardType: TextInputType.phone,
+                            ),
+                            _buildSetupTextField(
+                              controller: _model.emailTextController ??=
+                                  TextEditingController(),
+                              focusNode: _model.emailFocusNode ??= FocusNode(),
+                              labelText: 'Email',
+                              hintText: 'business@example.com',
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            _buildSetupTextField(
+                              controller: _model.websiteTextController ??=
+                                  TextEditingController(),
+                              focusNode: _model.websiteFocusNode ??=
+                                  FocusNode(),
+                              labelText: 'Website',
+                              hintText: 'https://yourbusiness.com',
+                              keyboardType: TextInputType.url,
                             ),
                           ].divide(SizedBox(height: 16.0)),
                         ),
@@ -871,6 +1041,16 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                 ),
                               ),
                             ),
+                            _buildSetupTextField(
+                              controller: _model.descriptionTextController ??=
+                                  TextEditingController(),
+                              focusNode: _model.descriptionFocusNode ??=
+                                  FocusNode(),
+                              labelText: 'Business Description',
+                              hintText:
+                                  'Tell customers what makes your business special',
+                              maxLines: 4,
+                            ),
                           ].divide(SizedBox(height: 8.0)),
                         ),
                         Container(
@@ -988,6 +1168,13 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                       ].divide(SizedBox(width: 16.0)),
                                     ),
                                   ),
+                                  Switch(
+                                    value: _model.isBlackOwned,
+                                    onChanged: (newValue) => safeSetState(
+                                        () => _model.isBlackOwned = newValue),
+                                    activeColor:
+                                        FlutterFlowTheme.of(context).primary,
+                                  ),
                                 ],
                               ),
                             ),
@@ -1000,20 +1187,25 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
-                        var businessesRecordReference =
-                            BusinessesRecord.collection.doc();
-                        await businessesRecordReference
-                            .set(createBusinessesRecordData(
-                          subscriptionTier: 'Community',
-                          isPremium: false,
-                        ));
-                        _model.newBusinessCreated =
-                            BusinessesRecord.getDocumentFromData(
-                                createBusinessesRecordData(
-                                  subscriptionTier: 'Community',
-                                  isPremium: false,
-                                ),
-                                businessesRecordReference);
+                        final result = await KinServices.registerBusiness(
+                          category: _model.dropdownValue,
+                          businessType: _model.businessType,
+                          isBlackOwned: _model.isBlackOwned,
+                          place: _model.placePickerValue,
+                          businessName: _model.businessNameTextController?.text,
+                          phoneNumber: _model.phoneNumberTextController?.text,
+                          email: _model.emailTextController?.text,
+                          website: _model.websiteTextController?.text,
+                          description: _model.descriptionTextController?.text,
+                        );
+                        if (!result.isSuccess) {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(result.error!)),
+                            );
+                          }
+                          return;
+                        }
 
                         context.pushNamed(OwnerProfileWidget.routeName);
 

@@ -33,6 +33,30 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
   late SectionHeaderModel sectionHeaderModel2;
   // State field(s) for PlacePicker widget.
   FFPlace placePickerValue = FFPlace();
+  // Selected business type (Choice Chips).
+  String businessType = 'Sole Proprietor';
+  // Whether this is a Black-owned business (defaults to true per design spec).
+  bool isBlackOwned = true;
+  // State field(s) for BusinessName widget.
+  FocusNode? businessNameFocusNode;
+  TextEditingController? businessNameTextController;
+  String? Function(BuildContext, String?)? businessNameTextControllerValidator;
+  // State field(s) for PhoneNumber widget.
+  FocusNode? phoneNumberFocusNode;
+  TextEditingController? phoneNumberTextController;
+  String? Function(BuildContext, String?)? phoneNumberTextControllerValidator;
+  // State field(s) for Email widget.
+  FocusNode? emailFocusNode;
+  TextEditingController? emailTextController;
+  String? Function(BuildContext, String?)? emailTextControllerValidator;
+  // State field(s) for Website widget.
+  FocusNode? websiteFocusNode;
+  TextEditingController? websiteTextController;
+  String? Function(BuildContext, String?)? websiteTextControllerValidator;
+  // State field(s) for Description widget.
+  FocusNode? descriptionFocusNode;
+  TextEditingController? descriptionTextController;
+  String? Function(BuildContext, String?)? descriptionTextControllerValidator;
   // Stores action output result for [Backend Call - Create Document] action in bu widget.
   BusinessesRecord? newBusinessCreated;
 
@@ -48,5 +72,15 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
     stepIndicatorModel.dispose();
     sectionHeaderModel1.dispose();
     sectionHeaderModel2.dispose();
+    businessNameFocusNode?.dispose();
+    businessNameTextController?.dispose();
+    phoneNumberFocusNode?.dispose();
+    phoneNumberTextController?.dispose();
+    emailFocusNode?.dispose();
+    emailTextController?.dispose();
+    websiteFocusNode?.dispose();
+    websiteTextController?.dispose();
+    descriptionFocusNode?.dispose();
+    descriptionTextController?.dispose();
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "kin-app-import-scripts",
+  "private": true,
+  "description": "One-off Admin SDK scripts. Not deployed with Cloud Functions.",
+  "dependencies": {
+    "firebase-admin": "^11.11.0"
+  },
+  "scripts": {
+    "import:businesses": "node import_businesses.js"
+  }
+}

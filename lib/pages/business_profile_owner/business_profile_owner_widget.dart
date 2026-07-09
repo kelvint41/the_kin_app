@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/gemini/gemini.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -9,7 +10,6 @@ import '/index.dart';
 import 'package:map_launcher/map_launcher.dart' as $ml;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'business_profile_owner_model.dart';
@@ -49,14 +49,6 @@ class _BusinessProfileOwnerWidgetState
     super.initState();
     _model = createModel(context, () => BusinessProfileOwnerModel());
 
-    // On page load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      await launchMap(
-        address: '',
-        title: '',
-      );
-    });
-
     _model.txtRawNotesTextController ??= TextEditingController();
     _model.txtRawNotesFocusNode ??= FocusNode();
   }
@@ -72,8 +64,28 @@ class _BusinessProfileOwnerWidgetState
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
+    // Some navigation call sites (e.g. Merchant Pricing Suite's "Elite
+    // Growth" tier, Owner Profile's "Preview" button) push this route
+    // without a businessRef at all. Since this page always means "the
+    // signed-in owner's own business", fall back to that instead of
+    // crashing on a null reference.
+    final businessRef =
+        widget!.businessRef ?? currentUserDocument?.ownedBusiness;
+    if (businessRef == null) {
+      return Scaffold(
+        key: scaffoldKey,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: Center(
+          child: Text(
+            'This business could not be found.',
+            style: FlutterFlowTheme.of(context).bodyLarge,
+          ),
+        ),
+      );
+    }
+
     return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget!.businessRef!),
+      stream: BusinessesRecord.getDocument(businessRef),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -1031,12 +1043,11 @@ class _BusinessProfileOwnerWidgetState
                                 ).then((generatedText) {
                                   safeSetState(() =>
                                       _model.aiStorefrontBio = generatedText);
+                                  if (generatedText != null) {
+                                    FFAppState().about = generatedText;
+                                  }
+                                  safeSetState(() {});
                                 });
-
-                                FFAppState().about = _model.aiStorefrontBio!;
-                                safeSetState(() {});
-
-                                safeSetState(() {});
                               },
                               text: '✨ Generate AI Bio',
                               options: FFButtonOptions(

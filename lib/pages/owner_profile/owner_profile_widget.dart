@@ -113,6 +113,51 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // This dashboard reads the signed-in owner's business; render an empty
+    // state instead of crashing when they haven't set one up yet.
+    if (currentUserDocument?.ownedBusiness == null) {
+      return Scaffold(
+        key: scaffoldKey,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Set up your business to see your owner dashboard.',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).bodyLarge.override(
+                        color: Colors.white,
+                      ),
+                ),
+                SizedBox(height: 24.0),
+                FFButtonWidget(
+                  onPressed: () {
+                    context.pushNamed(BusinessSetupPageWidget.routeName);
+                  },
+                  text: 'Set Up Business',
+                  options: FFButtonOptions(
+                    height: 44.0,
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
+                    color: FlutterFlowTheme.of(context).secondary,
+                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
+                          color: Colors.white,
+                        ),
+                    elevation: 0.0,
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -1227,7 +1272,14 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           highlightColor: Colors.transparent,
                           onTap: () async {
                             context.pushNamed(
-                                BusinessProfileOwnerWidget.routeName);
+                              BusinessProfileOwnerWidget.routeName,
+                              queryParameters: {
+                                'businessRef': serializeParam(
+                                  currentUserDocument?.ownedBusiness,
+                                  ParamType.DocumentReference,
+                                ),
+                              }.withoutNulls,
+                            );
                           },
                           child: wrapWithModel(
                             model: _model.actionBtnModel3,
@@ -1254,6 +1306,30 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             label: 'Get Support',
                           ),
                         ),
+                        if (currentUserDocument?.isAdmin == true)
+                          InkWell(
+                            splashColor: Colors.transparent,
+                            focusColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            onTap: () async {
+                              context.pushNamed(
+                                  ExecutiveDashboardWidget.routeName);
+                            },
+                            child: wrapWithModel(
+                              model: _model.actionBtnModel5,
+                              updateCallback: () => safeSetState(() {}),
+                              child: ActionBtnWidget(
+                                icon: Icon(
+                                  Icons.dashboard_rounded,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  size: 24.0,
+                                ),
+                                label: 'Dashboard',
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),

@@ -29,6 +29,11 @@ class BusinessesRecord extends FirestoreRecord {
   String get category => _category ?? '';
   bool hasCategory() => _category != null;
 
+  // "business_type" field.
+  String? _businessType;
+  String get businessType => _businessType ?? '';
+  bool hasBusinessType() => _businessType != null;
+
   // "website" field.
   String? _website;
   String get website => _website ?? '';
@@ -332,6 +337,7 @@ class BusinessesRecord extends FirestoreRecord {
   void _initializeFields() {
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
     _category = snapshotData['category'] as String?;
+    _businessType = snapshotData['business_type'] as String?;
     _website = snapshotData['website'] as String?;
     _tickerSymbol = snapshotData['ticker_symbol'] as String?;
     _heroImage = snapshotData['hero_image'] as String?;
@@ -603,6 +609,7 @@ class BusinessesRecord extends FirestoreRecord {
 Map<String, dynamic> createBusinessesRecordData({
   bool? isBlackOwned,
   String? category,
+  String? businessType,
   String? website,
   String? tickerSymbol,
   String? heroImage,
@@ -667,6 +674,7 @@ Map<String, dynamic> createBusinessesRecordData({
     <String, dynamic>{
       'is_black_owned': isBlackOwned,
       'category': category,
+      'business_type': businessType,
       'website': website,
       'ticker_symbol': tickerSymbol,
       'hero_image': heroImage,
@@ -740,6 +748,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
     const listEquality = ListEquality();
     return e1?.isBlackOwned == e2?.isBlackOwned &&
         e1?.category == e2?.category &&
+        e1?.businessType == e2?.businessType &&
         e1?.website == e2?.website &&
         e1?.tickerSymbol == e2?.tickerSymbol &&
         e1?.heroImage == e2?.heroImage &&
@@ -806,6 +815,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
   int hash(BusinessesRecord? e) => const ListEquality().hash([
         e?.isBlackOwned,
         e?.category,
+        e?.businessType,
         e?.website,
         e?.tickerSymbol,
         e?.heroImage,

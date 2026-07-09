@@ -124,8 +124,22 @@ service cloud.firestore {
     }
 
     match /reviews/{document} {
-      allow create: if true;
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.business_ref is path
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
       allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    match /signup_feed/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }

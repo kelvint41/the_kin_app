@@ -25,6 +25,7 @@ import 'schema/uservisits_record.dart';
 import 'schema/reviews_record.dart';
 import 'schema/user_engagement_events_record.dart';
 import 'schema/kindex_scores_record.dart';
+import 'schema/signup_feed_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -53,6 +54,7 @@ export 'schema/uservisits_record.dart';
 export 'schema/reviews_record.dart';
 export 'schema/user_engagement_events_record.dart';
 export 'schema/kindex_scores_record.dart';
+export 'schema/signup_feed_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -952,9 +954,44 @@ Future maybeCreateUser(User user) async {
 
   await userRecord.set(userData);
   currentUserDocument = UsersRecord.getDocumentFromData(userData, userRecord);
+
+  // Denormalized admin-facing feed of new signups. The `users` collection
+  // itself can't be listed by admins (rules only allow reading your own
+  // doc), so this is written once here, at the single point every new
+  // account is created regardless of sign-in method.
+  await SignupFeedRecord.collection.add(createSignupFeedRecordData(
+    userRef: userRecord,
+    displayName: currentUserDocument?.displayName,
+    subscriptionStatus: currentUserDocument?.subscriptionStatus,
+    timestamp: getCurrentTimestamp,
+  ));
 }
 
 Future updateUserDocument({String? email}) async {
   await currentUserDocument?.reference
       .update(createUsersRecordData(email: email));
 }
+
+/// Functions to query SignupFeedRecords (as a Stream and as a Future).
+Future<int> querySignupFeedRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      SignupFeedRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<SignupFeedRecord>> querySignupFeedRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      SignupFeedRecord.collection,
+      SignupFeedRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );

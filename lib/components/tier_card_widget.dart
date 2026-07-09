@@ -21,6 +21,7 @@ class TierCardWidget extends StatefulWidget {
     String? f2,
     String? f3,
     String? f4,
+    this.beaconText,
   })  : this.isPro = isPro ?? false,
         this.isElite = isElite ?? false,
         this.title = title ?? 'Community',
@@ -41,12 +42,19 @@ class TierCardWidget extends StatefulWidget {
   final String f3;
   final String f4;
 
+  /// Text shown on a small pulsing "beacon" badge at the card's top-left
+  /// corner (e.g. 'Free' or 'Upgrade'). Null hides the beacon entirely.
+  final String? beaconText;
+
   @override
   State<TierCardWidget> createState() => _TierCardWidgetState();
 }
 
-class _TierCardWidgetState extends State<TierCardWidget> {
+class _TierCardWidgetState extends State<TierCardWidget>
+    with SingleTickerProviderStateMixin {
   late TierCardModel _model;
+  late AnimationController _beaconController;
+  late Animation<double> _beaconOpacity;
 
   @override
   void setState(VoidCallback callback) {
@@ -58,13 +66,71 @@ class _TierCardWidgetState extends State<TierCardWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => TierCardModel());
+    _beaconController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _beaconOpacity = Tween<double>(begin: 0.35, end: 1.0).animate(
+      CurvedAnimation(parent: _beaconController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
+    _beaconController.dispose();
     _model.maybeDispose();
 
     super.dispose();
+  }
+
+  Widget _buildBeacon(BuildContext context) {
+    final isFree = widget!.beaconText == 'Free';
+    return FadeTransition(
+      opacity: _beaconOpacity,
+      child: Container(
+        padding: EdgeInsetsDirectional.fromSTEB(10.0, 5.0, 10.0, 5.0),
+        decoration: BoxDecoration(
+          color:
+              isFree ? FlutterFlowTheme.of(context).success : Color(0xFFD4AF37),
+          borderRadius: BorderRadius.circular(9999.0),
+          boxShadow: [
+            BoxShadow(
+              color: (isFree
+                      ? FlutterFlowTheme.of(context).success
+                      : Color(0xFFD4AF37))
+                  .withOpacity(0.6),
+              blurRadius: 8.0,
+              spreadRadius: 1.0,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 6.0,
+              height: 6.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+            ),
+            SizedBox(width: 6.0),
+            Text(
+              widget!.beaconText!,
+              style: FlutterFlowTheme.of(context).labelSmall.override(
+                    font: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    color: Colors.black,
+                    letterSpacing: 0.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -104,6 +170,12 @@ class _TierCardWidgetState extends State<TierCardWidget> {
                           ),
                           shape: BoxShape.rectangle,
                         ),
+                      ),
+                    if (widget!.beaconText != null)
+                      PositionedDirectional(
+                        top: -8.0,
+                        start: -8.0,
+                        child: _buildBeacon(context),
                       ),
                     Column(
                       mainAxisSize: MainAxisSize.min,
