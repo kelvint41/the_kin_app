@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/firebase_auth/auth_util.dart';
 
 import '../flutter_flow/flutter_flow_util.dart';
+import '../flutter_flow/kindex_ticker_util.dart';
 import 'schema/util/firestore_util.dart';
 
 import 'schema/businesses_record.dart';
@@ -940,12 +941,35 @@ Future maybeCreateUser(User user) async {
     return;
   }
 
+  final displayName =
+      user.displayName ?? FirebaseAuth.instance.currentUser?.displayName;
+
+  // Best-effort Kindex ticker symbol for the onboarding ticker's customer
+  // row. Reserved against `ticker_registry` (see KindexTickerUtil) since
+  // the self-only `users` collection can't be queried for a uniqueness
+  // check. A failure here should never block account creation, so this
+  // just leaves ticker_symbol unset rather than surfacing an error.
+  String? tickerSymbol;
+  if (displayName != null) {
+    final semantic = KindexTickerUtil.semanticCandidate(displayName);
+    if (semantic != null &&
+        await KindexTickerUtil.reserve(semantic, userRecord)) {
+      tickerSymbol = semantic;
+    }
+  }
+  for (var attempt = 0; tickerSymbol == null && attempt < 3; attempt++) {
+    final candidate = KindexTickerUtil.randomCandidate();
+    if (await KindexTickerUtil.reserve(candidate, userRecord)) {
+      tickerSymbol = candidate;
+    }
+  }
+
   final userData = createUsersRecordData(
     email: user.email ??
         FirebaseAuth.instance.currentUser?.email ??
         user.providerData.firstOrNull?.email,
-    displayName:
-        user.displayName ?? FirebaseAuth.instance.currentUser?.displayName,
+    displayName: displayName,
+    tickerSymbol: tickerSymbol,
     photoUrl: user.photoURL,
     uid: user.uid,
     phoneNumber: user.phoneNumber,

@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -20,6 +19,20 @@ class ServiceResult<T> {
   bool get isSuccess => error == null;
 }
 
+/// A single row of display data for the Kindex ticker (see
+/// [KinServices.fetchTopBusinessKindex]).
+class KindexTickerEntry {
+  const KindexTickerEntry({
+    required this.name,
+    required this.score,
+    required this.isTrendingUp,
+  });
+
+  final String name;
+  final double score;
+  final bool isTrendingUp;
+}
+
 /// Thin, reusable wrappers around this app's Firestore-backed actions.
 ///
 /// Every method here does three things consistently: checks auth/input
@@ -29,43 +42,11 @@ class ServiceResult<T> {
 class KinServices {
   KinServices._();
 
-  static final _random = Random();
-  static const _tickerChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  static const _tickerLength = 5;
-
   /// Uppercases and strips [raw] down to alphanumeric characters, returning
-  /// null if the result isn't exactly [_tickerLength] characters. Exposed
-  /// so a manual-entry fallback UI can validate user-typed tickers with
-  /// the same rules as generated ones.
-  static String? sanitizeTicker(String raw) {
-    final cleaned = raw.toUpperCase().replaceAll(RegExp('[^A-Z0-9]'), '');
-    return cleaned.length == _tickerLength ? cleaned : null;
-  }
-
-  static String _randomTickerCandidate() => List.generate(
-        _tickerLength,
-        (_) => _tickerChars[_random.nextInt(_tickerChars.length)],
-      ).join();
-
-  // Filler words stripped from a business name before deriving a semantic
-  // ticker - matched as whole tokens (case-insensitive), not substrings,
-  // so e.g. "Cole" doesn't lose its 'co'.
-  static const _tickerFillerWords = ['LLC', 'INC', 'CO', 'THE'];
-
-  /// Derives a semantic ticker candidate from [businessName] (e.g.
-  /// 'Rollin Smoke BBQ' -> 'ROLLI'), or null if fewer than
-  /// [_tickerLength] alphanumeric characters remain once filler words
-  /// ('LLC', 'Inc', 'Co', 'The') and punctuation/spaces are stripped.
-  static String? _semanticTickerCandidate(String businessName) {
-    final words = businessName
-        .toUpperCase()
-        .split(RegExp(r'[^A-Z0-9]+'))
-        .where((w) => w.isNotEmpty && !_tickerFillerWords.contains(w));
-    final cleaned = words.join();
-    return cleaned.length >= _tickerLength
-        ? cleaned.substring(0, _tickerLength)
-        : null;
-  }
+  /// null if the result isn't exactly 5 characters. Exposed so a
+  /// manual-entry fallback UI can validate user-typed tickers with the
+  /// same rules as generated ones.
+  static String? sanitizeTicker(String raw) => KindexTickerUtil.sanitize(raw);
 
   static Future<bool> _isTickerTaken(String ticker) async {
     final matches = await BusinessesRecord.collection
@@ -93,13 +74,13 @@ class KinServices {
   }) async {
     try {
       if (businessName != null) {
-        final semantic = _semanticTickerCandidate(businessName);
+        final semantic = KindexTickerUtil.semanticCandidate(businessName);
         if (semantic != null && !await _isTickerTaken(semantic)) {
           return ServiceResult.success(semantic);
         }
       }
       for (var attempt = 0; attempt < maxAttempts; attempt++) {
-        final candidate = _randomTickerCandidate();
+        final candidate = KindexTickerUtil.randomCandidate();
         if (!await _isTickerTaken(candidate)) {
           return ServiceResult.success(candidate);
         }
@@ -111,6 +92,105 @@ class KinServices {
       return const ServiceResult.failure(
         'Could not generate a unique ticker symbol. Please enter one manually.',
       );
+    }
+  }
+
+  /// Generates a unique 5-character alphanumeric Kindex ticker symbol for
+  /// a customer, reserved against `ticker_registry` via
+  /// [KindexTickerUtil.reserve] - the `users` collection can't be queried
+  /// for a uniqueness check the way `businesses` can, since its rules only
+  /// allow reading your own doc. Best-effort: unlike [generateUniqueTicker]
+  /// for businesses, a failure here should not block account creation, so
+  /// callers should treat a [ServiceResult.failure] as "no ticker yet"
+  /// rather than a hard error.
+  static Future<ServiceResult<String>> generateUniqueUserTicker({
+    required DocumentReference userRef,
+    String? displayName,
+    int maxAttempts = 3,
+  }) async {
+    try {
+      if (displayName != null) {
+        final semantic = KindexTickerUtil.semanticCandidate(displayName);
+        if (semantic != null &&
+            await KindexTickerUtil.reserve(semantic, userRef)) {
+          return ServiceResult.success(semantic);
+        }
+      }
+      for (var attempt = 0; attempt < maxAttempts; attempt++) {
+        final candidate = KindexTickerUtil.randomCandidate();
+        if (await KindexTickerUtil.reserve(candidate, userRef)) {
+          return ServiceResult.success(candidate);
+        }
+      }
+      return const ServiceResult.failure(
+        'Could not generate a unique ticker symbol.',
+      );
+    } catch (_) {
+      return const ServiceResult.failure(
+        'Could not generate a unique ticker symbol.',
+      );
+    }
+  }
+
+  /// Top businesses by Kindex score, for a scrolling ticker display.
+  ///
+  /// Reads only the `businesses` collection (public read, per
+  /// firestore.rules) so this is safe to call from a logged-out screen
+  /// like onboarding.
+  /// Used by: Onboarding screen -> MarqueeTicker (business row).
+  static Future<ServiceResult<List<KindexTickerEntry>>> fetchTopBusinessKindex({
+    int limit = 20,
+  }) async {
+    try {
+      final snapshot = await BusinessesRecord.collection
+          .orderBy('kindex_score', descending: true)
+          .limit(limit)
+          .get();
+      final entries = snapshot.docs
+          .map((doc) => BusinessesRecord.fromSnapshot(doc))
+          .where((record) => record.businessName.isNotEmpty)
+          .map((record) => KindexTickerEntry(
+                name: record.businessName,
+                score: record.kindexScore,
+                isTrendingUp: record.kindexVelocity >= 0,
+              ))
+          .toList();
+      return ServiceResult.success(entries);
+    } catch (_) {
+      return const ServiceResult.failure('Could not load the Kindex ticker.');
+    }
+  }
+
+  /// Top customers by Kindex score, for a scrolling ticker display.
+  ///
+  /// Reads only `KindexScores` (public read, per firestore.rules), using
+  /// the ticker_symbol/is_trending_up fields the Kindex scoring Cloud
+  /// Function denormalizes onto each score doc (see kindex_engine.js) -
+  /// `users` itself is self-only readable so can't be queried directly.
+  /// Customers who haven't been assigned a ticker yet (e.g. they signed up
+  /// before this existed, or ticker reservation failed) are skipped rather
+  /// than shown with a blank label.
+  /// Used by: Onboarding screen -> MarqueeTicker (customer row).
+  static Future<ServiceResult<List<KindexTickerEntry>>> fetchTopCustomerKindex({
+    int limit = 20,
+  }) async {
+    try {
+      final snapshot = await KindexScoresRecord.collection
+          .orderBy('score', descending: true)
+          .limit(limit)
+          .get();
+      final entries = snapshot.docs
+          .map((doc) => KindexScoresRecord.fromSnapshot(doc))
+          .where((record) => record.tickerSymbol.isNotEmpty)
+          .map((record) => KindexTickerEntry(
+                name: record.tickerSymbol,
+                score: record.score,
+                isTrendingUp: record.isTrendingUp,
+              ))
+          .toList();
+      return ServiceResult.success(entries);
+    } catch (_) {
+      return const ServiceResult.failure('Could not load the Kindex ticker.');
     }
   }
 

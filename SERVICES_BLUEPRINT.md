@@ -45,11 +45,14 @@ onPressed: () async {
 | Method | Signature | Firestore effect |
 |---|---|---|
 | `submitReview` | `({businessRef, rating, reviewText})` | Creates a `ReviewsRecord` |
-| `generateUniqueTicker` | `({businessName, maxAttempts = 3})` | Read-only: queries `businesses` for `ticker_symbol` collisions. No write. |
+| `generateUniqueTicker` | `({businessName, maxAttempts = 3})` | Business tickers. Read-only: queries `businesses` for `ticker_symbol` collisions. No write. |
+| `generateUniqueUserTicker` | `({userRef, displayName, maxAttempts = 3})` | Customer tickers. Reserves against `ticker_registry` (see Kindex Ticker Engine) rather than querying `users`, which can't be queried client-side. |
 | `sanitizeTicker` | `(raw)` | Pure function, no Firestore access - uppercases/strips to alphanumeric, returns null unless exactly 5 chars |
 | `registerBusiness` | `({category, businessType, isBlackOwned, place, businessName, phoneNumber, email, website, description})` | Generates a ticker via `generateUniqueTicker`, then creates a `BusinessesRecord` (including `tickerSymbol`); links it to the caller's `ownedBusiness` |
 | `upgradeBusinessTier` | `({businessRef, packageId, tierName, isPremium, isPriorityPinned, hasFlashBeacon})` | RevenueCat purchase, then updates `BusinessesRecord` only on a confirmed purchase |
 | `downgradeToCommunity` | `({businessRef})` | Resets `BusinessesRecord` to the free Community tier |
+| `fetchTopBusinessKindex` | `({limit = 20})` | Read-only: top `businesses` by `kindex_score`, for the onboarding Kindex ticker's business row. |
+| `fetchTopCustomerKindex` | `({limit = 20})` | Read-only: top `KindexScores` by `score`, for the ticker's customer row. |
 
 ## Button map
 
@@ -59,6 +62,7 @@ onPressed: () async {
 | "Register Now" | `pages/business_setup_page/business_setup_page_widget.dart` | `KinServices.registerBusiness` |
 | Community tier card | `pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart` | `KinServices.downgradeToCommunity` |
 | Founding Local / Pro Growth / Elite Growth tier cards | `pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart` | `KinServices.upgradeBusinessTier` |
+| Onboarding Kindex ticker (top-of-screen marquee) | `pages/onboarding_selection_card/onboarding_selection_card_widget.dart` -> `components/marquee_ticker_widget.dart` | `KinServices.fetchTopBusinessKindex` + `fetchTopCustomerKindex` |
 
 Note: this app already has its own Exchange system (`exchange_posts`,
 `exchange_promotions` collections). A separate Exchange gate/reactions
@@ -102,6 +106,52 @@ have randomly-generated tickers and were not retroactively changed. That
 import already ran against the live `kinvest-build-app` Firestore project;
 `firebase/scripts/import_businesses.js` is kept here for traceability, not
 for re-running.
+
+### Customer tickers
+
+Customers get the same 5-character ticker concept, assigned once at
+signup (`maybeCreateUser` in `backend.dart`), but through a different
+mechanism than businesses:
+
+- The `users` collection's Firestore rule only allows reading your own
+  doc (`allow read: if request.auth.uid == document`), so it can't be
+  queried for a `ticker_symbol` collision check the way `businesses` can.
+- Instead, tickers are reserved in a dedicated `ticker_registry`
+  collection, keyed by the ticker itself. Writing to a free ticker's doc
+  ID is a Firestore `create` (allowed); writing to an already-taken one
+  is an `update` against an existing doc, which the rule blocks
+  (`allow update: if false`). This makes reservation atomic without a
+  transaction. See `KindexTickerUtil.reserve` in
+  `lib/flutter_flow/kindex_ticker_util.dart`.
+- Unlike business registration, a failed ticker reservation never blocks
+  account creation - the user just ends up with no `ticker_symbol` and is
+  skipped by `fetchTopCustomerKindex` until one exists.
+- `ticker_symbol` and a `is_trending_up` flag (whether the customer's most
+  recently processed engagement event added or subtracted Kindex points)
+  are denormalized onto each `KindexScores/{userId}` document by the
+  `processUserEngagementEvent` Cloud Function
+  (`firebase/custom_cloud_functions/kindex_engine.js`), since that
+  collection has no display data of its own and `users` can't be queried
+  client-side either. **This Cloud Function change has been edited
+  locally but not yet deployed** - it needs `firebase deploy --only
+  functions:custom_cloud_functions` (or the equivalent full functions
+  deploy) before `fetchTopCustomerKindex` will return any real rows;
+  until then customers just won't have a `ticker_symbol` and the
+  ticker's customer row will be empty.
+
+### Known issue: business trend is not real
+
+`fetchTopBusinessKindex` derives `isTrendingUp` from
+`BusinessesRecord.kindexVelocity`, but **nothing writes to
+`kindex_velocity` anywhere in this codebase** - it's a schema field with
+no writer, so it reads as its default (0) for virtually every business,
+meaning the business row's trend arrow always shows "up" today. This was
+discovered while building the customer side (which does compute a real
+trend) but was left as-is since the business ticker row was explicitly
+scoped as "keep as is." Fixing it properly would mean deciding where
+business Kindex scoring should actually happen (nothing currently
+updates `businesses.kindex_score`/`kindex_velocity` at all outside of
+manual/admin writes) - a bigger scope than the ticker feature itself.
 
 ## Known follow-ups
 

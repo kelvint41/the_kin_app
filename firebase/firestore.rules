@@ -15,6 +15,20 @@ service cloud.firestore {
       allow delete: if request.auth.uid == document;
     }
 
+    // Uniqueness reservation for customer Kindex ticker symbols. Doc ID is
+    // the ticker itself, so a write to a free ticker is a Firestore
+    // 'create' (allowed) while a write to an already-taken one is an
+    // 'update' against an existing doc ('allow update: if false' blocks
+    // it) - this makes reservation atomic without needing a transaction
+    // or a query against the self-only `users` collection.
+    match /ticker_registry/{ticker} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if false;
+      allow delete: if false;
+    }
+
     match /bug_reports/{document} {
       allow create: if request.auth != null;
       allow read: if false;

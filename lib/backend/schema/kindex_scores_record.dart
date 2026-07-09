@@ -39,11 +39,26 @@ class KindexScoresRecord extends FirestoreRecord {
   DateTime? get lastUpdated => _lastUpdated;
   bool hasLastUpdated() => _lastUpdated != null;
 
+  // "ticker_symbol" field. Denormalized by the Kindex scoring Cloud
+  // Function from the user's own doc, since `users` can't be queried
+  // client-side for a leaderboard-style display.
+  String? _tickerSymbol;
+  String get tickerSymbol => _tickerSymbol ?? '';
+  bool hasTickerSymbol() => _tickerSymbol != null;
+
+  // "is_trending_up" field. Whether the most recently processed
+  // engagement event added (true) or subtracted (false) points.
+  bool? _isTrendingUp;
+  bool get isTrendingUp => _isTrendingUp ?? true;
+  bool hasIsTrendingUp() => _isTrendingUp != null;
+
   void _initializeFields() {
     _userRef = snapshotData['user_ref'] as DocumentReference?;
     _score = castToType<double>(snapshotData['score']);
     _lastEventId = snapshotData['last_event_id'] as String?;
     _lastUpdated = snapshotData['last_updated'] as DateTime?;
+    _tickerSymbol = snapshotData['ticker_symbol'] as String?;
+    _isTrendingUp = snapshotData['is_trending_up'] as bool?;
   }
 
   static CollectionReference get collection =>
@@ -89,7 +104,9 @@ class KindexScoresRecordDocumentEquality
     return e1?.userRef == e2?.userRef &&
         e1?.score == e2?.score &&
         e1?.lastEventId == e2?.lastEventId &&
-        e1?.lastUpdated == e2?.lastUpdated;
+        e1?.lastUpdated == e2?.lastUpdated &&
+        e1?.tickerSymbol == e2?.tickerSymbol &&
+        e1?.isTrendingUp == e2?.isTrendingUp;
   }
 
   @override
@@ -98,6 +115,8 @@ class KindexScoresRecordDocumentEquality
         e?.score,
         e?.lastEventId,
         e?.lastUpdated,
+        e?.tickerSymbol,
+        e?.isTrendingUp,
       ]);
 
   @override

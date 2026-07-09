@@ -70,13 +70,30 @@ exports.processUserEngagementEvent = functions.firestore
 
       const scoreRef = db.collection("KindexScores").doc(userRef.id);
       const scoreSnap = await tx.get(scoreRef);
-      const currentScore = scoreSnap.exists ? scoreSnap.data().score || 0 : 0;
+      const scoreData = scoreSnap.exists ? scoreSnap.data() : {};
+      const currentScore = scoreData.score || 0;
+
+      // Denormalize the user's ticker symbol onto the score doc so
+      // ticker-style UI (e.g. the onboarding Kindex ticker) can read it
+      // without a client-side query against the self-only `users`
+      // collection. Only fetched once - skipped on later events once it's
+      // already cached here, to avoid an extra read on every event.
+      let tickerSymbol = scoreData.ticker_symbol || null;
+      if (!tickerSymbol) {
+        const userSnap = await tx.get(userRef);
+        tickerSymbol = userSnap.exists ? userSnap.data().ticker_symbol || null : null;
+      }
 
       tx.set(
         scoreRef,
         {
           user_ref: userRef,
           score: currentScore + points,
+          ticker_symbol: tickerSymbol,
+          // Reflects whether the most recently processed event added or
+          // subtracted points - a simple, real signal for the ticker's
+          // trend arrow rather than a time-windowed momentum calculation.
+          is_trending_up: points >= 0,
           last_event_id: eventRef.id,
           last_updated: admin.firestore.FieldValue.serverTimestamp(),
         },
