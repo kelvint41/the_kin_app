@@ -95,9 +95,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
       redirect: (context, state) {
+        // devBypassTargetRoute is only ever set after a real sign-in
+        // succeeds (see main.dart's _maybeSignInDevBypass), so it's
+        // already a reliable signal by itself - checking
+        // appStateNotifier.loggedIn here too was redundant and raced
+        // against its auth-stream listener, which isn't registered until
+        // after this router is constructed and so still reads false on
+        // the very first redirect evaluation.
         if (kDebugMode &&
             devBypassTargetRoute != null &&
-            appStateNotifier.loggedIn &&
             state.uri.path == '/') {
           return devBypassTargetRoute;
         }
