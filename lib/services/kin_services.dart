@@ -4,7 +4,9 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
+import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
 
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
 /// catching exceptions themselves - every service method below already
@@ -329,6 +331,39 @@ class KinServices {
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your plan.');
+    }
+  }
+
+  /// Opens the native share sheet with [text], then records a
+  /// `share_app` Kindex engagement event for the signed-in user - the
+  /// event feeds the same processUserEngagementEvent pipeline as
+  /// reactions/reviews (see kindex_engine.js), so a share raises the
+  /// user's Kindex score and is denormalized onto their ticker the same
+  /// way. Recording the event is best-effort: the share sheet has
+  /// already done its job by the time this runs, so a failure here
+  /// (e.g. signed out, or a transient Firestore error) doesn't undo or
+  /// block the share itself.
+  /// Used by: Owner Profile -> "Promote" button.
+  static Future<void> shareApp({
+    required String text,
+    Rect? sharePositionOrigin,
+    DocumentReference? businessRef,
+  }) async {
+    await Share.share(text, sharePositionOrigin: sharePositionOrigin);
+    final userRef = currentUserReference;
+    if (userRef == null) return;
+    try {
+      await UserEngagementEventsRecord.collection.doc().set(
+            createUserEngagementEventsRecordData(
+              userRef: userRef,
+              businessRef: businessRef,
+              targetRef: businessRef,
+              eventType: 'share_app',
+              createdAt: getCurrentTimestamp,
+            ),
+          );
+    } catch (_) {
+      // Best-effort - see doc comment above.
     }
   }
 }

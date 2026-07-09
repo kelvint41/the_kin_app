@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/review_item_widget.dart';
@@ -13,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'owner_profile_model.dart';
 export 'owner_profile_model.dart';
 
@@ -1244,10 +1244,12 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: () async {
-                              await Share.share(
-                                'Check out my business on KIN:${currentUserDocument?.ownedBusiness?.id}',
+                              await KinServices.shareApp(
+                                text:
+                                    'Check out my business on KIN:${currentUserDocument?.ownedBusiness?.id}',
                                 sharePositionOrigin:
                                     getWidgetBoundingBox(context),
+                                businessRef: currentUserDocument?.ownedBusiness,
                               );
                             },
                             child: wrapWithModel(
