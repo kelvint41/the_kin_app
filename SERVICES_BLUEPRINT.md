@@ -287,6 +287,58 @@ an Instagram-card feed into a social-feed-style layout:
   anywhere in the app (`RefinedPostWidget`'s comment icon was always a
   stub). "Tied to posts/comments" in the request was implemented for
   posts only.
+- Spotlight leaderboard rows are now tappable: `KindexTickerEntry` gained
+  an optional `businessRef` (set by `fetchTopBusinessKindex`, left null by
+  `fetchTopCustomerKindex` since a customer has no business profile to
+  link to). Tapping a "Top Business Owners" row navigates to
+  `BusinessProfileV2Widget` with `businessDocument` serialized, matching
+  the exact convention used elsewhere (`business_showcase_widget.dart`'s
+  "View Showcase"). "Top Customers" rows stay inert - no target page.
+
+## Business Profile V2 - finalized as the Business Owner view
+
+`business_profile_v2_widget.dart` had accumulated several FlutterFlow-scaffold
+leftovers that made it feel unfinished. Cleaned up to match its new role as
+the dedicated page an owner lands on for their own business:
+
+- Removed the pulsing "Check In Now" button (an unwired `print()`-only
+  stub with a looping scale animation - this was almost certainly what read
+  as the status indicator "flashing," since it sat directly inside the
+  Open/Closed badge). Removed the separate "Check In" button too (also
+  unwired to anything persistent - it only mutated local `FFAppState`).
+  Removed "Call Now" (`tel:` launch + `call_tap` activity log).
+- `isBusinessOpen` (`lib/flutter_flow/custom_functions.dart`) was checked
+  and found already correct - proper 12-hour parsing, overnight-hours
+  handling, fail-safe-to-closed on bad data. No logic bug found; the
+  "flashing" was visual (the animated button above), not a status
+  miscalculation.
+- "Open in Maps" had a real bug: `launchMap(address: '', title: '')` -
+  hardcoded empty strings, so it opened Maps with no location. Fixed to
+  pass the business's real `address`/`businessName`.
+- "Order on KIN" (the delivery-options entry point) was silently broken:
+  it re-queried `businesses` filtered by a `business_ref` field equal to
+  the business's own reference - a field that's essentially never set in
+  practice (confirmed via grep - no write site sets it), so the query
+  always returned zero docs and the button rendered as an empty
+  `Container()`, invisible. This is why delivery felt "removed" - the
+  DoorDash/UberEats/Grubhub buttons themselves were already fully built
+  and wired to `businessDoc.doordashUrl`/`ubereatsUrl`/`grubhubUrl` in
+  `lib/components/clean_elegant_mobile_widget.dart`, just unreachable.
+  Fixed by passing the already-loaded `businessProfileV2BusinessesRecord`
+  (from the page's own outer `StreamBuilder`) directly instead of
+  re-querying - deleted the broken nested `StreamBuilder` entirely.
+- Added a "Manage Your Business" row (`ActionBtnWidget`, matching
+  `owner_profile_widget.dart`'s existing action-row visual style) linking
+  to `BusinessSetupPageWidget` (edit profile/hours), `MerchantPricingSuiteWidget`
+  (manage pricing/subscription), and `OwnerProfileWidget` (owner
+  dashboard). Gated behind `businessProfileV2BusinessesRecord.ownerRef ==
+  currentUserReference` - this page is also reached by non-owners via
+  `business_showcase_widget.dart`'s "View Showcase" button, so the
+  management row only renders for the actual owner.
+- Removed now-dead animation scaffolding (`animationsMap`,
+  `TickerProviderStateMixin`, the `flutter_flow_animations`/
+  `flutter_animate` imports) that existed solely to drive the removed
+  Check-In-Now pulse.
 
 ## Known follow-ups
 

@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/action_btn_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -25,8 +26,6 @@ import 'package:url_launcher/url_launcher.dart';
 class BusinessProfileV2Model extends FlutterFlowModel<BusinessProfileV2Widget> {
   ///  State fields for stateful widgets in this page.
 
-  // Stores action output result for [Custom Action - calculateRealTimeKindex] action in Button widget.
-  double? updatedScore;
   // State field(s) for RatingBar widget.
   double? ratingBarValue;
   // State field(s) for TextField widget.
@@ -35,13 +34,25 @@ class BusinessProfileV2Model extends FlutterFlowModel<BusinessProfileV2Widget> {
   String? Function(BuildContext, String?)? textControllerValidator;
   // Stores action output result for [Custom Action - calculateRealTimeKindex] action in Column widget.
   double? updatedKindexResult;
+  // Models for the owner-only "Manage Your Business" action row.
+  late ActionBtnModel ownerSetupActionModel;
+  late ActionBtnModel ownerPricingActionModel;
+  late ActionBtnModel ownerDashboardActionModel;
 
   @override
-  void initState(BuildContext context) {}
+  void initState(BuildContext context) {
+    ownerSetupActionModel = createModel(context, () => ActionBtnModel());
+    ownerPricingActionModel = createModel(context, () => ActionBtnModel());
+    ownerDashboardActionModel = createModel(context, () => ActionBtnModel());
+  }
 
   @override
   void dispose() {
     textFieldFocusNode?.dispose();
     textController?.dispose();
+
+    ownerSetupActionModel.dispose();
+    ownerPricingActionModel.dispose();
+    ownerDashboardActionModel.dispose();
   }
 }

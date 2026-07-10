@@ -1,26 +1,21 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
+import '/components/action_btn_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
-import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:math';
 import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
-import 'package:map_launcher/map_launcher.dart' as $ml;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'business_profile_v2_model.dart';
 export 'business_profile_v2_model.dart';
 
@@ -47,13 +42,10 @@ class BusinessProfileV2Widget extends StatefulWidget {
       _BusinessProfileV2WidgetState();
 }
 
-class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
-    with TickerProviderStateMixin {
+class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
   late BusinessProfileV2Model _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  final animationsMap = <String, AnimationInfo>{};
 
   @override
   void initState() {
@@ -62,35 +54,6 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
 
     _model.textController ??= TextEditingController();
     _model.textFieldFocusNode ??= FocusNode();
-
-    animationsMap.addAll({
-      'buttonOnPageLoadAnimation1': AnimationInfo(
-        loop: true,
-        trigger: AnimationTrigger.onPageLoad,
-        effectsBuilder: () => [
-          ScaleEffect(
-            curve: Curves.easeInOut,
-            delay: 0.0.ms,
-            duration: 600.0.ms,
-            begin: Offset(1.1, 1.0),
-            end: Offset(1.0, 1.0),
-          ),
-        ],
-      ),
-      'buttonOnPageLoadAnimation2': AnimationInfo(
-        loop: true,
-        trigger: AnimationTrigger.onPageLoad,
-        effectsBuilder: () => [
-          ScaleEffect(
-            curve: Curves.easeInOut,
-            delay: 0.0.ms,
-            duration: 600.0.ms,
-            begin: Offset(1.1, 1.0),
-            end: Offset(1.0, 1.0),
-          ),
-        ],
-      ),
-    });
   }
 
   @override
@@ -392,45 +355,6 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
                                     ),
                               ),
                             ),
-                            FFButtonWidget(
-                              onPressed: () {
-                                print('Button pressed ...');
-                              },
-                              text: 'Check In Now',
-                              options: FFButtonOptions(
-                                height: 28.0,
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    8.0, 0.0, 8.0, 0.0),
-                                iconAlignment: IconAlignment.start,
-                                iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 0.0, 0.0),
-                                color: FlutterFlowTheme.of(context).primary,
-                                textStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .override(
-                                      font: GoogleFonts.plusJakartaSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleSmall
-                                            .fontStyle,
-                                      ),
-                                      color: Colors.white,
-                                      fontSize: 14.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                elevation: 0.0,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                            ).animateOnPageLoad(
-                                animationsMap['buttonOnPageLoadAnimation1']!),
                           ],
                         ),
                       ),
@@ -460,135 +384,11 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
                                     0.0, 0.0, 8.0, 0.0),
                                 child: FFButtonWidget(
                                   onPressed: () async {
-                                    await launchUrl(Uri(
-                                      scheme: 'tel',
-                                      path: businessProfileV2BusinessesRecord
-                                          .phoneNumber,
-                                    ));
-
-                                    await ActivityLogsRecord.collection
-                                        .doc()
-                                        .set(createActivityLogsRecordData(
-                                          eventType: 'call_tap',
-                                          userRef: currentUserReference,
-                                          city: 'San Antonio',
-                                          sessionId: FFAppState().sessionId,
-                                          timestamp: getCurrentTimestamp,
-                                        ));
-                                  },
-                                  text: 'Call Now',
-                                  icon: Icon(
-                                    Icons.call_rounded,
-                                    size: 18.0,
-                                  ),
-                                  options: FFButtonOptions(
-                                    height: 48.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    iconColor: Colors.white,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: Colors.white,
-                                          fontSize: 13.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                    elevation: 0.0,
-                                    borderSide: BorderSide(
-                                      color: Colors.transparent,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 8.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () async {
-                                    _model.updatedScore =
-                                        await actions.calculateRealTimeKindex(
-                                      businessProfileV2BusinessesRecord
-                                          .kindexScore,
-                                      _model.ratingBarValue!.round(),
-                                      businessProfileV2BusinessesRecord
-                                          .isPremium,
-                                    );
-                                    FFAppState().kindexscore =
-                                        _model.updatedScore!;
-                                    safeSetState(() {});
-
-                                    safeSetState(() {});
-                                  },
-                                  text: 'Check In',
-                                  icon: Icon(
-                                    Icons.check_box_rounded,
-                                    size: 18.0,
-                                  ),
-                                  options: FFButtonOptions(
-                                    height: 48.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 0.0, 16.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    iconColor: Colors.white,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.w600,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: Colors.white,
-                                          fontSize: 13.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                    elevation: 0.0,
-                                    borderSide: BorderSide(
-                                      color: Colors.transparent,
-                                      width: 1.0,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 8.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () async {
                                     await launchMap(
-                                      address: '',
-                                      title: '',
+                                      address: businessProfileV2BusinessesRecord
+                                          .address,
+                                      title: businessProfileV2BusinessesRecord
+                                          .businessName,
                                     );
 
                                     await ActivityLogsRecord.collection
@@ -722,127 +522,218 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget>
                               ),
                             ),
                             Expanded(
-                              child: StreamBuilder<List<BusinessesRecord>>(
-                                stream: queryBusinessesRecord(
-                                  queryBuilder: (businessesRecord) =>
-                                      businessesRecord.where(
-                                    'business_ref',
-                                    isEqualTo: widget!.businessDocument,
-                                  ),
-                                  singleRecord: true,
-                                ),
-                                builder: (context, snapshot) {
-                                  // Customize what your widget looks like when it's loading.
-                                  if (!snapshot.hasData) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 50.0,
-                                        height: 50.0,
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                            FlutterFlowTheme.of(context)
-                                                .primary,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  List<BusinessesRecord>
-                                      buttonBusinessesRecordList =
-                                      snapshot.data!;
-                                  // Return an empty Container when the item does not exist.
-                                  if (snapshot.data!.isEmpty) {
-                                    return Container();
-                                  }
-                                  final buttonBusinessesRecord =
-                                      buttonBusinessesRecordList.isNotEmpty
-                                          ? buttonBusinessesRecordList.first
-                                          : null;
-
-                                  return FFButtonWidget(
-                                    onPressed: () async {
-                                      await showModalBottomSheet(
-                                        isScrollControlled: true,
-                                        backgroundColor: Colors.transparent,
-                                        enableDrag: false,
-                                        context: context,
-                                        builder: (context) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              FocusScope.of(context).unfocus();
-                                              FocusManager.instance.primaryFocus
-                                                  ?.unfocus();
-                                            },
-                                            child: Padding(
-                                              padding: MediaQuery.viewInsetsOf(
-                                                  context),
-                                              child: CleanElegantMobileWidget(
-                                                businessDoc:
-                                                    buttonBusinessesRecord!,
-                                              ),
+                              child: Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 0.0, 8.0, 0.0),
+                                child: FFButtonWidget(
+                                  onPressed: () async {
+                                    await showModalBottomSheet(
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      enableDrag: false,
+                                      context: context,
+                                      builder: (context) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            FocusScope.of(context).unfocus();
+                                            FocusManager.instance.primaryFocus
+                                                ?.unfocus();
+                                          },
+                                          child: Padding(
+                                            padding: MediaQuery.viewInsetsOf(
+                                                context),
+                                            child: CleanElegantMobileWidget(
+                                              businessDoc:
+                                                  businessProfileV2BusinessesRecord,
                                             ),
-                                          );
-                                        },
-                                      ).then((value) => safeSetState(() {}));
-                                    },
-                                    text: 'Order on KIN',
-                                    icon: Icon(
-                                      Icons.delivery_dining_sharp,
-                                      size: 18.0,
-                                    ),
-                                    options: FFButtonOptions(
-                                      height: 48.0,
-                                      padding: EdgeInsetsDirectional.fromSTEB(
-                                          12.0, 0.0, 12.0, 0.0),
-                                      iconPadding:
-                                          EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 0.0, 0.0, 0.0),
-                                      iconColor:
-                                          FlutterFlowTheme.of(context).primary,
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.w600,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleSmall
-                                                  .fontStyle,
-                                        ),
-                                        color:
-                                            FlutterFlowTheme.of(context).info,
-                                        fontSize: 13.0,
-                                        letterSpacing: 0.0,
+                                          ),
+                                        );
+                                      },
+                                    ).then((value) => safeSetState(() {}));
+                                  },
+                                  text: 'Order on KIN',
+                                  icon: Icon(
+                                    Icons.delivery_dining_sharp,
+                                    size: 18.0,
+                                  ),
+                                  options: FFButtonOptions(
+                                    height: 48.0,
+                                    padding: EdgeInsetsDirectional.fromSTEB(
+                                        12.0, 0.0, 12.0, 0.0),
+                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                        0.0, 0.0, 0.0, 0.0),
+                                    iconColor:
+                                        FlutterFlowTheme.of(context).primary,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .override(
+                                      font: GoogleFonts.plusJakartaSans(
                                         fontWeight: FontWeight.w600,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .fontStyle,
-                                        shadows: [
-                                          Shadow(
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            offset: Offset(2.0, 2.0),
-                                            blurRadius: 2.0,
-                                          )
-                                        ],
                                       ),
-                                      elevation: 0.0,
-                                      borderSide: BorderSide(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        width: 1.5,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12.0),
+                                      color: FlutterFlowTheme.of(context).info,
+                                      fontSize: 13.0,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.w600,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                      shadows: [
+                                        Shadow(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          offset: Offset(2.0, 2.0),
+                                          blurRadius: 2.0,
+                                        )
+                                      ],
                                     ),
-                                  );
-                                },
+                                    elevation: 0.0,
+                                    borderSide: BorderSide(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      width: 1.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                ),
                               ),
                             ),
                           ].divide(SizedBox(width: 12.0)),
                         ),
+                        if (businessProfileV2BusinessesRecord.ownerRef ==
+                            currentUserReference)
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 4.0, 0.0, 0.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
+                                borderRadius: BorderRadius.circular(16.0),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Manage Your Business',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontWeight: FontWeight.bold,
+                                            letterSpacing: 0.0,
+                                          ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            context.pushNamed(
+                                                BusinessSetupPageWidget
+                                                    .routeName);
+                                          },
+                                          child: wrapWithModel(
+                                            model: _model.ownerSetupActionModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: ActionBtnWidget(
+                                              icon: Icon(
+                                                Icons.edit_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                                size: 24.0,
+                                              ),
+                                              label: 'Edit Profile\n& Hours',
+                                            ),
+                                          ),
+                                        ),
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            context.pushNamed(
+                                              MerchantPricingSuiteWidget
+                                                  .routeName,
+                                              queryParameters: {
+                                                'businessRef': serializeParam(
+                                                  businessProfileV2BusinessesRecord
+                                                      .reference,
+                                                  ParamType.DocumentReference,
+                                                ),
+                                              }.withoutNulls,
+                                            );
+                                          },
+                                          child: wrapWithModel(
+                                            model:
+                                                _model.ownerPricingActionModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: ActionBtnWidget(
+                                              icon: Icon(
+                                                Icons.payments_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                                size: 24.0,
+                                              ),
+                                              label: 'Manage\nPricing',
+                                            ),
+                                          ),
+                                        ),
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            context.pushNamed(
+                                                OwnerProfileWidget.routeName);
+                                          },
+                                          child: wrapWithModel(
+                                            model: _model
+                                                .ownerDashboardActionModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: ActionBtnWidget(
+                                              icon: Icon(
+                                                Icons.dashboard_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                                size: 24.0,
+                                              ),
+                                              label: 'Owner\nDashboard',
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ].divide(SizedBox(height: 12.0)),
+                                ),
+                              ),
+                            ),
+                          ),
                         Row(
                           mainAxisSize: MainAxisSize.max,
                           children: [
