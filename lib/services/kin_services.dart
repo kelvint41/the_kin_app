@@ -28,11 +28,16 @@ class KindexTickerEntry {
     required this.name,
     required this.score,
     required this.isTrendingUp,
+    this.businessRef,
   });
 
   final String name;
   final double score;
   final bool isTrendingUp;
+
+  /// Only set for business entries (see [KinServices.fetchTopBusinessKindex])
+  /// - null for customer entries, which have no business profile to link to.
+  final DocumentReference? businessRef;
 }
 
 /// Power Hour caps for one subscription tier. See
@@ -88,6 +93,14 @@ String _powerHourLimitMessage(String tier) {
 /// onPressed never needs its own try/catch or crashes the app on failure.
 class KinServices {
   KinServices._();
+
+  /// Power Hour duration cap in minutes for [tier], from the same table
+  /// [startPowerHour] enforces server-side. Exposed so UI (duration
+  /// pickers, slider validation) can show/validate against the real
+  /// limit without duplicating it.
+  static int powerHourDurationCapMinutes(String tier) =>
+      (_powerHourLimitsByTier[tier] ?? _defaultPowerHourLimits)
+          .durationCapMinutes;
 
   /// Uppercases and strips [raw] down to alphanumeric characters, returning
   /// null if the result isn't exactly 5 characters. Exposed so a
@@ -200,6 +213,7 @@ class KinServices {
                 name: record.businessName,
                 score: record.kindexScore,
                 isTrendingUp: record.kindexVelocity >= 0,
+                businessRef: record.reference,
               ))
           .toList();
       return ServiceResult.success(entries);

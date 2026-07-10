@@ -1,6 +1,7 @@
 import '/components/rank_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/pages/business_profile_v2/business_profile_v2_widget.dart';
 import '/services/kin_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -235,14 +236,34 @@ class _LeaderboardSection extends StatelessWidget {
           ...entries.asMap().entries.map((indexed) {
             final rank = indexed.key + 1;
             final entry = indexed.value;
+            final businessRef = entry.businessRef;
+            final row = RankCardWidget(
+              rank: rank.toString(),
+              name: entry.name,
+              desc: descLabel,
+              score: entry.score.toStringAsFixed(0),
+            );
             return Padding(
               padding: EdgeInsets.only(bottom: theme.designToken.spacing.sm),
-              child: RankCardWidget(
-                rank: rank.toString(),
-                name: entry.name,
-                desc: descLabel,
-                score: entry.score.toStringAsFixed(0),
-              ),
+              child: businessRef == null
+                  ? row
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(24.0),
+                      child: InkWell(
+                        onTap: () {
+                          context.pushNamed(
+                            BusinessProfileV2Widget.routeName,
+                            queryParameters: {
+                              'businessDocument': serializeParam(
+                                businessRef,
+                                ParamType.DocumentReference,
+                              ),
+                            }.withoutNulls,
+                          );
+                        },
+                        child: row,
+                      ),
+                    ),
             );
           }),
       ],
