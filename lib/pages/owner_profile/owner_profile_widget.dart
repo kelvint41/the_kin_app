@@ -119,7 +119,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
     if (currentUserDocument?.ownedBusiness == null) {
       return Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24.0),
@@ -131,7 +131,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   'Set up your business to see your owner dashboard.',
                   textAlign: TextAlign.center,
                   style: FlutterFlowTheme.of(context).bodyLarge.override(
-                        color: Colors.white,
+                        color: FlutterFlowTheme.of(context).secondaryText,
                       ),
                 ),
                 SizedBox(height: 24.0),
@@ -166,7 +166,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: SingleChildScrollView(
           primary: false,
           child: Column(
@@ -198,7 +198,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              Color(0x990B3D2E),
+                              FlutterFlowTheme.of(context)
+                                  .primary
+                                  .withAlpha(153),
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 0.7, 1.0],
@@ -415,7 +417,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                             width: 100.0,
                                             height: 100.0,
                                             decoration: BoxDecoration(
-                                              color: Color(0x9A242424),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryBackground
+                                                      .withAlpha(154),
                                             ),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.max,
@@ -673,7 +678,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFF242424),
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
                         borderRadius: BorderRadius.circular(24.0),
                         shape: BoxShape.rectangle,
                       ),
@@ -715,7 +720,8 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                     .bodyLarge
                                                     .fontStyle,
                                           ),
-                                          color: Colors.white,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.bold,
                                           fontStyle:
@@ -740,7 +746,8 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                          color: Color(0xFF999999),
+                                          color:
+                                              FlutterFlowTheme.of(context).hint,
                                           letterSpacing: 0.0,
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
@@ -768,7 +775,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                             .bodySmall
                                             .fontStyle,
                                       ),
-                                      color: Color(0xFF999999),
+                                      color: FlutterFlowTheme.of(context).hint,
                                       letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodySmall
@@ -801,32 +808,33 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       children: [
                         Icon(
                           Icons.bolt_rounded,
-                          color: Colors.white,
+                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 18.0,
                         ),
                         Text(
                           'Active Promotion',
-                          style:
-                              FlutterFlowTheme.of(context).titleSmall.override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FontWeight.bold,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                    ),
-                                    color: Colors.white,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
+                          style: FlutterFlowTheme.of(context)
+                              .titleSmall
+                              .override(
+                                font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .titleSmall
+                                      .fontStyle,
+                                ),
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .fontStyle,
+                              ),
                         ),
                       ].divide(SizedBox(width: 4.0)),
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: Color(0xFF242424),
+                        color: FlutterFlowTheme.of(context).secondaryBackground,
                         borderRadius: BorderRadius.circular(24.0),
                         shape: BoxShape.rectangle,
                       ),
@@ -880,7 +888,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   .titleSmall
                                   .fontStyle,
                             ),
-                            color: Colors.white,
+                            color: FlutterFlowTheme.of(context).primaryText,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.bold,
                             fontStyle: FlutterFlowTheme.of(context)
@@ -956,7 +964,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   .titleSmall
                                   .fontStyle,
                             ),
-                            color: Colors.white,
+                            color: FlutterFlowTheme.of(context).primaryText,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.bold,
                             fontStyle: FlutterFlowTheme.of(context)
@@ -984,7 +992,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Color(0xFF242424),
+                              FlutterFlowTheme.of(context).secondaryBackground,
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 1.0],
@@ -994,7 +1002,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           borderRadius: BorderRadius.circular(24.0),
                           shape: BoxShape.rectangle,
                           border: Border.all(
-                            color: Color(0x33D4AF37),
+                            color: FlutterFlowTheme.of(context)
+                                .accent1
+                                .withAlpha(51),
                             width: 1.0,
                           ),
                         ),
@@ -1008,7 +1018,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: Color(0x33D4AF37),
+                                    color: FlutterFlowTheme.of(context)
+                                        .accent1
+                                        .withAlpha(51),
                                     borderRadius: BorderRadius.circular(9999.0),
                                     shape: BoxShape.rectangle,
                                   ),
@@ -1105,7 +1117,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color: Colors.white,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1151,7 +1165,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color: Colors.white,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1197,7 +1213,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color: Colors.white,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)

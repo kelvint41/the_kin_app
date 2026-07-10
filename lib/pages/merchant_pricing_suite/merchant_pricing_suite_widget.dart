@@ -133,7 +133,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
     if (businessRef == null) {
       return Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primary,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Center(
           child: Text(
             'This business could not be found.',
@@ -149,7 +149,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
-            backgroundColor: FlutterFlowTheme.of(context).primary,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Center(
               child: SizedBox(
                 width: 50.0,
@@ -173,7 +173,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
           },
           child: Scaffold(
             key: scaffoldKey,
-            backgroundColor: FlutterFlowTheme.of(context).primary,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,

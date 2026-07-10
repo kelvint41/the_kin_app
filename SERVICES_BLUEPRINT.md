@@ -354,6 +354,92 @@ the dedicated page an owner lands on for their own business:
   `business_setup_page_widget.dart`), that would be the more precise
   signal to switch to.
 
+## Theme Token Audit (Light/Dark consistency)
+
+`lib/flutter_flow/flutter_flow_theme.dart` is the actual source of truth
+(not FlutterFlow's settings screenshots) - `FlutterFlowTheme.of(context)`
+returns `LightModeTheme()`/`DarkModeTheme()` based on `Theme.of(context)
+.brightness`. Confirmed the given palette matches code exactly for
+Primary/Secondary/Tertiary/Alternate/Text/Background/Success/Error/
+Warning/Info/Accent1. Accent2/Accent3/Accent4(dark) in the given palette
+don't match the code's 8-digit ARGB values (different hues entirely, not
+rounding) - per user decision, kept the existing code values since they
+carry an alpha channel a 6-digit hex can't represent and are low-traffic
+overlay colors, not backgrounds/text.
+
+**Critical fix**: `LightModeTheme.primaryText` was `#D4AF37` (the same
+bright gold as dark mode) - since `primaryText` is the default color for
+nearly every typography style, this gave **2.05:1 contrast** against
+`primaryBackground` (#FCFCFC), failing WCAG AA at every text size (needs
+4.5:1 normal / 3:1 large). This was in the design system itself, not a
+code bug - confirmed by the user's own palette table listing the same
+gold for both modes. Fixed by deepening light-mode `primaryText` to
+`#7D5F16`, chosen to land at ~4.8:1 (a "dark goldenrod" that still reads
+as gold, not black) - deliberately matched to the ~5.8:1 contrast the app
+already relies on for gold-on-dark-green elsewhere, rather than picking
+an arbitrary safe value. Dark mode is unchanged.
+
+**Fixed - `owner_profile_widget.dart` and `merchant_pricing_suite_widget.dart`**
+used `FlutterFlowTheme.of(context).primary` (dark green, identical in
+both modes) as their Scaffold `backgroundColor` instead of
+`.primaryBackground` - a full-screen green page in light mode that never
+adapted to dark mode either. `owner_profile_widget.dart`'s original
+FlutterFlow build-prompt (still in the file's doc comment) explicitly
+specified "dark forest green primary background... and white text" -
+this was the original design intent, not a mistake, but superseded by
+this audit's instruction to unify all pages on the shared adaptive
+tokens. Fixing the background alone would have broken these pages, since
+their `Colors.white` text and `#242424`-hardcoded "premium dark cards"
+were tuned only for that fixed dark backdrop - once the background
+became adaptive, gold/white text and dark-hardcoded cards would clash or
+go invisible in light mode. Full fix in `owner_profile_widget.dart`:
+Scaffold backgrounds → `.primaryBackground`; section-header text
+(`Colors.white`) → `.primaryText`; the three "premium" card backgrounds
+(K-Index Score, Power Hour, Membership Tier - all hardcoded `#242424`) →
+`.secondaryBackground`, so the `.primaryText` icons already inside them
+stay correctly paired with an adaptive surface instead of a fixed-dark
+one; a paywall lock-overlay background → `.secondaryBackground` at the
+same alpha; a muted caption color (`#999999`) → `.hint` (the token
+already used for this role elsewhere in the app); a gold badge/border
+(`#33D4AF37`) → `.accent1.withAlpha(51)` (identical color, token-derived
+instead of magic hex). Left two `Colors.white` instances untouched
+intentionally: button text on a solid gold fill, and the hero business
+name sitting on the page's own dark image-gradient scrim - both are
+correct regardless of app theme mode, matching the same hero-scrim
+pattern used correctly elsewhere (`the_exchange_widget.dart`,
+`business_profile_v2_widget.dart`).
+
+### Found but explicitly out of scope for this pass
+
+- **Loading spinners app-wide** use `FlutterFlowTheme.of(context).primary`
+  (dark green) as their `CircularProgressIndicator` color, which is
+  ~1.5:1 contrast against `primaryBackground`/`secondaryBackground` in
+  dark mode - close to invisible. This is consistent across ~20+ files,
+  not specific to the two pages fixed here, so fixing it in only one
+  place would create a new inconsistency rather than resolve one. Needs
+  its own pass across every spinner call site (recommend `.secondaryText`,
+  which is legible against both background tokens in both modes).
+- `lib/components/marquee_ticker_widget.dart`'s root `Container` is
+  hardcoded `Colors.black` - a full-width, always-visible band on the
+  onboarding screen. Could be intentional "stock ticker" styling; flagged
+  for a design decision rather than changed.
+- `lib/old_designs/premium_story/premium_story_widget.dart` and
+  `refined_post_widget.dart` use hardcoded `Colors.black` for their
+  full-screen image-viewer dialogs - conventional for a lightbox, but not
+  theme-token-driven.
+- `lib/old_designs/exchange/exchange_widget.dart` and
+  `lib/old_designs/digital_loyalty_card/digital_loyalty_card_widget.dart`
+  have multiple hardcoded dark-green/charcoal full-width backgrounds, but
+  are confirmed unreachable (never instantiated outside their own file) -
+  only worth cleaning up if revived.
+- `lib/sign_in_page/`, `lib/legal_pages/`, `lib/dynamic_pages/`,
+  `lib/app_builder_concept/`, `lib/business_showcase/`,
+  `lib/mobile_sign_up_page/`, `lib/customersignup_page/`,
+  `lib/mobile_called_power_page/`, `lib/clean_premium_dark_page/` were
+  not covered by this audit (outside `lib/pages`/`lib/old_designs`/
+  `lib/components`) - a follow-up pass would need to include them for
+  full route-graph coverage.
+
 ## Known follow-ups
 
 - RevenueCat package identifiers in `merchant_pricing_suite_widget.dart`

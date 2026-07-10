@@ -155,7 +155,13 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color secondary = const Color(0xFFC5A059);
   late Color tertiary = const Color(0xFF8A7B5E);
   late Color alternate = const Color(0xFF3D3D3D);
-  late Color primaryText = const Color(0xFFD4AF37);
+  // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
+  // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
+  // failing WCAG AA at every text size since this is the default color
+  // for nearly all typography styles. This shade holds the same ~5.8:1
+  // contrast ratio the app already relies on for gold-on-dark-green
+  // elsewhere, while staying legible against a near-white background.
+  late Color primaryText = const Color(0xFF7D5F16);
   late Color secondaryText = const Color(0xFF14181B);
   late Color primaryBackground = const Color(0xFFFCFCFC);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
