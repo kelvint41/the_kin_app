@@ -184,5 +184,17 @@ service cloud.firestore {
       allow write: if false;
       allow delete: if false;
     }
+
+    // Written only by generateMarketingContent/logAiSuggestionEngagement
+    // (Cloud Functions, Admin SDK - bypasses rules entirely). No client
+    // path needs to read or write this directly; entitlement, latency, and
+    // engagement all round-trip through the callable functions instead.
+    match /ai_generation_logs/{document} {
+      allow read, write: if false;
+
+      match /engagement/{engagementDocument} {
+        allow read, write: if false;
+      }
+    }
   }
 }

@@ -38,12 +38,14 @@ class BusinessProfileV2Model extends FlutterFlowModel<BusinessProfileV2Widget> {
   late ActionBtnModel ownerSetupActionModel;
   late ActionBtnModel ownerPricingActionModel;
   late ActionBtnModel ownerDashboardActionModel;
+  late ActionBtnModel ownerAiMarketingActionModel;
 
   @override
   void initState(BuildContext context) {
     ownerSetupActionModel = createModel(context, () => ActionBtnModel());
     ownerPricingActionModel = createModel(context, () => ActionBtnModel());
     ownerDashboardActionModel = createModel(context, () => ActionBtnModel());
+    ownerAiMarketingActionModel = createModel(context, () => ActionBtnModel());
   }
 
   @override
@@ -54,5 +56,6 @@ class BusinessProfileV2Model extends FlutterFlowModel<BusinessProfileV2Widget> {
     ownerSetupActionModel.dispose();
     ownerPricingActionModel.dispose();
     ownerDashboardActionModel.dispose();
+    ownerAiMarketingActionModel.dispose();
   }
 }

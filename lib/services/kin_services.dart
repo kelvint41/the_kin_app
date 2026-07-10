@@ -6,6 +6,7 @@ import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
@@ -38,6 +39,27 @@ class KindexTickerEntry {
   /// Only set for business entries (see [KinServices.fetchTopBusinessKindex])
   /// - null for customer entries, which have no business profile to link to.
   final DocumentReference? businessRef;
+}
+
+/// One AI-generated post concept, returned by
+/// [KinServices.generateMarketingContent]. [generationLogId] identifies the
+/// `ai_generation_logs` doc this came from server-side - pass it back to
+/// [KinServices.logAiSuggestionEngagement] so usage can be tied to the
+/// specific generation that produced it.
+class MarketingContent {
+  const MarketingContent({
+    required this.caption,
+    required this.hashtags,
+    required this.cta,
+    required this.imageConcept,
+    required this.generationLogId,
+  });
+
+  final String caption;
+  final List<String> hashtags;
+  final String cta;
+  final String imageConcept;
+  final String generationLogId;
 }
 
 /// Power Hour caps for one subscription tier. See
@@ -490,6 +512,81 @@ class KinServices {
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not stop Power Hour.');
+    }
+  }
+
+  /// Generates one AI social media post concept (caption + 3 hashtags + CTA
+  /// + image concept) for [businessRef], optionally guided by [theme] (e.g.
+  /// "weekend brunch special").
+  ///
+  /// The entitlement check (does this business's subscription_tier qualify)
+  /// and the actual Gemini call both happen server-side, in the
+  /// generateMarketingContent Cloud Function - never here. This method
+  /// can't bypass that check by construction: it has no code path that
+  /// calls Gemini directly, only one that asks the Cloud Function to. A
+  /// modified/decompiled client could still call the Cloud Function
+  /// directly, but it would hit the exact same server-side entitlement
+  /// check, so there's no client-side shortcut to gate around.
+  ///
+  /// Calls the Cloud Function directly (not the generic makeCloudCall
+  /// helper in backend/cloud_functions/cloud_functions.dart) specifically
+  /// to surface the server's real error message - e.g. the "requires Pro
+  /// Growth or Elite Growth" upgrade prompt - rather than a generic
+  /// failure, matching the specific-message pattern startPowerHour
+  /// already uses for its own tier-limit failures.
+  /// Used by: Owner Profile -> Manage Your Business -> AI Marketing.
+  static Future<ServiceResult<MarketingContent>> generateMarketingContent({
+    required DocumentReference businessRef,
+    String? theme,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'generateMarketingContent',
+        options: HttpsCallableOptions(
+          timeout: const Duration(seconds: 30),
+        ),
+      )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        if (theme != null && theme.isNotEmpty) 'theme': theme,
+      });
+      final data = result.data;
+      return ServiceResult.success(MarketingContent(
+        caption: data['caption'] as String,
+        hashtags: List<String>.from(data['hashtags'] as List),
+        cta: data['cta'] as String,
+        imageConcept: data['image_concept'] as String,
+        generationLogId: data['generationLogId'] as String,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not generate marketing content.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not generate marketing content.');
+    }
+  }
+
+  /// Records what the owner did with an AI suggestion (used it, asked for
+  /// another, or dismissed it) - the "user engagement with suggested
+  /// posts" side of the AI analytics, separate from generation latency.
+  /// Best-effort: a logging failure shouldn't block the owner from
+  /// continuing to use the suggestion.
+  /// Used by: Owner Profile -> AI Marketing suggestion card actions.
+  static Future<void> logAiSuggestionEngagement({
+    required String generationLogId,
+    required String action,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('logAiSuggestionEngagement')
+          .call<void>({
+        'generationLogId': generationLogId,
+        'action': action,
+      });
+    } catch (_) {
+      // Best-effort - see doc comment above.
     }
   }
 }

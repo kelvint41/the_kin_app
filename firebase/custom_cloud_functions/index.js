@@ -6,3 +6,7 @@ exports.checkAndExpireBeacons = checkAndExpireBeacons.checkAndExpireBeacons;
 
 const kindexEngine = require("./kindex_engine.js");
 exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
+
+const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
+exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
+exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;

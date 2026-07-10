@@ -557,6 +557,87 @@ workflow's boot step; GitHub periodically updates which Xcode/simulator
 versions ship on `macos-14`, so this may need updating if the boot step
 can't find that device - check `xcrun simctl list devicetypes` in a run.
 
+## AI Marketing Orchestrator
+
+Generates one social media post concept (caption + 3 hashtags + CTA +
+image concept) per request, gated to paying businesses.
+
+**Architecture**: entirely server-side. `generateMarketingContent`
+(`firebase/custom_cloud_functions/ai_marketing_orchestrator.js`) is a
+Firebase callable function - the client (`KinServices.generateMarketingContent`
+in `kin_services.dart`) sends `{businessRefPath, theme?}`, Firebase verifies
+the caller's ID token before the handler runs (`request.auth` is
+trustworthy, unlike anything in the request body), then the function:
+checks the caller owns the business (`business.owner_ref` must match
+`request.auth.uid`), checks entitlement (`subscription_tier` in `{'Pro
+Growth', 'Elite Growth'}`), and only then calls Gemini using an API key
+from Firebase Secret Manager (`defineSecret('GEMINI_API_KEY')` - set via
+`firebase functions:secrets:set GEMINI_API_KEY`, never shipped to the
+client). The existing client-side Gemini wrapper
+(`lib/backend/gemini/gemini.dart`) previously had its API key committed
+to source and compromised (see the comment at the top of that file) -
+this is deliberately not reused for anything entitlement-gated, since a
+key embedded in the compiled client isn't a real secret and a client-side
+`if (isPremium)` check isn't a real security boundary.
+
+**Entitlement**: same `subscription_tier` field and same two tiers
+(`Pro Growth`/`Elite Growth`) the rest of the app already uses for paid
+features - no separate "Premium" concept was introduced. There's no
+hardcoded business ID or name anywhere in the entitlement path. A specific
+business can be comped by setting its `subscription_tier` field directly
+(the same mechanism every real upgrade already uses via
+`KinServices.upgradeBusinessTier`) - deliberately not implemented as a
+special-cased bypass in the middleware, after the requester's own two
+messages gave two different spellings of the same business name 30
+seconds apart, which is exactly the failure mode a hardcoded exact-string
+match would be vulnerable to (typo silently breaks or silently
+mismatches). No business named "Hair Madness"/"Hair Maddness" exists in
+Firestore as of this write-up; comping it is a one-time Firestore write
+once the business is actually registered.
+
+**Prompt structure**: `buildPrompt()` in the same file. Uses Gemini's
+structured-output mode (`responseSchema`, not free-text + regex) with a
+required 4-field schema (`caption`, `hashtags` - array, `cta`,
+`image_concept`), so the response is reliably parseable rather than
+occasionally malformed free text. Includes the business's name, category,
+and description from Firestore, plus an optional caller-supplied `theme`
+(e.g. "weekend brunch special").
+
+**Logging** (`ai_generation_logs` collection, Admin-SDK-write-only,
+`allow read, write: if false` in rules - no client path touches it
+directly):
+- Every call logs `status` (`success`/`error`/`rejected_not_entitled`),
+  `latency_ms` (wall-clock time around the Gemini call), `subscription_tier`,
+  and `theme` - this is the AI latency + system load data. Rejected
+  (not-entitled) attempts are logged too, not just successes, so upgrade-prompt
+  friction is visible in the data.
+- A subcollection (`ai_generation_logs/{id}/engagement`) records what the
+  owner did with each suggestion - `used`/`regenerated`/`dismissed`, via
+  the separate `logAiSuggestionEngagement` callable
+  (`KinServices.logAiSuggestionEngagement`, called from
+  `ai_marketing_sheet_widget.dart`'s three action buttons) - this is the
+  "user engagement with suggested posts" metric, tracked independently of
+  whether generation itself succeeded.
+- "Overall system load" beyond the per-call latency log: Cloud Functions
+  already emit invocation count/concurrency/duration to Cloud Monitoring
+  automatically, no extra code needed - visible in the Firebase console's
+  Functions dashboard. `ai_generation_logs` itself, aggregated by day/hour,
+  is a queryable proxy for load if an in-app admin view is wanted later;
+  none was built in this pass.
+
+**UI**: `lib/components/ai_marketing_sheet_widget.dart`, opened from a 4th
+button ("AI Marketing") added to Business Profile V2's existing "Manage
+Your Business" row (owner-only, same gating as the other three buttons
+there). Shows the theme input, a Generate button, and - once generated -
+the result plus Use This (copies to clipboard) / Regenerate / Dismiss,
+each logging the corresponding engagement action.
+
+**Not yet wired**: image generation itself (the "image concept" is a text
+description for the owner to shoot themselves, not a generated image) and
+posting directly to `exchange_posts` from the suggestion (Use This copies
+to clipboard rather than opening the composer prefilled - a reasonable
+follow-up if this gets used in practice).
+
 ## Known follow-ups
 
 - RevenueCat package identifiers in `merchant_pricing_suite_widget.dart`

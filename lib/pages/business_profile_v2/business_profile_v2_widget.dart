@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
+import '/components/ai_marketing_sheet_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -758,6 +759,46 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                 size: 24.0,
                                               ),
                                               label: 'Owner\nDashboard',
+                                            ),
+                                          ),
+                                        ),
+                                        InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () async {
+                                            await showModalBottomSheet(
+                                              isScrollControlled: true,
+                                              backgroundColor:
+                                                  Colors.transparent,
+                                              context: context,
+                                              builder: (context) => Padding(
+                                                padding:
+                                                    MediaQuery.viewInsetsOf(
+                                                        context),
+                                                child: AiMarketingSheetWidget(
+                                                  businessRef:
+                                                      businessProfileV2BusinessesRecord
+                                                          .reference,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          child: wrapWithModel(
+                                            model: _model
+                                                .ownerAiMarketingActionModel,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: ActionBtnWidget(
+                                              icon: Icon(
+                                                Icons.auto_awesome_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .primaryText,
+                                                size: 24.0,
+                                              ),
+                                              label: 'AI\nMarketing',
                                             ),
                                           ),
                                         ),
