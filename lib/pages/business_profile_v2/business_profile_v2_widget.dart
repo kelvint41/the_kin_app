@@ -42,6 +42,8 @@ bool _isFoodServiceBusiness(String category) {
     'barbecue',
     'coffee',
     'catering',
+    'grill',
+    'grocery',
   ];
   return foodKeywords.any(normalized.contains);
 }
