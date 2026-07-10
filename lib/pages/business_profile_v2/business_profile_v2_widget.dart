@@ -19,6 +19,33 @@ import 'package:provider/provider.dart';
 import 'business_profile_v2_model.dart';
 export 'business_profile_v2_model.dart';
 
+// There's no dedicated boolean for this yet - BusinessesRecord.
+// is_delivery_eligible exists in the schema but has no writer anywhere in
+// the app today (confirmed via grep), so gating on it would hide "Order on
+// KIN" for every business. `category` is the only populated signal: new
+// businesses get one of 5 fixed values from business_setup_page's dropdown
+// ('Restaurant & Food', 'Retail', etc.), but the 498 bulk-imported
+// businesses carry free-text Google-Places-style categories instead (e.g.
+// 'Barbecue restaurant', 'Bakery') - a keyword match covers both without a
+// data migration. If is_delivery_eligible ever gets a real writer (e.g. a
+// toggle next to the delivery URL fields in business_setup_page), that
+// would be the more precise long-term signal to switch to.
+bool _isFoodServiceBusiness(String category) {
+  final normalized = category.toLowerCase();
+  const foodKeywords = [
+    'restaurant',
+    'food',
+    'cafe',
+    'café',
+    'bakery',
+    'bbq',
+    'barbecue',
+    'coffee',
+    'catering',
+  ];
+  return foodKeywords.any(normalized.contains);
+}
+
 /// "Create a professional business profile page for a directory.
 ///
 /// Include a large header image at the top. Below the image, add the business
@@ -521,87 +548,92 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsetsDirectional.fromSTEB(
-                                    0.0, 0.0, 8.0, 0.0),
-                                child: FFButtonWidget(
-                                  onPressed: () async {
-                                    await showModalBottomSheet(
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      enableDrag: false,
-                                      context: context,
-                                      builder: (context) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            FocusScope.of(context).unfocus();
-                                            FocusManager.instance.primaryFocus
-                                                ?.unfocus();
-                                          },
-                                          child: Padding(
-                                            padding: MediaQuery.viewInsetsOf(
-                                                context),
-                                            child: CleanElegantMobileWidget(
-                                              businessDoc:
-                                                  businessProfileV2BusinessesRecord,
+                            if (_isFoodServiceBusiness(
+                                businessProfileV2BusinessesRecord.category))
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 8.0, 0.0),
+                                  child: FFButtonWidget(
+                                    onPressed: () async {
+                                      await showModalBottomSheet(
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        enableDrag: false,
+                                        context: context,
+                                        builder: (context) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              FocusScope.of(context).unfocus();
+                                              FocusManager.instance.primaryFocus
+                                                  ?.unfocus();
+                                            },
+                                            child: Padding(
+                                              padding: MediaQuery.viewInsetsOf(
+                                                  context),
+                                              child: CleanElegantMobileWidget(
+                                                businessDoc:
+                                                    businessProfileV2BusinessesRecord,
+                                              ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    ).then((value) => safeSetState(() {}));
-                                  },
-                                  text: 'Order on KIN',
-                                  icon: Icon(
-                                    Icons.delivery_dining_sharp,
-                                    size: 18.0,
-                                  ),
-                                  options: FFButtonOptions(
-                                    height: 48.0,
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
-                                    iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 0.0, 0.0, 0.0),
-                                    iconColor:
-                                        FlutterFlowTheme.of(context).primary,
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    textStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .override(
-                                      font: GoogleFonts.plusJakartaSans(
+                                          );
+                                        },
+                                      ).then((value) => safeSetState(() {}));
+                                    },
+                                    text: 'Order on KIN',
+                                    icon: Icon(
+                                      Icons.delivery_dining_sharp,
+                                      size: 18.0,
+                                    ),
+                                    options: FFButtonOptions(
+                                      height: 48.0,
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          12.0, 0.0, 12.0, 0.0),
+                                      iconPadding:
+                                          EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      iconColor:
+                                          FlutterFlowTheme.of(context).primary,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleSmall
+                                                  .fontStyle,
+                                        ),
+                                        color:
+                                            FlutterFlowTheme.of(context).info,
+                                        fontSize: 13.0,
+                                        letterSpacing: 0.0,
                                         fontWeight: FontWeight.w600,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .titleSmall
                                             .fontStyle,
+                                        shadows: [
+                                          Shadow(
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            offset: Offset(2.0, 2.0),
+                                            blurRadius: 2.0,
+                                          )
+                                        ],
                                       ),
-                                      color: FlutterFlowTheme.of(context).info,
-                                      fontSize: 13.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .fontStyle,
-                                      shadows: [
-                                        Shadow(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          offset: Offset(2.0, 2.0),
-                                          blurRadius: 2.0,
-                                        )
-                                      ],
+                                      elevation: 0.0,
+                                      borderSide: BorderSide(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        width: 1.5,
+                                      ),
+                                      borderRadius: BorderRadius.circular(12.0),
                                     ),
-                                    elevation: 0.0,
-                                    borderSide: BorderSide(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      width: 1.5,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12.0),
                                   ),
                                 ),
                               ),
-                            ),
                           ].divide(SizedBox(width: 12.0)),
                         ),
                         if (businessProfileV2BusinessesRecord.ownerRef ==

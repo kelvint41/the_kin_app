@@ -339,6 +339,20 @@ the dedicated page an owner lands on for their own business:
   `TickerProviderStateMixin`, the `flutter_flow_animations`/
   `flutter_animate` imports) that existed solely to drive the removed
   Check-In-Now pulse.
+- "Order on KIN" (delivery) is now gated to food-service businesses only,
+  via a new `_isFoodServiceBusiness(category)` keyword match in
+  `business_profile_v2_widget.dart`. There's no dedicated boolean for
+  this: `BusinessesRecord.is_delivery_eligible` exists in the schema but
+  has no writer anywhere in the app, so gating on it today would hide the
+  row for every business. `category` is the only populated signal, and it
+  comes in two shapes - `business_setup_page`'s fixed 5-value dropdown
+  (`'Restaurant & Food'`, etc.) for new signups, vs. free-text
+  Google-Places-style strings (`'Barbecue restaurant'`, `'Bakery'`) on the
+  498 bulk-imported businesses - hence a substring/keyword match rather
+  than an exact-value check. If `is_delivery_eligible` ever gets a real
+  writer (e.g. an owner-facing toggle next to the delivery URL fields in
+  `business_setup_page_widget.dart`), that would be the more precise
+  signal to switch to.
 
 ## Known follow-ups
 
