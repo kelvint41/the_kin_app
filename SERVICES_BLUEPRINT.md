@@ -67,6 +67,7 @@ onPressed: () async {
 | Founding Local / Pro Growth / Elite Growth tier cards | `pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart` | `KinServices.upgradeBusinessTier` |
 | "Promote" | `pages/owner_profile/owner_profile_widget.dart` | `KinServices.shareApp` |
 | Power Hour panel Start/Stop | `components/power_hour_panel_widget.dart` (used by `pages/owner_profile/owner_profile_widget.dart`) | `KinServices.startPowerHour` / `stopPowerHour` |
+| "Launch Power Hour Blast" | `mobile_called_power_page/mobile_called_power_page_widget.dart` | `KinServices.startPowerHour` |
 | Onboarding Kindex ticker (top-of-screen marquee) | `pages/onboarding_selection_card/onboarding_selection_card_widget.dart` -> `components/marquee_ticker_widget.dart` | `KinServices.fetchTopBusinessKindex` + `fetchTopCustomerKindex` |
 
 ## Power Hour
@@ -102,6 +103,33 @@ Community/Pro/Elite names:
 The requested duration is silently capped, not rejected. The frequency
 check uses a rolling 7-day window (`power_hour_last_reset` +
 `power_hour_usage_count`), not a fixed calendar week.
+
+`KinServices.powerHourDurationCapMinutes(tier)` exposes the same cap
+table for UI use (duration pickers, slider validation) without
+duplicating it - used by both `power_hour_panel_widget.dart` and
+`mobile_called_power_page_widget.dart`.
+
+### mobile_called_power_page - a second, previously-disconnected UI
+
+`mobile_called_power_page_widget.dart` ("Power Hour Blast") was a
+pre-existing, independent page that wrote to a completely different
+collection (`ExchangePromotionsRecord`), had no tier-awareness, hardcoded
+1/3/5-**hour** duration options, and a cost calculation that multiplied a
+`String` by an `int` (`sliderValue!.toString() * 35`, which repeats the
+string rather than computing anything - not really a `$888` placeholder,
+just a garbled string that looked like one). It's registered as a route
+(`/mobileCalledPowerPage`) but nothing in the app navigates to it.
+
+Consolidated onto the real system: it now reads `subscription_tier` from
+the same `BusinessesRecord` stream, shows one duration chip matching the
+tier's cap (via `powerHourDurationCapMinutes`), a slider (5-90 min) that
+clamps to the tier cap with a SnackBar on exceed, a real
+`_calculateTotalCost` ($10 per 30 min, prorated), and calls
+`KinServices.startPowerHour` on launch instead of writing to
+`ExchangePromotionsRecord`. Also removed a stray `InkWell` around the
+"Blast Message" label that wrote an `ExchangePromotionsRecord` on tap of
+the label itself - unrelated to any real action, looked like leftover
+miswired FlutterFlow generation.
 
 Note: this app already has its own Exchange system (`exchange_posts`,
 `exchange_promotions` collections). A separate Exchange gate/reactions
@@ -191,6 +219,74 @@ scoped as "keep as is." Fixing it properly would mean deciding where
 business Kindex scoring should actually happen (nothing currently
 updates `businesses.kindex_score`/`kindex_velocity` at all outside of
 manual/admin writes) - a bigger scope than the ticker feature itself.
+
+## Exchange Feed & Kindex Spotlight
+
+`the_exchange_widget.dart` (per-business Exchange page) was overhauled from
+an Instagram-card feed into a social-feed-style layout:
+
+- Wrapped `Scaffold.body` in `SafeArea` so the header clears the
+  notch/camera.
+- The `exchange_posts` `StreamBuilder` (queries by `business_ref`, already
+  existed) was clipped inside a stray fixed `height: 120.0` `Container` -
+  a real layout bug, not intentional. Removed; the feed now sizes to
+  content inside the page's own scroll view.
+- New component `lib/components/exchange_feed_item_widget.dart` replaces
+  `RefinedPostWidget` (old_designs, Instagram-style) for feed rows: a dark
+  card matching the existing header visual language (avatar, bold name,
+  theme-token colors), post text/image, and a per-post **Quick Reactions**
+  row (❤️🙌🏾🔥✨👏🏾).
+- Quick Reactions write a `UserEngagementEventsRecord` per user+post+type
+  at a **deterministic doc id** (`{uid}_{postId}_{eventType}`), exactly
+  mirroring `RefinedPostWidget._handleLike`'s dedup pattern - a repeat tap
+  is rejected server-side (`exchange_posts`/`UserEngagementEvents` rules
+  are create-only, no update/delete) and the failure is swallowed. The
+  event types (`react_love`/`react_praise`/`react_fire`/`react_sparkle`/
+  `react_applause`) were already seeded into `kindex_config/scoring_weights`
+  earlier, so reactions score Kindex points immediately - no Cloud
+  Function change needed.
+- **No aggregate reaction/like counts are shown.** `exchange_posts` and
+  `UserEngagementEvents` are both `allow write: if false` /
+  self-read-only respectively, so a post's total reaction count can't be
+  computed client-side (an authenticated user can only read *their own*
+  engagement events, not aggregate across all users on a post). Showing a
+  real count would need a Cloud Function to denormalize a counter onto
+  the post doc, admin-write, same shape as `kindex_engine.js` but not
+  built. Each reaction button instead just highlights once the current
+  session's user has tapped it.
+- Post creation (both the header "+" dialog and the bottom composer bar)
+  now also logs a `UserEngagementEventsRecord` with `event_type: 'post'`
+  targeting the new post - previously posting only wrote the
+  `ExchangePostsRecord` itself and never contributed to the author's
+  Kindex score, even though `'post': 10` has been in the seeded weights
+  map since the config was first created.
+- New component `lib/components/kindex_spotlight_widget.dart`: a compact
+  "Kindex Spotlight" preview card placed between the page header and the
+  feed. Tapping it opens a modal bottom sheet with two `RankCardWidget`
+  lists - "Top Business Owners" (`KinServices.fetchTopBusinessKindex`)
+  and "Top Customers" (`KinServices.fetchTopCustomerKindex`) - reusing the
+  two ranking queries already built for the onboarding ticker rather than
+  adding a third. Per-user Kindex score is also now shown inline as a
+  small gold pill next to each poster's name in the feed
+  (`_KindexScoreBadge` inside `exchange_feed_item_widget.dart`), reading
+  `KindexScores/{uid}` directly (guarded for the common case where a new
+  user has no score doc yet - `KindexScoresRecord.getDocument` would
+  otherwise throw on a non-existent doc).
+- **Depends on the not-yet-deployed Cloud Function change noted above**:
+  until `kindex_engine.js`'s `ticker_symbol`/`is_trending_up`
+  denormalization ships, `fetchTopCustomerKindex` returns an empty list
+  (every `KindexScores` doc has a blank `ticker_symbol`, so the row is
+  filtered out) - meaning the Spotlight's "Top Customers" half, and the
+  feed's inline score badges for customers, will show nothing until that
+  deploy happens. "Top Business Owners" is unaffected by that deploy, but
+  inherits the pre-existing "trend is not real" issue above (`kindex_score`
+  itself is also only ever set by manual/admin writes today, so most
+  businesses will show a flat/tied score until real business-side Kindex
+  scoring is built).
+- Comments are out of scope: there is no comment schema/collection
+  anywhere in the app (`RefinedPostWidget`'s comment icon was always a
+  stub). "Tied to posts/comments" in the request was implemented for
+  posts only.
 
 ## Known follow-ups
 
