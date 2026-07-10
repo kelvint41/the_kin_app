@@ -71,8 +71,8 @@ jobs:
             --dart-define=DEV_PASSWORD="${{ secrets.DEV_BYPASS_PASSWORD }}" \
             --dart-define=DEV_EMAIL="${{ secrets.DEV_BYPASS_EMAIL }}" \
             --dart-define=DEV_ROUTE="$ROUTE" \
-            --dart-define=SCREENSHOT_THEME="$THEME" 
-            
+            --dart-define=SCREENSHOT_THEME="$THEME" \
+            > "$LOG_FILE" 2>&1 &
           TEST_PID=$!
 
           SEEN=""
