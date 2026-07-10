@@ -139,6 +139,31 @@ class BusinessesRecord extends FirestoreRecord {
   bool get hasFlashBeacon => _hasFlashBeacon ?? false;
   bool hasHasFlashBeacon() => _hasFlashBeacon != null;
 
+  // "flash_beacon_expires_at" field. Read by the checkAndExpireBeacons
+  // Cloud Function (firebase/custom_cloud_functions), which flips
+  // has_flash_beacon back to false once this passes.
+  DateTime? _flashBeaconExpiresAt;
+  DateTime? get flashBeaconExpiresAt => _flashBeaconExpiresAt;
+  bool hasFlashBeaconExpiresAt() => _flashBeaconExpiresAt != null;
+
+  // "flash_beacon_duration_minutes" field.
+  int? _flashBeaconDurationMinutes;
+  int get flashBeaconDurationMinutes => _flashBeaconDurationMinutes ?? 0;
+  bool hasFlashBeaconDurationMinutes() => _flashBeaconDurationMinutes != null;
+
+  // "power_hour_usage_count" field. Count of Power Hours started within
+  // the current rolling 7-day window (see power_hour_last_reset).
+  int? _powerHourUsageCount;
+  int get powerHourUsageCount => _powerHourUsageCount ?? 0;
+  bool hasPowerHourUsageCount() => _powerHourUsageCount != null;
+
+  // "power_hour_last_reset" field. When the rolling 7-day usage window
+  // last reset; power_hour_usage_count is treated as 0 once 7 days have
+  // passed since this timestamp.
+  DateTime? _powerHourLastReset;
+  DateTime? get powerHourLastReset => _powerHourLastReset;
+  bool hasPowerHourLastReset() => _powerHourLastReset != null;
+
   // "is_priority_pinned" field.
   bool? _isPriorityPinned;
   bool get isPriorityPinned => _isPriorityPinned ?? false;
@@ -359,6 +384,13 @@ class BusinessesRecord extends FirestoreRecord {
     _isArEnabled = snapshotData['is_ar_enabled'] as bool?;
     _subscriptionTier = snapshotData['subscription_tier'] as String?;
     _hasFlashBeacon = snapshotData['has_flash_beacon'] as bool?;
+    _flashBeaconExpiresAt =
+        snapshotData['flash_beacon_expires_at'] as DateTime?;
+    _flashBeaconDurationMinutes =
+        castToType<int>(snapshotData['flash_beacon_duration_minutes']);
+    _powerHourUsageCount =
+        castToType<int>(snapshotData['power_hour_usage_count']);
+    _powerHourLastReset = snapshotData['power_hour_last_reset'] as DateTime?;
     _isPriorityPinned = snapshotData['is_priority_pinned'] as bool?;
     _loiSigned = snapshotData['loi_signed'] as bool?;
     _loiDate = snapshotData['loi_date'] as DateTime?;
@@ -631,6 +663,10 @@ Map<String, dynamic> createBusinessesRecordData({
   bool? isArEnabled,
   String? subscriptionTier,
   bool? hasFlashBeacon,
+  DateTime? flashBeaconExpiresAt,
+  int? flashBeaconDurationMinutes,
+  int? powerHourUsageCount,
+  DateTime? powerHourLastReset,
   bool? isPriorityPinned,
   bool? loiSigned,
   DateTime? loiDate,
@@ -696,6 +732,10 @@ Map<String, dynamic> createBusinessesRecordData({
       'is_ar_enabled': isArEnabled,
       'subscription_tier': subscriptionTier,
       'has_flash_beacon': hasFlashBeacon,
+      'flash_beacon_expires_at': flashBeaconExpiresAt,
+      'flash_beacon_duration_minutes': flashBeaconDurationMinutes,
+      'power_hour_usage_count': powerHourUsageCount,
+      'power_hour_last_reset': powerHourLastReset,
       'is_priority_pinned': isPriorityPinned,
       'loi_signed': loiSigned,
       'loi_date': loiDate,
@@ -770,6 +810,10 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.isArEnabled == e2?.isArEnabled &&
         e1?.subscriptionTier == e2?.subscriptionTier &&
         e1?.hasFlashBeacon == e2?.hasFlashBeacon &&
+        e1?.flashBeaconExpiresAt == e2?.flashBeaconExpiresAt &&
+        e1?.flashBeaconDurationMinutes == e2?.flashBeaconDurationMinutes &&
+        e1?.powerHourUsageCount == e2?.powerHourUsageCount &&
+        e1?.powerHourLastReset == e2?.powerHourLastReset &&
         e1?.isPriorityPinned == e2?.isPriorityPinned &&
         e1?.loiSigned == e2?.loiSigned &&
         e1?.loiDate == e2?.loiDate &&
@@ -837,6 +881,10 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.isArEnabled,
         e?.subscriptionTier,
         e?.hasFlashBeacon,
+        e?.flashBeaconExpiresAt,
+        e?.flashBeaconDurationMinutes,
+        e?.powerHourUsageCount,
+        e?.powerHourLastReset,
         e?.isPriorityPinned,
         e?.loiSigned,
         e?.loiDate,

@@ -35,6 +35,51 @@ class KindexTickerEntry {
   final bool isTrendingUp;
 }
 
+/// Power Hour caps for one subscription tier. See
+/// [KinServices.startPowerHour].
+class _PowerHourLimits {
+  const _PowerHourLimits({required this.durationCapMinutes, this.weeklyLimit});
+
+  final int durationCapMinutes;
+
+  /// Max Power Hours per rolling 7-day window. Null means unlimited -
+  /// skip the frequency check entirely.
+  final int? weeklyLimit;
+}
+
+/// Real subscription_tier values, as written by the live upgrade flow in
+/// merchant_pricing_suite_widget.dart - not the generic 'Community' /
+/// 'Pro' / 'Elite' names a first pass might assume. Any business whose
+/// subscription_tier isn't one of these keys (a typo, or an ad-hoc value
+/// like 'Founder'/'unlimited' set outside the normal upgrade flow) falls
+/// through to [_defaultPowerHourLimits] rather than risk granting
+/// broader access than intended.
+const _powerHourLimitsByTier = <String, _PowerHourLimits>{
+  'Community': _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1),
+  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, weeklyLimit: 2),
+  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, weeklyLimit: 3),
+  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, weeklyLimit: null),
+};
+const _defaultPowerHourLimits =
+    _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1);
+
+String _powerHourLimitMessage(String tier) {
+  switch (tier) {
+    case 'Community':
+      return "You've reached your weekly Power Hour limit. Upgrade to "
+          'Founding Local or Pro Growth for more!';
+    case 'Founding Local':
+      return "You've reached your weekly Power Hour limit for Founding "
+          'Local. Upgrade to Pro Growth for more!';
+    case 'Pro Growth':
+      return "You've reached your weekly Power Hour limit for Pro Growth. "
+          'Upgrade to Elite Growth for unlimited Power Hours!';
+    default:
+      return "You've reached your weekly Power Hour limit. Upgrade your "
+          'plan for more!';
+  }
+}
+
 /// Thin, reusable wrappers around this app's Firestore-backed actions.
 ///
 /// Every method here does three things consistently: checks auth/input
@@ -364,6 +409,73 @@ class KinServices {
           );
     } catch (_) {
       // Best-effort - see doc comment above.
+    }
+  }
+
+  /// Starts a Power Hour flash-beacon promotion, gated by the business's
+  /// subscription_tier: [durationMinutes] is capped, and a rolling
+  /// 7-day usage count is checked against a per-tier weekly limit (see
+  /// _powerHourLimitsByTier). Fetches the business fresh rather than
+  /// trusting the caller's possibly-stale cached data, since this is
+  /// enforcing a real limit, not just display. checkAndExpireBeacons (a
+  /// scheduled Cloud Function that already exists, see
+  /// firebase/custom_cloud_functions) flips has_flash_beacon back to
+  /// false once flash_beacon_expires_at passes - no new backend logic
+  /// needed for expiry itself.
+  /// Used by: Owner Profile -> Power Hour panel "Start" button.
+  static Future<ServiceResult<void>> startPowerHour({
+    required DocumentReference businessRef,
+    required int durationMinutes,
+  }) async {
+    try {
+      final business = await BusinessesRecord.getDocumentOnce(businessRef);
+      final limits = _powerHourLimitsByTier[business.subscriptionTier] ??
+          _defaultPowerHourLimits;
+
+      final now = DateTime.now();
+      final windowExpired = business.powerHourLastReset == null ||
+          now.difference(business.powerHourLastReset!).inDays >= 7;
+      final currentUsage = windowExpired ? 0 : business.powerHourUsageCount;
+
+      if (limits.weeklyLimit != null && currentUsage >= limits.weeklyLimit!) {
+        return ServiceResult.failure(
+            _powerHourLimitMessage(business.subscriptionTier));
+      }
+
+      final cappedDuration = durationMinutes > limits.durationCapMinutes
+          ? limits.durationCapMinutes
+          : durationMinutes;
+      final expiresAt = now.add(Duration(minutes: cappedDuration));
+
+      await businessRef.update(createBusinessesRecordData(
+        hasFlashBeacon: true,
+        flashBeaconExpiresAt: expiresAt,
+        flashBeaconDurationMinutes: cappedDuration,
+        powerHourUsageCount: currentUsage + 1,
+        powerHourLastReset:
+            windowExpired ? now : (business.powerHourLastReset ?? now),
+      ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not start Power Hour.');
+    }
+  }
+
+  /// Ends a Power Hour promotion early. Only clears has_flash_beacon -
+  /// leaves flash_beacon_expires_at as-is, since it's harmless once
+  /// has_flash_beacon is false and every read of it already checks that
+  /// flag first.
+  /// Used by: Owner Profile -> Power Hour panel "Stop" button.
+  static Future<ServiceResult<void>> stopPowerHour({
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      await businessRef.update(createBusinessesRecordData(
+        hasFlashBeacon: false,
+      ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not stop Power Hour.');
     }
   }
 }

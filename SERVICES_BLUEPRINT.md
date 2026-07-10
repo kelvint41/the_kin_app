@@ -53,6 +53,9 @@ onPressed: () async {
 | `downgradeToCommunity` | `({businessRef})` | Resets `BusinessesRecord` to the free Community tier |
 | `fetchTopBusinessKindex` | `({limit = 20})` | Read-only: top `businesses` by `kindex_score`, for the onboarding Kindex ticker's business row. |
 | `fetchTopCustomerKindex` | `({limit = 20})` | Read-only: top `KindexScores` by `score`, for the ticker's customer row. |
+| `shareApp` | `({text, sharePositionOrigin, businessRef})` | Opens the native share sheet, then creates a `share_app` `UserEngagementEventsRecord` (best-effort) |
+| `startPowerHour` | `({businessRef, durationMinutes})` | Sets `has_flash_beacon`, `flash_beacon_expires_at` (computed client-side), `flash_beacon_duration_minutes` on `BusinessesRecord` |
+| `stopPowerHour` | `({businessRef})` | Clears `has_flash_beacon` on `BusinessesRecord` |
 
 ## Button map
 
@@ -62,7 +65,43 @@ onPressed: () async {
 | "Register Now" | `pages/business_setup_page/business_setup_page_widget.dart` | `KinServices.registerBusiness` |
 | Community tier card | `pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart` | `KinServices.downgradeToCommunity` |
 | Founding Local / Pro Growth / Elite Growth tier cards | `pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart` | `KinServices.upgradeBusinessTier` |
+| "Promote" | `pages/owner_profile/owner_profile_widget.dart` | `KinServices.shareApp` |
+| Power Hour panel Start/Stop | `components/power_hour_panel_widget.dart` (used by `pages/owner_profile/owner_profile_widget.dart`) | `KinServices.startPowerHour` / `stopPowerHour` |
 | Onboarding Kindex ticker (top-of-screen marquee) | `pages/onboarding_selection_card/onboarding_selection_card_widget.dart` -> `components/marquee_ticker_widget.dart` | `KinServices.fetchTopBusinessKindex` + `fetchTopCustomerKindex` |
+
+## Power Hour
+
+`components/power_hour_panel_widget.dart` replaces what was an empty placeholder
+in Owner Profile's "Active Promotion" section. It reuses backend
+infrastructure that already existed before this feature: `has_flash_beacon`
+and the scheduled Cloud Function `checkAndExpireBeacons`
+(`firebase/custom_cloud_functions`, runs every 5 min) that flips
+`has_flash_beacon` back to `false` once `flash_beacon_expires_at` passes -
+no new Cloud Function was needed, only the two new schema fields
+(`flash_beacon_expires_at`, `flash_beacon_duration_minutes`) that
+`checkAndExpireBeacons` already referenced but the Dart client couldn't
+read/write.
+
+The countdown is computed client-side from `flash_beacon_expires_at` via
+a local `Timer.periodic`, not a Firestore read on a loop. Stopping early
+is confirm-gated (an `AlertDialog`); starting isn't, since an accidental
+early stop mid-promotion is the costlier mistake.
+
+`startPowerHour` gates on `subscription_tier` - real values as written by
+`merchant_pricing_suite_widget.dart`'s upgrade flow, not generic
+Community/Pro/Elite names:
+
+| Tier | Duration cap | Weekly limit |
+|---|---|---|
+| Community | 30 min | 1 |
+| Founding Local | 45 min | 2 |
+| Pro Growth | 60 min | 3 |
+| Elite Growth | 90 min | unlimited |
+| anything else (typo, ad-hoc value like `Founder`/`unlimited`) | 30 min | 1 (fails safe to Community's limits) |
+
+The requested duration is silently capped, not rejected. The frequency
+check uses a rolling 7-day window (`power_hour_last_reset` +
+`power_hour_usage_count`), not a fixed calendar week.
 
 Note: this app already has its own Exchange system (`exchange_posts`,
 `exchange_promotions` collections). A separate Exchange gate/reactions

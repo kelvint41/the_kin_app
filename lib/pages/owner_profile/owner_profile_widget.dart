@@ -3,6 +3,7 @@ import '/backend/backend.dart';
 import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
+import '/components/power_hour_panel_widget.dart';
 import '/components/review_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -831,11 +832,32 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(24.0),
-                        child: Container(
-                          child: Container(
-                            width: 0.0,
-                            height: 0.0,
-                          ),
+                        child: StreamBuilder<BusinessesRecord>(
+                          stream: BusinessesRecord.getDocument(
+                              currentUserDocument!.ownedBusiness!),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return Center(
+                                child: SizedBox(
+                                  width: 24.0,
+                                  height: 24.0,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      FlutterFlowTheme.of(context).primary,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            final powerHourBusinessesRecord = snapshot.data!;
+                            return PowerHourPanelWidget(
+                              businessRef: powerHourBusinessesRecord.reference,
+                              hasFlashBeacon:
+                                  powerHourBusinessesRecord.hasFlashBeacon,
+                              flashBeaconExpiresAt: powerHourBusinessesRecord
+                                  .flashBeaconExpiresAt,
+                            );
+                          },
                         ),
                       ),
                     ),
