@@ -1,0 +1,98 @@
+name: App Store screenshots
+
+# Manual trigger only - this produces marketing assets on demand, not a
+# CI gate that should run on every push. Requires these repo secrets:
+#   FIREBASE_SERVICE_ACCOUNT_KEY  - base64 of firebase/scripts/serviceAccountKey.json
+#   DEV_BYPASS_EMAIL              - the dev-bypass account's email (see main.dart)
+#   DEV_BYPASS_PASSWORD           - the dev-bypass account's password
+#   DEV_BYPASS_UID                - that account's Firebase Auth uid, so the
+#                                    seed script can set it as the demo
+#                                    business's owner
+#
+# Runs on macos-14 (Xcode + iOS Simulator preinstalled by GitHub - no local
+# Xcode/Android SDK install needed). Device name below may need updating as
+# GitHub rotates the preinstalled Xcode/simulator versions on this image;
+# check `xcrun simctl list devicetypes` in a run if the boot step fails.
+on:
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: macos-14
+    strategy:
+      matrix:
+        theme: [light, dark]
+        route:
+          - path: "/theExchange?businessRef=screenshot_demo_business"
+            label: exchange
+          - path: "/businessProfileV2?businessDocument=screenshot_demo_business"
+            label: business_profile
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Decode Firebase service account key
+        run: echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY }}" | base64 --decode > firebase/scripts/serviceAccountKey.json
+
+      - name: Install seed script dependencies
+        run: npm install firebase-admin --no-save
+        working-directory: firebase/scripts
+
+      - name: Seed screenshot demo data
+        env:
+          SEED_DEV_UID: ${{ secrets.DEV_BYPASS_UID }}
+        run: node seed_screenshot_demo.js
+        working-directory: firebase/scripts
+
+      - run: flutter pub get
+
+      - name: Boot iOS Simulator (iPhone 15 Pro Max, 6.7")
+        run: |
+          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro Max" | head -1 | grep -oE '[0-9A-F-]{36}')
+          echo "DEVICE_ID=$DEVICE_ID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$DEVICE_ID"
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+
+      - name: Run screenshot capture (${{ matrix.route.label }}, ${{ matrix.theme }})
+        env:
+          ROUTE: ${{ matrix.route.path }}
+          LABEL: ${{ matrix.route.label }}
+          THEME: ${{ matrix.theme }}
+        run: |
+          mkdir -p screenshots
+          LOG_FILE=$(mktemp)
+
+          flutter test integration_test/app_screenshots_test.dart \
+            -d "$DEVICE_ID" \
+            --dart-define=DEV_PASSWORD="${{ secrets.DEV_BYPASS_PASSWORD }}" \
+            --dart-define=DEV_EMAIL="${{ secrets.DEV_BYPASS_EMAIL }}" \
+            --dart-define=DEV_ROUTE="$ROUTE" \
+            --dart-define=SCREENSHOT_THEME="$THEME" \
+            > "$LOG_FILE" 2>&1 &
+          TEST_PID=$!
+
+          SEEN=""
+          while kill -0 $TEST_PID 2>/dev/null; do
+            LINE=$(grep "KIN_SCREENSHOT_READY:" "$LOG_FILE" | tail -1 || true)
+            if [ -n "$LINE" ] && [ "$LINE" != "$SEEN" ]; then
+              SEEN="$LINE"
+              NAME=$(echo "$LINE" | sed 's/.*KIN_SCREENSHOT_READY: //' | tr -d '[:space:]')
+              OUT="screenshots/${NAME}_${THEME}.png"
+              echo "Capturing $OUT"
+              xcrun simctl io "$DEVICE_ID" screenshot "$OUT"
+            fi
+            sleep 0.5
+          done
+
+          wait $TEST_PID
+          cat "$LOG_FILE"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ matrix.route.label }}-${{ matrix.theme }}
+          path: screenshots/*.png
+          if-no-files-found: error

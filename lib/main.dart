@@ -9,9 +9,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'auth/firebase_auth/firebase_user_provider.dart';
 import 'auth/firebase_auth/auth_util.dart';
 
+import 'backend/backend.dart';
 import 'backend/firebase/firebase_config.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import 'flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/kindex_ticker_util.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'flutter_flow/nav/nav.dart';
@@ -41,6 +43,7 @@ void main() async {
   }
 
   await _maybeSignInDevBypass();
+  _maybeForceThemeMode();
 
   runApp(ChangeNotifierProvider(
     create: (context) => appState,
@@ -61,9 +64,12 @@ void main() async {
 /// DEV_EMAIL defaults to the test account kelvin@apptest.com; override
 /// with --dart-define=DEV_EMAIL=... for a different one. DEV_ROUTE
 /// controls where you land after sign-in (see devBypassTargetRoute in
-/// nav.dart) - defaults to the Business Sign Up page, override with
+/// nav.dart) - defaults to Owner Profile, override with
 /// --dart-define=DEV_ROUTE=/somePagePath to point at a different test
-/// page without any code change.
+/// page without any code change. A real test business is auto-created
+/// for the account if it doesn't already own one (see
+/// _ensureDevBypassBusiness), so Owner Profile's business-required
+/// guard never blocks you from getting there.
 Future<void> _maybeSignInDevBypass() async {
   if (!kDebugMode) return;
   const password = String.fromEnvironment('DEV_PASSWORD');
@@ -71,11 +77,8 @@ Future<void> _maybeSignInDevBypass() async {
 
   const email =
       String.fromEnvironment('DEV_EMAIL', defaultValue: 'kelvin@apptest.com');
-  // Literal, not BusinessSignUpWidget.routePath - String.fromEnvironment's
-  // defaultValue must be a compile-time constant, and routePath is a
-  // mutable static field. Keep this in sync if that route path changes.
   const route =
-      String.fromEnvironment('DEV_ROUTE', defaultValue: '/businessSignUp');
+      String.fromEnvironment('DEV_ROUTE', defaultValue: '/ownerProfile');
 
   if (FirebaseAuth.instance.currentUser == null) {
     try {
@@ -86,7 +89,68 @@ Future<void> _maybeSignInDevBypass() async {
       return;
     }
   }
+  await _ensureDevBypassBusiness();
   devBypassTargetRoute = route;
+}
+
+/// Ensures the dev-bypass account owns a real business, so the "set up
+/// your business first" guard (owner_profile_widget.dart and anywhere
+/// else that checks currentUserDocument.ownedBusiness) never blocks
+/// testing, on any page - with no per-page changes needed, since every
+/// page already reads the same currentUserDocument.ownedBusiness.
+///
+/// This creates a REAL Firestore business document, not an in-memory
+/// mock: a fake/non-existent business reference would satisfy a
+/// null-check but leave every page that actually reads business data
+/// (name, tier, address, etc.) showing blank or broken fields. Runs
+/// once - idempotent, since it only acts when ownedBusiness is unset,
+/// whether from a prior bypass run or a real registration.
+Future<void> _ensureDevBypassBusiness() async {
+  final uid = FirebaseAuth.instance.currentUser?.uid;
+  if (uid == null) return;
+  final userRef = UsersRecord.collection.doc(uid);
+  final userDoc = await UsersRecord.getDocumentOnce(userRef);
+  if (userDoc.ownedBusiness != null) return;
+
+  try {
+    final businessRef = BusinessesRecord.collection.doc();
+    await businessRef.set(createBusinessesRecordData(
+      ownerRef: userRef,
+      businessName: 'Dev Test Business',
+      businessType: 'Sole Proprietor',
+      isBlackOwned: true,
+      tickerSymbol: KindexTickerUtil.randomCandidate(),
+      isVerified: false,
+      isClaimed: true,
+      subscriptionTier: 'Community',
+      isPremium: false,
+    ));
+    await userRef.update(createUsersRecordData(ownedBusiness: businessRef));
+    debugPrint('DevBypass: created test business ${businessRef.id} for $uid');
+  } catch (e) {
+    debugPrint('DevBypass: failed to create test business: $e');
+  }
+}
+
+/// Debug-only forced theme, for deterministic screenshot automation (see
+/// integration_test/app_screenshots_test.dart). System/user theme
+/// preference is normally read from SharedPreferences via
+/// FlutterFlowTheme.themeMode, which would make CI screenshots depend on
+/// whatever the simulator's default appearance happens to be - this
+/// forces a specific mode before the first frame renders instead.
+///
+///   flutter drive ... --dart-define=SCREENSHOT_THEME=dark
+///
+/// No-ops (and leaves themeMode at its normal system/persisted value)
+/// unless both kDebugMode and SCREENSHOT_THEME are set.
+void _maybeForceThemeMode() {
+  if (!kDebugMode) return;
+  const theme = String.fromEnvironment('SCREENSHOT_THEME');
+  if (theme == 'light') {
+    FlutterFlowTheme.saveThemeMode(ThemeMode.light);
+  } else if (theme == 'dark') {
+    FlutterFlowTheme.saveThemeMode(ThemeMode.dark);
+  }
 }
 
 class MyApp extends StatefulWidget {

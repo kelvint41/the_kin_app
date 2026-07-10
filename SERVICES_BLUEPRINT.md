@@ -440,6 +440,123 @@ pattern used correctly elsewhere (`the_exchange_widget.dart`,
   `lib/components`) - a follow-up pass would need to include them for
   full route-graph coverage.
 
+## Kindex formulas (as of this audit)
+
+Three separate, disconnected systems currently calculate "Kindex" - only
+the first one actually writes to Firestore in production.
+
+**1. Live event-weight engine** - `firebase/custom_cloud_functions/kindex_engine.js`,
+`processUserEngagementEvent`. Triggered on `UserEngagementEvents/{id}`
+document creation. Inside a transaction: looks up `weights[event.event_type]`
+from `kindex_config/scoring_weights` (5-minute in-memory cache), rejects
+unknown event types, then `KindexScores/{userId}.score += points`. Scores
+**individual users** (customers and owners as people), not businesses.
+Live weights as of this audit:
+
+| event_type | points | event_type | points |
+|---|---|---|---|
+| post | 10 | comment | 2 |
+| share_app | 10 | map_tap | 2 |
+| call_tap | 5 | like | 1 |
+| share | 5 | page_view | 1 |
+| react_love/praise/fire/sparkle/applause | 1 each | | |
+
+"Velocity" in this system is only `is_trending_up` - a boolean, whether
+the last processed event added or subtracted points. No percentage, no
+decay, no rolling window exists today.
+
+**2. `BusinessesRecord.kindex_score` / `kindex_velocity`** - the fields
+actually displayed everywhere (business cards, the ticker, the
+leaderboard). Nothing writes to these; they only change via manual
+Firestore console edits. No automated business-side scoring exists.
+
+**3. `lib/custom_code/actions/calculate_real_time_kindex.dart`** -
+`calculateRealTimeKindex(currentScore, newStarRating, isPremiumBusiness)`.
+A real formula: baseline 500 (or 850 premium) when `currentScore == 0`,
+otherwise `±15` for 5-star / `±5` for 4-star / `-5` for 2-star / `-15` for
+1-star (3-star neutral), clamped to a tier ceiling (750 standard / 900
+premium). Its only remaining call site
+(`business_profile_v2_widget.dart`, the "Customer Reviews" header tap)
+stores the result in local model state and never persists it - decorative
+today, not live.
+
+### Proposed velocity metric (not yet implemented)
+
+Built for the interactive simulator (see below), not deployed:
+`ewma(t) = α·dailyPoints(t) + (1-α)·ewma(t-1)`, displayed as
+`(ewma(t) / avgDailyPoints(t) − 1) × 100` - the entity's current daily
+scoring pace as a percentage above/below its own running average. `α`
+(0.05-0.95) is the tunable "sensitivity": low α smooths out single-day
+spikes, high α tracks yesterday's events almost immediately. Implementing
+this for real would mean deciding a target (user or business - system 2
+has no live writer to hook into) and an update cadence (recomputed every
+event, like the score itself, or batched daily via a scheduled function).
+
+### Interactive simulator
+
+Published as a Claude Artifact ("Kindex Velocity Lab") - lets you tune
+every live event weight, the velocity sensitivity (α), and pick between
+4 scenario presets (dormant/steady/viral spike/declining), then visualizes
+score + velocity over a simulated 60-day timeline. Uses the exact live
+weight values above as defaults. Not saved to this repo since it's a
+standalone HTML tool, not app code - re-generate by asking to rebuild it
+from this section's formula if the link is lost.
+
+## App Store screenshot automation
+
+Three pieces, none of which could be run end-to-end in the environment
+this was built in - **no iOS Simulator or Android SDK was available**
+(only Command Line Tools, not full Xcode). Written carefully against the
+app's real widget structure, but treat the first real CI run as the
+first real test of this pipeline, not a rerun of something verified.
+
+- **`firebase/scripts/seed_screenshot_demo.js`** - idempotent seed script.
+  Creates one demo business (`businesses/screenshot_demo_business`,
+  "Rollin' Smoke Kitchen (Screenshot Demo)", category `Barbecue restaurant`
+  so the delivery button shows, `kindex_score: 918`, real-looking
+  hours/address/delivery URLs), links it as owned by the dev-bypass
+  account (`SEED_DEV_UID` env var - required, no default), 4 supporting
+  demo businesses with varied `kindex_score` values so the "Top Business
+  Owners" leaderboard isn't empty/tied, 3 demo reviewer users with
+  `KindexScores` docs so "Top Customers" isn't empty either, 4 demo
+  `exchange_posts`, and 3 demo `reviews`. Every demo doc is clearly
+  labeled "(Screenshot Demo)" and easy to find/delete. Skips re-seeding
+  posts/reviews if they already exist (safe to re-run every CI trigger).
+- **`integration_test/app_screenshots_test.dart`** - drives the app via
+  the existing dev-bypass mechanism (`DEV_ROUTE` lands directly on either
+  `/theExchange` or `/businessProfileV2` with the demo business's ref),
+  waits for real content to load (polls rather than a single
+  `pumpAndSettle()`, since this is a real network round-trip to Firestore
+  in CI), and prints a `KIN_SCREENSHOT_READY: <name>` marker at each
+  stable, screenshot-worthy moment - `the_exchange` and (after tapping
+  the Kindex Spotlight card) `leaderboard` in the Exchange run,
+  `business_profile` in the other. Deliberately does NOT try to capture
+  pixels itself - Flutter's in-process screenshot APIs don't reliably hit
+  exact device resolutions across platforms.
+- **`.github/workflows/screenshots.yml`** - manual-trigger (`workflow_dispatch`)
+  workflow on `macos-14` (Xcode + iOS Simulator preinstalled, no local
+  install needed). Boots an iPhone 15 Pro Max simulator - whose native
+  resolution, 1290×2796, *is* Apple's 6.7" screenshot spec, so no
+  resizing step is needed. Runs the integration test in the background,
+  tails its log, and fires `xcrun simctl io <device> screenshot` the
+  instant each marker appears - a real simulator framebuffer capture, not
+  a resized desktop window. Matrix over `theme: [light, dark]` × the two
+  routes, uploading PNGs as build artifacts per combination. New
+  `_maybeForceThemeMode()` in `main.dart` (gated on `kDebugMode`, same
+  safety pattern as the dev bypass) reads a `SCREENSHOT_THEME` dart-define
+  so each run boots directly into a specific mode rather than whatever
+  the simulator's default appearance happens to be.
+
+**Required GitHub repo secrets** (none of which I can create myself):
+`FIREBASE_SERVICE_ACCOUNT_KEY` (base64 of the service account JSON used
+elsewhere in `firebase/scripts/`), `DEV_BYPASS_EMAIL`, `DEV_BYPASS_PASSWORD`,
+`DEV_BYPASS_UID` (that account's Firebase Auth uid).
+
+**Known gap**: the device name (`iPhone 15 Pro Max`) is hardcoded in the
+workflow's boot step; GitHub periodically updates which Xcode/simulator
+versions ship on `macos-14`, so this may need updating if the boot step
+can't find that device - check `xcrun simctl list devicetypes` in a run.
+
 ## Known follow-ups
 
 - RevenueCat package identifiers in `merchant_pricing_suite_widget.dart`
