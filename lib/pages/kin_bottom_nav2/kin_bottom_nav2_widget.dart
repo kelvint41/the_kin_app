@@ -1,10 +1,9 @@
+import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
+import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'kin_bottom_nav2_model.dart';
 export 'kin_bottom_nav2_model.dart';
 
@@ -57,7 +56,13 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           children: [
             Expanded(
               flex: 1,
-              child: Column(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  print('KinBottomNav2Widget: Directory tab tapped');
+                  context.pushNamed(CustomerProfilePageWidget.routeName);
+                },
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,11 +93,18 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                 ].divide(SizedBox(
                     height:
                         FlutterFlowTheme.of(context).designToken.spacing.xs)),
+                ),
               ),
             ),
             Expanded(
               flex: 1,
-              child: Column(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  print('KinBottomNav2Widget: Map tab tapped');
+                  context.pushNamed(GoogleMapPageWidget.routeName);
+                },
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,11 +135,33 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                 ].divide(SizedBox(
                     height:
                         FlutterFlowTheme.of(context).designToken.spacing.xs)),
+                ),
               ),
             ),
             Expanded(
               flex: 1,
-              child: Column(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () async {
+                  print('KinBottomNav2Widget: Feed tab tapped');
+                  final businesses = await queryBusinessesRecordOnce(limit: 1);
+                  final businessRef = businesses.firstOrNull?.reference;
+                  if (businessRef == null || !context.mounted) {
+                    print(
+                        'KinBottomNav2Widget: no business available to open Feed');
+                    return;
+                  }
+                  context.pushNamed(
+                    TheExchangeWidget.routeName,
+                    queryParameters: {
+                      'businessRef': serializeParam(
+                        businessRef,
+                        ParamType.DocumentReference,
+                      ),
+                    }.withoutNulls,
+                  );
+                },
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -158,11 +192,18 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                 ].divide(SizedBox(
                     height:
                         FlutterFlowTheme.of(context).designToken.spacing.xs)),
+                ),
               ),
             ),
             Expanded(
               flex: 1,
-              child: Column(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  print('KinBottomNav2Widget: Loyalty tab tapped');
+                  context.pushNamed(CommunityPrestigeWidget.routeName);
+                },
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -193,6 +234,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                 ].divide(SizedBox(
                     height:
                         FlutterFlowTheme.of(context).designToken.spacing.xs)),
+                ),
               ),
             ),
           ],

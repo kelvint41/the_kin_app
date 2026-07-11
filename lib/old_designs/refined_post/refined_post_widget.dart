@@ -50,6 +50,37 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
   bool _hasLiked = false;
   bool _isSharing = false;
 
+  void _openImageViewer(String imageUrl) {
+    print('RefinedPostWidget: post image tapped');
+    showDialog(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (dialogContext) => GestureDetector(
+        onTap: () => Navigator.pop(dialogContext),
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(dialogContext),
+            ),
+          ),
+          extendBodyBehindAppBar: true,
+          body: Center(
+            child: InteractiveViewer(
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _handleLike() async {
     if (_hasLiked || currentUserReference == null || widget.postRef == null) {
       return;
@@ -287,15 +318,21 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                   height: 380.0,
                   child: Stack(
                     children: [
-                      CachedNetworkImage(
-                        fadeInDuration: Duration(milliseconds: 0),
-                        fadeOutDuration: Duration(milliseconds: 0),
-                        imageUrl: valueOrDefault<String>(
+                      GestureDetector(
+                        onTap: () => _openImageViewer(valueOrDefault<String>(
                           widget.post_image,
                           'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop%20interior%20gold%20accents',
+                        )),
+                        child: CachedNetworkImage(
+                          fadeInDuration: Duration(milliseconds: 0),
+                          fadeOutDuration: Duration(milliseconds: 0),
+                          imageUrl: valueOrDefault<String>(
+                            widget.post_image,
+                            'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop%20interior%20gold%20accents',
+                          ),
+                          height: 380.0,
+                          fit: BoxFit.cover,
                         ),
-                        height: 380.0,
-                        fit: BoxFit.cover,
                       ),
                       if (widget.is_carousel ?? false)
                       Align(

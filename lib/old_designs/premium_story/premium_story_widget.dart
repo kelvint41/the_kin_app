@@ -45,9 +45,46 @@ class _PremiumStoryWidgetState extends State<PremiumStoryWidget> {
     super.dispose();
   }
 
+  void _openImageViewer() {
+    print('PremiumStoryWidget: story thumbnail tapped (${widget!.label})');
+    final imageUrl = valueOrDefault<String>(
+      widget!.img_desc,
+      'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
+    );
+    showDialog(
+      context: context,
+      barrierColor: Colors.black,
+      builder: (dialogContext) => GestureDetector(
+        onTap: () => Navigator.pop(dialogContext),
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.close, color: Colors.white),
+              onPressed: () => Navigator.pop(dialogContext),
+            ),
+          ),
+          extendBodyBehindAppBar: true,
+          body: Center(
+            child: InteractiveViewer(
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return GestureDetector(
+      onTap: _openImageViewer,
+      child: Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -122,6 +159,7 @@ class _PremiumStoryWidgetState extends State<PremiumStoryWidget> {
         ),
       ].divide(SizedBox(
           height: FlutterFlowTheme.of(context).designToken.spacing.xs)),
+      ),
     );
   }
 }

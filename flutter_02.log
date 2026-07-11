@@ -1,0 +1,85 @@
+Flutter crash report.
+Please report a bug at https://github.com/flutter/flutter/issues.
+
+## command
+
+flutter run -d chrome --dart-define=GEMINI_API_KEY=AQ.Ab8RN6LzIF4fOf-LGfcJPnPoGhhwqdRSUfAjUQmrVSVpJte6TQ
+
+## exception
+
+ShaderCompilerException: ShaderCompilerException: Shader compilation of "/Users/jasmineknowles-taylor/KINVEST_Development/flutter/packages/flutter/lib/src/material/shaders/stretch_effect.frag" to "build/flutter_assets/shaders/stretch_effect.frag" failed with exit code -9.
+
+
+
+```
+#0      ShaderCompiler.compileShader (package:flutter_tools/src/build_system/tools/shader_compiler.dart:232:9)
+<asynchronous suspension>
+#1      writeBundle.<anonymous closure> (package:flutter_tools/src/bundle_builder.dart:227:25)
+<asynchronous suspension>
+#2      Future.wait.<anonymous closure> (dart:async/future.dart:546:21)
+<asynchronous suspension>
+#3      writeBundle (package:flutter_tools/src/bundle_builder.dart:171:3)
+<asynchronous suspension>
+#4      WebDevFS.update (package:flutter_tools/src/isolated/devfs_web.dart:342:9)
+<asynchronous suspension>
+#5      ResidentWebRunner._updateDevFS (package:flutter_tools/src/isolated/resident_web_runner.dart:804:35)
+<asynchronous suspension>
+#6      ResidentWebRunner.run.<anonymous closure> (package:flutter_tools/src/isolated/resident_web_runner.dart:330:41)
+<asynchronous suspension>
+#7      asyncGuard.<anonymous closure> (package:flutter_tools/src/base/async_guard.dart:108:24)
+<asynchronous suspension>
+```
+
+## flutter doctor
+
+```
+[!] Flutter (Channel stable, 3.44.4, on macOS 26.5.1 25F80 darwin-arm64, locale en-US) [4.4s]
+    • Flutter version 3.44.4 on channel stable at /Users/jasmineknowles-taylor/KINVEST_Development/flutter
+    ! Warning: `dart` on your path resolves to /opt/homebrew/Cellar/dart/3.12.2/libexec/bin/dart, which is not inside your current Flutter SDK checkout at /Users/jasmineknowles-taylor/KINVEST_Development/flutter. Consider adding /Users/jasmineknowles-taylor/KINVEST_Development/flutter/bin to the front of your path.
+    • Upstream repository https://github.com/flutter/flutter.git
+    • Framework revision ad70ec4617 (10 days ago), 2026-06-24 11:07:06 -0700
+    • Engine revision a10d8ac38d
+    • Dart version 3.12.2
+    • DevTools version 2.57.0
+    • Feature flags: enable-web, enable-linux-desktop, enable-macos-desktop, enable-windows-desktop, enable-android, enable-ios, cli-animations, enable-native-assets, enable-swift-package-manager, omit-legacy-version-file, enable-lldb-debugging, enable-uiscene-migration
+    ✗ Downloaded executables cannot execute on host.
+      See https://github.com/flutter/flutter/issues/6207 for more information.
+      Flutter requires the Rosetta translation environment on ARM Macs. Try running:
+        sudo softwareupdate --install-rosetta --agree-to-license
+
+    • If those were intentional, you can disregard the above warnings; however it is recommended to use "git" directly to perform update checks and upgrades.
+
+[✗] Android toolchain - develop for Android devices [81ms]
+    ✗ Unable to locate Android SDK.
+      Install Android Studio from: https://developer.android.com/studio/index.html
+      On first launch it will assist you in installing the Android SDK components.
+      (or visit https://flutter.dev/to/macos-android-setup for detailed instructions).
+      If the Android SDK has been installed to a custom location, please use
+      `flutter config --android-sdk` to update to that location.
+
+
+[!] Xcode - develop for iOS and macOS [95ms]
+    ✗ Xcode installation is incomplete; a full installation is necessary for iOS and macOS development.
+      Download at: https://developer.apple.com/xcode/
+      Or install Xcode via the App Store.
+      Once installed, run:
+        sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+        sudo xcodebuild -runFirstLaunch
+    ! CocoaPods not installed.
+        CocoaPods is a package manager for iOS or macOS platform code.
+        Without CocoaPods, plugins will not work on iOS or macOS.
+        For more info, see https://flutter.dev/to/platform-plugins
+      For installation instructions, see https://guides.cocoapods.org/using/getting-started.html#installation
+
+[✓] Chrome - develop for the web [30ms]
+    • Chrome at /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+
+[✓] Connected device (2 available) [47ms]
+    • macOS (desktop) • macos  • darwin-arm64   • macOS 26.5.1 25F80 darwin-arm64
+    • Chrome (web)    • chrome • web-javascript • Google Chrome 149.0.7827.201
+
+[✓] Network resources [2.7s]
+    • All expected network resources are available.
+
+! Doctor found issues in 3 categories.
+```

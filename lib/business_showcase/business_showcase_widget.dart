@@ -7,7 +7,6 @@ import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'business_showcase_model.dart';
@@ -42,11 +41,6 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => BusinessShowcaseModel());
-
-    // On page load action.
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      context.pushNamed(GoogleMapPageWidget.routeName);
-    });
   }
 
   @override
