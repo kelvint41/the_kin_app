@@ -1,0 +1,269 @@
+/* Pillar page — The Guide to Black-Owned Businesses in San Antonio.
+ * Editorial content page: LIGHT canvas for long-form readability, so all
+ * gold-toned text uses the WCAG-AA #7D5F16 shade per CLAUDE.md; pure gold
+ * #D4AF37 appears only on Evergreen/dark elements (chips, badges, bands).
+ * Tokens mirrored from lib/flutter_flow/flutter_flow_theme.dart.
+ */
+
+:root {
+  --kin-evergreen: #0B3D2E;
+  --kin-gold: #D4AF37;
+  --kin-gold-muted: #C5A059;
+  --kin-gold-on-light: #7D5F16;
+  --kin-bronze: #8A7B5E;
+  --kin-graphite: #3D3D3D;
+  --kin-ink: #14181B;
+  --kin-canvas: #FCFCFC;
+  --kin-surface: #FFFFFF;
+
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 24px; --r-full: 9999px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, .20);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, .30);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--kin-canvas);
+  color: var(--kin-ink);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+}
+
+.guide-wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 var(--sp-lg);
+}
+
+/* ------------------------------ Intro ---------------------------------- */
+
+.guide-intro { padding: var(--sp-xl) 0 var(--sp-lg); }
+
+.guide-intro h1 {
+  margin: 0 0 var(--sp-md);
+  color: var(--kin-gold-on-light);
+  font-weight: 800;
+  font-size: clamp(30px, 5vw, 44px);
+  line-height: 1.15;
+}
+
+.guide-intro .lede {
+  margin: 0 0 var(--sp-md);
+  max-width: 68ch;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.guide-updated {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-sm);
+  padding: 6px var(--sp-md);
+  background: var(--kin-evergreen);
+  color: var(--kin-gold);
+  border-radius: var(--r-full);
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+
+/* Placeholder-data notice — removed by flipping PLACEHOLDER_LISTINGS. */
+.guide-sample-notice {
+  margin: var(--sp-lg) 0 0;
+  padding: var(--sp-md);
+  border: 1px dashed var(--kin-bronze);
+  border-radius: var(--r-md);
+  background: #FFF8E7;
+  color: var(--kin-gold-on-light);
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* --------------------------- Category TOC ------------------------------ */
+
+.guide-toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-sm);
+  padding: var(--sp-md) 0 var(--sp-xl);
+}
+.guide-toc a {
+  padding: 8px var(--sp-md);
+  border: 1px solid var(--kin-bronze);
+  border-radius: var(--r-full);
+  color: var(--kin-gold-on-light);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+}
+.guide-toc a:hover, .guide-toc a:focus-visible {
+  background: var(--kin-evergreen);
+  border-color: var(--kin-evergreen);
+  color: var(--kin-gold);
+  outline: none;
+}
+
+/* --------------------------- Directory sections ------------------------ */
+
+.guide-section { padding: var(--sp-lg) 0; scroll-margin-top: 96px; }
+
+.guide-section h2 {
+  margin: 0 0 var(--sp-xs);
+  color: var(--kin-ink);
+  font-weight: 800;
+  font-size: 28px;
+}
+.guide-section .section-blurb {
+  margin: 0 0 var(--sp-lg);
+  color: var(--kin-graphite);
+  font-family: "Playfair Display", Georgia, serif; /* editorial accent */
+  font-style: italic;
+  font-size: 15px;
+}
+
+.guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--sp-md);
+}
+
+.biz-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-sm);
+  padding: var(--sp-lg);
+  background: var(--kin-surface);
+  border: 1px solid #E4E1DA;
+  border-left: 3px solid var(--kin-gold-muted);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.biz-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-sm);
+}
+.biz-card__name {
+  margin: 0;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--kin-ink);
+}
+.biz-card__ticker {
+  margin-left: auto;
+  padding: 3px 8px;
+  background: var(--kin-evergreen);
+  color: var(--kin-gold);
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+.biz-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  color: var(--kin-gold-on-light);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+.biz-card__badge::before {
+  content: "✓";
+  display: inline-grid;
+  place-items: center;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-full);
+  background: var(--kin-gold);
+  color: var(--kin-ink);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.biz-card__meta {
+  margin: 0;
+  color: var(--kin-bronze);
+  font-weight: 600;
+  font-size: 12px;
+}
+.biz-card__desc {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--kin-graphite);
+}
+.biz-card__link {
+  margin-top: auto;
+  color: var(--kin-gold-on-light);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+.biz-card__link:hover, .biz-card__link:focus-visible { text-decoration: underline; }
+
+/* ----------------------------- CTA band -------------------------------- */
+
+.guide-cta {
+  margin: var(--sp-xl) 0;
+  padding: var(--sp-xl);
+  background: var(--kin-evergreen);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+.guide-cta h2 {
+  margin: 0 0 var(--sp-sm);
+  color: var(--kin-gold);
+  font-weight: 800;
+  font-size: 28px;
+}
+.guide-cta p {
+  margin: 0 0 var(--sp-lg);
+  color: var(--kin-gold-muted);
+  font-size: 15px;
+}
+.guide-cta__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-md);
+}
+.btn-gold, .btn-outline {
+  padding: 12px var(--sp-lg);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .02em;
+  transition: box-shadow .2s ease;
+}
+.btn-gold { background: var(--kin-gold); color: var(--kin-ink); }
+.btn-outline { border: 1px solid var(--kin-gold-muted); color: var(--kin-gold-muted); }
+.btn-gold:hover, .btn-gold:focus-visible,
+.btn-outline:hover, .btn-outline:focus-visible {
+  box-shadow: 0 0 0 2px var(--kin-gold);
+  outline: none;
+}
+
+/* ------------------------------ Footer --------------------------------- */
+
+.guide-footer {
+  padding: var(--sp-xl) 0;
+  border-top: 1px solid #E4E1DA;
+  color: var(--kin-bronze);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.guide-footer a { color: var(--kin-gold-on-light); }
+
+@media (max-width: 640px) {
+  .guide-wrap { padding: 0 var(--sp-md); }
+  .guide-grid { grid-template-columns: 1fr; }
+}

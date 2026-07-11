@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Guide to Black-Owned Businesses in San Antonio (2026) | The KIN App</title>
+  <meta name="description" content="A living, community-verified directory of independent, Black-owned restaurants, barbershops, gyms, shops, and services in San Antonio — updated monthly by The KIN App.">
+  <link rel="canonical" href="https://www.kinvestguidance.com/san-antonio-guide/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="The Guide to Black-Owned Businesses in San Antonio (2026)">
+  <meta property="og:description" content="Community-verified Black-owned businesses in San Antonio, organized by category and updated monthly.">
+  <meta property="og:url" content="https://www.kinvestguidance.com/san-antonio-guide/">
+  <meta property="og:image" content="https://www.kinvestguidance.com/assets/social/x_twitter_header_1500x500.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../components/site-header/site-header.css">
+  <link rel="stylesheet" href="guide.css">
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <div class="guide-wrap">
+    <header class="guide-intro">
+      <h1>The Guide to Black-Owned Businesses in San Antonio</h1>
+      <p class="lede">
+        This is a living directory, not a scraped list. Every business here
+        was submitted by an owner or suggested by the community, then
+        reviewed by a real person before publishing. It grows as San Antonio
+        grows — check back monthly, or get the app and watch it live.
+      </p>
+      <span class="guide-updated" id="guide-updated"></span>
+    </header>
+
+    <nav class="guide-toc" id="guide-toc" aria-label="Categories"></nav>
+
+    <main id="guide-sections"></main>
+
+    <aside class="guide-cta" aria-label="Get involved">
+      <h2>Know a business that belongs here?</h2>
+      <p>Owners list free. Neighbors can suggest. A human verifies every entry.</p>
+      <div class="guide-cta__row">
+        <a class="btn-gold" href="/#get-the-app">Get The KIN App</a>
+        <a class="btn-outline" href="../for-business/">List Your Business — Free</a>
+      </div>
+    </aside>
+
+    <footer class="guide-footer">
+      <p>
+        Kinvest Guidance LLC — building digital infrastructure for
+        independent, Black-owned businesses. Stronger Together.<br>
+        <a href="/">Home</a> · <a href="../for-business/">For Businesses</a> ·
+        <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a>
+      </p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { initSiteHeader } from "../../components/site-header/site-header.js";
+    import { renderGuide } from "./guide.js";
+    initSiteHeader(document.getElementById("site-header"), { activeHref: "#spotlight" });
+    renderGuide();
+  </script>
+</body>
+</html>

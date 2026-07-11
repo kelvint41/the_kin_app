@@ -1,0 +1,185 @@
+/* /for-business landing page — owner-facing conversion page.
+ * Alternates Evergreen (hero/CTA) and light canvas (content) bands.
+ * Tokens mirrored from lib/flutter_flow/flutter_flow_theme.dart; gold text
+ * on light surfaces uses the WCAG-AA #7D5F16 shade per CLAUDE.md.
+ */
+
+:root {
+  --kin-evergreen: #0B3D2E;
+  --kin-gold: #D4AF37;
+  --kin-gold-muted: #C5A059;
+  --kin-gold-on-light: #7D5F16;
+  --kin-bronze: #8A7B5E;
+  --kin-graphite: #3D3D3D;
+  --kin-ink: #14181B;
+  --kin-canvas: #FCFCFC;
+  --kin-surface: #FFFFFF;
+
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 24px; --r-full: 9999px;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, .20);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--kin-canvas);
+  color: var(--kin-ink);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+}
+
+.fb-wrap { max-width: 960px; margin: 0 auto; padding: 0 var(--sp-lg); }
+
+.btn-gold, .btn-outline, .btn-evergreen {
+  display: inline-block;
+  padding: 12px var(--sp-lg);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .02em;
+  transition: box-shadow .2s ease;
+}
+.btn-gold { background: var(--kin-gold); color: var(--kin-ink); }
+.btn-evergreen { background: var(--kin-evergreen); color: #FFFFFF; }
+.btn-outline { border: 1px solid var(--kin-gold-muted); color: var(--kin-gold-muted); }
+.btn-gold:hover, .btn-gold:focus-visible,
+.btn-evergreen:hover, .btn-evergreen:focus-visible,
+.btn-outline:hover, .btn-outline:focus-visible {
+  box-shadow: 0 0 0 2px var(--kin-gold);
+  outline: none;
+}
+
+/* ------------------------------- Hero ---------------------------------- */
+
+.fb-hero {
+  background: var(--kin-evergreen);
+  color: #FCFCFC;
+  text-align: center;
+  padding: 72px var(--sp-lg) 80px;
+}
+.fb-hero h1 {
+  margin: 0 auto var(--sp-md);
+  max-width: 640px;
+  color: var(--kin-gold);
+  font-weight: 800;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.15;
+}
+.fb-hero p {
+  margin: 0 auto var(--sp-lg);
+  max-width: 56ch;
+  color: var(--kin-gold-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.fb-hero__note {
+  display: block;
+  margin-top: var(--sp-md);
+  color: var(--kin-bronze);
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* --------------------------- Value props ------------------------------- */
+
+.fb-values { padding: var(--sp-xl) 0; }
+.fb-values h2, .fb-steps h2, .fb-faq h2 {
+  margin: 0 0 var(--sp-lg);
+  color: var(--kin-gold-on-light);
+  font-weight: 800;
+  font-size: 30px;
+}
+.fb-values__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-md);
+}
+.fb-value {
+  padding: var(--sp-lg);
+  background: var(--kin-surface);
+  border: 1px solid #E4E1DA;
+  border-top: 3px solid var(--kin-gold-muted);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm);
+}
+.fb-value h3 { margin: 0 0 var(--sp-sm); font-size: 16px; font-weight: 700; }
+.fb-value p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--kin-graphite); }
+
+/* ------------------------------ Steps ---------------------------------- */
+
+.fb-steps { padding: var(--sp-xl) 0; }
+.fb-steps__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sp-md);
+}
+.fb-step {
+  padding: var(--sp-lg);
+  background: var(--kin-evergreen);
+  border-radius: var(--r-md);
+}
+.fb-step__num {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-bottom: var(--sp-sm);
+  border-radius: var(--r-full);
+  background: var(--kin-gold);
+  color: var(--kin-ink);
+  font-weight: 800;
+  font-size: 15px;
+}
+.fb-step h3 { margin: 0 0 var(--sp-sm); color: var(--kin-gold); font-size: 16px; }
+.fb-step p { margin: 0; color: var(--kin-gold-muted); font-size: 14px; line-height: 1.55; }
+
+/* ------------------------------- FAQ ------------------------------------ */
+
+.fb-faq { padding: var(--sp-xl) 0; }
+.fb-faq details {
+  margin-bottom: var(--sp-sm);
+  padding: var(--sp-md) var(--sp-lg);
+  background: var(--kin-surface);
+  border: 1px solid #E4E1DA;
+  border-radius: var(--r-md);
+}
+.fb-faq summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--kin-ink);
+}
+.fb-faq summary::marker { color: var(--kin-gold-on-light); }
+.fb-faq details p {
+  margin: var(--sp-md) 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--kin-graphite);
+}
+
+/* ----------------------------- Final CTA -------------------------------- */
+
+.fb-cta {
+  margin: var(--sp-xl) 0;
+  padding: var(--sp-xl);
+  background: var(--kin-evergreen);
+  border-radius: var(--r-lg);
+  text-align: center;
+}
+.fb-cta h2 { margin: 0 0 var(--sp-sm); color: var(--kin-gold); font-weight: 800; font-size: 28px; }
+.fb-cta p { margin: 0 0 var(--sp-lg); color: var(--kin-gold-muted); font-size: 15px; }
+
+.fb-footer {
+  padding: var(--sp-xl) 0;
+  border-top: 1px solid #E4E1DA;
+  color: var(--kin-bronze);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.fb-footer a { color: var(--kin-gold-on-light); }
+
+@media (max-width: 640px) {
+  .fb-wrap { padding: 0 var(--sp-md); }
+}
