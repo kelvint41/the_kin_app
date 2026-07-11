@@ -10,3 +10,7 @@ exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
 const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
 exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
 exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;
+
+const launchSubscribers = require("./launch_subscribers.js");
+exports.subscribeToLaunch = launchSubscribers.subscribeToLaunch;
+exports.confirmLaunchSubscription = launchSubscribers.confirmLaunchSubscription;

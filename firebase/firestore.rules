@@ -185,6 +185,17 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Website launch-notification list (Notify-Me flow). Deny-all for
+    // clients: every create goes through the subscribeToLaunch callable and
+    // every status change through confirmLaunchSubscription — both run on
+    // the Admin SDK, which bypasses these rules, so the functions keep full
+    // read/write. No client read means the list can't be scraped; no client
+    // create means the function's email validation and dedup can't be
+    // bypassed by writing junk documents directly.
+    match /launch_subscribers/{document} {
+      allow read, write: if false;
+    }
+
     // Written only by generateMarketingContent/logAiSuggestionEngagement
     // (Cloud Functions, Admin SDK - bypasses rules entirely). No client
     // path needs to read or write this directly; entitlement, latency, and

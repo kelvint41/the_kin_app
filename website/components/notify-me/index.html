@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KIN Notify-Me — component demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="notify-me.css">
+  <style>
+    /* Demo scaffolding only — the component itself is styled by notify-me.css */
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    }
+    section {
+      display: grid;
+      place-items: center;
+      gap: 24px;
+      padding: 64px 24px;
+    }
+    .dark  { background: #0B3D2E; color: #FCFCFC; }   /* KIN Evergreen hero */
+    .light { background: #FCFCFC; color: #14181B; }   /* light shell section */
+    h2 { margin: 0; font-weight: 800; font-size: 34px; }
+    .dark h2 { color: #D4AF37; }
+    .light h2 { color: #7D5F16; }
+  </style>
+</head>
+<body>
+  <!-- Hero placement (Evergreen surface, gold accents) -->
+  <section class="dark">
+    <h2>Be first on the KIN Exchange.</h2>
+    <div id="notify-hero"></div>
+  </section>
+
+  <!-- Footer/light placement (AA gold-on-light variant) -->
+  <section class="light">
+    <h2>Get the launch email.</h2>
+    <div id="notify-footer"></div>
+  </section>
+
+  <script type="module">
+    import { initNotifyMe } from "./notify-me.js";
+    initNotifyMe(document.getElementById("notify-hero"),   { source: "web_hero" });
+    initNotifyMe(document.getElementById("notify-footer"), { source: "web_footer", surface: "light" });
+  </script>
+</body>
+</html>

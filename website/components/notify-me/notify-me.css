@@ -1,0 +1,185 @@
+/* KIN Notify-Me component
+ * Tokens mirrored 1:1 from lib/flutter_flow/flutter_flow_theme.dart:
+ *   primary #0B3D2E (KIN Evergreen) · accent1 #D4AF37 (brand gold)
+ *   secondary #C5A059 · tertiary/hint #8A7B5E · alternate #3D3D3D
+ *   light primaryText #7D5F16 (AA gold-on-light) · secondaryText #14181B
+ *   success #2D4A3E / #82FAAF · error #BA1A1A / #FFB4AB
+ *   FFSpacing 4/8/16/24/32 · FFRadius md 14 / lg 24 · Plus Jakarta Sans
+ */
+
+.kin-notify {
+  --kin-evergreen: #0B3D2E;
+  --kin-gold: #D4AF37;
+  --kin-gold-muted: #C5A059;
+  --kin-bronze: #8A7B5E;
+  --kin-graphite: #3D3D3D;
+  --kin-ink: #14181B;
+  --kin-surface: #242424;
+  --kin-success: #82FAAF;
+  --kin-error: #FFB4AB;
+
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+  --r-md: 14px; --r-lg: 24px;
+
+  box-sizing: border-box;
+  max-width: 480px;
+  width: 100%;
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+}
+.kin-notify *, .kin-notify *::before, .kin-notify *::after { box-sizing: inherit; }
+
+/* On light surfaces (mirrors LightModeTheme): gold text drops to the
+ * WCAG-AA #7D5F16 shade the app uses — #D4AF37 on white is 2.05:1. */
+.kin-notify[data-surface="light"] {
+  --kin-surface: #FFFFFF;
+  --kin-gold-muted: #7D5F16;
+  --kin-bronze: #8A7B5E;
+  --kin-success: #2D4A3E;
+  --kin-error: #BA1A1A;
+}
+
+.kin-notify__form {
+  display: flex;
+  gap: var(--sp-sm);
+  padding: var(--sp-xs);
+  background: var(--kin-surface);
+  border: 1px solid var(--kin-graphite);
+  border-radius: var(--r-lg);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.kin-notify__form:focus-within {
+  border-color: var(--kin-gold);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, .25);
+}
+
+.kin-notify__input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px var(--sp-md);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: 400 16px/1.5 "Plus Jakarta Sans", system-ui, sans-serif; /* bodyLarge */
+}
+.kin-notify__input::placeholder { color: var(--kin-bronze); } /* theme.hint */
+.kin-notify__input:focus { outline: none; }
+
+.kin-notify__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-sm);
+  min-width: 128px;
+  padding: 12px var(--sp-lg);
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--kin-evergreen);
+  color: #FFFFFF; /* theme.onPrimary */
+  font: 600 14px/1.3 "Plus Jakarta Sans", system-ui, sans-serif; /* labelLarge */
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: box-shadow .2s ease, transform .1s ease, opacity .2s ease;
+}
+.kin-notify__button:hover:not(:disabled),
+.kin-notify__button:focus-visible {
+  box-shadow: 0 0 0 2px var(--kin-gold);
+  outline: none;
+}
+.kin-notify__button:active:not(:disabled) { transform: translateY(1px); }
+
+/* Empty state: button sits dormant until the field has content. */
+.kin-notify__button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.kin-notify__spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, .35);
+  border-top-color: var(--kin-gold);
+  border-radius: 9999px;
+  animation: kin-spin .7s linear infinite;
+}
+@keyframes kin-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .kin-notify__spinner { animation-duration: 1.6s; }
+}
+
+/* Loading state */
+.kin-notify[data-state="loading"] .kin-notify__spinner { display: inline-block; }
+.kin-notify[data-state="loading"] .kin-notify__button-label { opacity: .6; }
+.kin-notify[data-state="loading"] .kin-notify__input,
+.kin-notify[data-state="loading"] .kin-notify__button { pointer-events: none; }
+
+.kin-notify__hint {
+  margin: var(--sp-sm) var(--sp-xs) 0;
+  color: var(--kin-bronze);
+  font: 600 12px/1.3 "Plus Jakarta Sans", system-ui, sans-serif; /* labelMedium */
+}
+
+.kin-notify__message {
+  display: none;
+  margin: var(--sp-sm) var(--sp-xs) 0;
+  font: 600 14px/1.4 "Plus Jakarta Sans", system-ui, sans-serif;
+}
+.kin-notify[data-state="error"] .kin-notify__message {
+  display: block;
+  color: var(--kin-error);
+}
+.kin-notify[data-state="error"] .kin-notify__form { border-color: var(--kin-error); }
+
+/* Success state: the form collapses into a confirmation card. */
+.kin-notify__success {
+  display: none;
+  align-items: flex-start;
+  gap: var(--sp-md);
+  padding: var(--sp-lg);
+  background: var(--kin-evergreen);
+  border: 1px solid rgba(212, 175, 55, .35);
+  border-radius: var(--r-lg);
+}
+.kin-notify[data-state="success"] .kin-notify__form,
+.kin-notify[data-state="success"] .kin-notify__hint,
+.kin-notify[data-state="success"] .kin-notify__message { display: none; }
+.kin-notify[data-state="success"] .kin-notify__success { display: flex; }
+
+.kin-notify__success-icon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--kin-gold);
+  color: var(--kin-ink); /* never white-on-gold */
+  font-size: 16px;
+  font-weight: 800;
+}
+.kin-notify__success-title {
+  margin: 0 0 var(--sp-xs);
+  color: var(--kin-gold);
+  font: 700 17px/1.4 "Plus Jakarta Sans", system-ui, sans-serif; /* titleMedium */
+}
+.kin-notify__success-body {
+  margin: 0;
+  color: #C5A059;
+  font: 400 14px/1.5 "Plus Jakarta Sans", system-ui, sans-serif; /* bodyMedium */
+}
+
+/* Responsive: stack input over button on narrow viewports. */
+@media (max-width: 480px) {
+  .kin-notify__form { flex-direction: column; }
+  .kin-notify__button { width: 100%; min-width: 0; }
+}
+
+.kin-notify .visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
