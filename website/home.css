@@ -1,0 +1,309 @@
+/* kinvestguidance.com homepage shell — section styles.
+ * Components (header, ticker, map, notify-me, flash) bring their own CSS;
+ * this file styles only the page bands between them. Tokens mirrored from
+ * lib/flutter_flow/flutter_flow_theme.dart (see CLAUDE.md). Gold text on
+ * light surfaces uses the WCAG-AA #7D5F16 shade.
+ */
+
+:root {
+  --kin-evergreen: #0B3D2E;
+  --kin-gold: #D4AF37;
+  --kin-gold-muted: #C5A059;
+  --kin-gold-on-light: #7D5F16;
+  --kin-bronze: #8A7B5E;
+  --kin-graphite: #3D3D3D;
+  --kin-ink: #14181B;
+  --kin-canvas: #FCFCFC;
+  --kin-surface: #FFFFFF;
+  --kin-bg-dark: #121212;
+  --kin-surface-dark: #242424;
+
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 24px; --r-full: 9999px;
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, .30);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--kin-canvas);
+  color: var(--kin-ink);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+}
+
+.band { padding: 72px var(--sp-lg); }
+.band__inner { max-width: 1000px; margin: 0 auto; }
+.band--evergreen { background: var(--kin-evergreen); color: #FCFCFC; }
+.band--dark { background: var(--kin-bg-dark); color: #FCFCFC; }
+
+.btn-gold, .btn-outline-gold, .btn-evergreen {
+  display: inline-block;
+  padding: 12px var(--sp-lg);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: .02em;
+  transition: box-shadow .2s ease;
+}
+.btn-gold { background: var(--kin-gold); color: var(--kin-ink); }
+.btn-evergreen { background: var(--kin-evergreen); color: #FFFFFF; }
+.btn-outline-gold { border: 1px solid var(--kin-gold-muted); color: var(--kin-gold-muted); }
+.btn-gold:hover, .btn-gold:focus-visible,
+.btn-evergreen:hover, .btn-evergreen:focus-visible,
+.btn-outline-gold:hover, .btn-outline-gold:focus-visible {
+  box-shadow: 0 0 0 2px var(--kin-gold);
+  outline: none;
+}
+
+/* -------------------------------- Hero --------------------------------- */
+
+.hero { text-align: center; padding: 88px var(--sp-lg) 96px; }
+.hero h1 {
+  margin: 0 auto var(--sp-md);
+  max-width: 680px;
+  color: var(--kin-gold);
+  font-weight: 800;
+  font-size: clamp(36px, 6vw, 60px);
+  line-height: 1.12;
+}
+.hero .hero-sub {
+  margin: 0 auto var(--sp-sm);
+  max-width: 60ch;
+  color: var(--kin-gold-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+.hero .hero-cities {
+  margin: 0 auto var(--sp-lg);
+  color: var(--kin-bronze);
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  font-size: 15px;
+}
+.hero .hero-capture { display: flex; justify-content: center; }
+.hero .hero-owner-link {
+  display: inline-block;
+  margin-top: var(--sp-lg);
+  color: var(--kin-gold-muted);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.hero .hero-owner-link:hover { color: var(--kin-gold); }
+
+/* ---------------------------- How it works ----------------------------- */
+
+.how h2, .mission h2, .owners h2, .soon h2 {
+  margin: 0 0 var(--sp-lg);
+  font-weight: 800;
+  font-size: clamp(26px, 4vw, 34px);
+}
+.how h2 { color: var(--kin-gold-on-light); }
+
+.how-tabs { display: flex; gap: var(--sp-sm); margin-bottom: var(--sp-lg); }
+.how-tab {
+  padding: 10px var(--sp-lg);
+  border: 1px solid var(--kin-bronze);
+  border-radius: var(--r-full);
+  background: transparent;
+  color: var(--kin-gold-on-light);
+  font: 600 13px/1.3 "Plus Jakarta Sans", system-ui, sans-serif;
+  cursor: pointer;
+}
+.how-tab[aria-selected="true"] {
+  background: var(--kin-evergreen);
+  border-color: var(--kin-evergreen);
+  color: var(--kin-gold);
+}
+
+.how-panel { display: none; }
+.how-panel[data-active="true"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--sp-md);
+}
+.how-step {
+  padding: var(--sp-lg);
+  background: var(--kin-surface);
+  border: 1px solid #E4E1DA;
+  border-top: 3px solid var(--kin-gold-muted);
+  border-radius: var(--r-md);
+}
+.how-step h3 { margin: 0 0 var(--sp-sm); font-size: 16px; }
+.how-step p { margin: 0; font-size: 14px; line-height: 1.55; color: var(--kin-graphite); }
+
+/* ------------------------------ Mission -------------------------------- */
+
+.mission .band__inner {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--sp-xl);
+  align-items: start;
+}
+.mission h2 { color: var(--kin-gold); }
+.mission .mission-copy p {
+  margin: 0 0 var(--sp-md);
+  color: #E9E4D8;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.mission .mission-copy .signature {
+  color: var(--kin-gold-muted);
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+}
+
+.fund-card {
+  padding: var(--sp-lg);
+  background: rgba(0, 0, 0, .25);
+  border: 1px solid rgba(212, 175, 55, .35);
+  border-radius: var(--r-lg);
+}
+.fund-card h3 {
+  margin: 0 0 var(--sp-md);
+  color: var(--kin-gold);
+  font-size: 17px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.fund-bar {
+  height: 12px;
+  border-radius: var(--r-full);
+  background: rgba(252, 252, 252, .15);
+  overflow: hidden;
+  margin-bottom: var(--sp-sm);
+}
+.fund-bar__fill { height: 100%; background: var(--kin-gold); border-radius: var(--r-full); }
+.fund-numbers {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--sp-md);
+  color: var(--kin-gold-muted);
+  font-weight: 600;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.fund-ledger {
+  margin: 0 0 var(--sp-lg);
+  padding-left: 18px;
+  color: #E9E4D8;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.fund-ledger li::marker { color: var(--kin-gold); }
+.fund-note {
+  display: block;
+  margin-top: var(--sp-sm);
+  color: var(--kin-bronze);
+  font-size: 12px;
+}
+
+/* ------------------------------- Owners -------------------------------- */
+
+.owners { text-align: center; }
+.owners h2 { color: var(--kin-gold-on-light); }
+.owners .owners-list {
+  margin: 0 auto var(--sp-lg);
+  max-width: 70ch;
+  color: var(--kin-graphite);
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.owners .owners-note {
+  display: block;
+  margin-top: var(--sp-sm);
+  color: var(--kin-bronze);
+  font-size: 13px;
+}
+
+/* ----------------------------- Coming soon ----------------------------- */
+
+.soon { text-align: center; }
+.soon h2 { color: var(--kin-gold); }
+.soon p { margin: 0 0 var(--sp-lg); color: var(--kin-gold-muted); font-size: 15px; }
+.store-badges {
+  display: flex;
+  justify-content: center;
+  gap: var(--sp-md);
+  margin-bottom: var(--sp-xl);
+}
+.store-badge {
+  padding: 12px var(--sp-lg);
+  border: 1px solid var(--kin-gold-muted);
+  border-radius: var(--r-md);
+  color: var(--kin-gold-muted);
+  font-weight: 700;
+  font-size: 14px;
+  position: relative;
+  opacity: .8;
+}
+.store-badge span {
+  display: block;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: .1em;
+  color: var(--kin-bronze);
+  text-transform: uppercase;
+}
+.soon .soon-capture { display: flex; justify-content: center; }
+
+/* ------------------------------- Footer -------------------------------- */
+
+.site-footer { padding: var(--sp-xl) var(--sp-lg); }
+.site-footer .band__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-xl);
+  align-items: flex-start;
+}
+.site-footer img { height: 56px; width: auto; }
+.site-footer nav { display: flex; flex-direction: column; gap: var(--sp-sm); }
+.site-footer nav strong {
+  color: var(--kin-gold);
+  font-size: 12px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.site-footer a {
+  color: var(--kin-gold-muted);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+}
+.site-footer a:hover { color: var(--kin-gold); }
+.site-footer .footer-mission {
+  flex-basis: 100%;
+  margin: 0;
+  padding-top: var(--sp-lg);
+  border-top: 1px solid rgba(212, 175, 55, .25);
+  color: var(--kin-bronze);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* -------------------------- Sticky mobile CTA --------------------------- */
+
+.mobile-cta {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 150;
+  display: none;
+  gap: var(--sp-sm);
+  padding: var(--sp-sm) var(--sp-md);
+  padding-bottom: calc(var(--sp-sm) + env(safe-area-inset-bottom, 0px));
+  background: rgba(11, 61, 46, .96);
+  border-top: 1px solid rgba(212, 175, 55, .35);
+  box-shadow: 0 -4px 8px rgba(0, 0, 0, .3);
+}
+.mobile-cta a { flex: 1; text-align: center; }
+@media (max-width: 640px) {
+  .mobile-cta[data-visible="true"] { display: flex; }
+  .mission .band__inner { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .mission .band__inner { grid-template-columns: 1fr; }
+}

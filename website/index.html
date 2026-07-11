@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The KIN App — Discover Black-Owned Businesses in San Antonio | Kinvest Guidance</title>
+  <meta name="description" content="The KIN App connects you with independent, Black-owned businesses in San Antonio — verified by real people, scored live on the KIN Exchange. Houston and Atlanta next. Join the launch list.">
+  <link rel="canonical" href="https://www.kinvestguidance.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Own Your Local Economy — The KIN App">
+  <meta property="og:description" content="Discover independent, Black-owned businesses. Watch your community grow. Watch your KIN Score climb. San Antonio first.">
+  <meta property="og:url" content="https://www.kinvestguidance.com/">
+  <meta property="og:image" content="https://www.kinvestguidance.com/assets/social/x_twitter_header_1500x500.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="components/site-header/site-header.css">
+  <link rel="stylesheet" href="components/notify-me/notify-me.css">
+  <link rel="stylesheet" href="components/community-data/community-data.css">
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+  <!-- 1 · Header -->
+  <div id="site-header"></div>
+
+  <!-- 2 · KIN Score Ticker: proof of life before any ask -->
+  <div id="kin-ticker"></div>
+
+  <!-- 3 · Hero -->
+  <section class="band band--evergreen hero" id="home">
+    <h1>Own Your Local Economy.</h1>
+    <p class="hero-sub">
+      The KIN App connects you with independent, Black-owned businesses in
+      your city — and turns every visit, review, and purchase into measurable
+      momentum. Watch your community grow. Watch your KIN Score climb.
+    </p>
+    <p class="hero-cities">Launching first in San Antonio. Houston and Atlanta are next.</p>
+    <div class="hero-capture" id="notify-hero"></div>
+    <a class="hero-owner-link" href="pages/for-business/">Own a business? → Get listed free</a>
+  </section>
+
+  <!-- 4 · Live community map -->
+  <section class="band band--dark" id="spotlight">
+    <div class="band__inner">
+      <div id="community-map"></div>
+    </div>
+  </section>
+
+  <!-- 5 · How it works -->
+  <section class="band how" id="kin-score">
+    <div class="band__inner">
+      <h2>How the Exchange works</h2>
+      <div class="how-tabs" role="tablist" aria-label="Choose your path">
+        <button class="how-tab" role="tab" id="tab-members" aria-selected="true" aria-controls="panel-members">For Members</button>
+        <button class="how-tab" role="tab" id="tab-owners" aria-selected="false" aria-controls="panel-owners">For Business Owners</button>
+      </div>
+      <div class="how-panel" id="panel-members" role="tabpanel" aria-labelledby="tab-members" data-active="true">
+        <div class="how-step">
+          <h3>1 · Discover</h3>
+          <p>Find Black-owned restaurants, shops, and services near you —
+             verified by real people, not scraped lists.</p>
+        </div>
+        <div class="how-step">
+          <h3>2 · Show up</h3>
+          <p>Visit, review, connect. Every action earns KIN Score for you and
+             momentum for them.</p>
+        </div>
+        <div class="how-step">
+          <h3>3 · Watch it grow</h3>
+          <p>Your neighborhood's businesses rise on the KIN Exchange in real
+             time. That's your spending, made visible.</p>
+        </div>
+      </div>
+      <div class="how-panel" id="panel-owners" role="tabpanel" aria-labelledby="tab-owners" data-active="false">
+        <div class="how-step">
+          <h3>1 · Get listed free</h3>
+          <p>Claim your ticker symbol on the KIN Exchange in minutes. No fees
+             to be found.</p>
+        </div>
+        <div class="how-step">
+          <h3>2 · Get verified</h3>
+          <p>A real person confirms your listing, so customers know it's you.</p>
+        </div>
+        <div class="how-step">
+          <h3>3 · Get momentum</h3>
+          <p>Reviews and visits raise your KIN Score. Power Hours and
+             Spotlight put you in front of the whole city.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Mission + Seeding the Exchange -->
+  <section class="band band--evergreen mission" id="about">
+    <div class="band__inner">
+      <div class="mission-copy">
+        <h2>Infrastructure is the difference between surviving and owning.</h2>
+        <p>
+          Black-owned businesses don't lack talent, work ethic, or customers
+          who care. Too often, they lack the digital infrastructure that big
+          brands take for granted — discovery, reputation, analytics,
+          marketing.
+        </p>
+        <p>
+          Kinvest Guidance LLC exists to close that gap. The KIN App is the
+          first piece: a directory where the community's support is counted,
+          scored, and celebrated in real time. We're proving it in San
+          Antonio, then Houston, then Atlanta. Then everywhere.
+        </p>
+        <p class="signature">— Kelvin Taylor, Founder &amp; CEO</p>
+      </div>
+      <aside class="fund-card" id="support" aria-label="Seeding the Exchange">
+        <h3>Seeding the Exchange</h3>
+        <div class="fund-bar"><div class="fund-bar__fill" id="fund-fill" style="width:0%"></div></div>
+        <div class="fund-numbers">
+          <span id="fund-raised">$—</span>
+          <span id="fund-goal">of $— goal</span>
+        </div>
+        <ul class="fund-ledger">
+          <li>App Store &amp; Google Play developer accounts</li>
+          <li>Firebase / search infrastructure, year one</li>
+          <li>San Antonio merchant onboarding</li>
+          <li>Legal &amp; compliance</li>
+        </ul>
+        <a class="btn-outline-gold" href="https://gofund.me/eb678e74e" target="_blank" rel="noopener">Back the Mission →</a>
+        <span class="fund-note">Every backer is listed as a Founding Supporter at launch.</span>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 7 · For business owners -->
+  <section class="band owners">
+    <div class="band__inner">
+      <h2>Your customers are looking for you.<br>Make sure they find you.</h2>
+      <p class="owners-list">
+        Free listing · Verified badge · Live KIN Score · AI marketing tools ·
+        Delivery links · Power Hour promotions
+      </p>
+      <a class="btn-evergreen" href="pages/for-business/">Register Your Business — Free →</a>
+      <span class="owners-note">Takes about 4 minutes. A human reviews every listing.</span>
+    </div>
+  </section>
+
+  <!-- 8 · Coming soon / stores -->
+  <section class="band band--evergreen soon" id="get-the-app">
+    <div class="band__inner">
+      <h2>The KIN App arrives this year.</h2>
+      <p>iOS and Android. San Antonio first — be there on day one.</p>
+      <div class="store-badges" id="store-badges">
+        <span class="store-badge">App Store<span>Launching soon</span></span>
+        <span class="store-badge">Google Play<span>Launching soon</span></span>
+      </div>
+      <div class="soon-capture" id="notify-soon"></div>
+    </div>
+  </section>
+
+  <!-- 9 · Footer -->
+  <footer class="site-footer band--dark">
+    <div class="band__inner">
+      <!-- Master Branding Library: transparent mark works on any dark surface
+           (assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png) -->
+      <img src="../assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png"
+           alt="Kinvest Guidance" width="858" height="819" loading="lazy">
+      <nav aria-label="Explore">
+        <strong>Explore</strong>
+        <a href="#home">Home</a>
+        <a href="#about">Mission</a>
+        <a href="pages/san-antonio-guide/">San Antonio Guide</a>
+      </nav>
+      <nav aria-label="For businesses">
+        <strong>For Businesses</strong>
+        <a href="pages/for-business/">Get Listed Free</a>
+        <a href="pages/for-business/#register">Registration Form</a>
+      </nav>
+      <nav aria-label="Support">
+        <strong>Support</strong>
+        <a href="https://gofund.me/eb678e74e" target="_blank" rel="noopener">Back the Mission</a>
+        <a href="mailto:kelvin@kinvestguidance.com">Contact</a>
+      </nav>
+      <nav aria-label="Legal">
+        <strong>Legal</strong>
+        <a href="privacy">Privacy Policy</a>
+        <a href="terms">Terms of Service</a>
+      </nav>
+      <p class="footer-mission">
+        Kinvest Guidance LLC — building digital infrastructure for
+        independent, Black-owned businesses. Stronger Together.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Sticky mobile CTA (appears after 50% scroll, ≤640px) -->
+  <div class="mobile-cta" data-visible="false">
+    <a class="btn-gold" href="#get-the-app">Notify Me</a>
+    <a class="btn-outline-gold" href="pages/for-business/">List a Business</a>
+  </div>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module">
+    import { initSiteHeader } from "./components/site-header/site-header.js";
+    import { initNotifyMe } from "./components/notify-me/notify-me.js";
+    import { initKinTicker, initCommunityMap, initSignupFlash }
+      from "./components/community-data/community-data.js";
+
+    // This page sits one level above the components' default asset depth.
+    const assetBase = "../assets/KIN_Logo_Assets";
+
+    initSiteHeader(document.getElementById("site-header"), {
+      assetBase,
+      activeHref: "#home",
+      links: [
+        { label: "Home", href: "#home" },
+        { label: "Mission", href: "#about" },
+        { label: "Community", href: "#spotlight" },
+        { label: "SA Guide", href: "pages/san-antonio-guide/" },
+      ],
+      actions: {
+        ghost: { label: "Support", href: "#support" },
+        cta: { label: "Get the App", href: "#get-the-app" },
+      },
+    });
+
+    // Flip `live: true` on ticker/map/flash once web_projection functions
+    // and web_public rules are deployed (community-data README).
+    initKinTicker(document.getElementById("kin-ticker"), { live: false });
+    initCommunityMap(document.getElementById("community-map"), { live: false });
+    initSignupFlash({ live: false, demo: false, assetBase });
+
+    initNotifyMe(document.getElementById("notify-hero"), { source: "web_hero", assetBase });
+    initNotifyMe(document.getElementById("notify-soon"), { source: "web_footer", assetBase });
+
+    // TODO(kelvin): keep in sync with the GoFundMe campaign until the
+    // hourly web_public/config.funding refresh is built (blueprint §4.1).
+    const FUNDING = { raised: 0, goal: 25000 };
+    const pct = Math.min(100, Math.round((FUNDING.raised / FUNDING.goal) * 100));
+    document.getElementById("fund-fill").style.width = `${pct}%`;
+    document.getElementById("fund-raised").textContent =
+      `$${FUNDING.raised.toLocaleString()} raised`;
+    document.getElementById("fund-goal").textContent =
+      `of $${FUNDING.goal.toLocaleString()} goal`;
+
+    // How-it-works tabs
+    const tabs = document.querySelectorAll(".how-tab");
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.setAttribute("aria-selected", String(t === tab)));
+        document.querySelectorAll(".how-panel").forEach((p) => {
+          p.setAttribute("data-active", String(p.id === tab.getAttribute("aria-controls")));
+        });
+      });
+    });
+
+    // Sticky mobile CTA after ~50% of first two viewports
+    const mobileCta = document.querySelector(".mobile-cta");
+    const onScroll = () => {
+      mobileCta.setAttribute(
+        "data-visible",
+        String(window.scrollY > window.innerHeight * 0.9)
+      );
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Kinvest Guidance LLC",
+    "url": "https://www.kinvestguidance.com/",
+    "logo": "https://www.kinvestguidance.com/assets/logo/kin_logo_master_transparent.png",
+    "founder": { "@type": "Person", "name": "Kelvin Taylor" },
+    "description": "Digital infrastructure for independent, Black-owned businesses. Maker of The KIN App.",
+    "sameAs": ["https://gofund.me/eb678e74e"]
+  }
+  </script>
+</body>
+</html>
