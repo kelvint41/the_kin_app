@@ -1,0 +1,264 @@
+/* KIN Site Header
+ * Same design tokens as website/components/notify-me/notify-me.css, all
+ * mirrored from lib/flutter_flow/flutter_flow_theme.dart:
+ *   primary #0B3D2E (KIN Evergreen) · accent1 #D4AF37 (brand gold)
+ *   secondary #C5A059 · alternate #3D3D3D · onPrimary #FFFFFF
+ *   FFSpacing 4/8/16/24/32 · FFRadius md 14 · Plus Jakarta Sans
+ * Blueprint §1.4: solid Evergreen, 1px gold-tinted bottom border,
+ * translucent Evergreen + backdrop blur once the page scrolls.
+ */
+
+.kin-header {
+  --kin-evergreen: #0B3D2E;
+  --kin-gold: #D4AF37;
+  --kin-gold-muted: #C5A059;
+  --kin-bronze: #8A7B5E;
+  --kin-graphite: #3D3D3D;
+  --kin-ink: #14181B;
+
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px;
+  --r-md: 14px; --r-full: 9999px;
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, .30);
+
+  --kin-header-height: 72px;
+
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--kin-evergreen);
+  border-bottom: 1px solid rgba(212, 175, 55, .35);
+  font-family: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  transition: background-color .25s ease, box-shadow .25s ease;
+}
+.kin-header *, .kin-header *::before, .kin-header *::after { box-sizing: inherit; }
+
+/* Scrolled: translucent Evergreen + blur, per the blueprint header spec. */
+.kin-header[data-scrolled="true"] {
+  background: rgba(11, 61, 46, .88);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-md);
+}
+
+.kin-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  height: var(--kin-header-height);
+  padding: 0 var(--sp-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-lg);
+}
+
+/* Brand lockup — gold-text variant for this Evergreen surface, per the
+ * CLAUDE.md Master Branding Library selection matrix:
+ * assets/KIN_Logo_Assets/10_website_header/header_logo_lockup_gold_text.png */
+.kin-header__brand {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  margin-right: auto;
+  border-radius: var(--sp-xs);
+}
+.kin-header__brand:focus-visible {
+  outline: 2px solid var(--kin-gold);
+  outline-offset: 4px;
+}
+.kin-header__brand img {
+  display: block;
+  height: 40px;   /* 1558×286 source ratio → ~218px wide */
+  width: auto;
+}
+
+.kin-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-lg);
+}
+
+.kin-header__link {
+  position: relative;
+  padding: var(--sp-sm) 0;
+  color: var(--kin-gold-muted);
+  text-decoration: none;
+  font: 600 14px/1.3 "Plus Jakarta Sans", system-ui, sans-serif; /* labelLarge */
+  letter-spacing: .02em;
+  transition: color .2s ease;
+}
+.kin-header__link::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 100%;
+  bottom: 0;
+  height: 2px;
+  background: var(--kin-gold);
+  transition: right .2s ease;
+}
+.kin-header__link:hover,
+.kin-header__link:focus-visible,
+.kin-header__link[aria-current="page"] {
+  color: var(--kin-gold);
+  outline: none;
+}
+.kin-header__link:hover::after,
+.kin-header__link:focus-visible::after,
+.kin-header__link[aria-current="page"]::after {
+  right: 0;
+}
+
+.kin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-md);
+}
+
+/* Ghost CTA (blueprint §1.4): transparent, muted-gold border. */
+.kin-header__ghost {
+  padding: 10px var(--sp-md);
+  border: 1px solid var(--kin-gold-muted);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--kin-gold-muted);
+  text-decoration: none;
+  font: 600 14px/1.3 "Plus Jakarta Sans", system-ui, sans-serif;
+  transition: color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.kin-header__ghost:hover,
+.kin-header__ghost:focus-visible {
+  color: var(--kin-gold);
+  border-color: var(--kin-gold);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, .25);
+}
+
+/* Primary CTA on an Evergreen surface: gold fill with Ink label —
+ * an Evergreen button would vanish here, and white-on-gold is off-limits
+ * (2.05:1); Ink-on-gold is ~7.9:1. */
+.kin-header__cta {
+  padding: 10px var(--sp-lg);
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--kin-gold);
+  color: var(--kin-ink);
+  text-decoration: none;
+  font: 600 14px/1.3 "Plus Jakarta Sans", system-ui, sans-serif;
+  letter-spacing: .02em;
+  transition: box-shadow .2s ease, transform .1s ease;
+}
+.kin-header__cta:hover,
+.kin-header__cta:focus-visible {
+  box-shadow: 0 0 0 2px #FFFFFF33, var(--shadow-md);
+  outline: none;
+}
+.kin-header__cta:active { transform: translateY(1px); }
+
+/* Mobile menu toggle — hidden on desktop. */
+.kin-header__toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: none;
+  border-radius: var(--r-md);
+  background: transparent;
+  cursor: pointer;
+}
+.kin-header__toggle:focus-visible {
+  outline: 2px solid var(--kin-gold);
+}
+.kin-header__toggle-bar {
+  display: block;
+  height: 2px;
+  border-radius: var(--r-full);
+  background: var(--kin-gold);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.kin-header__toggle[aria-expanded="true"] .kin-header__toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.kin-header__toggle[aria-expanded="true"] .kin-header__toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+.kin-header__toggle[aria-expanded="true"] .kin-header__toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 860px) {
+  .kin-header__inner {
+    height: 64px;
+    padding: 0 var(--sp-md);
+  }
+  .kin-header__brand img { height: 34px; }
+
+  .kin-header__toggle { display: flex; }
+
+  /* Collapsed nav becomes a full-width Evergreen panel under the bar. */
+  .kin-header__menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    padding: var(--sp-sm) var(--sp-md) var(--sp-lg);
+    background: var(--kin-evergreen);
+    border-bottom: 1px solid rgba(212, 175, 55, .35);
+    box-shadow: var(--shadow-md);
+  }
+  .kin-header[data-menu-open="true"] .kin-header__menu { display: flex; }
+
+  .kin-header__nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .kin-header__link {
+    padding: var(--sp-md) var(--sp-xs);
+    border-bottom: 1px solid rgba(61, 61, 61, .6); /* graphite divider */
+    font-size: 16px;
+  }
+  .kin-header__link::after { display: none; }
+
+  .kin-header__actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-sm);
+    margin-top: var(--sp-md);
+  }
+  .kin-header__ghost,
+  .kin-header__cta {
+    text-align: center;
+    padding: 12px var(--sp-lg);
+  }
+}
+
+@media (min-width: 861px) {
+  .kin-header__menu {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kin-header,
+  .kin-header__link,
+  .kin-header__link::after,
+  .kin-header__toggle-bar {
+    transition: none;
+  }
+}
+
+.kin-header .visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

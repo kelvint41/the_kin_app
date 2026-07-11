@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KIN Site Header — component demo (header + funnel alignment)</title>
+  <link rel="icon" href="../../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site-header.css">
+  <link rel="stylesheet" href="../notify-me/notify-me.css">
+  <style>
+    /* Demo scaffolding only — components are styled by their own CSS */
+    body { margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; }
+    .hero {
+      display: grid;
+      place-items: center;
+      gap: 24px;
+      padding: 96px 24px;
+      background: #0B3D2E;
+      color: #FCFCFC;
+      text-align: center;
+    }
+    .hero h1 {
+      margin: 0;
+      max-width: 640px;
+      color: #D4AF37;
+      font-weight: 800;
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1.15;
+    }
+    .hero p { margin: 0; color: #C5A059; font-size: 17px; }
+    .filler {
+      min-height: 120vh;
+      padding: 64px 24px;
+      background: #FCFCFC;
+      color: #14181B;
+    }
+    .filler h2 { color: #7D5F16; font-weight: 800; font-size: 34px; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <!-- Alignment test: header directly above the Notify-Me funnel -->
+  <section class="hero" id="home">
+    <h1>Own Your Local Economy.</h1>
+    <p>The KIN Exchange is coming to the App Store and Google Play.</p>
+    <div id="notify-hero"></div>
+  </section>
+
+  <section class="filler" id="about">
+    <h2>Scroll to test the translucent header treatment.</h2>
+    <p>The header switches to blurred, translucent Evergreen once the page
+       leaves the top (blueprint §1.4).</p>
+  </section>
+
+  <script type="module">
+    import { initSiteHeader } from "./site-header.js";
+    import { initNotifyMe } from "../notify-me/notify-me.js";
+
+    initSiteHeader(document.getElementById("site-header"), { activeHref: "#home" });
+    initNotifyMe(document.getElementById("notify-hero"), { source: "web_hero" });
+  </script>
+</body>
+</html>
