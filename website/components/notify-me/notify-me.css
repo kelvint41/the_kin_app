@@ -38,6 +38,22 @@
   --kin-error: #BA1A1A;
 }
 
+/* Brand lockup from the Master Branding Library (see CLAUDE.md):
+ * assets/KIN_Logo_Assets/10_website_header/header_logo_lockup_gold_text.png
+ * on dark surfaces, header_logo_lockup_dark_text.png on light. The
+ * width/height attributes on the <img> carry the source 1558×286 ratio,
+ * so this render width never causes layout shift. */
+.kin-notify__brand {
+  display: block;
+  width: min(220px, 70%);
+  height: auto;
+  margin: 0 auto var(--sp-md);
+}
+
+.kin-notify[data-state="success"] .kin-notify__brand {
+  margin-bottom: var(--sp-md); /* lockup stays visible above the success card */
+}
+
 .kin-notify__form {
   display: flex;
   gap: var(--sp-sm);

@@ -30,6 +30,18 @@ const COPY = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
+// Master Branding Library (assets/KIN_Logo_Assets — see CLAUDE.md): gold
+// wordmark lockup on dark/Evergreen surfaces, dark wordmark on light.
+// Source PNGs are 1558×286. Override assetBase if the shell serves the
+// assets folder from a different root than this default relative path.
+const DEFAULT_ASSET_BASE = "../../../assets/KIN_Logo_Assets";
+const LOGO_BY_SURFACE = {
+  dark: "10_website_header/header_logo_lockup_gold_text.png",
+  light: "10_website_header/header_logo_lockup_dark_text.png",
+};
+const LOGO_WIDTH = 1558;
+const LOGO_HEIGHT = 286;
+
 async function callSubscribeToLaunch(email, source) {
   const res = await fetch(SUBSCRIBE_URL, {
     method: "POST",
@@ -45,7 +57,14 @@ async function callSubscribeToLaunch(email, source) {
   return body.result || {};
 }
 
-export default function NotifyMe({ source = "web", surface = "dark" }) {
+export default function NotifyMe({
+  source = "web",
+  surface = "dark",
+  assetBase = DEFAULT_ASSET_BASE,
+}) {
+  const logoSrc = `${assetBase.replace(/\/$/, "")}/${
+    LOGO_BY_SURFACE[surface] || LOGO_BY_SURFACE.dark
+  }`;
   const inputId = useId();
   const [email, setEmail] = useState("");
   const [state, setState] = useState("idle"); // idle | loading | success | error
@@ -83,6 +102,14 @@ export default function NotifyMe({ source = "web", surface = "dark" }) {
 
   return (
     <div className="kin-notify" data-state={state} data-surface={surface}>
+      <img
+        className="kin-notify__brand"
+        src={logoSrc}
+        alt="Kinvest Guidance"
+        width={LOGO_WIDTH}
+        height={LOGO_HEIGHT}
+        decoding="async"
+      />
       <form className="kin-notify__form" noValidate onSubmit={handleSubmit}>
         <label className="visually-hidden" htmlFor={inputId}>
           Email address

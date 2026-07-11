@@ -18,6 +18,21 @@ const FUNCTIONS_REGION = "us-central1";
 const SUBSCRIBE_URL =
   `https://${FUNCTIONS_REGION}-${FIREBASE_PROJECT_ID}.cloudfunctions.net/subscribeToLaunch`;
 
+// Master Branding Library (assets/KIN_Logo_Assets — see CLAUDE.md).
+// Default base is relative to this component's folder
+// (website/components/notify-me/ → repo root → assets/); override via
+// options.assetBase when the shell serves assets from another root.
+const DEFAULT_ASSET_BASE = "../../../assets/KIN_Logo_Assets";
+const LOGO_BY_SURFACE = {
+  // Gold wordmark for dark/Evergreen surfaces, dark wordmark for light —
+  // per the selection matrix in CLAUDE.md.
+  dark: "10_website_header/header_logo_lockup_gold_text.png",
+  light: "10_website_header/header_logo_lockup_dark_text.png",
+};
+// Source PNGs are 1558×286 (aspect preserved by the CSS render width).
+const LOGO_WIDTH = 1558;
+const LOGO_HEIGHT = 286;
+
 const COPY = {
   hint: "One email at launch. No spam. Unsubscribe anytime.",
   placeholder: "you@example.com",
@@ -52,9 +67,19 @@ async function callSubscribeToLaunch(email, source) {
 export function initNotifyMe(container, options = {}) {
   const source = options.source || "web";
   const surface = options.surface || "dark"; // "dark" | "light"
+  const assetBase = (options.assetBase || DEFAULT_ASSET_BASE).replace(/\/$/, "");
+  const logoSrc = `${assetBase}/${LOGO_BY_SURFACE[surface] || LOGO_BY_SURFACE.dark}`;
 
   container.innerHTML = `
     <div class="kin-notify" data-state="idle" data-surface="${surface}">
+      <img
+        class="kin-notify__brand"
+        src="${logoSrc}"
+        alt="Kinvest Guidance"
+        width="${LOGO_WIDTH}"
+        height="${LOGO_HEIGHT}"
+        decoding="async"
+      >
       <form class="kin-notify__form" novalidate>
         <label class="visually-hidden" for="kin-notify-email-${source}">
           Email address
