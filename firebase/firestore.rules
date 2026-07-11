@@ -185,6 +185,15 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Sanitized public projection for the website (ticker, map, signup
+    // flash). Written exclusively by the web_projection Cloud Functions via
+    // the Admin SDK; contents are whitelisted web-safe fields only, so a
+    // public read exposes no PII.
+    match /web_public/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // Website launch-notification list (Notify-Me flow). Deny-all for
     // clients: every create goes through the subscribeToLaunch callable and
     // every status change through confirmLaunchSubscription — both run on

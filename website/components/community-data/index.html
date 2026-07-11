@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KIN Community &amp; Data — full-stack demo</title>
+  <link rel="icon" href="../../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Leaflet vendored at website/vendor/leaflet (blueprint §7: self-host,
+       no third-party JS in the critical path) -->
+  <link rel="stylesheet" href="../../vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="../site-header/site-header.css">
+  <link rel="stylesheet" href="../notify-me/notify-me.css">
+  <link rel="stylesheet" href="community-data.css">
+  <style>
+    /* Demo scaffolding only */
+    body { margin: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; background: #121212; }
+    .hero {
+      display: grid; place-items: center; gap: 24px;
+      padding: 80px 24px; background: #0B3D2E; color: #FCFCFC; text-align: center;
+    }
+    .hero h1 {
+      margin: 0; max-width: 640px; color: #D4AF37;
+      font-weight: 800; font-size: clamp(34px, 6vw, 56px); line-height: 1.15;
+    }
+    .community { max-width: 1000px; margin: 0 auto; padding: 48px 24px 96px; }
+    .community h2 { color: #D4AF37; font-weight: 800; font-size: 34px; margin: 0 0 24px; }
+  </style>
+</head>
+<body>
+  <div id="site-header"></div>
+  <div id="kin-ticker"></div>
+
+  <section class="hero" id="home">
+    <h1>Own Your Local Economy.</h1>
+    <div id="notify-hero"></div>
+  </section>
+
+  <section class="community" id="spotlight">
+    <h2>The KIN Community, Live.</h2>
+    <div id="community-map"></div>
+  </section>
+
+  <script src="../../vendor/leaflet/leaflet.js"></script>
+  <script type="module">
+    import { initSiteHeader } from "../site-header/site-header.js";
+    import { initNotifyMe } from "../notify-me/notify-me.js";
+    import { initKinTicker, initCommunityMap, initSignupFlash } from "./community-data.js";
+
+    initSiteHeader(document.getElementById("site-header"), { activeHref: "#home" });
+
+    // Flip `live: true` on all three once the web_projection Cloud
+    // Functions and web_public rules are deployed (see README).
+    initKinTicker(document.getElementById("kin-ticker"), { live: false });
+    initCommunityMap(document.getElementById("community-map"), { live: false });
+    initSignupFlash({ live: false, demo: true, demoDelayMs: 1500, demoIntervalMs: 10000 });
+
+    initNotifyMe(document.getElementById("notify-hero"), { source: "web_hero" });
+  </script>
+</body>
+</html>

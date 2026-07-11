@@ -14,3 +14,7 @@ exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngag
 const launchSubscribers = require("./launch_subscribers.js");
 exports.subscribeToLaunch = launchSubscribers.subscribeToLaunch;
 exports.confirmLaunchSubscription = launchSubscribers.confirmLaunchSubscription;
+
+const webProjection = require("./web_projection.js");
+exports.publishWebProjection = webProjection.publishWebProjection;
+exports.publishSignupFlash = webProjection.publishSignupFlash;
