@@ -63,7 +63,7 @@ jobs:
           LABEL: ${{ matrix.route.label }}
           THEME: ${{ matrix.theme }}
         run: |
-          run: |
+          
       set +e  # This allows the script to continue even if a command fails
       mkdir -p screenshots
       LOG_FILE=$(mktemp)
