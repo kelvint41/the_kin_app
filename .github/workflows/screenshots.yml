@@ -66,7 +66,6 @@ jobs:
         set +e
         mkdir -p screenshots
         LOG_FILE=$(mktemp)
-        
         flutter test -v integration_test/app_screenshots_test.dart \
           -d "$DEVICE_ID" \
           --dart-define=DEV_PASSWORD="${{ secrets.DEV_BYPASS_PASSWORD }}" \
@@ -75,7 +74,6 @@ jobs:
           --dart-define=SCREENSHOT_THEME="$THEME" \
           > "$LOG_FILE" 2>&1 &
         TEST_PID=$!
-        
         SEEN=""
         while kill -0 $TEST_PID 2>/dev/null; do
           LINE=$(grep "KIN_SCREENSHOT_READY:" "$LOG_FILE" | tail -1 || true)
@@ -88,7 +86,6 @@ jobs:
           fi
           sleep 0.5
         done
-        
         wait $TEST_PID
         EXIT_CODE=$?
         cat "$LOG_FILE"
