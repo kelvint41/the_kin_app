@@ -232,6 +232,7 @@ body {
   margin-bottom: var(--sp-xl);
 }
 .store-badge {
+  text-decoration: none;
   padding: 12px var(--sp-lg);
   border: 1px solid var(--kin-gold-muted);
   border-radius: var(--r-md);

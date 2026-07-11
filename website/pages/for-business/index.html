@@ -12,7 +12,7 @@
   <meta property="og:url" content="https://www.kinvestguidance.com/for-business/">
   <meta property="og:image" content="https://www.kinvestguidance.com/assets/social/x_twitter_header_1500x500.png">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="../../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="icon" href="../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -153,7 +153,10 @@
 
   <script type="module">
     import { initSiteHeader } from "../../components/site-header/site-header.js";
-    initSiteHeader(document.getElementById("site-header"), { activeHref: "#about" });
+    initSiteHeader(document.getElementById("site-header"), {
+      activeHref: "#about",
+      assetBase: "../../assets/KIN_Logo_Assets",
+    });
 
     // TODO(kelvin): paste the real Google Form URL. It feeds
     // ingestBusinessCandidate → the discovery pipeline (DISCOVERY_BLUEPRINT.md).

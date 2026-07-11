@@ -12,7 +12,7 @@
   <meta property="og:url" content="https://www.kinvestguidance.com/san-antonio-guide/">
   <meta property="og:image" content="https://www.kinvestguidance.com/assets/social/x_twitter_header_1500x500.png">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="../../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="icon" href="../../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -42,7 +42,7 @@
       <h2>Know a business that belongs here?</h2>
       <p>Owners list free. Neighbors can suggest. A human verifies every entry.</p>
       <div class="guide-cta__row">
-        <a class="btn-gold" href="/#get-the-app">Get The KIN App</a>
+        <a class="btn-gold" href="https://thekinapp.carrd.co/" rel="noopener">Get The KIN App</a>
         <a class="btn-outline" href="../for-business/">List Your Business — Free</a>
       </div>
     </aside>
@@ -60,7 +60,10 @@
   <script type="module">
     import { initSiteHeader } from "../../components/site-header/site-header.js";
     import { renderGuide } from "./guide.js";
-    initSiteHeader(document.getElementById("site-header"), { activeHref: "#spotlight" });
+    initSiteHeader(document.getElementById("site-header"), {
+      activeHref: "#spotlight",
+      assetBase: "../../assets/KIN_Logo_Assets",
+    });
     renderGuide();
   </script>
 </body>

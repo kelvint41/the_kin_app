@@ -166,6 +166,26 @@ body {
   white-space: nowrap;
 }
 
+/* Featured entries: priority placement (sorted first) + gold treatment. */
+.biz-card--featured {
+  border: 1px solid var(--kin-gold);
+  border-left: 3px solid var(--kin-gold);
+  box-shadow: var(--shadow-md);
+}
+.biz-card__featured-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-xs);
+  align-self: flex-start;
+  padding: 3px 10px;
+  background: var(--kin-gold);
+  color: var(--kin-ink);
+  border-radius: var(--r-full);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: .04em;
+}
+
 .biz-card__badge {
   display: inline-flex;
   align-items: center;

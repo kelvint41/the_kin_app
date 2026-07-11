@@ -12,7 +12,7 @@
   <meta property="og:url" content="https://www.kinvestguidance.com/">
   <meta property="og:image" content="https://www.kinvestguidance.com/assets/social/x_twitter_header_1500x500.png">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="icon" href="../assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
+  <link rel="icon" href="assets/KIN_Logo_Assets/09_favicon/favicon_dark_256.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
@@ -150,8 +150,8 @@
       <h2>The KIN App arrives this year.</h2>
       <p>iOS and Android. San Antonio first — be there on day one.</p>
       <div class="store-badges" id="store-badges">
-        <span class="store-badge">App Store<span>Launching soon</span></span>
-        <span class="store-badge">Google Play<span>Launching soon</span></span>
+        <a class="store-badge" href="https://thekinapp.carrd.co/" rel="noopener" target="_blank">App Store<span>Launching soon · join the waitlist</span></a>
+        <a class="store-badge" href="https://thekinapp.carrd.co/" rel="noopener" target="_blank">Google Play<span>Launching soon · join the waitlist</span></a>
       </div>
       <div class="soon-capture" id="notify-soon"></div>
     </div>
@@ -162,7 +162,7 @@
     <div class="band__inner">
       <!-- Master Branding Library: transparent mark works on any dark surface
            (assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png) -->
-      <img src="../assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png"
+      <img src="assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png"
            alt="Kinvest Guidance" width="858" height="819" loading="lazy">
       <nav aria-label="Explore">
         <strong>Explore</strong>
@@ -205,8 +205,8 @@
     import { initKinTicker, initCommunityMap, initSignupFlash }
       from "./components/community-data/community-data.js";
 
-    // This page sits one level above the components' default asset depth.
-    const assetBase = "../assets/KIN_Logo_Assets";
+    // Production asset copy inside the hosting root (website/assets/).
+    const assetBase = "assets/KIN_Logo_Assets";
 
     initSiteHeader(document.getElementById("site-header"), {
       assetBase,
@@ -270,7 +270,7 @@
     "@type": "Organization",
     "name": "Kinvest Guidance LLC",
     "url": "https://www.kinvestguidance.com/",
-    "logo": "https://www.kinvestguidance.com/assets/logo/kin_logo_master_transparent.png",
+    "logo": "https://www.kinvestguidance.com/assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png",
     "founder": { "@type": "Person", "name": "Kelvin Taylor" },
     "description": "Digital infrastructure for independent, Black-owned businesses. Maker of The KIN App.",
     "sameAs": ["https://gofund.me/eb678e74e"]
