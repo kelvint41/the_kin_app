@@ -19,6 +19,11 @@ class BusinessesRecord extends FirestoreRecord {
     _initializeFields();
   }
 
+  // "is_published" field.
+  bool? _isPublished;
+  bool get isPublished => _isPublished ?? false;
+  bool hasIsPublished() => _isPublished != null;
+
   // "is_black_owned" field.
   bool? _isBlackOwned;
   bool get isBlackOwned => _isBlackOwned ?? false;
@@ -360,6 +365,7 @@ class BusinessesRecord extends FirestoreRecord {
   bool hasPhotoGallery() => _photoGallery != null;
 
   void _initializeFields() {
+    _isPublished = snapshotData['is_published'] as bool?;
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
     _category = snapshotData['category'] as String?;
     _businessType = snapshotData['business_type'] as String?;
@@ -459,6 +465,7 @@ class BusinessesRecord extends FirestoreRecord {
   static BusinessesRecord fromAlgolia(AlgoliaObjectSnapshot snapshot) =>
       BusinessesRecord.getDocumentFromData(
         {
+          'is_published': snapshot.data['is_published'],
           'is_black_owned': snapshot.data['is_black_owned'],
           'category': snapshot.data['category'],
           'website': snapshot.data['website'],
@@ -639,6 +646,7 @@ class BusinessesRecord extends FirestoreRecord {
 }
 
 Map<String, dynamic> createBusinessesRecordData({
+  bool? isPublished,
   bool? isBlackOwned,
   String? category,
   String? businessType,
@@ -708,6 +716,7 @@ Map<String, dynamic> createBusinessesRecordData({
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
+      'is_published': isPublished,
       'is_black_owned': isBlackOwned,
       'category': category,
       'business_type': businessType,
@@ -786,7 +795,8 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
   @override
   bool equals(BusinessesRecord? e1, BusinessesRecord? e2) {
     const listEquality = ListEquality();
-    return e1?.isBlackOwned == e2?.isBlackOwned &&
+    return e1?.isPublished == e2?.isPublished &&
+        e1?.isBlackOwned == e2?.isBlackOwned &&
         e1?.category == e2?.category &&
         e1?.businessType == e2?.businessType &&
         e1?.website == e2?.website &&
@@ -857,6 +867,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
 
   @override
   int hash(BusinessesRecord? e) => const ListEquality().hash([
+        e?.isPublished,
         e?.isBlackOwned,
         e?.category,
         e?.businessType,

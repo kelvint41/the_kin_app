@@ -381,7 +381,9 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     context.watch<FFAppState>();
 
     return StreamBuilder<List<BusinessesRecord>>(
-      stream: queryBusinessesRecord(),
+      stream: queryBusinessesRecord(
+        queryBuilder: (q) => q.where('is_published', isEqualTo: true),
+      ),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {

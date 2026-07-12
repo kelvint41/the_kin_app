@@ -37,6 +37,8 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
   String businessType = 'Sole Proprietor';
   // Whether this is a Black-owned business (defaults to true per design spec).
   bool isBlackOwned = true;
+  // Whether the listing is visible on the public map/discovery (default false).
+  bool isPublished = false;
   // State field(s) for BusinessName widget.
   FocusNode? businessNameFocusNode;
   TextEditingController? businessNameTextController;

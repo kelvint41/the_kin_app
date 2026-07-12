@@ -9,7 +9,8 @@ service cloud.firestore {
       allow create: if request.auth != null
         && request.resource.data.get('is_premium', false) == false
         && request.resource.data.get('subscription_tier', 'Community') == 'Community'
-        && request.resource.data.get('is_priority_pinned', false) == false;
+        && request.resource.data.get('is_priority_pinned', false) == false
+        && request.resource.data.get('is_published', false) == false;
 
       allow read: if true;
 

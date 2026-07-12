@@ -124,6 +124,7 @@ class _OnboardingSelectionCardWidgetState
     return StreamBuilder<List<BusinessesRecord>>(
       stream: queryBusinessesRecord(
         queryBuilder: (businessesRecord) => businessesRecord
+            .where('is_published', isEqualTo: true)
             .where(
               'city',
               isEqualTo: currentUserLocationValue?.toString(),
