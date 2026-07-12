@@ -19,6 +19,11 @@ class BusinessesRecord extends FirestoreRecord {
     _initializeFields();
   }
 
+  // "geohash" field.
+  String? _geohash;
+  String get geohash => _geohash ?? '';
+  bool hasGeohash() => _geohash != null;
+
   // "is_published" field.
   bool? _isPublished;
   bool get isPublished => _isPublished ?? false;
@@ -365,6 +370,7 @@ class BusinessesRecord extends FirestoreRecord {
   bool hasPhotoGallery() => _photoGallery != null;
 
   void _initializeFields() {
+    _geohash = snapshotData['geohash'] as String?;
     _isPublished = snapshotData['is_published'] as bool?;
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
     _category = snapshotData['category'] as String?;
@@ -465,6 +471,7 @@ class BusinessesRecord extends FirestoreRecord {
   static BusinessesRecord fromAlgolia(AlgoliaObjectSnapshot snapshot) =>
       BusinessesRecord.getDocumentFromData(
         {
+          'geohash': snapshot.data['geohash'],
           'is_published': snapshot.data['is_published'],
           'is_black_owned': snapshot.data['is_black_owned'],
           'category': snapshot.data['category'],
@@ -646,6 +653,7 @@ class BusinessesRecord extends FirestoreRecord {
 }
 
 Map<String, dynamic> createBusinessesRecordData({
+  String? geohash,
   bool? isPublished,
   bool? isBlackOwned,
   String? category,
@@ -716,6 +724,7 @@ Map<String, dynamic> createBusinessesRecordData({
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
+      'geohash': geohash,
       'is_published': isPublished,
       'is_black_owned': isBlackOwned,
       'category': category,
@@ -795,7 +804,8 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
   @override
   bool equals(BusinessesRecord? e1, BusinessesRecord? e2) {
     const listEquality = ListEquality();
-    return e1?.isPublished == e2?.isPublished &&
+    return e1?.geohash == e2?.geohash &&
+        e1?.isPublished == e2?.isPublished &&
         e1?.isBlackOwned == e2?.isBlackOwned &&
         e1?.category == e2?.category &&
         e1?.businessType == e2?.businessType &&
@@ -867,6 +877,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
 
   @override
   int hash(BusinessesRecord? e) => const ListEquality().hash([
+        e?.geohash,
         e?.isPublished,
         e?.isBlackOwned,
         e?.category,

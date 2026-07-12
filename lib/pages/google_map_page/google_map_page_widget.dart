@@ -82,10 +82,24 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   // the strip, their explicit choice wins from then on.
   bool? _bottomSheetExpandedOverride;
 
+  // User's GPS location; initialized to San Antonio so the first query fires
+  // instantly without waiting for the async GPS result.
+  LatLng _userLocation = const LatLng(29.4241, -98.4936);
+
+  // Memoized stream: recreated only when the geohash prefix changes (i.e.,
+  // user moves to a different city area) so camera pans and UI state changes
+  // don't trigger unnecessary Firestore re-subscriptions.
+  String? _cachedGeohashPrefix;
+  Stream<List<BusinessesRecord>>? _cachedBusinessStream;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => GoogleMapPageModel());
+
+    getCurrentUserLocation(
+            defaultLocation: const LatLng(29.4241, -98.4936), cached: true)
+        .then((loc) => safeSetState(() => _userLocation = loc));
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -124,6 +138,49 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
             sin(dLng / 2);
     final c = 2 * atan2(sqrt(h), sqrt(1 - h));
     return earthRadiusMiles * c;
+  }
+
+  // Encodes a lat/lng pair as a geohash string of the given precision.
+  // Mirrors the geofire-common algorithm used by the Cloud Function.
+  String _geohashEncode(double lat, double lng, int precision) {
+    const chars = '0123456789bcdefghjkmnpqrstuvwxyz';
+    double minLat = -90, maxLat = 90;
+    double minLng = -180, maxLng = 180;
+    int bit = 0, bits = 0;
+    bool isEven = true;
+    final buf = StringBuffer();
+    while (buf.length < precision) {
+      if (isEven) {
+        final mid = (minLng + maxLng) / 2;
+        if (lng >= mid) { bits = (bits << 1) | 1; minLng = mid; }
+        else             { bits = bits << 1;        maxLng = mid; }
+      } else {
+        final mid = (minLat + maxLat) / 2;
+        if (lat >= mid) { bits = (bits << 1) | 1; minLat = mid; }
+        else             { bits = bits << 1;        maxLat = mid; }
+      }
+      isEven = !isEven;
+      if (++bit == 5) { buf.write(chars[bits]); bit = 0; bits = 0; }
+    }
+    return buf.toString();
+  }
+
+  // Returns (and memoizes) a Firestore stream filtered to the ~40 km cell
+  // containing `_userLocation`. Precision-4 geohash cells naturally separate
+  // cities so expanding to Houston / Atlanta requires no query change.
+  // The stream is recreated only if the prefix changes.
+  Stream<List<BusinessesRecord>> _nearbyStream() {
+    final prefix = _geohashEncode(
+        _userLocation.latitude, _userLocation.longitude, 4);
+    if (_cachedGeohashPrefix != prefix || _cachedBusinessStream == null) {
+      _cachedGeohashPrefix = prefix;
+      _cachedBusinessStream = queryBusinessesRecord(
+        queryBuilder: (q) => q
+            .where('geohash', isGreaterThanOrEqualTo: prefix)
+            .where('geohash', isLessThanOrEqualTo: prefix + ''),
+      );
+    }
+    return _cachedBusinessStream!;
   }
 
   Widget _buildFilterTile({
@@ -259,11 +316,15 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     final theme = FlutterFlowTheme.of(context);
     final isMobile = MediaQuery.sizeOf(context).width < 600;
     final expanded = _bottomSheetExpandedOverride ?? !isMobile;
-    final center = _model.mapGoogleMapsCenter ?? LatLng(29.4241, -98.4936);
+    final center = _model.mapGoogleMapsCenter ?? _userLocation;
+    const nearbyMiles = 10.0;
     final nearby = businesses
         .where((b) => b.businessLocation != null)
-        .take(10)
-        .toList();
+        .where((b) =>
+            _milesBetween(center, b.businessLocation!) <= nearbyMiles)
+        .toList()
+      ..sort((a, b) => _milesBetween(center, a.businessLocation!)
+          .compareTo(_milesBetween(center, b.businessLocation!)));
 
     return SafeArea(
       top: false,
@@ -381,9 +442,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     context.watch<FFAppState>();
 
     return StreamBuilder<List<BusinessesRecord>>(
-      stream: queryBusinessesRecord(
-        queryBuilder: (q) => q.where('is_published', isEqualTo: true),
-      ),
+      stream: _nearbyStream(),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -402,8 +461,10 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
             ),
           );
         }
-        List<BusinessesRecord> googleMapPageBusinessesRecordList =
-            snapshot.data!;
+        // Geohash query returns the whole city cell; filter unpublished
+        // listings client-side (no composite index required).
+        final googleMapPageBusinessesRecordList =
+            snapshot.data!.where((b) => b.isPublished).toList();
 
         return GestureDetector(
           onTap: () {

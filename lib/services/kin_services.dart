@@ -9,6 +9,32 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:share_plus/share_plus.dart';
 
+// Encodes a lat/lng pair as a geohash string of the given precision.
+// Mirrors the geofire-common algorithm used by the Cloud Function so both
+// sides produce identical values with no extra Dart package needed.
+String _geohashEncode(double lat, double lng, int precision) {
+  const chars = '0123456789bcdefghjkmnpqrstuvwxyz';
+  double minLat = -90, maxLat = 90;
+  double minLng = -180, maxLng = 180;
+  int bit = 0, bits = 0;
+  bool isEven = true;
+  final buf = StringBuffer();
+  while (buf.length < precision) {
+    if (isEven) {
+      final mid = (minLng + maxLng) / 2;
+      if (lng >= mid) { bits = (bits << 1) | 1; minLng = mid; }
+      else             { bits = bits << 1;        maxLng = mid; }
+    } else {
+      final mid = (minLat + maxLat) / 2;
+      if (lat >= mid) { bits = (bits << 1) | 1; minLat = mid; }
+      else             { bits = bits << 1;        maxLat = mid; }
+    }
+    isEven = !isEven;
+    if (++bit == 5) { buf.write(chars[bits]); bit = 0; bits = 0; }
+  }
+  return buf.toString();
+}
+
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
 /// catching exceptions themselves - every service method below already
 /// wraps its Firebase call in a try/catch and reports failure this way.
@@ -336,8 +362,14 @@ class KinServices {
 
     try {
       final businessRef = BusinessesRecord.collection.doc();
+      final latlng = place.latLng;
+      final geohash = latlng != null
+          ? _geohashEncode(latlng.latitude, latlng.longitude, 9)
+          : null;
+
       final data = createBusinessesRecordData(
         ownerRef: ownerRef,
+        geohash: geohash,
         category: category,
         businessType: businessType,
         isBlackOwned: isBlackOwned,
