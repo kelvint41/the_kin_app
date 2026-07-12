@@ -5,7 +5,7 @@ import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:math' show pi, sin, cos, sqrt, atan2;
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,25 +23,22 @@ export 'google_map_page_model.dart';
 /// Theme: Dark luxurious black background with gold and green accents.
 ///
 /// Layout:
-/// - Top: Search TextField with placeholder "Search businesses..."
-/// - Below search: Horizontal row of filter chips (Near Me, Restaurants,
-/// Beauty, Professional, etc.)
+/// - Top: nothing but a floating hamburger menu button (top-left). Tapping
+///   it opens a left Drawer holding the category filter options that used
+///   to run across the top of the map as a chip row.
 /// - Main area: Full Google Map with business markers (use custom
 /// KinBusinessMapPinIcon for Black-owned businesses)
-/// - Bottom sheet or floating area: ListView of business cards (prioritized
-/// for Black-owned)
-/// - Top-right corner: Menu IconButton (three dots or hamburger) that opens a
-/// Bottom Sheet with navigation options:
-///   - The Exchange
-///   - My Business / Profile
-///   - Community Feed
-///   - Power Hour Blast
+/// - Bottom: a compact, collapsible business carousel bound to the same
+///   business list driving the map markers (no separate hardcoded cards).
+///   Collapsed to a slim peek strip by default on mobile widths so the map
+///   stays the primary focus; expandable by tapping the strip.
 ///
-/// Bottom Navigation Bar with 4 items:
-///   - Discover (this page, active)
-///   - The Exchange
-///   - My Business
-///   - Profile
+/// Bottom Navigation Bar: provided by the app-level persistent nav shell
+/// (see components/kin_scaffold.dart) when this page is reached via the
+/// /map tab. This page keeps its own KinBottomNav2Widget as a fallback for
+/// the standalone /googleMapPage route, still used by several
+/// context.goNamedAuth(GoogleMapPageWidget.routeName, ...) call sites
+/// elsewhere in the app that don't go through the tab shell.
 ///
 /// Backend Query for the business list:
 /// - Collection: businesses
@@ -66,6 +63,20 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   late GoogleMapPageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Category filter, chosen from the drawer. `null` means "Near Me" / no
+  // filter. This is UI selection state only, same as the original chip
+  // row: neither the old chips nor this drawer match the label against the
+  // business.category field (real category values are much more granular,
+  // e.g. "Hair salon" / "Coffee shop" - see DISCOVERY_BLUEPRINT.md - so a
+  // label like "Beauty" would need an explicit keyword-to-category mapping
+  // decision before it could filter real data correctly).
+  String? _selectedCategoryFilter;
+
+  // Bottom business carousel: null = use the responsive default (collapsed
+  // on mobile widths, expanded on wide/tablet widths); once the user taps
+  // the strip, their explicit choice wins from then on.
+  bool? _bottomSheetExpandedOverride;
 
   @override
   void initState() {
@@ -92,6 +103,270 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  // Straight-line (haversine) distance in miles. Replaces the previous
+  // "distance" text, which either printed a raw LatLng tuple as a string
+  // (a pre-existing bug) or a hardcoded fake value.
+  double _milesBetween(LatLng a, LatLng b) {
+    const earthRadiusMiles = 3958.8;
+    double deg2rad(double deg) => deg * (pi / 180);
+    final dLat = deg2rad(b.latitude - a.latitude);
+    final dLng = deg2rad(b.longitude - a.longitude);
+    final h = sin(dLat / 2) * sin(dLat / 2) +
+        cos(deg2rad(a.latitude)) *
+            cos(deg2rad(b.latitude)) *
+            sin(dLng / 2) *
+            sin(dLng / 2);
+    final c = 2 * atan2(sqrt(h), sqrt(1 - h));
+    return earthRadiusMiles * c;
+  }
+
+  Widget _buildFilterTile({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String? value,
+  }) {
+    final theme = FlutterFlowTheme.of(context);
+    final selected = _selectedCategoryFilter == value;
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: selected ? theme.primaryBackground : theme.primaryText,
+        size: 22.0,
+      ),
+      title: Text(
+        label,
+        style: theme.bodyMedium.override(
+          font: GoogleFonts.plusJakartaSans(),
+          color: selected ? theme.primaryBackground : theme.primaryText,
+          letterSpacing: 0.0,
+        ),
+      ),
+      trailing: selected
+          ? Icon(Icons.check_rounded, color: theme.primaryBackground, size: 20.0)
+          : null,
+      tileColor: selected ? theme.tertiary : Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+      contentPadding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 0.0),
+      onTap: () {
+        safeSetState(() => _selectedCategoryFilter = value);
+        Navigator.pop(context);
+      },
+    );
+  }
+
+  Widget _buildFilterDrawer(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Drawer(
+      backgroundColor: theme.secondaryBackground,
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
+              child: Text(
+                'Filters',
+                style: theme.headlineSmall.override(
+                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  color: theme.primaryText,
+                  letterSpacing: 0.0,
+                ),
+              ),
+            ),
+            _buildFilterTile(
+              context: context,
+              icon: Icons.near_me_rounded,
+              label: 'Near Me',
+              value: null,
+            ),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(20.0, 8.0, 20.0, 8.0),
+              child: Divider(color: theme.alternate, height: 1.0),
+            ),
+            _buildFilterTile(
+              context: context,
+              icon: Icons.restaurant_rounded,
+              label: 'Restaurants',
+              value: 'Restaurants',
+            ),
+            _buildFilterTile(
+              context: context,
+              icon: Icons.content_cut_rounded,
+              label: 'Beauty',
+              value: 'Beauty',
+            ),
+            _buildFilterTile(
+              context: context,
+              icon: Icons.work_rounded,
+              label: 'Professional',
+              value: 'Professional',
+            ),
+            _buildFilterTile(
+              context: context,
+              icon: Icons.self_improvement_rounded,
+              label: 'Wellness',
+              value: 'Wellness',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHamburgerButton(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Container(
+      width: 48.0,
+      height: 48.0,
+      decoration: BoxDecoration(
+        color: Color(0xE6FFFFFF),
+        borderRadius: BorderRadius.circular(9999.0),
+        shape: BoxShape.rectangle,
+        border: Border.all(color: theme.alternate, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 8.0,
+            offset: Offset(0.0, 2.0),
+          ),
+        ],
+      ),
+      alignment: AlignmentDirectional(0.0, 0.0),
+      child: FlutterFlowIconButton(
+        borderRadius: 8.0,
+        buttonSize: 40.0,
+        fillColor: Colors.transparent,
+        icon: Icon(Icons.menu_rounded, color: theme.primaryText, size: 24.0),
+        onPressed: () => scaffoldKey.currentState?.openDrawer(),
+      ),
+    );
+  }
+
+  Widget _buildBottomBusinessSheet(
+    BuildContext context,
+    List<BusinessesRecord> businesses,
+  ) {
+    final theme = FlutterFlowTheme.of(context);
+    final isMobile = MediaQuery.sizeOf(context).width < 600;
+    final expanded = _bottomSheetExpandedOverride ?? !isMobile;
+    final center = _model.mapGoogleMapsCenter ?? LatLng(29.4241, -98.4936);
+    final nearby = businesses
+        .where((b) => b.businessLocation != null)
+        .take(10)
+        .toList();
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 12.0),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0x40000000),
+                blurRadius: 12.0,
+                offset: Offset(0.0, 4.0),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                borderRadius: BorderRadius.circular(16.0),
+                onTap: () => safeSetState(
+                  () => _bottomSheetExpandedOverride = !expanded,
+                ),
+                child: Padding(
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(16.0, 10.0, 12.0, 10.0),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        nearby.isEmpty
+                            ? 'No businesses nearby'
+                            : 'Black-Owned Near You · ${nearby.length}',
+                        style: theme.titleSmall.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          color: theme.primaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                      Icon(
+                        expanded
+                            ? Icons.keyboard_arrow_down_rounded
+                            : Icons.keyboard_arrow_up_rounded,
+                        color: theme.secondaryText,
+                        size: 24.0,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (expanded && nearby.isNotEmpty)
+                Padding(
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
+                  child: SizedBox(
+                    height: 132.0,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                      itemCount: nearby.length,
+                      separatorBuilder: (_, __) => SizedBox(width: 12.0),
+                      itemBuilder: (context, index) {
+                        final business = nearby[index];
+                        return GestureDetector(
+                          onTap: () => context.pushNamed(
+                            BusinessShowcaseWidget.routeName,
+                            queryParameters: {
+                              'businessRecord': serializeParam(
+                                business,
+                                ParamType.Document,
+                              ),
+                            }.withoutNulls,
+                            extra: <String, dynamic>{
+                              'businessRecord': business,
+                            },
+                          ),
+                          child: BusinessPreviewCardWidget(
+                            name: business.businessName.isNotEmpty
+                                ? business.businessName
+                                : null,
+                            isPriority: business.isPriorityPinned,
+                            category: business.category.isNotEmpty
+                                ? business.category
+                                : null,
+                            rating: business.reviewScore > 0
+                                ? formatNumber(
+                                    business.reviewScore,
+                                    formatType: FormatType.decimal,
+                                    decimalType: DecimalType.periodDecimal,
+                                  )
+                                : null,
+                            distance:
+                                '${_milesBetween(center, business.businessLocation!).toStringAsFixed(1)} mi',
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -130,6 +405,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
             key: scaffoldKey,
             resizeToAvoidBottomInset: false,
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            drawer: _buildFilterDrawer(context),
             body: Stack(
               alignment: AlignmentDirectional(-1.0, -1.0),
               children: [
@@ -184,785 +460,31 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     mapTakesGesturePreference: false,
                   ),
                 ),
+                // Top of the map is clear except for this floating
+                // hamburger button - category filters now live in the
+                // drawer it opens (_buildFilterDrawer), not a chip row.
                 Align(
-                  alignment: AlignmentDirectional(0.0, -1.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          FlutterFlowTheme.of(context).primaryBackground,
-                          Color(0x00FCFCFC)
-                        ],
-                        stops: [0.0, 1.0],
-                        begin: AlignmentDirectional(0.0, -1.0),
-                        end: AlignmentDirectional(0, 1.0),
-                      ),
-                      shape: BoxShape.rectangle,
-                    ),
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(
-                          16.0, 24.0, 16.0, 24.0),
-                      child: Container(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 48.0,
-                                  height: 48.0,
-                                  decoration: BoxDecoration(
-                                    color: Color(0xE6FFFFFF),
-                                    borderRadius: BorderRadius.circular(9999.0),
-                                    shape: BoxShape.rectangle,
-                                    border: Border.all(
-                                      color: FlutterFlowTheme.of(context)
-                                          .alternate,
-                                      width: 1.0,
-                                    ),
-                                  ),
-                                  alignment: AlignmentDirectional(0.0, 0.0),
-                                  child: FlutterFlowIconButton(
-                                    borderRadius: 8.0,
-                                    buttonSize: 40.0,
-                                    fillColor: Colors.transparent,
-                                    icon: Icon(
-                                      Icons.menu_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      size: 24.0,
-                                    ),
-                                    onPressed: () {
-                                      print('IconButton pressed ...');
-                                    },
-                                  ),
-                                ),
-                              ].divide(SizedBox(width: 8.0)),
-                            ),
-                            StreamBuilder<List<BusinessesRecord>>(
-                              stream: queryBusinessesRecord(
-                                queryBuilder: (businessesRecord) =>
-                                    businessesRecord
-                                        .orderBy('is_black_owned',
-                                            descending: true)
-                                        .orderBy('is_priority_pinned',
-                                            descending: true)
-                                        .orderBy('kindex_score',
-                                            descending: true),
-                              ),
-                              builder: (context, snapshot) {
-                                // Customize what your widget looks like when it's loading.
-                                if (!snapshot.hasData) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50.0,
-                                      height: 50.0,
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).primary,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                }
-                                List<BusinessesRecord> rowBusinessesRecordList =
-                                    snapshot.data!;
-
-                                return SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: List.generate(
-                                        rowBusinessesRecordList.length,
-                                        (rowIndex) {
-                                      final rowBusinessesRecord =
-                                          rowBusinessesRecordList[rowIndex];
-                                      return Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            4.0, 0.0, 0.0, 0.0),
-                                        child: Container(
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            children: [
-                                              Container(
-                                                height: 34.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .tertiary,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .alternate,
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 12.0, 0.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.check_rounded,
-                                                        color: FlutterFlowTheme
-                                                                .of(context)
-                                                            .primaryBackground,
-                                                        size: 16.0,
-                                                      ),
-                                                      Text(
-                                                        'Near Me',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .plusJakartaSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryBackground,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.4,
-                                                                ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(width: 6.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                height: 34.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .alternate,
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 12.0, 0.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .restaurant_rounded,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 18.0,
-                                                      ),
-                                                      Text(
-                                                        'Restaurants',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .plusJakartaSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.4,
-                                                                ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(width: 6.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                height: 34.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .alternate,
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 12.0, 0.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .content_cut_rounded,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 18.0,
-                                                      ),
-                                                      Text(
-                                                        'Beauty',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .plusJakartaSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.4,
-                                                                ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(width: 6.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                height: 34.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .alternate,
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 12.0, 0.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons.work_rounded,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 18.0,
-                                                      ),
-                                                      Text(
-                                                        'Professional',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .plusJakartaSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.4,
-                                                                ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(width: 6.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                              Container(
-                                                height: 34.0,
-                                                decoration: BoxDecoration(
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryBackground,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          8.0),
-                                                  border: Border.all(
-                                                    color: FlutterFlowTheme.of(
-                                                            context)
-                                                        .alternate,
-                                                    width: 1.0,
-                                                  ),
-                                                ),
-                                                alignment: AlignmentDirectional(
-                                                    0.0, 0.0),
-                                                child: Padding(
-                                                  padding: EdgeInsetsDirectional
-                                                      .fromSTEB(
-                                                          12.0, 0.0, 12.0, 0.0),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .self_improvement_rounded,
-                                                        color:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .primaryText,
-                                                        size: 18.0,
-                                                      ),
-                                                      Text(
-                                                        'Wellness',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
-                                                                .labelMedium
-                                                                .override(
-                                                                  font: GoogleFonts
-                                                                      .plusJakartaSans(
-                                                                    fontWeight: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontWeight,
-                                                                    fontStyle: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .labelMedium
-                                                                        .fontStyle,
-                                                                  ),
-                                                                  color: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .primaryText,
-                                                                  fontSize:
-                                                                      14.0,
-                                                                  letterSpacing:
-                                                                      0.0,
-                                                                  fontWeight: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontWeight,
-                                                                  fontStyle: FlutterFlowTheme.of(
-                                                                          context)
-                                                                      .labelMedium
-                                                                      .fontStyle,
-                                                                  lineHeight:
-                                                                      1.4,
-                                                                ),
-                                                      ),
-                                                    ].divide(
-                                                        SizedBox(width: 6.0)),
-                                                  ),
-                                                ),
-                                              ),
-                                            ].divide(SizedBox(width: 8.0)),
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                                  ),
-                                );
-                              },
-                            ),
-                          ].divide(SizedBox(height: 16.0)),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional(0.1, -0.2),
-                  child: Container(
-                    width: 40.0,
-                    height: 40.0,
-                    child: Stack(
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      children: [
-                        Icon(
-                          Icons.location_on_rounded,
-                          color: FlutterFlowTheme.of(context).tertiary,
-                          size: 40.0,
-                        ),
-                        Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(
-                              0.0, 0.0, 0.0, 6.0),
-                          child: Container(
-                            child: Container(
-                              width: 20.0,
-                              height: 20.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context)
-                                    .primaryBackground,
-                                borderRadius: BorderRadius.circular(9999.0),
-                                shape: BoxShape.rectangle,
-                              ),
-                              alignment: AlignmentDirectional(0.0, 0.0),
-                              child: Icon(
-                                Icons.auto_awesome_rounded,
-                                color: FlutterFlowTheme.of(context).tertiary,
-                                size: 12.0,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Align(
-                  alignment: AlignmentDirectional(0.0, 1.0),
-                  child: Container(
+                  alignment: AlignmentDirectional(-1.0, -1.0),
+                  child: SafeArea(
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 100.0),
-                      child: Container(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Black-Owned Near You',
-                                    style: FlutterFlowTheme.of(context)
-                                        .titleMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  ),
-                                  Text(
-                                    'See All',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelLarge
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelLarge
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelLarge
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .tertiary,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelLarge
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelLarge
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        0.0, 16.0, 0.0, 16.0),
-                                    child: Container(
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel1,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: FFAppState().businessname,
-                                              isPriority: true,
-                                              category: FFAppState().category,
-                                              rating: formatNumber(
-                                                googleMapPageBusinessesRecordList
-                                                    .elementAtOrNull(0)
-                                                    ?.reviewScore,
-                                                formatType: FormatType.decimal,
-                                                decimalType:
-                                                    DecimalType.periodDecimal,
-                                              ),
-                                              distance:
-                                                  googleMapPageBusinessesRecordList
-                                                      .elementAtOrNull(0)
-                                                      ?.businessLocation
-                                                      ?.toString(),
-                                            ),
-                                          ),
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel2,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: 'Nourish Beauty Lab',
-                                              isPriority: false,
-                                              category: 'Skin Care',
-                                              rating: '4.8',
-                                              distance: '0.5 mi',
-                                            ),
-                                          ),
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel3,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: 'The Kin Exchange',
-                                              isPriority: true,
-                                              category: 'Co-working',
-                                              rating: '5.0',
-                                              distance: '0.8 mi',
-                                            ),
-                                          ),
-                                        ].divide(SizedBox(width: 16.0)),
-                                      ),
-                                    ),
-                                  ),
-                                  FlutterFlowIconButton(
-                                    borderRadius: 8.0,
-                                    buttonSize: 40.0,
-                                    fillColor:
-                                        FlutterFlowTheme.of(context).primary,
-                                    icon: Icon(
-                                      Icons.arrow_back,
-                                      color: FlutterFlowTheme.of(context).info,
-                                      size: 24.0,
-                                    ),
-                                    onPressed: () async {
-                                      print(
-                                          'GoogleMapPageWidget: green arrow (Explore Exchange) button tapped');
-                                      final matchedBusinessRef =
-                                          googleMapPageBusinessesRecordList
-                                              .where((e) =>
-                                                  e.businessName ==
-                                                  FFAppState().businessname)
-                                              .toList()
-                                              .elementAtOrNull(0)
-                                              ?.reference;
-                                      if (matchedBusinessRef == null) {
-                                        print(
-                                            'GoogleMapPageWidget: no business matches FFAppState().businessname ("${FFAppState().businessname}"), not navigating to avoid a null businessRef crash');
-                                        return;
-                                      }
-                                      context.pushNamed(
-                                        TheExchangeWidget.routeName,
-                                        queryParameters: {
-                                          'businessRef': serializeParam(
-                                            matchedBusinessRef,
-                                            ParamType.DocumentReference,
-                                          ),
-                                        }.withoutNulls,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ].divide(SizedBox(height: 16.0)),
-                        ),
-                      ),
+                          EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 0.0, 0.0),
+                      child: _buildHamburgerButton(context),
                     ),
                   ),
                 ),
+                // Compact, collapsible business carousel - replaces the old
+                // wide static "Black-Owned Near You" row (and the stray
+                // bronze location/sparkle icon that used to float over the
+                // map center, which had no data binding or purpose and has
+                // been removed outright).
                 Align(
                   alignment: AlignmentDirectional(0.0, 1.0),
-                  child: Container(
-                    child: Container(
-                      width: 0.0,
-                      height: 0.0,
-                    ),
+                  child: Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 88.0),
+                    child: _buildBottomBusinessSheet(
+                        context, googleMapPageBusinessesRecordList),
                   ),
                 ),
               ],
