@@ -32,8 +32,6 @@ export '/pages/business_setup_page/business_setup_page_widget.dart'
     show BusinessSetupPageWidget;
 export '/pages/google_map_page/google_map_page_widget.dart'
     show GoogleMapPageWidget;
-export '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart'
-    show KinBottomNav2Widget;
 export '/pages/executive_dashboard/executive_dashboard_widget.dart'
     show ExecutiveDashboardWidget;
 export '/pages/customer_profile_page/customer_profile_page_widget.dart'

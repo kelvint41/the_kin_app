@@ -33,12 +33,16 @@ export 'google_map_page_model.dart';
 ///   Collapsed to a slim peek strip by default on mobile widths so the map
 ///   stays the primary focus; expandable by tapping the strip.
 ///
-/// Bottom Navigation Bar: provided by the app-level persistent nav shell
-/// (see components/kin_scaffold.dart) when this page is reached via the
-/// /map tab. This page keeps its own KinBottomNav2Widget as a fallback for
-/// the standalone /googleMapPage route, still used by several
-/// context.goNamedAuth(GoogleMapPageWidget.routeName, ...) call sites
-/// elsewhere in the app that don't go through the tab shell.
+/// Bottom Navigation Bar: provided solely by the app-level persistent nav
+/// shell (see components/kin_scaffold.dart, flutter_flow/nav/nav.dart's
+/// kinTabShellRoute). This page does NOT set its own bottomNavigationBar.
+/// The old standalone /googleMapPage route (still the target of several
+/// context.pushNamed/goNamedAuth(GoogleMapPageWidget.routeName, ...) call
+/// sites app-wide) now redirects straight to the shell's /map tab, so
+/// every path into this page renders inside KinScaffold. The legacy
+/// KinBottomNav2Widget this page used to render directly - a second,
+/// non-shell-aware bottom bar that caused stacked bars when reached via
+/// /map - has been removed from the codebase entirely.
 ///
 /// Backend Query for the business list:
 /// - Collection: businesses
@@ -489,7 +493,6 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 ),
               ],
             ),
-            bottomNavigationBar: KinBottomNav2Widget(),
           ),
         );
       },

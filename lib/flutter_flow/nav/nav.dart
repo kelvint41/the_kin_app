@@ -125,6 +125,28 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         // (Explore / Map / Favorites / Account). Sits alongside the existing
         // standalone routes below, which stay pushable for deep links.
         kinTabShellRoute(appStateNotifier),
+        // The Map page used to have its own standalone route
+        // (/googleMapPage) rendering GoogleMapPageWidget with its own
+        // hardcoded bottomNavigationBar (KinBottomNav2Widget) - a second,
+        // non-shell-aware nav bar. Every caller that navigated there by
+        // name (sign_in_page post-login, partner_l_o_i_page's "Agree &
+        // Continue", customer_profile_page, business_profile_owner) would
+        // land outside the persistent nav shell added above, so if that
+        // page also rendered inside the shell's /map tab, the two bottom
+        // bars would stack. Rather than track down and edit every one of
+        // those call sites individually, this route now just redirects
+        // anyone still navigating to it BY NAME to the real shell tab -
+        // every existing pushNamed/goNamedAuth(GoogleMapPageWidget.routeName)
+        // call site keeps working unchanged, but now lands inside the
+        // shell. GoogleMapPageWidget itself no longer sets its own
+        // bottomNavigationBar (see google_map_page_widget.dart), and the
+        // legacy KinBottomNav2Widget/-Model source files were deleted -
+        // this was their only real call site.
+        GoRoute(
+          name: GoogleMapPageWidget.routeName,
+          path: GoogleMapPageWidget.routePath,
+          redirect: (context, state) => '/map',
+        ),
         ...[
           FFRoute(
             name: '_initialize',
@@ -241,11 +263,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: BusinessSetupPageWidget.routeName,
           path: BusinessSetupPageWidget.routePath,
           builder: (context, params) => BusinessSetupPageWidget(),
-        ),
-        FFRoute(
-          name: GoogleMapPageWidget.routeName,
-          path: GoogleMapPageWidget.routePath,
-          builder: (context, params) => GoogleMapPageWidget(),
         ),
         FFRoute(
           name: ExecutiveDashboardWidget.routeName,
