@@ -183,14 +183,11 @@ class _OnboardingSelectionCardWidgetState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(
-                                      'assets/images/Untitled_design_(1).png',
-                                      width: 200.0,
-                                      height: 208.1,
-                                      fit: BoxFit.cover,
-                                    ),
+                                  Image.asset(
+                                    'assets/KIN_Logo_Assets/10_website_header/header_logo_mark_transparent.png',
+                                    width: 200.0,
+                                    height: 200.0,
+                                    fit: BoxFit.contain,
                                   ),
                                   SizedBox(height: 32.0),
                                   Column(

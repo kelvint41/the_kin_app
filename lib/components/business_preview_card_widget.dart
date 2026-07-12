@@ -117,29 +117,35 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          valueOrDefault<String>(
-                            widget!.name,
-                            'Harlem Coffee Co.',
-                          ),
-                          maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                font: GoogleFonts.plusJakartaSans(
+                        // Flexible allows the Text to shrink and ellipsize
+                        // inside a MainAxisSize.min Row; without it the Row
+                        // overflows when the business name is long.
+                        Flexible(
+                          child: Text(
+                            valueOrDefault<String>(
+                              widget!.name,
+                              'Harlem Coffee Co.',
+                            ),
+                            maxLines: 1,
+                            style: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                  ),
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  letterSpacing: 0.0,
                                   fontWeight: FontWeight.bold,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .titleSmall
                                       .fontStyle,
                                 ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                          overflow: TextOverflow.ellipsis,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         if (valueOrDefault<bool>(
                           widget!.isPriority,

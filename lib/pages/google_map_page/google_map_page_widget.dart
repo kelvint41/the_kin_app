@@ -244,7 +244,10 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
         buttonSize: 40.0,
         fillColor: Colors.transparent,
         icon: Icon(Icons.menu_rounded, color: theme.primaryText, size: 24.0),
-        onPressed: () => scaffoldKey.currentState?.openDrawer(),
+        // Builder ensures the context is a descendant of the inner Scaffold
+        // so Scaffold.of() resolves to *this* Scaffold, not KinScaffold's
+        // outer shell.
+        onPressed: () => Scaffold.of(context).openDrawer(),
       ),
     );
   }
@@ -467,13 +470,22 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 // Top of the map is clear except for this floating
                 // hamburger button - category filters now live in the
                 // drawer it opens (_buildFilterDrawer), not a chip row.
+                //
+                // Builder is required here so `innerCtx` is a descendant of
+                // *this* Scaffold. Without it, `Scaffold.of(context)` from
+                // the outer StreamBuilder context would resolve to
+                // KinScaffold's shell Scaffold instead, silently doing
+                // nothing or opening the wrong drawer.
                 Align(
                   alignment: AlignmentDirectional(-1.0, -1.0),
                   child: SafeArea(
                     child: Padding(
                       padding:
                           EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 0.0, 0.0),
-                      child: _buildHamburgerButton(context),
+                      child: Builder(
+                        builder: (innerCtx) =>
+                            _buildHamburgerButton(innerCtx),
+                      ),
                     ),
                   ),
                 ),
