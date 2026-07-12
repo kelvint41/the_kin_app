@@ -32,9 +32,18 @@ void main() async {
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
 
+  // RevenueCat keys are supplied at build time, never hardcoded, so a real
+  // key can never be committed to source (PAYMENTS_BLUEPRINT.md, Critical
+  // Risk #3). Provide them per environment with, e.g.:
+  //   flutter run --dart-define=REVENUECAT_APPLE_KEY=appl_xxx \
+  //               --dart-define=REVENUECAT_GOOGLE_KEY=goog_xxx \
+  //               --dart-define=REVENUECAT_WEB_KEY=rcb_xxx
+  // If a key is absent, initialize() fails closed: RevenueCat stays
+  // unconfigured and purchases safely no-op rather than running in test mode.
   await revenue_cat.initialize(
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
+    const String.fromEnvironment('REVENUECAT_APPLE_KEY'),
+    const String.fromEnvironment('REVENUECAT_GOOGLE_KEY'),
+    webKey: const String.fromEnvironment('REVENUECAT_WEB_KEY'),
     loadDataAfterLaunch: true,
   );
 

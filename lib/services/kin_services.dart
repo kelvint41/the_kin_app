@@ -368,8 +368,23 @@ class KinServices {
     }
   }
 
-  /// Purchases/activates a subscription tier for a business via RevenueCat,
-  /// then updates the business record only on a confirmed purchase.
+  /// Initiates a subscription purchase for a business via RevenueCat.
+  ///
+  /// Entitlement is deliberately NOT written here. The paid-status fields
+  /// (subscription_tier / is_premium / is_priority_pinned) are locked to
+  /// server-only writes in firestore.rules and are granted exclusively by
+  /// the entitlement-sync Cloud Function that consumes the RevenueCat
+  /// webhook (PAYMENTS_BLUEPRINT.md, Phase B). This closes the
+  /// forgeable-entitlement hole (Critical Risk #1): a confirmed purchase
+  /// updates RevenueCat's CustomerInfo, the webhook grants entitlement
+  /// server-side, and the app observes the change through the
+  /// CustomerInfoUpdateListener wired in revenue_cat_util.dart.
+  ///
+  /// [tierName], [isPremium], [isPriorityPinned] and [hasFlashBeacon] are
+  /// retained on the signature for the Merchant Pricing Suite call sites but
+  /// are no longer written from the client - the tier the webhook grants is
+  /// derived from the purchased product, the real source of truth.
+  ///
   /// Used by: Merchant Pricing Suite -> each tier card's action button.
   static Future<ServiceResult<void>> upgradeBusinessTier({
     required DocumentReference businessRef,
@@ -385,34 +400,34 @@ class KinServices {
         return const ServiceResult.failure(
             'Purchase could not be completed. Please try again.');
       }
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: tierName,
-        isPremium: isPremium,
-        isPriorityPinned: isPriorityPinned,
-        hasFlashBeacon: hasFlashBeacon,
-      ));
+      // Purchase confirmed with the store. Entitlement is granted
+      // server-side by the RevenueCat webhook; the client does not (and
+      // per firestore.rules cannot) write the paid-status fields.
       return const ServiceResult.success();
     } catch (_) {
-      return const ServiceResult.failure('Could not update your subscription.');
+      return const ServiceResult.failure('Could not complete your purchase.');
     }
   }
 
-  /// Downgrades a business back to the free Community tier - no purchase
-  /// involved. Used by: Merchant Pricing Suite -> "Community" tier card.
+  /// Cancellation / downgrade path for a business subscription.
+  ///
+  /// A client can no longer write the paid-status fields (they're locked to
+  /// server-only writes in firestore.rules), and an auto-renewing
+  /// subscription can't be revoked by a local flag flip anyway - it stays
+  /// active at the store until the current period ends. Cancellation is
+  /// therefore managed through the platform store; the RevenueCat webhook
+  /// flips the business back to Community server-side on the EXPIRATION /
+  /// CANCELLATION event (PAYMENTS_BLUEPRINT.md, Phase B). This method no
+  /// longer performs a Firestore write.
+  ///
+  /// Used by: Merchant Pricing Suite -> "Community" tier card.
   static Future<ServiceResult<void>> downgradeToCommunity({
     required DocumentReference businessRef,
   }) async {
-    try {
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: 'Community',
-        isPremium: false,
-        isPriorityPinned: false,
-        hasFlashBeacon: false,
-      ));
-      return const ServiceResult.success();
-    } catch (_) {
-      return const ServiceResult.failure('Could not update your plan.');
-    }
+    return const ServiceResult.failure(
+        'To change or cancel your plan, manage your subscription in your '
+        'App Store or Google Play account settings. Your current plan stays '
+        'active until the end of the billing period.');
   }
 
   /// Opens the native share sheet with [text], then records a

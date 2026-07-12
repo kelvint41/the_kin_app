@@ -2,9 +2,28 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /businesses/{document} {
-      allow create: if request.auth != null;
+      // A business is always born at the free Community tier. Paid-status
+      // fields can never be self-set at creation by a client; only the
+      // entitlement-sync Cloud Function (RevenueCat webhook, Admin SDK,
+      // bypasses rules) may elevate them. See PAYMENTS_BLUEPRINT.md.
+      allow create: if request.auth != null
+        && request.resource.data.get('is_premium', false) == false
+        && request.resource.data.get('subscription_tier', 'Community') == 'Community'
+        && request.resource.data.get('is_priority_pinned', false) == false;
+
       allow read: if true;
-      allow write: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+
+      // Owners may edit their own listing, but NOT the paid-status fields
+      // (is_premium, subscription_tier, is_priority_pinned) — those are
+      // written solely by the server entitlement sync, which closes the
+      // forgeable-entitlement hole (PAYMENTS_BLUEPRINT.md, Critical Risk #1).
+      // has_flash_beacon is deliberately NOT locked: it's Power Hour usage
+      // state toggled by KinServices.start/stopPowerHour, and is gated by
+      // the now-trusted subscription_tier server-side.
+      allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+             .hasAny(['is_premium', 'subscription_tier', 'is_priority_pinned']);
+
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
@@ -123,8 +142,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Entitlement records are written ONLY by the server entitlement sync
+    // (Admin SDK, bypasses rules). Closing create to clients prevents a
+    // client from injecting a forged entitlement doc. Read stays open for
+    // now (records are unused until the Phase B webhook defines their shape;
+    // owner-scoped reads land with that field structure).
     match /entitlements/{document} {
-      allow create: if true;
+      allow create: if false;
       allow read: if true;
       allow write: if false;
       allow delete: if false;
