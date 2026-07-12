@@ -11,6 +11,7 @@ import '/backend/schema/structs/index.dart';
 import '/auth/base_auth_user_provider.dart';
 
 import '/main.dart';
+import '/components/kin_scaffold.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/lat_lng.dart';
 import '/flutter_flow/place.dart';
@@ -107,15 +108,27 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             state.uri.path == '/') {
           return devBypassTargetRoute;
         }
+        // Land signed-in users inside the persistent-nav shell (Map tab)
+        // rather than the bare map page, so the bottom navigation is present
+        // on the app's home surface. Only fires at '/', and '/map' requires
+        // auth + is only reached when already logged in, so no redirect loop.
+        if (appStateNotifier.loggedIn && state.uri.path == '/') {
+          return '/map';
+        }
         return null;
       },
       errorBuilder: (context, state) => appStateNotifier.loggedIn
           ? GoogleMapPageWidget()
           : OnboardingSelectionCardWidget(),
       routes: [
-        FFRoute(
-          name: '_initialize',
-          path: '/',
+        // Persistent bottom-navigation shell hosting the four main tabs
+        // (Explore / Map / Favorites / Account). Sits alongside the existing
+        // standalone routes below, which stay pushable for deep links.
+        kinTabShellRoute(appStateNotifier),
+        ...[
+          FFRoute(
+            name: '_initialize',
+            path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
               ? GoogleMapPageWidget()
               : OnboardingSelectionCardWidget(),
@@ -299,8 +312,69 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: MobileCalledPowerPageWidget.routeName,
           path: MobileCalledPowerPageWidget.routePath,
           builder: (context, params) => MobileCalledPowerPageWidget(),
-        )
-      ].map((r) => r.toRoute(appStateNotifier)).toList(),
+          )
+        ].map((r) => r.toRoute(appStateNotifier)),
+      ],
+    );
+
+/// Persistent bottom-nav shell hosting the four main tabs. Each branch keeps
+/// its own Navigator via the underlying IndexedStack, so switching tabs
+/// preserves each tab's navigation stack and scroll position.
+///
+/// Tabs reuse `FFRoute.toRoute` so they inherit the app's auth-gating and
+/// page transitions exactly like every other route. Tab paths/names
+/// (/explore, /map, /favorites, /account; *Tab names) are deliberately
+/// distinct from the existing standalone routes for the same screens
+/// (/theExchange, /googleMapPage, …) so there are no duplicate-path or
+/// duplicate-name collisions — those standalone routes remain for deep
+/// links and imperative pushes.
+StatefulShellRoute kinTabShellRoute(AppStateNotifier appStateNotifier) =>
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          KinScaffold(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            FFRoute(
+              name: 'ExploreTab',
+              path: '/explore',
+              requireAuth: true,
+              builder: (context, params) =>
+                  TheExchangeWidget(businessRef: null),
+            ).toRoute(appStateNotifier),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            FFRoute(
+              name: 'MapTab',
+              path: '/map',
+              requireAuth: true,
+              builder: (context, params) => GoogleMapPageWidget(),
+            ).toRoute(appStateNotifier),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            FFRoute(
+              name: 'FavoritesTab',
+              path: '/favorites',
+              requireAuth: true,
+              builder: (context, params) => FavoritesPageWidget(),
+            ).toRoute(appStateNotifier),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            FFRoute(
+              name: 'AccountTab',
+              path: '/account',
+              requireAuth: true,
+              builder: (context, params) => AccountPageWidget(),
+            ).toRoute(appStateNotifier),
+          ],
+        ),
+      ],
     );
 
 extension NavParamExtensions on Map<String, String?> {
