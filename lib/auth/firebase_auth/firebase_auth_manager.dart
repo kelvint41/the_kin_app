@@ -72,6 +72,12 @@ class FirebaseAuthManager extends AuthManager
       }
       await currentUser?.delete();
     } on FirebaseAuthException catch (e) {
+      // context is a caller-supplied BuildContext, not tied to this class's
+      // own widget lifecycle - it can go stale (e.g. the caller navigated
+      // away) while `delete()` was in flight above. Re-check before the
+      // first post-await context use, or ScaffoldMessenger.of(context) can
+      // throw on a deactivated element.
+      if (!context.mounted) return;
       if (e.code == 'requires-recent-login') {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +102,7 @@ class FirebaseAuthManager extends AuthManager
       await currentUser?.updateEmail(email);
       await updateUserDocument(email: email);
     } on FirebaseAuthException catch (e) {
+      if (!context.mounted) return;
       if (e.code == 'requires-recent-login') {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -119,6 +126,7 @@ class FirebaseAuthManager extends AuthManager
       }
       await currentUser?.updatePassword(newPassword);
     } on FirebaseAuthException catch (e) {
+      if (!context.mounted) return;
       if (e.code == 'requires-recent-login') {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -136,12 +144,14 @@ class FirebaseAuthManager extends AuthManager
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
+      if (!context.mounted) return null;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message!}')),
       );
       return null;
     }
+    if (!context.mounted) return null;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Password reset email sent')),
     );
@@ -314,6 +324,11 @@ class FirebaseAuthManager extends AuthManager
           ? null
           : TheKINAppFirebaseUser.fromUserCredential(userCredential);
     } on FirebaseAuthException catch (e) {
+      // This is the shared implementation behind every sign-in/sign-up
+      // method (email, Google, Apple, GitHub, JWT, anonymous, phone) - the
+      // caller's context can go stale during the awaited network call
+      // above on any of those paths, so every one of them needs this guard.
+      if (!context.mounted) return null;
       final errorMsg = switch (e.code) {
         'email-already-in-use' =>
           'Error: The email is already in use by a different account',

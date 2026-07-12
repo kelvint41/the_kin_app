@@ -414,6 +414,14 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                           email: _model.emailFieldTextController.text,
                           context: context,
                         );
+                        // authManager.resetPassword already awaited a
+                        // network call before returning here, so this
+                        // widget may have been unmounted in the meantime
+                        // (e.g. the user backed out of the page). Re-check
+                        // before this second, separate use of context, or
+                        // ScaffoldMessenger.of(context) can throw on a
+                        // deactivated element.
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
@@ -462,6 +470,12 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                   if (user == null) {
                     return;
                   }
+                  // context.goNamedAuth already no-ops internally when
+                  // !mounted, so this was never an actual runtime crash
+                  // risk - but the analyzer can't see into that extension
+                  // method, so it still flags the call. This explicit guard
+                  // makes the safety verifiable by the analyzer too.
+                  if (!context.mounted) return;
 
                   context.goNamedAuth(
                       GoogleMapPageWidget.routeName, context.mounted);

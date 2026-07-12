@@ -497,6 +497,10 @@ class _BusinessSignUpWidgetState extends State<BusinessSignUpWidget> {
                                     .set(createBusinessesRecordData(
                                   isVeteran: false,
                                 ));
+                                // The Firestore write above is an async
+                                // gap the user could navigate away during;
+                                // re-check before touching context.
+                                if (!context.mounted) return;
                                 _model.newBusiness =
                                     BusinessesRecord.getDocumentFromData(
                                         createBusinessesRecordData(

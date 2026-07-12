@@ -548,6 +548,13 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                               email: _model.emailFieldTextController.text,
                               displayName: _model.nameFieldTextController.text,
                             ));
+                        // context.pushNamedAuth already no-ops internally
+                        // when !mounted, so this was never an actual
+                        // runtime crash risk - but the analyzer can't see
+                        // into that extension method, so it still flags
+                        // the call. This explicit guard makes the safety
+                        // verifiable by the analyzer too.
+                        if (!context.mounted) return;
 
                         context.pushNamedAuth(
                             CustomerProfilePageWidget.routeName,

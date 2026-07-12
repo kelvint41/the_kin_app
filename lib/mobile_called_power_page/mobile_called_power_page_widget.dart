@@ -572,6 +572,12 @@ class _MobileCalledPowerPageWidgetState
                                           maxHeight: 1024.00,
                                           allowPhoto: true,
                                         );
+                                        // The media picker above is an
+                                        // async gap the user could navigate
+                                        // away during; re-check before
+                                        // validateFileFormat's internal
+                                        // ScaffoldMessenger.of(context) use.
+                                        if (!context.mounted) return;
                                         if (selectedMedia != null &&
                                             selectedMedia.every((m) =>
                                                 validateFileFormat(

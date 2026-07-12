@@ -83,6 +83,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
         return;
       }
       _model.userDocument = await UsersRecord.getDocumentOnce(userRef);
+      // The Firestore read above is an async gap the user could navigate
+      // away during (this runs from a postFrameCallback in initState);
+      // re-check before touching context.
+      if (!context.mounted) return;
       if (_model.userDocument?.isAdmin != true) {
         context.goNamed(OnboardingSelectionCardWidget.routeName);
         return;
