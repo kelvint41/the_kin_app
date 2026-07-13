@@ -13,3 +13,10 @@ exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
 const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
 exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
 exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;
+
+const rotateDailyCodes = require("./rotate_daily_codes.js");
+exports.rotateDailyCodes = rotateDailyCodes.rotateDailyCodes;
+exports.getMyCheckinCode = rotateDailyCodes.getMyCheckinCode;
+
+const redeemCheckinCode = require("./redeem_checkin_code.js");
+exports.redeemCheckinCode = redeemCheckinCode.redeemCheckinCode;

@@ -203,6 +203,28 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // daily_codes/{businessId} — written solely by rotateDailyCodes /
+    // getMyCheckinCode Cloud Functions (Admin SDK, bypasses rules).
+    // Business owner may read their own code; customers verify via the
+    // redeemCheckinCode callable, which reads server-side.
+    match /daily_codes/{businessId} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/businesses/$(businessId))
+             .data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow write: if false;
+    }
+
+    // loyalty_checkins/{userId}_{businessId}_{date} — written solely by the
+    // redeemCheckinCode callable (Admin SDK transaction). Users may read
+    // their own records to display loyalty history client-side.
+    match /loyalty_checkins/{checkinId} {
+      allow read: if request.auth != null
+        && resource.data.user_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow write: if false;
+    }
+
     match /kindex_config/{document} {
       allow create: if false;
       allow read: if request.auth != null;

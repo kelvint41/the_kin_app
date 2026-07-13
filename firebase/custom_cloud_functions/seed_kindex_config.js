@@ -19,6 +19,7 @@ const DEFAULT_WEIGHTS = {
   share: 5,
   post: 10,
   comment: 2,
+  checkin: 15, // Physical check-in via daily code — highest-trust engagement signal
 };
 
 async function seed() {
