@@ -94,6 +94,108 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     super.dispose();
   }
 
+  /// The hamburger menu's bottom sheet, per this page's own doc comment
+  /// (top of this file): The Exchange / My Business / Community Feed /
+  /// Power Hour Blast. The Exchange requires a real businessRef (its
+  /// constructor force-unwraps it), so it's the only item gated on
+  /// actually owning a business - the other three self-guard internally
+  /// (OwnerProfileWidget and MobileCalledPowerPageWidget already show
+  /// their own "set up your business" empty state; CommunityPrestigeWidget
+  /// takes no business context at all).
+  void _showMainMenu(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.primaryBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(theme.designToken.radius.lg),
+              topRight: Radius.circular(theme.designToken.radius.lg),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding:
+                  EdgeInsets.symmetric(vertical: theme.designToken.spacing.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.0,
+                    height: 4.0,
+                    margin:
+                        EdgeInsets.only(bottom: theme.designToken.spacing.md),
+                    decoration: BoxDecoration(
+                      color: theme.alternate,
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                  ),
+                  ListTile(
+                    leading:
+                        Icon(Icons.forum_outlined, color: theme.primaryText),
+                    title: Text('The Exchange', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      final businessRef = currentUserDocument?.ownedBusiness;
+                      if (businessRef == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Set up your business to access The Exchange.'),
+                          ),
+                        );
+                        return;
+                      }
+                      context.pushNamed(
+                        TheExchangeWidget.routeName,
+                        queryParameters: {
+                          'businessRef': serializeParam(
+                            businessRef,
+                            ParamType.DocumentReference,
+                          ),
+                        }.withoutNulls,
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.storefront_rounded,
+                        color: theme.primaryText),
+                    title:
+                        Text('My Business / Profile', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(OwnerProfileWidget.routeName);
+                    },
+                  ),
+                  ListTile(
+                    leading:
+                        Icon(Icons.groups_rounded, color: theme.primaryText),
+                    title: Text('Community Feed', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(CommunityPrestigeWidget.routeName);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.bolt_rounded, color: theme.primaryText),
+                    title: Text('Power Hour Blast', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(MobileCalledPowerPageWidget.routeName);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
@@ -238,7 +340,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       size: 24.0,
                                     ),
                                     onPressed: () {
-                                      print('IconButton pressed ...');
+                                      _showMainMenu(context);
                                     },
                                   ),
                                 ),
@@ -916,24 +1018,32 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                     fillColor:
                                         FlutterFlowTheme.of(context).primary,
                                     icon: Icon(
-                                      Icons.arrow_back,
+                                      Icons.arrow_forward,
                                       color: FlutterFlowTheme.of(context).info,
                                       size: 24.0,
                                     ),
                                     onPressed: () async {
-                                      print(
-                                          'GoogleMapPageWidget: green arrow (Explore Exchange) button tapped');
+                                      // Previously matched against
+                                      // FFAppState().businessname, which is
+                                      // never set anywhere in the app - this
+                                      // button could never navigate. The
+                                      // first result of the same live query
+                                      // backing this card row is what the
+                                      // first preview card represents, so
+                                      // that's the business this "explore"
+                                      // arrow should open.
                                       final matchedBusinessRef =
                                           googleMapPageBusinessesRecordList
-                                              .where((e) =>
-                                                  e.businessName ==
-                                                  FFAppState().businessname)
-                                              .toList()
                                               .elementAtOrNull(0)
                                               ?.reference;
                                       if (matchedBusinessRef == null) {
-                                        print(
-                                            'GoogleMapPageWidget: no business matches FFAppState().businessname ("${FFAppState().businessname}"), not navigating to avoid a null businessRef crash');
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                                'No nearby businesses to explore yet.'),
+                                          ),
+                                        );
                                         return;
                                       }
                                       context.pushNamed(
