@@ -62,7 +62,7 @@ class _OnboardingSelectionCardWidgetState
   late OnboardingSelectionCardModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  LatLng? currentUserLocationValue;
+  LatLng currentUserLocationValue = const LatLng(29.4241, -98.4936);
   List<KindexTickerEntry> _businessKindexEntries = [];
   List<KindexTickerEntry> _customerKindexEntries = [];
 
@@ -78,7 +78,8 @@ class _OnboardingSelectionCardWidgetState
       safeSetState(() {});
     });
 
-    getCurrentUserLocation(defaultLocation: LatLng(0.0, 0.0), cached: true)
+    getCurrentUserLocation(
+            defaultLocation: const LatLng(29.4241, -98.4936), cached: true)
         .then((loc) => safeSetState(() => currentUserLocationValue = loc));
 
     KinServices.fetchTopBusinessKindex().then((result) {
@@ -104,22 +105,6 @@ class _OnboardingSelectionCardWidgetState
   @override
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
-    if (currentUserLocationValue == null) {
-      return Container(
-        color: FlutterFlowTheme.of(context).primaryBackground,
-        child: Center(
-          child: SizedBox(
-            width: 50.0,
-            height: 50.0,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                FlutterFlowTheme.of(context).primary,
-              ),
-            ),
-          ),
-        ),
-      );
-    }
 
     return StreamBuilder<List<BusinessesRecord>>(
       stream: queryBusinessesRecord(
@@ -127,7 +112,7 @@ class _OnboardingSelectionCardWidgetState
             .where('is_published', isEqualTo: true)
             .where(
               'city',
-              isEqualTo: currentUserLocationValue?.toString(),
+              isEqualTo: currentUserLocationValue.toString(),
             )
             .orderBy('kindex_score', descending: true),
         limit: 3,
