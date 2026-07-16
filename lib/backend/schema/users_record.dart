@@ -91,6 +91,14 @@ class UsersRecord extends FirestoreRecord {
   bool get isAdmin => _isAdmin ?? false;
   bool hasIsAdmin() => _isAdmin != null;
 
+  // "role" field. Explicit account role: 'customer' or 'business_owner'.
+  // Populated at onboarding for new users and backfilled for existing ones
+  // (see firebase/scripts/backfill_user_roles.js). Defaults to '' (unset)
+  // for any user that predates the backfill.
+  String? _role;
+  String get role => _role ?? '';
+  bool hasRole() => _role != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -107,6 +115,7 @@ class UsersRecord extends FirestoreRecord {
     _lastLogin = snapshotData['last_login'] as DateTime?;
     _arToursCompleted = castToType<int>(snapshotData['ar_tours_completed']);
     _isAdmin = snapshotData['is_admin'] as bool?;
+    _role = snapshotData['role'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -158,6 +167,7 @@ Map<String, dynamic> createUsersRecordData({
   DateTime? lastLogin,
   int? arToursCompleted,
   bool? isAdmin,
+  String? role,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -176,6 +186,7 @@ Map<String, dynamic> createUsersRecordData({
       'last_login': lastLogin,
       'ar_tours_completed': arToursCompleted,
       'is_admin': isAdmin,
+      'role': role,
     }.withoutNulls,
   );
 
@@ -201,7 +212,8 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.isActive == e2?.isActive &&
         e1?.lastLogin == e2?.lastLogin &&
         e1?.arToursCompleted == e2?.arToursCompleted &&
-        e1?.isAdmin == e2?.isAdmin;
+        e1?.isAdmin == e2?.isAdmin &&
+        e1?.role == e2?.role;
   }
 
   @override
@@ -220,7 +232,8 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.isActive,
         e?.lastLogin,
         e?.arToursCompleted,
-        e?.isAdmin
+        e?.isAdmin,
+        e?.role
       ]);
 
   @override

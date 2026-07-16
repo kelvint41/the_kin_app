@@ -6,6 +6,7 @@
     "firebase-admin": "^11.11.0"
   },
   "scripts": {
-    "import:businesses": "node import_businesses.js"
+    "import:businesses": "node import_businesses.js",
+    "backfill:roles": "node backfill_user_roles.js"
   }
 }

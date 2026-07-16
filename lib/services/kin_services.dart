@@ -314,6 +314,10 @@ class KinServices {
       await businessRef.set(data);
       await currentUserDocument!.reference.update(createUsersRecordData(
         ownedBusiness: businessRef,
+        // Registering a business makes this user a business owner, whatever
+        // their onboarding selection wrote - set the explicit role here so
+        // it's always correct for anyone who owns a business.
+        role: 'business_owner',
       ));
       currentUserDocument = await UsersRecord.getDocumentOnce(ownerRef);
       return ServiceResult.success(businessRef);

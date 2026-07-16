@@ -36,7 +36,7 @@ Collections defined in `lib/backend/schema/`, governed by
 
 | Collection | Purpose | Client access |
 |---|---|---|
-| `users` | Account profile (`email, displayName, tickerSymbol, ownedBusiness, isAdmin, isActive, lastLogin, arToursCompleted`) | Read/write self only; `is_admin` **not** client-writable |
+| `users` | Account profile (`email, displayName, tickerSymbol, ownedBusiness, role, isAdmin, isActive, lastLogin, arToursCompleted`) | Read/write self only; `is_admin` **not** client-writable; `role` constrained to `customer`/`business_owner` |
 | `businesses` | Directory record (~65 fields) | Public read; create requires `owner_ref == self`; update restricted to `mutableBusinessFields()` allowlist |
 | `reviews` | Star + text reviews | Public read; create self-authored, rating 1–5 validated |
 | `UserEngagementEvents` | Append-only Kindex event log | Self read; create must be `status:'pending'` with no scoring fields |
@@ -211,9 +211,14 @@ redirects to `/onboardingSelectionCard`; page-level checks such as the
 Executive Dashboard's `isAdmin != true` guard on load; and the Business Setup
 register button's inline Terms-of-Service consent.
 
-**Role model:** there is no `role`/`userType` field. A user is a business
-owner iff `ownedBusiness` is set; onboarding branches purely by which page the
-selection card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
+**Role model:** an explicit `role` field (`customer` | `business_owner`) is
+written at onboarding — derived from `FFAppState().signupType` in the customer
+signup, and forced to `business_owner` in `registerBusiness`. Existing users
+are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1). The
+legacy signal — a user is a business owner iff `ownedBusiness` is set — is
+still what most read sites check; migrating those to read `role` is Stage 2
+(pending). Onboarding still branches by which page the selection card pushes
+(`CustomersignupPage` vs. `BusinessSetupPage`).
 
 ---
 
@@ -229,7 +234,8 @@ selection card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
 | **`mutableBusinessFields()`** | Rules helper: the allowlist of business fields an owner may edit client-side. Everything else is server-controlled. |
 | **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, and AI entitlement per tier. |
 | **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
-| **ownedBusiness** | User→business link. This is how "role" is implemented — there is no explicit `role` field. |
+| **ownedBusiness** | User→business link. Legacy role signal (owner iff set); most read sites still key off this pending Stage 2. |
+| **role** | Explicit account role on `users`: `customer` or `business_owner`. Written at onboarding, backfilled for existing users. Rules constrain it to those two values. |
 | **owner_ref** | Business→user pointer; the basis of every ownership authorization check. |
 | **The Exchange** | Verified-business social feed (`exchange_posts`). |
 | **Entitlement** | Server-side "is this business allowed feature X" check (AI orchestrator, tier flags). |
@@ -252,8 +258,10 @@ selection card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
   can't cross the Node/Dart boundary); a parity check confirms they match.
   RevenueCat package IDs remain in `merchant_pricing_suite_widget.dart` as a
   deliberately separate concern (product mapping, not tier policy).
-- **Role inferred, never stored** — any future "switch account type" feature
-  must account for the fact that role = "has `ownedBusiness`".
+- **Role model — Stage 1 done, Stage 2 pending.** An explicit `role` field is
+  now written at onboarding and backfilled (`backfill_user_roles.js`). The read
+  sites that still infer role from `ownedBusiness` have not yet been migrated
+  to read `role` — that's Stage 2.
 - **Repo dead weight:** ~90 `lib/old_designs/` components, 27 `.old` files,
   `migration_data.json` (~536 KB), a ~200 KB directory CSV, and
   `flutter_01/02.log` are all committed.

@@ -547,6 +547,15 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                             .update(createUsersRecordData(
                               email: _model.emailFieldTextController.text,
                               displayName: _model.nameFieldTextController.text,
+                              // Explicit account role, derived from the
+                              // onboarding selection (FFAppState().signupType,
+                              // set on the Onboarding Selection Card). A
+                              // business owner is reinforced to
+                              // 'business_owner' again in
+                              // KinServices.registerBusiness.
+                              role: FFAppState().signupType == 'business'
+                                  ? 'business_owner'
+                                  : 'customer',
                             ));
 
                         context.pushNamedAuth(
