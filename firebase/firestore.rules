@@ -1,18 +1,80 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Fields a business OWNER is allowed to change from the client (profile
+    // content + Power Hour promo state). Anything NOT in this list is
+    // server-controlled and can only be written by a Cloud Function via the
+    // Admin SDK (which bypasses these rules). In particular the paywall /
+    // trust / rank fields are intentionally absent:
+    //   subscription_tier, is_premium, is_priority_pinned  (billing/paywall)
+    //   is_verified, is_claimed, claimed_by_user_id        (trust/claim)
+    //   kindex_score, kindex_velocity, review_score,
+    //   review_count, interaction_count, total_sentiment_score,
+    //   connection_count, tier_level                       (computed rank)
+    //   marketing_tier, marketing_generations_used,
+    //   monthly_promo_count, monthly_promo_reset_date,
+    //   scheduled_promo_date                               (server-metered)
+    //   loi_signed, loi_date                               (legal)
+    //   owner_ref, ticker_symbol                           (identity, set at create)
+    // NOTE: the Power Hour fields below stay client-writable so the existing
+    // client-side startPowerHour/stopPowerHour keep working. Their per-tier
+    // caps are still only enforced client-side, so a modified client could
+    // set them directly - see the follow-up note in the audit. Move them
+    // server-side to fully close that.
+    function mutableBusinessFields() {
+      return [
+        // Core profile
+        'business_name', 'category', 'business_type', 'description',
+        'phone_number', 'email', 'website', 'owner_name', 'established_year',
+        'opening_time', 'closing_time',
+        // Location
+        'address', 'city', 'state', 'zip_code_postcode', 'business_location',
+        'latitude', 'longitude', 'coordinates',
+        // Media
+        'hero_image', 'photo_gallery',
+        // Attributes / flags
+        'is_black_owned', 'is_veteran', 'is_ecommerce', 'is_farmer',
+        'is_wholesale', 'is_retail',
+        // Social links
+        'instagram_url', 'facebook_url', 'tiktok_url', 'linkedin_url',
+        // Delivery
+        'doordash_url', 'ubereats_url', 'grubhub_url', 'is_delivery_eligible',
+        // AR
+        'ar_asset_url', 'arc_asset_url', 'is_ar_enabled',
+        // Power Hour promo state (client-writable; see note above)
+        'has_flash_beacon', 'flash_beacon_expires_at',
+        'flash_beacon_duration_minutes', 'power_hour_usage_count',
+        'power_hour_last_reset'
+      ];
+    }
+
     match /businesses/{document} {
-      allow create: if request.auth != null;
       allow read: if true;
-      allow write: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow create: if request.auth != null;
+      // Owner may update ONLY the fields in mutableBusinessFields(). hasOnly
+      // rejects the write if any other key changed - so subscription_tier,
+      // is_verified, kindex_score, owner_ref, etc. cannot be set from the
+      // client even by the business's own owner. Tier upgrades/downgrades
+      // now go through a Cloud Function instead (see audit / KinServices note).
+      allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(mutableBusinessFields());
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
     match /users/{document} {
-      allow create: if request.auth.uid == document;
       allow read: if request.auth.uid == document;
-      allow write: if request.auth.uid == document;
       allow delete: if request.auth.uid == document;
+      // Client may create their own doc, but never pre-set is_admin true.
+      allow create: if request.auth.uid == document
+        && (!('is_admin' in request.resource.data)
+            || request.resource.data.is_admin == false);
+      // Client may update their own doc, but can never add, grant, or revoke
+      // is_admin - that field is managed only server-side (Admin SDK, which
+      // bypasses these rules). affectedKeys() rejects the write if is_admin
+      // is among the changed keys, while leaving all other profile edits
+      // (last_login, display_name, owned_business, ...) allowed.
+      allow update: if request.auth.uid == document
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['is_admin']);
     }
 
     // Uniqueness reservation for customer Kindex ticker symbols. Doc ID is
