@@ -16,11 +16,13 @@ service cloud.firestore {
     //   scheduled_promo_date                               (server-metered)
     //   loi_signed, loi_date                               (legal)
     //   owner_ref, ticker_symbol                           (identity, set at create)
-    // NOTE: the Power Hour fields below stay client-writable so the existing
-    // client-side startPowerHour/stopPowerHour keep working. Their per-tier
-    // caps are still only enforced client-side, so a modified client could
-    // set them directly - see the follow-up note in the audit. Move them
-    // server-side to fully close that.
+    //   has_flash_beacon, flash_beacon_expires_at,
+    //   flash_beacon_duration_minutes, power_hour_usage_count,
+    //   power_hour_last_reset                              (Power Hour promo)
+    // The Power Hour fields are now server-controlled too: startPowerHour /
+    // stopPowerHour are Cloud Functions (power_hour.js) that enforce the
+    // per-tier duration cap and weekly frequency limit, so the client can
+    // no longer write these directly to bypass the caps.
     function mutableBusinessFields() {
       return [
         // Core profile
@@ -40,11 +42,7 @@ service cloud.firestore {
         // Delivery
         'doordash_url', 'ubereats_url', 'grubhub_url', 'is_delivery_eligible',
         // AR
-        'ar_asset_url', 'arc_asset_url', 'is_ar_enabled',
-        // Power Hour promo state (client-writable; see note above)
-        'has_flash_beacon', 'flash_beacon_expires_at',
-        'flash_beacon_duration_minutes', 'power_hour_usage_count',
-        'power_hour_last_reset'
+        'ar_asset_url', 'arc_asset_url', 'is_ar_enabled'
       ];
     }
 

@@ -13,3 +13,7 @@ exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngag
 
 const setBusinessSubscription = require("./set_business_subscription.js");
 exports.setBusinessSubscription = setBusinessSubscription.setBusinessSubscription;
+
+const powerHour = require("./power_hour.js");
+exports.startPowerHour = powerHour.startPowerHour;
+exports.stopPowerHour = powerHour.stopPowerHour;

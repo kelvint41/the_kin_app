@@ -54,8 +54,8 @@ onPressed: () async {
 | `fetchTopBusinessKindex` | `({limit = 20})` | Read-only: top `businesses` by `kindex_score`, for the onboarding Kindex ticker's business row. |
 | `fetchTopCustomerKindex` | `({limit = 20})` | Read-only: top `KindexScores` by `score`, for the ticker's customer row. |
 | `shareApp` | `({text, sharePositionOrigin, businessRef})` | Opens the native share sheet, then creates a `share_app` `UserEngagementEventsRecord` (best-effort) |
-| `startPowerHour` | `({businessRef, durationMinutes})` | Sets `has_flash_beacon`, `flash_beacon_expires_at` (computed client-side), `flash_beacon_duration_minutes` on `BusinessesRecord` |
-| `stopPowerHour` | `({businessRef})` | Clears `has_flash_beacon` on `BusinessesRecord` |
+| `startPowerHour` | `({businessRef, durationMinutes})` | Calls the `startPowerHour` Cloud Function, which enforces the per-tier cap + weekly limit and sets `has_flash_beacon`, `flash_beacon_expires_at`, `flash_beacon_duration_minutes` via Admin SDK. Client can't write these fields directly (firestore.rules). |
+| `stopPowerHour` | `({businessRef})` | Calls the `stopPowerHour` Cloud Function, which clears `has_flash_beacon` |
 
 ## Button map
 
@@ -88,7 +88,9 @@ a local `Timer.periodic`, not a Firestore read on a loop. Stopping early
 is confirm-gated (an `AlertDialog`); starting isn't, since an accidental
 early stop mid-promotion is the costlier mistake.
 
-`startPowerHour` gates on `subscription_tier` - real values as written by
+Power Hour limits are enforced **server-side** by the `startPowerHour`
+Cloud Function (`firebase/custom_cloud_functions/power_hour.js`), which
+gates on `subscription_tier` - real values as written by
 `merchant_pricing_suite_widget.dart`'s upgrade flow, not generic
 Community/Pro/Elite names:
 
@@ -102,12 +104,17 @@ Community/Pro/Elite names:
 
 The requested duration is silently capped, not rejected. The frequency
 check uses a rolling 7-day window (`power_hour_last_reset` +
-`power_hour_usage_count`), not a fixed calendar week.
+`power_hour_usage_count`), not a fixed calendar week, and runs in a
+Firestore transaction so two rapid taps can't both slip under the cap.
+On the weekly limit the function throws `resource-exhausted` with the
+per-tier upgrade-prompt message, which `KinServices.startPowerHour`
+passes through.
 
-`KinServices.powerHourDurationCapMinutes(tier)` exposes the same cap
-table for UI use (duration pickers, slider validation) without
-duplicating it - used by both `power_hour_panel_widget.dart` and
-`mobile_called_power_page_widget.dart`.
+`KinServices.powerHourDurationCapMinutes(tier)` exposes a **display-only**
+copy of the cap table for UI use (duration pickers, slider validation)
+without a round-trip - used by both `power_hour_panel_widget.dart` and
+`mobile_called_power_page_widget.dart`. The server holds the
+authoritative copy; keep the two in sync (tracked tech debt).
 
 ### mobile_called_power_page - a second, previously-disconnected UI
 

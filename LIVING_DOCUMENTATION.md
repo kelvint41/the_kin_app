@@ -83,7 +83,7 @@ throwing, so an `onPressed` handler never needs its own try/catch.
 | `submitReview` | Post a review | Writes `reviews` with server timestamp. |
 | `upgradeBusinessTier` | Change tier | RevenueCat `purchasePackage` **first**, then calls the `setBusinessSubscription` Cloud Function — does not write Firestore directly and does not accept entitlement booleans. |
 | `downgradeToCommunity` | Free tier | Routes through the same callable with `'Community'`. |
-| `startPowerHour` / `stopPowerHour` | Timed promo | Enforces per-tier duration cap + rolling 7-day frequency from the tier table. |
+| `startPowerHour` / `stopPowerHour` | Timed promo | Call the `startPowerHour`/`stopPowerHour` Cloud Functions, which enforce the per-tier duration cap + rolling 7-day frequency server-side. Client can't write the Power Hour fields directly. |
 | `generateMarketingContent` / `logAiSuggestionEngagement` | AI marketing | Pass-throughs to Cloud Functions; no client-side Gemini path by construction. |
 | `shareApp` | Share + score | Opens native share sheet, then fires a best-effort `share_app` engagement event. |
 
@@ -118,13 +118,25 @@ server-side `TIER_FLAGS` table → derives `is_premium`/`is_priority_pinned`/
 stamping `subscription_updated_at`. Flag values match the historical client
 writes exactly.
 
-### 2e. Beacon expiry (`check_and_expire_beacons.js`)
+### 2e. Power Hour start/stop (`power_hour.js`)
+
+**Intent:** the only path allowed to write Power Hour promo fields, enforcing
+tier caps server-side.
+**Mechanism:** two callables. `startPowerHour` runs in a transaction:
+auth → ownership → per-tier duration cap + rolling 7-day weekly-frequency
+limit (from a server-side `POWER_HOUR_LIMITS` table) → writes
+`has_flash_beacon`/`flash_beacon_expires_at`/`flash_beacon_duration_minutes`/
+`power_hour_usage_count`/`power_hour_last_reset` via Admin SDK. On the weekly
+limit it throws `resource-exhausted` with the per-tier upgrade message.
+`stopPowerHour` clears `has_flash_beacon` only.
+
+### 2f. Beacon expiry (`check_and_expire_beacons.js`)
 
 **Intent:** auto-end expired Power Hour promos.
 **Mechanism:** cron every 5 minutes; batch-flips `has_flash_beacon:false`
 where `flash_beacon_expires_at < now`.
 
-### 2f. Business Kindex calc (`lib/custom_code/actions/calculate_real_time_kindex.dart`)
+### 2g. Business Kindex calc (`lib/custom_code/actions/calculate_real_time_kindex.dart`)
 
 **Intent:** map a new star rating to a business score delta.
 **Mechanism:** tier-aware baselines/ceilings (standard 500/750, premium
@@ -132,7 +144,7 @@ where `flash_beacon_expires_at < now`.
 3→0, 2→−5, 1→−15), clamps to the tier ceiling. Separate from the customer
 scoring function in 2b — **two scoring systems share the "Kindex" name.**
 
-### 2g. Generic proxy + auth cleanup (`firebase/functions/index.js`)
+### 2h. Generic proxy + auth cleanup (`firebase/functions/index.js`)
 
 `ffPrivateApiCall` (v1 callable) and `ffPrivateApiCallV2` (v2 `onRequest` with
 manual CORS + Bearer verification) proxy FlutterFlow private API calls.
@@ -160,10 +172,9 @@ remediated on this baseline:
 
 ### Open items (tracked, not yet closed)
 
-1. **Power Hour tier caps are still client-enforced.** The Power Hour fields
-   remain in `mutableBusinessFields()` so the client-side
-   `startPowerHour`/`stopPowerHour` keep working; a modified client could set
-   them directly. *(Migration to a Cloud Function is the immediate next task.)*
+1. ~~**Power Hour tier caps are client-enforced.**~~ **RESOLVED** — Power Hour
+   is now server-side (`power_hour.js`); the fields were removed from
+   `mutableBusinessFields()`, so the client can no longer write them.
 2. **RevenueCat purchase is trusted, not verified.** `setBusinessSubscription`
    confirms ownership but assumes the client completed the purchase. Full
    closure = a RevenueCat webhook or server-side subscriber lookup before
