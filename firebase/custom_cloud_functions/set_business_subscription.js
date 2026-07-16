@@ -4,40 +4,12 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
-// The only tier names a client may request, mapped to the exact flag values
-// the old client-side upgrade flow wrote (see merchant_pricing_suite +
-// kin_services.dart history). The server derives every flag from the tier -
-// the client no longer supplies is_premium/is_priority_pinned/etc., so a
-// modified client can't request premium placement on a free tier.
-//
-// NOTE (pre-existing behavior, preserved for parity): 'Elite Growth' turns
-// has_flash_beacon on with no flash_beacon_expires_at. checkAndExpireBeacons
-// only expires docs where flash_beacon_expires_at < now, and Firestore range
-// queries skip docs missing that field - so an Elite upgrade's beacon stays
-// on until a Power Hour or downgrade overwrites it. If that's not intended,
-// drop the flag here (Elite owners can still start real Power Hours).
-const TIER_FLAGS = {
-  "Community": {
-    is_premium: false,
-    is_priority_pinned: false,
-    has_flash_beacon: false,
-  },
-  "Founding Local": {
-    is_premium: true,
-    is_priority_pinned: false,
-    has_flash_beacon: false,
-  },
-  "Pro Growth": {
-    is_premium: true,
-    is_priority_pinned: false,
-    has_flash_beacon: false,
-  },
-  "Elite Growth": {
-    is_premium: true,
-    is_priority_pinned: true,
-    has_flash_beacon: true,
-  },
-};
+// Tier entitlement flags come from the shared tier_config table (single
+// source of truth, mirrored on the client). The server derives every flag
+// from the tier - the client no longer supplies is_premium/
+// is_priority_pinned/etc., so a modified client can't request premium
+// placement on a free tier.
+const { flagsForTier } = require("./tier_config.js");
 
 // Server-side replacement for the direct Firestore writes that
 // KinServices.upgradeBusinessTier / downgradeToCommunity used to do -
@@ -47,7 +19,7 @@ const TIER_FLAGS = {
 //
 // Trust model: same gates as generateMarketingContent - verified ID token,
 // then ownership via the business's own owner_ref. The tier itself is
-// validated against TIER_FLAGS, and all flags are derived server-side.
+// validated against tier_config, and all flags are derived server-side.
 // LIMITATION (follow-up): this still trusts that the client completed the
 // RevenueCat purchase before calling. Full closure is a RevenueCat webhook
 // (or server-side subscriber lookup with a REVENUECAT_API_KEY secret)
@@ -65,7 +37,7 @@ exports.setBusinessSubscription = onCall(async (request) => {
   }
 
   const tierName = request.data.tierName;
-  const flags = TIER_FLAGS[tierName];
+  const flags = flagsForTier(tierName);
   if (!flags) {
     throw new HttpsError(
       "invalid-argument",

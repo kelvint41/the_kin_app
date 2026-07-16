@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
+import '/services/tier_config.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -62,43 +63,6 @@ class MarketingContent {
   final String generationLogId;
 }
 
-/// Power Hour caps for one subscription tier. See
-/// [KinServices.startPowerHour].
-class _PowerHourLimits {
-  const _PowerHourLimits({required this.durationCapMinutes, this.weeklyLimit});
-
-  final int durationCapMinutes;
-
-  /// Max Power Hours per rolling 7-day window. Null means unlimited -
-  /// skip the frequency check entirely.
-  final int? weeklyLimit;
-}
-
-/// Real subscription_tier values, as written by the live upgrade flow in
-/// merchant_pricing_suite_widget.dart - not the generic 'Community' /
-/// 'Pro' / 'Elite' names a first pass might assume. Any business whose
-/// subscription_tier isn't one of these keys (a typo, or an ad-hoc value
-/// like 'Founder'/'unlimited' set outside the normal upgrade flow) falls
-/// through to [_defaultPowerHourLimits] rather than risk granting
-/// broader access than intended.
-///
-/// DISPLAY ONLY. Power Hour limits are enforced server-side by the
-/// startPowerHour Cloud Function (see power_hour.js), which holds the
-/// authoritative copy of this same table. This client copy exists solely
-/// so UI can show/validate against the cap (e.g. the duration picker's
-/// max) without a round-trip - the [weeklyLimit] here isn't read anywhere
-/// on the client anymore, only [durationCapMinutes] via
-/// [KinServices.powerHourDurationCapMinutes]. Keep the two tables in sync;
-/// consolidating this duplication is tracked tech debt.
-const _powerHourLimitsByTier = <String, _PowerHourLimits>{
-  'Community': _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1),
-  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, weeklyLimit: 2),
-  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, weeklyLimit: 3),
-  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, weeklyLimit: null),
-};
-const _defaultPowerHourLimits =
-    _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1);
-
 /// Thin, reusable wrappers around this app's Firestore-backed actions.
 ///
 /// Every method here does three things consistently: checks auth/input
@@ -108,13 +72,12 @@ const _defaultPowerHourLimits =
 class KinServices {
   KinServices._();
 
-  /// Power Hour duration cap in minutes for [tier], from the same table
-  /// [startPowerHour] enforces server-side. Exposed so UI (duration
-  /// pickers, slider validation) can show/validate against the real
-  /// limit without duplicating it.
+  /// Power Hour duration cap in minutes for [tier], from the shared
+  /// [tierConfigFor] table (mirror of what [startPowerHour] enforces
+  /// server-side). Exposed so UI (duration pickers, slider validation) can
+  /// show/validate against the real limit without duplicating it.
   static int powerHourDurationCapMinutes(String tier) =>
-      (_powerHourLimitsByTier[tier] ?? _defaultPowerHourLimits)
-          .durationCapMinutes;
+      tierConfigFor(tier).powerHourDurationCapMinutes;
 
   /// Uppercases and strips [raw] down to alphanumeric characters, returning
   /// null if the result isn't exactly 5 characters. Exposed so a

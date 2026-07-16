@@ -6,22 +6,12 @@ if (!admin.apps.length) {
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-// Per-tier Power Hour limits, moved here from the client so the caps are
-// enforced server-side and can't be bypassed by a modified client. Values
-// match KinServices._powerHourLimitsByTier exactly (the client keeps that
-// same table, but now only for display - e.g. the duration picker's max).
-// weeklyLimit null means unlimited (skip the frequency check).
-const POWER_HOUR_LIMITS = {
-  "Community": { durationCapMinutes: 30, weeklyLimit: 1 },
-  "Founding Local": { durationCapMinutes: 45, weeklyLimit: 2 },
-  "Pro Growth": { durationCapMinutes: 60, weeklyLimit: 3 },
-  "Elite Growth": { durationCapMinutes: 90, weeklyLimit: null },
-};
-const DEFAULT_LIMITS = { durationCapMinutes: 30, weeklyLimit: 1 };
-
-function limitsForTier(tier) {
-  return POWER_HOUR_LIMITS[tier] || DEFAULT_LIMITS;
-}
+// Per-tier Power Hour caps come from the shared tier_config table (single
+// source of truth, mirrored on the client for display). Enforcing them
+// here server-side is what stops a modified client from bypassing the caps.
+// powerHourLimits() falls back to the default tier's caps for an unknown
+// subscription_tier. weeklyLimit null means unlimited.
+const { powerHourLimits } = require("./tier_config.js");
 
 // Same wording the client-side _powerHourLimitMessage used, so the upgrade
 // prompt a merchant sees when they hit their cap is unchanged.
@@ -89,7 +79,7 @@ exports.startPowerHour = onCall(async (request) => {
     const snap = await assertOwnership(businessRef, request.auth.uid, tx);
     const business = snap.data();
     const tier = business.subscription_tier;
-    const limits = limitsForTier(tier);
+    const limits = powerHourLimits(tier);
 
     const nowMs = Date.now();
     const lastReset = business.power_hour_last_reset;

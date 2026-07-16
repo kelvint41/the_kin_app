@@ -112,8 +112,8 @@ to `ai_generation_logs`. Gemini key is a server-side secret.
 
 **Intent:** the only path allowed to write paywall fields, now that the client
 can't.
-**Mechanism:** callable; auth → ownership → validates `tierName` against a
-server-side `TIER_FLAGS` table → derives `is_premium`/`is_priority_pinned`/
+**Mechanism:** callable; auth → ownership → validates `tierName` against the
+shared `tier_config.js` table → derives `is_premium`/`is_priority_pinned`/
 `has_flash_beacon` from the tier → writes via Admin SDK (bypasses rules),
 stamping `subscription_updated_at`. Flag values match the historical client
 writes exactly.
@@ -227,8 +227,8 @@ selection card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
 | **Power Hour / Flash Beacon** | Time-boxed promo (`has_flash_beacon` + `flash_beacon_expires_at`); tier-capped; cron-expired. |
 | **subscription_tier** | `Community` (free), `Founding Local`, `Pro Growth`, `Elite Growth`. Gates Power Hour + AI. Server-written only. |
 | **`mutableBusinessFields()`** | Rules helper: the allowlist of business fields an owner may edit client-side. Everything else is server-controlled. |
-| **`TIER_FLAGS`** | Server-side table in `setBusinessSubscription` mapping each tier → its entitlement booleans. |
-| **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. |
+| **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, and AI entitlement per tier. |
+| **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
 | **ownedBusiness** | User→business link. This is how "role" is implemented — there is no explicit `role` field. |
 | **owner_ref** | Business→user pointer; the basis of every ownership authorization check. |
 | **The Exchange** | Verified-business social feed (`exchange_posts`). |
@@ -244,9 +244,14 @@ selection card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
 
 - **Two "Kindex" systems** under one name (customer Cloud Function vs. business
   Dart action), with different baselines and update paths — easy to conflate.
-- **Tier list duplicated** across `merchant_pricing_suite_widget.dart`,
-  `KinServices._powerHourLimitsByTier`, and `TIER_FLAGS` (server). Three
-  sources of truth for the same four tiers.
+- ~~**Tier list duplicated** across four files.~~ **RESOLVED** — tier
+  attributes (flags, Power Hour caps, AI entitlement) are now consolidated
+  into one table per runtime: `firebase/custom_cloud_functions/tier_config.js`
+  (server, authoritative) and `lib/services/tier_config.dart` (client,
+  display-only mirror). The two are kept in agreement by hand (a literal
+  can't cross the Node/Dart boundary); a parity check confirms they match.
+  RevenueCat package IDs remain in `merchant_pricing_suite_widget.dart` as a
+  deliberately separate concern (product mapping, not tier policy).
 - **Role inferred, never stored** — any future "switch account type" feature
   must account for the fact that role = "has `ownedBusiness`".
 - **Repo dead weight:** ~90 `lib/old_designs/` components, 27 `.old` files,
