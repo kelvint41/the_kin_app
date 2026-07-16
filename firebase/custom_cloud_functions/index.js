@@ -10,3 +10,6 @@ exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
 const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
 exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
 exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;
+
+const setBusinessSubscription = require("./set_business_subscription.js");
+exports.setBusinessSubscription = setBusinessSubscription.setBusinessSubscription;

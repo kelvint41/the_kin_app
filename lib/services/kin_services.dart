@@ -368,16 +368,50 @@ class KinServices {
     }
   }
 
+  /// Asks the setBusinessSubscription Cloud Function to set [tierName] on
+  /// [businessRef]. The server re-checks ownership and derives every
+  /// entitlement flag (is_premium, is_priority_pinned, has_flash_beacon)
+  /// from the tier itself - the client can't supply them anymore, and
+  /// firestore.rules blocks writing those fields directly, so this callable
+  /// is the only path that can change a tier. Surfaces the server's real
+  /// error message (same pattern as generateMarketingContent).
+  static Future<ServiceResult<void>> _setSubscriptionTier({
+    required DocumentReference businessRef,
+    required String tierName,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+            'setBusinessSubscription',
+            options: HttpsCallableOptions(
+              timeout: const Duration(seconds: 30),
+            ),
+          )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        'tierName': tierName,
+      });
+      return const ServiceResult.success();
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not update your subscription.');
+    } catch (_) {
+      return const ServiceResult.failure('Could not update your subscription.');
+    }
+  }
+
   /// Purchases/activates a subscription tier for a business via RevenueCat,
-  /// then updates the business record only on a confirmed purchase.
+  /// then - only on a confirmed purchase - asks the setBusinessSubscription
+  /// Cloud Function to apply the tier. The entitlement flags are derived
+  /// server-side from [tierName]; firestore.rules no longer allows the
+  /// client to write subscription_tier/is_premium/is_priority_pinned
+  /// directly (see the paywall-bypass fix), so the callable is the only
+  /// upgrade path.
   /// Used by: Merchant Pricing Suite -> each tier card's action button.
   static Future<ServiceResult<void>> upgradeBusinessTier({
     required DocumentReference businessRef,
     required String packageId,
     required String tierName,
-    required bool isPremium,
-    bool isPriorityPinned = false,
-    bool hasFlashBeacon = false,
   }) async {
     try {
       final purchased = await revenue_cat.purchasePackage(packageId);
@@ -385,34 +419,21 @@ class KinServices {
         return const ServiceResult.failure(
             'Purchase could not be completed. Please try again.');
       }
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: tierName,
-        isPremium: isPremium,
-        isPriorityPinned: isPriorityPinned,
-        hasFlashBeacon: hasFlashBeacon,
-      ));
-      return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your subscription.');
     }
+    return _setSubscriptionTier(businessRef: businessRef, tierName: tierName);
   }
 
   /// Downgrades a business back to the free Community tier - no purchase
-  /// involved. Used by: Merchant Pricing Suite -> "Community" tier card.
+  /// involved, but the write still goes through the setBusinessSubscription
+  /// Cloud Function since the tier fields are locked to client writes.
+  /// Used by: Merchant Pricing Suite -> "Community" tier card.
   static Future<ServiceResult<void>> downgradeToCommunity({
     required DocumentReference businessRef,
   }) async {
-    try {
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: 'Community',
-        isPremium: false,
-        isPriorityPinned: false,
-        hasFlashBeacon: false,
-      ));
-      return const ServiceResult.success();
-    } catch (_) {
-      return const ServiceResult.failure('Could not update your plan.');
-    }
+    return _setSubscriptionTier(
+        businessRef: businessRef, tierName: 'Community');
   }
 
   /// Opens the native share sheet with [text], then records a
