@@ -31,8 +31,6 @@ class BusinessSignUpModel extends FlutterFlowModel<BusinessSignUpWidget> {
   TextEditingController? textController3;
   late MaskTextInputFormatter textFieldMask3;
   String? Function(BuildContext, String?)? textController3Validator;
-  // Stores action output result for [Backend Call - Create Document] action in Button widget.
-  BusinessesRecord? newBusiness;
 
   @override
   void initState(BuildContext context) {}

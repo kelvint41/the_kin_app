@@ -491,23 +491,15 @@ class _BusinessSignUpWidgetState extends State<BusinessSignUpWidget> {
                             ),
                             FFButtonWidget(
                               onPressed: () async {
-                                var businessesRecordReference =
-                                    BusinessesRecord.collection.doc();
-                                await businessesRecordReference
-                                    .set(createBusinessesRecordData(
-                                  isVeteran: false,
-                                ));
-                                _model.newBusiness =
-                                    BusinessesRecord.getDocumentFromData(
-                                        createBusinessesRecordData(
-                                          isVeteran: false,
-                                        ),
-                                        businessesRecordReference);
-
+                                // The real business document is created by
+                                // KinServices.registerBusiness on the
+                                // Business Setup page. The orphan create
+                                // that used to happen here (a doc with only
+                                // isVeteran and no owner_ref) was never
+                                // read by anything, and firestore.rules now
+                                // requires owner_ref == self on create.
                                 context.pushNamed(
                                     BusinessSetupPageWidget.routeName);
-
-                                safeSetState(() {});
                               },
                               text: 'Submit Request',
                               options: FFButtonOptions(

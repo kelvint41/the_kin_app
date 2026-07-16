@@ -50,7 +50,13 @@ service cloud.firestore {
 
     match /businesses/{document} {
       allow read: if true;
-      allow create: if request.auth != null;
+      // owner_ref must point at the creator - blocks creating businesses
+      // attributed to other users (or ownerless orphans). Every legit
+      // create path (KinServices.registerBusiness, the dev-bypass seeding
+      // in main.dart) already sets owner_ref to the signed-in user;
+      // directory imports use the Admin SDK and bypass rules.
+      allow create: if request.auth != null
+        && request.resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
       // Owner may update ONLY the fields in mutableBusinessFields(). hasOnly
       // rejects the write if any other key changed - so subscription_tier,
       // is_verified, kindex_score, owner_ref, etc. cannot be set from the
@@ -126,9 +132,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Internal ops/project-tracking data (assigned_editor, current_step,
+    // delivery dates). Only read client-side by the app_builder_concept
+    // demo pages; nothing in the client creates docs here - intake happens
+    // via console/Admin SDK, which bypasses rules.
     match /agency_queue/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if false;
+      allow read: if request.auth != null;
       allow write: if false;
       allow delete: if false;
     }
@@ -143,22 +153,46 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Client telemetry (page views, map taps). Writes happen from pages
+    // that are reachable logged-out (public directory browsing), where
+    // createActivityLogsRecordData strips the null user_ref - so an
+    // anonymous create is allowed, but only WITHOUT a user_ref. A
+    // signed-in create must stamp itself, so nobody can write logs
+    // attributed to someone else. Shape-checked to keep junk writes out.
     match /activity_logs/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.resource.data.event_type is string
+        && request.resource.data.timestamp is timestamp
+        && (
+          !('user_ref' in request.resource.data)
+            ? true
+            : (request.auth != null
+               && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid))
+        );
+      // Only the Executive Dashboard reads these, and it already gates
+      // itself on isAdmin client-side - this makes that gate real. Works
+      // because is_admin is no longer client-writable (see /users).
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // No client-side reads or writes exist for this collection - it's
+    // populated (if at all) via console/Admin SDK. Admin-read only, so a
+    // future dashboard can use it without another rules change.
     match /analytics_daily/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if false;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // Read by the Privacy Policy page, which must work logged-out (legal
+    // gate comes BEFORE signup) - so read stays public. Nothing in the
+    // client creates these; updates happen via console/Admin SDK.
     match /legal_metadata/{document} {
-      allow create: if true;
+      allow create: if false;
       allow read: if true;
       allow write: if false;
       allow delete: if false;
@@ -185,16 +219,24 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Tier/comp grants (tier, source, granted_reason, expires_at). No
+    // client path reads or writes this collection, and it has no owner
+    // field to scope reads to - so it's fully locked. Server-side code
+    // (Admin SDK) bypasses rules; re-open deliberately if a client
+    // feature ever needs it.
     match /entitlements/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if false;
+      allow read: if false;
       allow write: if false;
       allow delete: if false;
     }
 
+    // Legacy visit tracking - no client path reads or writes it anymore.
+    // Fully locked; Admin SDK bypasses if anything server-side still
+    // logs visits.
     match /uservisits/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if false;
+      allow read: if false;
       allow write: if false;
       allow delete: if false;
     }
