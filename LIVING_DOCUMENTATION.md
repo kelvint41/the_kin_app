@@ -214,11 +214,14 @@ register button's inline Terms-of-Service consent.
 **Role model:** an explicit `role` field (`customer` | `business_owner`) is
 written at onboarding — derived from `FFAppState().signupType` in the customer
 signup, and forced to `business_owner` in `registerBusiness`. Existing users
-are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1). The
-legacy signal — a user is a business owner iff `ownedBusiness` is set — is
-still what most read sites check; migrating those to read `role` is Stage 2
-(pending). Onboarding still branches by which page the selection card pushes
-(`CustomersignupPage` vs. `BusinessSetupPage`).
+are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1).
+Canonical role checks live in `auth_util.dart` as `currentUserIsBusinessOwner`
+/ `currentUserIsCustomer` (read `role`, with a transitional fallback to
+`ownedBusiness`). **Stage 2 (in progress):** role-*intent* checks are moving
+to these helpers, while `ownedBusiness` stays for its real job — the *link* to
+the business doc (loading/updating/displaying it) and the null-guards that
+protect those derefs. Onboarding still branches by which page the selection
+card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
 
 ---
 
@@ -234,8 +237,9 @@ still what most read sites check; migrating those to read `role` is Stage 2
 | **`mutableBusinessFields()`** | Rules helper: the allowlist of business fields an owner may edit client-side. Everything else is server-controlled. |
 | **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, and AI entitlement per tier. |
 | **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
-| **ownedBusiness** | User→business link. Legacy role signal (owner iff set); most read sites still key off this pending Stage 2. |
+| **ownedBusiness** | User→business **link** (the reference to the business doc). Used to load/update/display the business and to null-guard those derefs — this is its permanent job, not role. |
 | **role** | Explicit account role on `users`: `customer` or `business_owner`. Written at onboarding, backfilled for existing users. Rules constrain it to those two values. |
+| **`currentUserIsBusinessOwner` / `currentUserIsCustomer`** | Canonical role checks in `auth_util.dart`. Read `role` (transitional fallback to `ownedBusiness`). Use these for "what kind of account is this?"; use `ownedBusiness` only when you need the business reference. |
 | **owner_ref** | Business→user pointer; the basis of every ownership authorization check. |
 | **The Exchange** | Verified-business social feed (`exchange_posts`). |
 | **Entitlement** | Server-side "is this business allowed feature X" check (AI orchestrator, tier flags). |

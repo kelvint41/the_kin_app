@@ -46,6 +46,26 @@ final jwtTokenStream = FirebaseAuth.instance
 DocumentReference? get currentUserReference =>
     loggedIn ? UsersRecord.collection.doc(currentUser!.uid) : null;
 
+/// Canonical role checks (Stage 2 of the role migration). Prefer these over
+/// inspecting `ownedBusiness` when the question is "what kind of account is
+/// this?" - `ownedBusiness` is the LINK to a business doc and should still be
+/// used when you actually need that reference.
+///
+/// Reads the explicit `role` field, with a transitional fallback to the
+/// legacy signal (owning a business): a correctly-populated user matches
+/// either way, and the fallback keeps a user whose `role` somehow didn't get
+/// written - but who clearly owns a business - classified as an owner rather
+/// than silently demoted. Drop the fallback once every user is confirmed to
+/// carry a role.
+bool get currentUserIsBusinessOwner =>
+    currentUserDocument?.role == 'business_owner' ||
+    currentUserDocument?.ownedBusiness != null;
+
+/// True for a signed-in non-owner account. Note this is owner-negation, so a
+/// logged-out user reads as "customer" - guard on `loggedIn` first where that
+/// distinction matters.
+bool get currentUserIsCustomer => !currentUserIsBusinessOwner;
+
 UsersRecord? currentUserDocument;
 final authenticatedUserStream = FirebaseAuth.instance
     .authStateChanges()
