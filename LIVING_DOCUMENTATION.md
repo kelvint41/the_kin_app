@@ -133,11 +133,17 @@ limit (from a server-side `POWER_HOUR_LIMITS` table) → writes
 limit it throws `resource-exhausted` with the per-tier upgrade message.
 `stopPowerHour` clears `has_flash_beacon` only.
 
-### 2f. Beacon expiry (`check_and_expire_beacons.js`)
+### 2f. Beacon audit / expiry (`check_and_expire_beacons.js`)
 
-**Intent:** auto-end expired Power Hour promos.
-**Mechanism:** cron every 5 minutes; batch-flips `has_flash_beacon:false`
-where `flash_beacon_expires_at < now`.
+**Intent:** keep `has_flash_beacon` honest — end expired Power Hour promos and
+clear any beacon that isn't legitimate for its business's tier.
+**Mechanism:** cron every 5 minutes. Queries **all** businesses with
+`has_flash_beacon == true` (no range filter, so no-expiry docs are included)
+and audits each: a beacon is kept only if it's an **active Power Hour**
+(`flash_beacon_expires_at` in the future) **or** the tier grants a **persistent
+beacon** (`tier_config.hasPersistentBeacon`, today only Elite Growth).
+Everything else — past-expiry Power Hours, and no-expiry beacons on tiers that
+don't grant one — is cleared, in chunked batches.
 
 ### 2g. Business Kindex calc (`lib/custom_code/actions/calculate_real_time_kindex.dart`)
 
@@ -188,7 +194,7 @@ remediated on this baseline:
 `ticker_registry`, `exchange_posts`, and `signup_feed` all use
 `request.resource.data` field validation and owner-scoping correctly.
 
-### Open items (tracked, not yet closed)
+### Open items (tracked)
 
 1. ~~**Power Hour tier caps are client-enforced.**~~ **RESOLVED** — Power Hour
    is now server-side (`power_hour.js`); the fields were removed from
@@ -199,13 +205,15 @@ remediated on this baseline:
    tier, failing closed; and `revenueCatWebhook` (§2h) auto-downgrades a
    business to Community when its subscription lapses. Grant-time and
    lifecycle are both covered now.
-3. **Elite Growth perma-beacon (pre-existing parity quirk).** Elite upgrades
-   set `has_flash_beacon:true` with no `flash_beacon_expires_at`;
-   `checkAndExpireBeacons` skips docs missing that field, so it never
-   auto-clears.
+3. ~~**Elite Growth perma-beacon.**~~ **RESOLVED** — `checkAndExpireBeacons`
+   (§2f) now audits every `has_flash_beacon` against the tier: an Elite beacon
+   is kept as a legitimate persistent-beacon perk, while no-expiry/expired
+   beacons on tiers that don't grant one are cleared. The old query could never
+   see no-expiry docs; it now can.
 4. **Historical secret in git history.** The Gemini key formerly hardcoded in
    `lib/backend/gemini/gemini.dart` is now `--dart-define`/server-secret, but
-   remains in history — rotate if not already done.
+   remains in history — rotate if not already done. *(The only remaining item —
+   a git-history hygiene task, not a code change.)*
 
 ---
 
