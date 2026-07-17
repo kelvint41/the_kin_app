@@ -217,11 +217,14 @@ signup, and forced to `business_owner` in `registerBusiness`. Existing users
 are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1).
 Canonical role checks live in `auth_util.dart` as `currentUserIsBusinessOwner`
 / `currentUserIsCustomer` (read `role`, with a transitional fallback to
-`ownedBusiness`). **Stage 2 (in progress):** role-*intent* checks are moving
-to these helpers, while `ownedBusiness` stays for its real job — the *link* to
-the business doc (loading/updating/displaying it) and the null-guards that
-protect those derefs. Onboarding still branches by which page the selection
-card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
+`ownedBusiness`). **Stage 2 (complete):** role-*intent* checks now use these
+helpers — the owner-profile empty-state guard and the map page's hamburger
+menu, which gates its owner-only items (The Exchange, My Business / Profile,
+Power Hour Blast) on `currentUserIsBusinessOwner` (Community Feed stays visible
+to everyone). `ownedBusiness` remains for its real job — the *link* to the
+business doc (loading/updating/displaying it) and the null-guards that protect
+those derefs. Onboarding still branches by which page the selection card pushes
+(`CustomersignupPage` vs. `BusinessSetupPage`).
 
 ---
 
@@ -262,10 +265,13 @@ card pushes (`CustomersignupPage` vs. `BusinessSetupPage`).
   can't cross the Node/Dart boundary); a parity check confirms they match.
   RevenueCat package IDs remain in `merchant_pricing_suite_widget.dart` as a
   deliberately separate concern (product mapping, not tier policy).
-- **Role model — Stage 1 done, Stage 2 pending.** An explicit `role` field is
-  now written at onboarding and backfilled (`backfill_user_roles.js`). The read
-  sites that still infer role from `ownedBusiness` have not yet been migrated
-  to read `role` — that's Stage 2.
+- ~~**Role model — role inferred from `ownedBusiness`.**~~ **RESOLVED** — an
+  explicit `role` field is written at onboarding and backfilled
+  (`backfill_user_roles.js`); role-intent read sites now use the
+  `currentUserIsBusinessOwner` / `currentUserIsCustomer` helpers. Remaining
+  `ownedBusiness` usages are intentional data links, not role checks. The
+  transitional `ownedBusiness` fallback inside those helpers can be dropped
+  once every user is confirmed to carry a role.
 - **Repo dead weight:** ~90 `lib/old_designs/` components, 27 `.old` files,
   `migration_data.json` (~536 KB), a ~200 KB directory CSV, and
   `flutter_01/02.log` are all committed.
