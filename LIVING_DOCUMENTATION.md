@@ -216,8 +216,8 @@ written at onboarding — derived from `FFAppState().signupType` in the customer
 signup, and forced to `business_owner` in `registerBusiness`. Existing users
 are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1).
 Canonical role checks live in `auth_util.dart` as `currentUserIsBusinessOwner`
-/ `currentUserIsCustomer` (read `role`, with a transitional fallback to
-`ownedBusiness`). **Stage 2 (complete):** role-*intent* checks now use these
+/ `currentUserIsCustomer` (read the explicit `role` field). **Stage 2
+(complete):** role-*intent* checks now use these
 helpers — the owner-profile empty-state guard and the map page's hamburger
 menu, which gates its owner-only items (The Exchange, My Business / Profile,
 Power Hour Blast) on `currentUserIsBusinessOwner` (Community Feed stays visible
@@ -242,7 +242,7 @@ those derefs. Onboarding still branches by which page the selection card pushes
 | **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
 | **ownedBusiness** | User→business **link** (the reference to the business doc). Used to load/update/display the business and to null-guard those derefs — this is its permanent job, not role. |
 | **role** | Explicit account role on `users`: `customer` or `business_owner`. Written at onboarding, backfilled for existing users. Rules constrain it to those two values. |
-| **`currentUserIsBusinessOwner` / `currentUserIsCustomer`** | Canonical role checks in `auth_util.dart`. Read `role` (transitional fallback to `ownedBusiness`). Use these for "what kind of account is this?"; use `ownedBusiness` only when you need the business reference. |
+| **`currentUserIsBusinessOwner` / `currentUserIsCustomer`** | Canonical role checks in `auth_util.dart`. Read the explicit `role` field. Use these for "what kind of account is this?"; use `ownedBusiness` only when you need the business reference. |
 | **owner_ref** | Business→user pointer; the basis of every ownership authorization check. |
 | **The Exchange** | Verified-business social feed (`exchange_posts`). |
 | **Entitlement** | Server-side "is this business allowed feature X" check (AI orchestrator, tier flags). |
@@ -268,10 +268,10 @@ those derefs. Onboarding still branches by which page the selection card pushes
 - ~~**Role model — role inferred from `ownedBusiness`.**~~ **RESOLVED** — an
   explicit `role` field is written at onboarding and backfilled
   (`backfill_user_roles.js`); role-intent read sites now use the
-  `currentUserIsBusinessOwner` / `currentUserIsCustomer` helpers. Remaining
-  `ownedBusiness` usages are intentional data links, not role checks. The
-  transitional `ownedBusiness` fallback inside those helpers can be dropped
-  once every user is confirmed to carry a role.
+  `currentUserIsBusinessOwner` / `currentUserIsCustomer` helpers, which read
+  the explicit `role` field directly (the transitional `ownedBusiness`
+  fallback has been removed now that all users carry a role). Remaining
+  `ownedBusiness` usages are intentional data links, not role checks.
 - **Repo dead weight:** ~90 `lib/old_designs/` components, 27 `.old` files,
   `migration_data.json` (~536 KB), a ~200 KB directory CSV, and
   `flutter_01/02.log` are all committed.

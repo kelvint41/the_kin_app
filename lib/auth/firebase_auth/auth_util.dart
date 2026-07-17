@@ -51,15 +51,11 @@ DocumentReference? get currentUserReference =>
 /// this?" - `ownedBusiness` is the LINK to a business doc and should still be
 /// used when you actually need that reference.
 ///
-/// Reads the explicit `role` field, with a transitional fallback to the
-/// legacy signal (owning a business): a correctly-populated user matches
-/// either way, and the fallback keeps a user whose `role` somehow didn't get
-/// written - but who clearly owns a business - classified as an owner rather
-/// than silently demoted. Drop the fallback once every user is confirmed to
-/// carry a role.
+/// Reads the explicit `role` field. (The transitional fallback to the legacy
+/// signal - owning a business - was dropped once all users were confirmed to
+/// carry a role via the onboarding writes and the one-time backfill.)
 bool get currentUserIsBusinessOwner =>
-    currentUserDocument?.role == 'business_owner' ||
-    currentUserDocument?.ownedBusiness != null;
+    currentUserDocument?.role == 'business_owner';
 
 /// True for a signed-in non-owner account. Note this is owner-negation, so a
 /// logged-out user reads as "customer" - guard on `loggedIn` first where that
