@@ -17,6 +17,13 @@
 //
 // powerHourWeeklyLimit: null means unlimited (skip the frequency check).
 //
+// revenueCatProductId: the RevenueCat/store product identifier a purchase of
+// this tier grants (matches the package ids in
+// merchant_pricing_suite_widget.dart). null for the free Community tier.
+// setBusinessSubscription verifies an active subscription to this product
+// against RevenueCat before writing a paid tier. If your RevenueCat product
+// identifiers differ from these package ids, update them here.
+//
 // NOTE (pre-existing parity): 'Elite Growth' has hasFlashBeacon true with no
 // expiry set at upgrade time. checkAndExpireBeacons only clears docs where
 // flash_beacon_expires_at < now, so an Elite upgrade's beacon stays on until
@@ -30,6 +37,8 @@ const TIERS = {
     powerHourDurationCapMinutes: 30,
     powerHourWeeklyLimit: 1,
     aiMarketingEntitled: false,
+    // Free tier - no purchase, so no product to verify against RevenueCat.
+    revenueCatProductId: null,
   },
   "Founding Local": {
     isPremium: true,
@@ -38,6 +47,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 45,
     powerHourWeeklyLimit: 2,
     aiMarketingEntitled: false,
+    revenueCatProductId: "founding_local_monthly",
   },
   "Pro Growth": {
     isPremium: true,
@@ -46,6 +56,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 60,
     powerHourWeeklyLimit: 3,
     aiMarketingEntitled: true,
+    revenueCatProductId: "pro_growth_monthly",
   },
   "Elite Growth": {
     isPremium: true,
@@ -54,6 +65,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 90,
     powerHourWeeklyLimit: null,
     aiMarketingEntitled: true,
+    revenueCatProductId: "elite_growth_monthly",
   },
 };
 
@@ -93,10 +105,17 @@ function isAiMarketingEntitled(tier) {
   return !!(TIERS[tier] && TIERS[tier].aiMarketingEntitled);
 }
 
+// RevenueCat/store product id a paid tier requires, or null for a free tier
+// (or an unknown tier). null means "no purchase to verify".
+function revenueCatProductId(tier) {
+  return (TIERS[tier] && TIERS[tier].revenueCatProductId) || null;
+}
+
 module.exports = {
   TIERS,
   isKnownTier,
   flagsForTier,
   powerHourLimits,
   isAiMarketingEntitled,
+  revenueCatProductId,
 };

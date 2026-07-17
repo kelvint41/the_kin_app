@@ -113,10 +113,13 @@ to `ai_generation_logs`. Gemini key is a server-side secret.
 **Intent:** the only path allowed to write paywall fields, now that the client
 can't.
 **Mechanism:** callable; auth → ownership → validates `tierName` against the
-shared `tier_config.js` table → derives `is_premium`/`is_priority_pinned`/
-`has_flash_beacon` from the tier → writes via Admin SDK (bypasses rules),
-stamping `subscription_updated_at`. Flag values match the historical client
-writes exactly.
+shared `tier_config.js` table → **for any paid tier, verifies with RevenueCat's
+REST API that the caller (`app_user_id` = Firebase UID) holds an active
+purchase of that tier's product** (fails closed on any verification error) →
+derives `is_premium`/`is_priority_pinned`/`has_flash_beacon` from the tier →
+writes via Admin SDK (bypasses rules), stamping `subscription_updated_at`.
+Community (free) skips verification, so it's also the downgrade path. Requires
+the `REVENUECAT_API_KEY` secret.
 
 ### 2e. Power Hour start/stop (`power_hour.js`)
 
@@ -175,10 +178,12 @@ remediated on this baseline:
 1. ~~**Power Hour tier caps are client-enforced.**~~ **RESOLVED** — Power Hour
    is now server-side (`power_hour.js`); the fields were removed from
    `mutableBusinessFields()`, so the client can no longer write them.
-2. **RevenueCat purchase is trusted, not verified.** `setBusinessSubscription`
-   confirms ownership but assumes the client completed the purchase. Full
-   closure = a RevenueCat webhook or server-side subscriber lookup before
-   writing paid tiers.
+2. ~~**RevenueCat purchase is trusted, not verified.**~~ **RESOLVED** —
+   `setBusinessSubscription` now verifies an active RevenueCat purchase of the
+   tier's product (via the REST API, keyed on the Firebase UID) before writing
+   any paid tier, failing closed. A RevenueCat **webhook** would still be a
+   nice defense-in-depth addition (catch refunds/expiries and downgrade
+   automatically), but the client can no longer grant itself a paid tier.
 3. **Elite Growth perma-beacon (pre-existing parity quirk).** Elite upgrades
    set `has_flash_beacon:true` with no `flash_beacon_expires_at`;
    `checkAndExpireBeacons` skips docs missing that field, so it never
@@ -238,7 +243,7 @@ those derefs. Onboarding still branches by which page the selection card pushes
 | **Power Hour / Flash Beacon** | Time-boxed promo (`has_flash_beacon` + `flash_beacon_expires_at`); tier-capped; cron-expired. |
 | **subscription_tier** | `Community` (free), `Founding Local`, `Pro Growth`, `Elite Growth`. Gates Power Hour + AI. Server-written only. |
 | **`mutableBusinessFields()`** | Rules helper: the allowlist of business fields an owner may edit client-side. Everything else is server-controlled. |
-| **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, and AI entitlement per tier. |
+| **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, AI entitlement, and the RevenueCat product id per tier. |
 | **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
 | **ownedBusiness** | User→business **link** (the reference to the business doc). Used to load/update/display the business and to null-guard those derefs — this is its permanent job, not role. |
 | **role** | Explicit account role on `users`: `customer` or `business_owner`. Written at onboarding, backfilled for existing users. Rules constrain it to those two values. |
