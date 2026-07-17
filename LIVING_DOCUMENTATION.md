@@ -297,3 +297,84 @@ those derefs. Onboarding still branches by which page the selection card pushes
   `flutter_01/02.log` are all committed.
 - **`app_builder_concept/` demo pages** read `agency_queue` but are not
   reachable from any route (no `pushNamed` to them) — orphaned demos.
+
+---
+
+## 7. Deployment & External Setup
+
+### Cloud Functions secrets
+
+Server secrets are set with the Firebase CLI and **bind at deploy time** — after
+setting or changing one, redeploy the functions for it to take effect.
+
+| Secret | Used by | What it is |
+|---|---|---|
+| `GEMINI_API_KEY` | `generateMarketingContent` | Gemini API key (server-side; the old client-embedded key was rotated). |
+| `REVENUECAT_API_KEY` | `setBusinessSubscription`, `revenueCatWebhook` | RevenueCat **v1 secret** REST API key (Dashboard → API keys). Used to look a subscriber up by Firebase UID. |
+| `REVENUECAT_WEBHOOK_AUTH` | `revenueCatWebhook` | Shared secret compared against the webhook's `Authorization` header. Pick a strong random value. |
+
+```bash
+firebase functions:secrets:set GEMINI_API_KEY
+firebase functions:secrets:set REVENUECAT_API_KEY
+firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH
+```
+
+### Deploy
+
+```bash
+# Functions (both codebases) + security rules together - rules and the
+# functions that back them must ship as one unit.
+firebase deploy --only functions:custom_cloud_functions,functions:functions,firestore:rules
+
+# Just the custom Cloud Functions codebase:
+firebase deploy --only functions:custom_cloud_functions
+```
+
+After deploy, the CLI prints each function's URL. The webhook's is also at
+**Firebase Console → Functions → `revenueCatWebhook` → Trigger URL**, of the form
+`https://us-central1-<project-id>.cloudfunctions.net/revenueCatWebhook`.
+
+### RevenueCat webhook (auto-downgrade)
+
+1. **Deploy** so `revenueCatWebhook` picks up its secrets, then copy its Trigger URL.
+2. RevenueCat dashboard → your project → **Integrations → Webhooks** (older UIs:
+   **Project Settings → Integrations → Webhooks**) → **Add**.
+3. **Webhook URL** → the `revenueCatWebhook` Trigger URL.
+4. **Authorization header value** → the **exact** `REVENUECAT_WEBHOOK_AUTH` value —
+   no `Bearer` prefix, no quotes, no trailing spaces (the function compares the
+   raw header string to the secret).
+5. **Environment** → Production (and Sandbox too if you want lapse events during
+   testing; the function handles both identically).
+6. Leave event filtering at the default (send all events) — the function filters
+   to loss-type events itself.
+7. **Save**, then use **Send test event**. Expected: HTTP **200** with
+   `{"ok":true,"ignored":"TEST"}`. A **401** means the Authorization value
+   doesn't match the secret; a **5xx** means it reached the function but errored.
+
+**Behavior on a real lapse:** loss-type event → look up `users/{app_user_id}` →
+their `owned_business` → re-verify the current tier's product against RevenueCat →
+if inactive, set `subscription_tier: Community` (clearing `is_premium` /
+`is_priority_pinned` / `has_flash_beacon`, stamping `subscription_updated_at` and
+`subscription_downgrade_reason`). The user's `role` stays `business_owner` and
+their `ownedBusiness` link is untouched — a lapsed owner becomes a *free* business
+owner, not a customer.
+
+### Tier configuration to verify before go-live
+
+The RevenueCat product identifiers in `tier_config.js` /
+`lib/services/tier_config.dart` (`founding_local_monthly`, `pro_growth_monthly`,
+`elite_growth_monthly`) must match the product identifiers in your RevenueCat
+dashboard. If they differ, both the grant-time check and the webhook re-verify
+will misfire. These two tier tables are manual mirrors of each other — keep them
+in sync.
+
+### One-time data scripts
+
+`firebase/scripts/` holds Admin SDK scripts (require a `serviceAccountKey.json`,
+gitignored). Both default to **dry run**; pass `--commit` to write:
+
+```bash
+cd firebase/scripts && npm install
+node backfill_user_roles.js            # dry run
+node backfill_user_roles.js --commit   # apply
+```
