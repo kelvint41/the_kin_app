@@ -147,7 +147,22 @@ where `flash_beacon_expires_at < now`.
 3→0, 2→−5, 1→−15), clamps to the tier ceiling. Separate from the customer
 scoring function in 2b — **two scoring systems share the "Kindex" name.**
 
-### 2h. Generic proxy + auth cleanup (`firebase/functions/index.js`)
+### 2h. RevenueCat auto-downgrade webhook (`revenue_cat_webhook.js`)
+
+**Intent:** downgrade a business to free Community when its subscription lapses
+(expiry, refund, billing failure) — defense-in-depth on top of
+`setBusinessSubscription`'s grant-time check.
+**Mechanism:** `onRequest` endpoint. Authenticates via a shared secret in the
+`Authorization` header (`REVENUECAT_WEBHOOK_AUTH`). On loss-type events
+(EXPIRATION / CANCELLATION / BILLING_ISSUE / REFUND / SUBSCRIPTION_PAUSED) it
+looks up `users/{app_user_id}` → their `owned_business`, then **re-verifies the
+business's current tier product against RevenueCat's REST API** (shared
+`revenuecat.js` helper) and downgrades to Community only if it's genuinely
+inactive — so auto-renew-off (still active until period end) doesn't downgrade
+prematurely. Idempotent; returns 5xx on error so RevenueCat retries. Reuses
+`REVENUECAT_API_KEY`.
+
+### 2i. Generic proxy + auth cleanup (`firebase/functions/index.js`)
 
 `ffPrivateApiCall` (v1 callable) and `ffPrivateApiCallV2` (v2 `onRequest` with
 manual CORS + Bearer verification) proxy FlutterFlow private API calls.
@@ -179,11 +194,11 @@ remediated on this baseline:
    is now server-side (`power_hour.js`); the fields were removed from
    `mutableBusinessFields()`, so the client can no longer write them.
 2. ~~**RevenueCat purchase is trusted, not verified.**~~ **RESOLVED** —
-   `setBusinessSubscription` now verifies an active RevenueCat purchase of the
-   tier's product (via the REST API, keyed on the Firebase UID) before writing
-   any paid tier, failing closed. A RevenueCat **webhook** would still be a
-   nice defense-in-depth addition (catch refunds/expiries and downgrade
-   automatically), but the client can no longer grant itself a paid tier.
+   `setBusinessSubscription` verifies an active RevenueCat purchase of the
+   tier's product (REST API, keyed on the Firebase UID) before writing any paid
+   tier, failing closed; and `revenueCatWebhook` (§2h) auto-downgrades a
+   business to Community when its subscription lapses. Grant-time and
+   lifecycle are both covered now.
 3. **Elite Growth perma-beacon (pre-existing parity quirk).** Elite upgrades
    set `has_flash_beacon:true` with no `flash_beacon_expires_at`;
    `checkAndExpireBeacons` skips docs missing that field, so it never

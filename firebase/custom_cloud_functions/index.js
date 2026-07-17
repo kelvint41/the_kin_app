@@ -17,3 +17,6 @@ exports.setBusinessSubscription = setBusinessSubscription.setBusinessSubscriptio
 const powerHour = require("./power_hour.js");
 exports.startPowerHour = powerHour.startPowerHour;
 exports.stopPowerHour = powerHour.stopPowerHour;
+
+const revenueCatWebhook = require("./revenue_cat_webhook.js");
+exports.revenueCatWebhook = revenueCatWebhook.revenueCatWebhook;

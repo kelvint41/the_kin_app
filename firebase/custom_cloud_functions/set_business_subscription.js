@@ -11,74 +11,12 @@ if (!admin.apps.length) {
 // is_premium/is_priority_pinned/etc., so a modified client can't request
 // premium placement on a free tier.
 const { flagsForTier, revenueCatProductId } = require("./tier_config.js");
+const { hasActivePurchase } = require("./revenuecat.js");
 
 // RevenueCat secret (v1) REST API key. Server-side only - never shipped to
 // the client. Set via:
 //   firebase functions:secrets:set REVENUECAT_API_KEY
 const revenueCatApiKey = defineSecret("REVENUECAT_API_KEY");
-
-const REVENUECAT_SUBSCRIBER_URL = "https://api.revenuecat.com/v1/subscribers/";
-
-function isActiveExpiry(expiresDate) {
-  // No expiry = lifetime/non-expiring entitlement. Otherwise must be future.
-  if (!expiresDate) return true;
-  return new Date(expiresDate).getTime() > Date.now();
-}
-
-// Confirms with RevenueCat that [appUserId] holds an ACTIVE purchase of
-// [productId]. RevenueCat's app_user_id is the Firebase UID (the client calls
-// Purchases.logIn(uid) - see revenue_cat_util.dart), so we can look the caller
-// up directly by request.auth.uid. Checks both the subscriptions map (keyed by
-// product id) and active entitlements whose product_identifier matches, so it
-// works whether the tier is modeled as a bare subscription or behind an
-// entitlement. Fails CLOSED: any error verifying (network, non-200, bad body)
-// throws rather than granting, since this gates a paywall.
-async function hasActivePurchase(appUserId, productId) {
-  let res;
-  try {
-    res = await fetch(
-      REVENUECAT_SUBSCRIBER_URL + encodeURIComponent(appUserId),
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${revenueCatApiKey.value()}`,
-          Accept: "application/json",
-        },
-      },
-    );
-  } catch (e) {
-    throw new HttpsError(
-      "unavailable",
-      "Could not verify your purchase right now. Please try again.",
-    );
-  }
-  if (!res.ok) {
-    throw new HttpsError(
-      "unavailable",
-      "Could not verify your purchase right now. Please try again.",
-    );
-  }
-
-  const body = await res.json();
-  const subscriber = (body && body.subscriber) || {};
-
-  const subs = subscriber.subscriptions || {};
-  if (subs[productId] && isActiveExpiry(subs[productId].expires_date)) {
-    return true;
-  }
-
-  const entitlements = subscriber.entitlements || {};
-  for (const ent of Object.values(entitlements)) {
-    if (
-      ent &&
-      ent.product_identifier === productId &&
-      isActiveExpiry(ent.expires_date)
-    ) {
-      return true;
-    }
-  }
-  return false;
-}
 
 // Server-side replacement for the direct Firestore writes that
 // KinServices.upgradeBusinessTier / downgradeToCommunity used to do -
@@ -130,10 +68,23 @@ exports.setBusinessSubscription = onCall(
 
     // Paywall enforcement: a paid tier requires an active RevenueCat purchase
     // of its product. Community (productId null) is free, so it's skipped -
-    // this is also the downgrade path.
+    // this is also the downgrade path. Fails CLOSED: if RevenueCat can't be
+    // reached, deny rather than grant.
     const productId = revenueCatProductId(tierName);
     if (productId) {
-      const entitled = await hasActivePurchase(request.auth.uid, productId);
+      let entitled;
+      try {
+        entitled = await hasActivePurchase(
+          request.auth.uid,
+          productId,
+          revenueCatApiKey.value(),
+        );
+      } catch (e) {
+        throw new HttpsError(
+          "unavailable",
+          "Could not verify your purchase right now. Please try again.",
+        );
+      }
       if (!entitled) {
         throw new HttpsError(
           "failed-precondition",
