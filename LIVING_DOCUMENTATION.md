@@ -113,10 +113,13 @@ to `ai_generation_logs`. Gemini key is a server-side secret.
 **Intent:** the only path allowed to write paywall fields, now that the client
 can't.
 **Mechanism:** callable; auth → ownership → validates `tierName` against the
-shared `tier_config.js` table → derives `is_premium`/`is_priority_pinned`/
-`has_flash_beacon` from the tier → writes via Admin SDK (bypasses rules),
-stamping `subscription_updated_at`. Flag values match the historical client
-writes exactly.
+shared `tier_config.js` table → **for any paid tier, verifies with RevenueCat's
+REST API that the caller (`app_user_id` = Firebase UID) holds an active
+purchase of that tier's product** (fails closed on any verification error) →
+derives `is_premium`/`is_priority_pinned`/`has_flash_beacon` from the tier →
+writes via Admin SDK (bypasses rules), stamping `subscription_updated_at`.
+Community (free) skips verification, so it's also the downgrade path. Requires
+the `REVENUECAT_API_KEY` secret.
 
 ### 2e. Power Hour start/stop (`power_hour.js`)
 
@@ -130,11 +133,17 @@ limit (from a server-side `POWER_HOUR_LIMITS` table) → writes
 limit it throws `resource-exhausted` with the per-tier upgrade message.
 `stopPowerHour` clears `has_flash_beacon` only.
 
-### 2f. Beacon expiry (`check_and_expire_beacons.js`)
+### 2f. Beacon audit / expiry (`check_and_expire_beacons.js`)
 
-**Intent:** auto-end expired Power Hour promos.
-**Mechanism:** cron every 5 minutes; batch-flips `has_flash_beacon:false`
-where `flash_beacon_expires_at < now`.
+**Intent:** keep `has_flash_beacon` honest — end expired Power Hour promos and
+clear any beacon that isn't legitimate for its business's tier.
+**Mechanism:** cron every 5 minutes. Queries **all** businesses with
+`has_flash_beacon == true` (no range filter, so no-expiry docs are included)
+and audits each: a beacon is kept only if it's an **active Power Hour**
+(`flash_beacon_expires_at` in the future) **or** the tier grants a **persistent
+beacon** (`tier_config.hasPersistentBeacon`, today only Elite Growth).
+Everything else — past-expiry Power Hours, and no-expiry beacons on tiers that
+don't grant one — is cleared, in chunked batches.
 
 ### 2g. Business Kindex calc (`lib/custom_code/actions/calculate_real_time_kindex.dart`)
 
@@ -144,7 +153,22 @@ where `flash_beacon_expires_at < now`.
 3→0, 2→−5, 1→−15), clamps to the tier ceiling. Separate from the customer
 scoring function in 2b — **two scoring systems share the "Kindex" name.**
 
-### 2h. Generic proxy + auth cleanup (`firebase/functions/index.js`)
+### 2h. RevenueCat auto-downgrade webhook (`revenue_cat_webhook.js`)
+
+**Intent:** downgrade a business to free Community when its subscription lapses
+(expiry, refund, billing failure) — defense-in-depth on top of
+`setBusinessSubscription`'s grant-time check.
+**Mechanism:** `onRequest` endpoint. Authenticates via a shared secret in the
+`Authorization` header (`REVENUECAT_WEBHOOK_AUTH`). On loss-type events
+(EXPIRATION / CANCELLATION / BILLING_ISSUE / REFUND / SUBSCRIPTION_PAUSED) it
+looks up `users/{app_user_id}` → their `owned_business`, then **re-verifies the
+business's current tier product against RevenueCat's REST API** (shared
+`revenuecat.js` helper) and downgrades to Community only if it's genuinely
+inactive — so auto-renew-off (still active until period end) doesn't downgrade
+prematurely. Idempotent; returns 5xx on error so RevenueCat retries. Reuses
+`REVENUECAT_API_KEY`.
+
+### 2i. Generic proxy + auth cleanup (`firebase/functions/index.js`)
 
 `ffPrivateApiCall` (v1 callable) and `ffPrivateApiCallV2` (v2 `onRequest` with
 manual CORS + Bearer verification) proxy FlutterFlow private API calls.
@@ -170,22 +194,26 @@ remediated on this baseline:
 `ticker_registry`, `exchange_posts`, and `signup_feed` all use
 `request.resource.data` field validation and owner-scoping correctly.
 
-### Open items (tracked, not yet closed)
+### Open items (tracked)
 
 1. ~~**Power Hour tier caps are client-enforced.**~~ **RESOLVED** — Power Hour
    is now server-side (`power_hour.js`); the fields were removed from
    `mutableBusinessFields()`, so the client can no longer write them.
-2. **RevenueCat purchase is trusted, not verified.** `setBusinessSubscription`
-   confirms ownership but assumes the client completed the purchase. Full
-   closure = a RevenueCat webhook or server-side subscriber lookup before
-   writing paid tiers.
-3. **Elite Growth perma-beacon (pre-existing parity quirk).** Elite upgrades
-   set `has_flash_beacon:true` with no `flash_beacon_expires_at`;
-   `checkAndExpireBeacons` skips docs missing that field, so it never
-   auto-clears.
+2. ~~**RevenueCat purchase is trusted, not verified.**~~ **RESOLVED** —
+   `setBusinessSubscription` verifies an active RevenueCat purchase of the
+   tier's product (REST API, keyed on the Firebase UID) before writing any paid
+   tier, failing closed; and `revenueCatWebhook` (§2h) auto-downgrades a
+   business to Community when its subscription lapses. Grant-time and
+   lifecycle are both covered now.
+3. ~~**Elite Growth perma-beacon.**~~ **RESOLVED** — `checkAndExpireBeacons`
+   (§2f) now audits every `has_flash_beacon` against the tier: an Elite beacon
+   is kept as a legitimate persistent-beacon perk, while no-expiry/expired
+   beacons on tiers that don't grant one are cleared. The old query could never
+   see no-expiry docs; it now can.
 4. **Historical secret in git history.** The Gemini key formerly hardcoded in
    `lib/backend/gemini/gemini.dart` is now `--dart-define`/server-secret, but
-   remains in history — rotate if not already done.
+   remains in history — rotate if not already done. *(The only remaining item —
+   a git-history hygiene task, not a code change.)*
 
 ---
 
@@ -214,10 +242,16 @@ register button's inline Terms-of-Service consent.
 **Role model:** an explicit `role` field (`customer` | `business_owner`) is
 written at onboarding — derived from `FFAppState().signupType` in the customer
 signup, and forced to `business_owner` in `registerBusiness`. Existing users
-are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1). The
-legacy signal — a user is a business owner iff `ownedBusiness` is set — is
-still what most read sites check; migrating those to read `role` is Stage 2
-(pending). Onboarding still branches by which page the selection card pushes
+are backfilled by `firebase/scripts/backfill_user_roles.js` (Stage 1).
+Canonical role checks live in `auth_util.dart` as `currentUserIsBusinessOwner`
+/ `currentUserIsCustomer` (read the explicit `role` field). **Stage 2
+(complete):** role-*intent* checks now use these
+helpers — the owner-profile empty-state guard and the map page's hamburger
+menu, which gates its owner-only items (The Exchange, My Business / Profile,
+Power Hour Blast) on `currentUserIsBusinessOwner` (Community Feed stays visible
+to everyone). `ownedBusiness` remains for its real job — the *link* to the
+business doc (loading/updating/displaying it) and the null-guards that protect
+those derefs. Onboarding still branches by which page the selection card pushes
 (`CustomersignupPage` vs. `BusinessSetupPage`).
 
 ---
@@ -232,10 +266,11 @@ still what most read sites check; migrating those to read `role` is Stage 2
 | **Power Hour / Flash Beacon** | Time-boxed promo (`has_flash_beacon` + `flash_beacon_expires_at`); tier-capped; cron-expired. |
 | **subscription_tier** | `Community` (free), `Founding Local`, `Pro Growth`, `Elite Growth`. Gates Power Hour + AI. Server-written only. |
 | **`mutableBusinessFields()`** | Rules helper: the allowlist of business fields an owner may edit client-side. Everything else is server-controlled. |
-| **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, and AI entitlement per tier. |
+| **`tier_config`** | The single per-runtime source of truth for tier attributes: `firebase/custom_cloud_functions/tier_config.js` (server, authoritative) + `lib/services/tier_config.dart` (client, display-only mirror). Holds entitlement flags, Power Hour caps, AI entitlement, and the RevenueCat product id per tier. |
 | **`setBusinessSubscription`** | Cloud Function; the only path allowed to write tier/paywall fields. Reads flags from `tier_config.js`. |
-| **ownedBusiness** | User→business link. Legacy role signal (owner iff set); most read sites still key off this pending Stage 2. |
+| **ownedBusiness** | User→business **link** (the reference to the business doc). Used to load/update/display the business and to null-guard those derefs — this is its permanent job, not role. |
 | **role** | Explicit account role on `users`: `customer` or `business_owner`. Written at onboarding, backfilled for existing users. Rules constrain it to those two values. |
+| **`currentUserIsBusinessOwner` / `currentUserIsCustomer`** | Canonical role checks in `auth_util.dart`. Read the explicit `role` field. Use these for "what kind of account is this?"; use `ownedBusiness` only when you need the business reference. |
 | **owner_ref** | Business→user pointer; the basis of every ownership authorization check. |
 | **The Exchange** | Verified-business social feed (`exchange_posts`). |
 | **Entitlement** | Server-side "is this business allowed feature X" check (AI orchestrator, tier flags). |
@@ -258,12 +293,96 @@ still what most read sites check; migrating those to read `role` is Stage 2
   can't cross the Node/Dart boundary); a parity check confirms they match.
   RevenueCat package IDs remain in `merchant_pricing_suite_widget.dart` as a
   deliberately separate concern (product mapping, not tier policy).
-- **Role model — Stage 1 done, Stage 2 pending.** An explicit `role` field is
-  now written at onboarding and backfilled (`backfill_user_roles.js`). The read
-  sites that still infer role from `ownedBusiness` have not yet been migrated
-  to read `role` — that's Stage 2.
+- ~~**Role model — role inferred from `ownedBusiness`.**~~ **RESOLVED** — an
+  explicit `role` field is written at onboarding and backfilled
+  (`backfill_user_roles.js`); role-intent read sites now use the
+  `currentUserIsBusinessOwner` / `currentUserIsCustomer` helpers, which read
+  the explicit `role` field directly (the transitional `ownedBusiness`
+  fallback has been removed now that all users carry a role). Remaining
+  `ownedBusiness` usages are intentional data links, not role checks.
 - **Repo dead weight:** ~90 `lib/old_designs/` components, 27 `.old` files,
   `migration_data.json` (~536 KB), a ~200 KB directory CSV, and
   `flutter_01/02.log` are all committed.
 - **`app_builder_concept/` demo pages** read `agency_queue` but are not
   reachable from any route (no `pushNamed` to them) — orphaned demos.
+
+---
+
+## 7. Deployment & External Setup
+
+### Cloud Functions secrets
+
+Server secrets are set with the Firebase CLI and **bind at deploy time** — after
+setting or changing one, redeploy the functions for it to take effect.
+
+| Secret | Used by | What it is |
+|---|---|---|
+| `GEMINI_API_KEY` | `generateMarketingContent` | Gemini API key (server-side; the old client-embedded key was rotated). |
+| `REVENUECAT_API_KEY` | `setBusinessSubscription`, `revenueCatWebhook` | RevenueCat **v1 secret** REST API key (Dashboard → API keys). Used to look a subscriber up by Firebase UID. |
+| `REVENUECAT_WEBHOOK_AUTH` | `revenueCatWebhook` | Shared secret compared against the webhook's `Authorization` header. Pick a strong random value. |
+
+```bash
+firebase functions:secrets:set GEMINI_API_KEY
+firebase functions:secrets:set REVENUECAT_API_KEY
+firebase functions:secrets:set REVENUECAT_WEBHOOK_AUTH
+```
+
+### Deploy
+
+```bash
+# Functions (both codebases) + security rules together - rules and the
+# functions that back them must ship as one unit.
+firebase deploy --only functions:custom_cloud_functions,functions:functions,firestore:rules
+
+# Just the custom Cloud Functions codebase:
+firebase deploy --only functions:custom_cloud_functions
+```
+
+After deploy, the CLI prints each function's URL. The webhook's is also at
+**Firebase Console → Functions → `revenueCatWebhook` → Trigger URL**, of the form
+`https://us-central1-<project-id>.cloudfunctions.net/revenueCatWebhook`.
+
+### RevenueCat webhook (auto-downgrade)
+
+1. **Deploy** so `revenueCatWebhook` picks up its secrets, then copy its Trigger URL.
+2. RevenueCat dashboard → your project → **Integrations → Webhooks** (older UIs:
+   **Project Settings → Integrations → Webhooks**) → **Add**.
+3. **Webhook URL** → the `revenueCatWebhook` Trigger URL.
+4. **Authorization header value** → the **exact** `REVENUECAT_WEBHOOK_AUTH` value —
+   no `Bearer` prefix, no quotes, no trailing spaces (the function compares the
+   raw header string to the secret).
+5. **Environment** → Production (and Sandbox too if you want lapse events during
+   testing; the function handles both identically).
+6. Leave event filtering at the default (send all events) — the function filters
+   to loss-type events itself.
+7. **Save**, then use **Send test event**. Expected: HTTP **200** with
+   `{"ok":true,"ignored":"TEST"}`. A **401** means the Authorization value
+   doesn't match the secret; a **5xx** means it reached the function but errored.
+
+**Behavior on a real lapse:** loss-type event → look up `users/{app_user_id}` →
+their `owned_business` → re-verify the current tier's product against RevenueCat →
+if inactive, set `subscription_tier: Community` (clearing `is_premium` /
+`is_priority_pinned` / `has_flash_beacon`, stamping `subscription_updated_at` and
+`subscription_downgrade_reason`). The user's `role` stays `business_owner` and
+their `ownedBusiness` link is untouched — a lapsed owner becomes a *free* business
+owner, not a customer.
+
+### Tier configuration to verify before go-live
+
+The RevenueCat product identifiers in `tier_config.js` /
+`lib/services/tier_config.dart` (`founding_local_monthly`, `pro_growth_monthly`,
+`elite_growth_monthly`) must match the product identifiers in your RevenueCat
+dashboard. If they differ, both the grant-time check and the webhook re-verify
+will misfire. These two tier tables are manual mirrors of each other — keep them
+in sync.
+
+### One-time data scripts
+
+`firebase/scripts/` holds Admin SDK scripts (require a `serviceAccountKey.json`,
+gitignored). Both default to **dry run**; pass `--commit` to write:
+
+```bash
+cd firebase/scripts && npm install
+node backfill_user_roles.js            # dry run
+node backfill_user_roles.js --commit   # apply
+```

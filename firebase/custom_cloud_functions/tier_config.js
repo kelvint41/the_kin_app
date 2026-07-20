@@ -17,11 +17,20 @@
 //
 // powerHourWeeklyLimit: null means unlimited (skip the frequency check).
 //
-// NOTE (pre-existing parity): 'Elite Growth' has hasFlashBeacon true with no
-// expiry set at upgrade time. checkAndExpireBeacons only clears docs where
-// flash_beacon_expires_at < now, so an Elite upgrade's beacon stays on until
-// a Power Hour or downgrade overwrites it. Flip to false here if that's not
-// intended (Elite owners can still start real Power Hours).
+// revenueCatProductId: the RevenueCat/store product identifier a purchase of
+// this tier grants (matches the package ids in
+// merchant_pricing_suite_widget.dart). null for the free Community tier.
+// setBusinessSubscription verifies an active subscription to this product
+// against RevenueCat before writing a paid tier. If your RevenueCat product
+// identifiers differ from these package ids, update them here.
+//
+// 'Elite Growth' has hasFlashBeacon true: the tier grants an always-on
+// (persistent) flash beacon, with no Power Hour expiry. checkAndExpireBeacons
+// audits every beacon against this flag - so an Elite beacon is kept as
+// legitimate, while a no-expiry beacon on any tier that DOESN'T grant one is
+// cleared. Set this to false to remove Elite's persistent beacon; the next
+// scheduled audit will then clear it (Elite owners can still start real
+// Power Hours regardless).
 const TIERS = {
   "Community": {
     isPremium: false,
@@ -30,6 +39,8 @@ const TIERS = {
     powerHourDurationCapMinutes: 30,
     powerHourWeeklyLimit: 1,
     aiMarketingEntitled: false,
+    // Free tier - no purchase, so no product to verify against RevenueCat.
+    revenueCatProductId: null,
   },
   "Founding Local": {
     isPremium: true,
@@ -38,6 +49,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 45,
     powerHourWeeklyLimit: 2,
     aiMarketingEntitled: false,
+    revenueCatProductId: "founding_local_monthly",
   },
   "Pro Growth": {
     isPremium: true,
@@ -46,6 +58,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 60,
     powerHourWeeklyLimit: 3,
     aiMarketingEntitled: true,
+    revenueCatProductId: "pro_growth_monthly",
   },
   "Elite Growth": {
     isPremium: true,
@@ -54,6 +67,7 @@ const TIERS = {
     powerHourDurationCapMinutes: 90,
     powerHourWeeklyLimit: null,
     aiMarketingEntitled: true,
+    revenueCatProductId: "elite_growth_monthly",
   },
 };
 
@@ -93,10 +107,27 @@ function isAiMarketingEntitled(tier) {
   return !!(TIERS[tier] && TIERS[tier].aiMarketingEntitled);
 }
 
+// RevenueCat/store product id a paid tier requires, or null for a free tier
+// (or an unknown tier). null means "no purchase to verify".
+function revenueCatProductId(tier) {
+  return (TIERS[tier] && TIERS[tier].revenueCatProductId) || null;
+}
+
+// Whether a tier grants a PERSISTENT flash beacon (always-on, independent of
+// any Power Hour). Today only Elite Growth. checkAndExpireBeacons uses this to
+// decide whether a beacon with no active-Power-Hour expiry is legitimate for
+// the business's tier or should be cleared. Unknown tier -> false (fail safe
+// to "no persistent beacon").
+function hasPersistentBeacon(tier) {
+  return !!(TIERS[tier] && TIERS[tier].hasFlashBeacon);
+}
+
 module.exports = {
   TIERS,
   isKnownTier,
   flagsForTier,
   powerHourLimits,
   isAiMarketingEntitled,
+  revenueCatProductId,
+  hasPersistentBeacon,
 };

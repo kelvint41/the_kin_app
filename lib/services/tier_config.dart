@@ -21,6 +21,7 @@ class TierConfig {
     required this.powerHourDurationCapMinutes,
     required this.powerHourWeeklyLimit,
     required this.aiMarketingEntitled,
+    required this.revenueCatProductId,
   });
 
   final bool isPremium;
@@ -31,6 +32,12 @@ class TierConfig {
   /// Max Power Hours per rolling 7-day window. Null means unlimited.
   final int? powerHourWeeklyLimit;
   final bool aiMarketingEntitled;
+
+  /// RevenueCat/store product id a purchase of this tier grants. Null for the
+  /// free Community tier. The server (`setBusinessSubscription`) verifies an
+  /// active purchase of this product before writing a paid tier; kept here so
+  /// the two tier tables stay a faithful mirror.
+  final String? revenueCatProductId;
 }
 
 /// The four real tiers. Keep in sync with `TIERS` in tier_config.js.
@@ -42,6 +49,7 @@ const kTierConfigs = <String, TierConfig>{
     powerHourDurationCapMinutes: 30,
     powerHourWeeklyLimit: 1,
     aiMarketingEntitled: false,
+    revenueCatProductId: null,
   ),
   'Founding Local': TierConfig(
     isPremium: true,
@@ -50,6 +58,7 @@ const kTierConfigs = <String, TierConfig>{
     powerHourDurationCapMinutes: 45,
     powerHourWeeklyLimit: 2,
     aiMarketingEntitled: false,
+    revenueCatProductId: 'founding_local_monthly',
   ),
   'Pro Growth': TierConfig(
     isPremium: true,
@@ -58,6 +67,7 @@ const kTierConfigs = <String, TierConfig>{
     powerHourDurationCapMinutes: 60,
     powerHourWeeklyLimit: 3,
     aiMarketingEntitled: true,
+    revenueCatProductId: 'pro_growth_monthly',
   ),
   'Elite Growth': TierConfig(
     isPremium: true,
@@ -66,6 +76,7 @@ const kTierConfigs = <String, TierConfig>{
     powerHourDurationCapMinutes: 90,
     powerHourWeeklyLimit: null,
     aiMarketingEntitled: true,
+    revenueCatProductId: 'elite_growth_monthly',
   ),
 };
 
