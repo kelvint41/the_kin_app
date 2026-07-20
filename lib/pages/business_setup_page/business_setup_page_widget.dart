@@ -918,7 +918,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                           ),
                                     ),
                                     Text(
-                                      'Search with Google Maps...',
+                                      _model.placePickerValue.address.isNotEmpty
+                                          ? _model.placePickerValue.address
+                                          : 'Search with Google Maps...',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -1187,6 +1189,22 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
+                        // Require the essentials before creating the record so
+                        // a business is never registered with a blank name or
+                        // no address/city.
+                        final enteredName =
+                            _model.businessNameTextController?.text.trim() ?? '';
+                        if (enteredName.isEmpty ||
+                            _model.placePickerValue.address.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Please enter a business name and select your location.'),
+                            ),
+                          );
+                          return;
+                        }
+
                         final result = await KinServices.registerBusiness(
                           category: _model.dropdownValue,
                           businessType: _model.businessType,
@@ -1207,9 +1225,11 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                           return;
                         }
 
-                        context.pushNamed(OwnerProfileWidget.routeName);
-
-                        safeSetState(() {});
+                        // Replace (not push) so the completed setup form is
+                        // dropped from the back stack - a freshly registered
+                        // owner lands on their dashboard and can't navigate
+                        // back into the form to re-submit.
+                        context.goNamed(OwnerProfileWidget.routeName);
                       },
                       text: 'Register Now',
                       options: FFButtonOptions(
