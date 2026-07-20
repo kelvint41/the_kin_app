@@ -27,6 +27,8 @@ import 'schema/reviews_record.dart';
 import 'schema/user_engagement_events_record.dart';
 import 'schema/kindex_scores_record.dart';
 import 'schema/signup_feed_record.dart';
+import 'schema/marketing_campaigns_record.dart';
+import 'schema/referrals_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -56,6 +58,8 @@ export 'schema/reviews_record.dart';
 export 'schema/user_engagement_events_record.dart';
 export 'schema/kindex_scores_record.dart';
 export 'schema/signup_feed_record.dart';
+export 'schema/marketing_campaigns_record.dart';
+export 'schema/referrals_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -274,6 +278,80 @@ Future<List<MarketingRequestsRecord>> queryMarketingRequestsRecordOnce({
     queryCollectionOnce(
       MarketingRequestsRecord.collection,
       MarketingRequestsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query MarketingCampaignsRecords (as a Stream and as a Future).
+Future<int> queryMarketingCampaignsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      MarketingCampaignsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<MarketingCampaignsRecord>> queryMarketingCampaignsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      MarketingCampaignsRecord.collection,
+      MarketingCampaignsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<MarketingCampaignsRecord>> queryMarketingCampaignsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      MarketingCampaignsRecord.collection,
+      MarketingCampaignsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query ReferralsRecords (as a Stream and as a Future).
+Future<int> queryReferralsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      ReferralsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<ReferralsRecord>> queryReferralsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      ReferralsRecord.collection,
+      ReferralsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<ReferralsRecord>> queryReferralsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      ReferralsRecord.collection,
+      ReferralsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

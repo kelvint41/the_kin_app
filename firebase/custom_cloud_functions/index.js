@@ -10,3 +10,10 @@ exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
 const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
 exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
 exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;
+
+const marketingEngine = require("./marketing_engine.js");
+exports.getOrCreateReferralCode = marketingEngine.getOrCreateReferralCode;
+exports.redeemReferralCode = marketingEngine.redeemReferralCode;
+exports.processReferral = marketingEngine.processReferral;
+exports.logCampaignEvent = marketingEngine.logCampaignEvent;
+exports.expireCampaigns = marketingEngine.expireCampaigns;

@@ -589,4 +589,152 @@ class KinServices {
       // Best-effort - see doc comment above.
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // Marketing / referrals (marketing_engine.js)
+  // ---------------------------------------------------------------------------
+
+  /// Creates a `marketing_campaigns` doc owned by the current user, returning
+  /// its [DocumentReference]. Server-maintained metric counters are seeded to
+  /// zero here so the Firestore rules (which pin them on owner edits) and the
+  /// dashboard bindings both have real values to read from day one.
+  ///
+  /// [targetRegions] are the markets the campaign runs in (e.g.
+  /// `['San Antonio, TX', 'Houston, TX']`); [referralRewardTier] /
+  /// [referralRewardDays] optionally grant an entitlement to each successful
+  /// referrer on top of the Kindex points the referral already earns.
+  /// Used by: the campaign builder page.
+  static Future<ServiceResult<DocumentReference>> createReferralCampaign({
+    required String title,
+    required String description,
+    required List<String> targetRegions,
+    required DateTime startDate,
+    required DateTime endDate,
+    DocumentReference? businessRef,
+    String type = 'referral',
+    String? referralRewardTier,
+    int referralRewardDays = 0,
+    int maxReferralsPerUser = 0,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const ServiceResult.failure('Please sign in to create a campaign.');
+    }
+    if (title.trim().isEmpty) {
+      return const ServiceResult.failure('Give your campaign a title.');
+    }
+    if (!endDate.isAfter(startDate)) {
+      return const ServiceResult.failure('End date must be after the start date.');
+    }
+    try {
+      final data = createMarketingCampaignsRecordData(
+        title: title.trim(),
+        description: description.trim(),
+        ownerRef: userRef,
+        businessRef: businessRef,
+        type: type,
+        status: 'active',
+        defaultRegion: targetRegions.isNotEmpty ? targetRegions.first : null,
+        startDate: startDate,
+        endDate: endDate,
+        referralRewardTier:
+            (referralRewardTier?.trim().isEmpty ?? true) ? null : referralRewardTier!.trim(),
+        referralRewardDays: referralRewardDays,
+        maxReferralsPerUser: maxReferralsPerUser,
+        createdAt: getCurrentTimestamp,
+        updatedAt: getCurrentTimestamp,
+      );
+      final ref = MarketingCampaignsRecord.collection.doc();
+      await ref.set({
+        ...data,
+        // Array + server-maintained counters aren't part of the generated
+        // create helper's params, so seed them explicitly.
+        'target_regions': targetRegions,
+        'referral_count': 0,
+        'qualified_referral_count': 0,
+        'reward_granted_count': 0,
+        'impression_count': 0,
+        'click_count': 0,
+      });
+      return ServiceResult.success(ref);
+    } catch (_) {
+      return const ServiceResult.failure('Could not create the campaign. Please try again.');
+    }
+  }
+
+  /// Returns the current user's personal, shareable referral code for
+  /// [campaignRef], minting one server-side if they don't have it yet. The
+  /// code is what powers the invite copy in the share sheet.
+  /// Used by: the "Invite friends" / referral share button.
+  static Future<ServiceResult<String>> getOrCreateReferralCode({
+    required DocumentReference campaignRef,
+  }) async {
+    if (currentUserReference == null) {
+      return const ServiceResult.failure('Please sign in to get your invite code.');
+    }
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('getOrCreateReferralCode')
+          .call<Map<String, dynamic>>({'campaignRefPath': campaignRef.path});
+      return ServiceResult.success(result.data['code'] as String);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not create an invite code.');
+    } catch (_) {
+      return const ServiceResult.failure('Could not create an invite code.');
+    }
+  }
+
+  /// Redeems a referral [code] for the signed-in (usually just-signed-up) user.
+  /// The referrer is resolved server-side from the code, so the client can't
+  /// forge it. [region] tags the redemption for per-market analytics.
+  /// Used by: the post-signup "Have an invite code?" prompt.
+  static Future<ServiceResult<void>> redeemReferralCode({
+    required String code,
+    String? region,
+  }) async {
+    if (currentUserReference == null) {
+      return const ServiceResult.failure('Please sign in first.');
+    }
+    if (code.trim().isEmpty) {
+      return const ServiceResult.failure('Enter a referral code.');
+    }
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('redeemReferralCode')
+          .call<Map<String, dynamic>>({
+        'code': code.trim(),
+        if (region != null && region.isNotEmpty) 'region': region,
+      });
+      return const ServiceResult.success();
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not redeem that code.');
+    } catch (_) {
+      return const ServiceResult.failure('Could not redeem that code.');
+    }
+  }
+
+  /// Records an impression or click on a campaign for per-region analytics.
+  /// Best-effort: a logging failure never blocks the UI. Pass [count] to batch
+  /// several impressions into one call at high volume.
+  /// Used by: promo banner widgets (log 'impression' on view, 'click' on tap).
+  static Future<void> logCampaignEvent({
+    required DocumentReference campaignRef,
+    required String eventType,
+    String? region,
+    int count = 1,
+  }) async {
+    if (currentUserReference == null) return;
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable('logCampaignEvent')
+          .call<Map<String, dynamic>>({
+        'campaignRefPath': campaignRef.path,
+        'eventType': eventType,
+        if (region != null && region.isNotEmpty) 'region': region,
+        'count': count,
+      });
+    } catch (_) {
+      // Best-effort analytics - swallow failures.
+    }
+  }
 }

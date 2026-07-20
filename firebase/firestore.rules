@@ -196,5 +196,62 @@ service cloud.firestore {
         allow read, write: if false;
       }
     }
+
+    // Marketing campaigns. Publicly readable so the app can show active
+    // promos to everyone. A campaign is created by (and owned by) the signed-in
+    // user who runs it; only that owner can edit it. Server-maintained metric
+    // counters (referral_count, impression_count, ...) are written by
+    // marketing_engine.js via the Admin SDK, which bypasses these rules - the
+    // owner's own updates must not touch them, so they are pinned to their
+    // current values on client writes.
+    match /marketing_campaigns/{document} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if request.auth != null
+        && resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.owner_ref == resource.data.owner_ref
+        && request.resource.data.referral_count == resource.data.referral_count
+        && request.resource.data.qualified_referral_count == resource.data.qualified_referral_count
+        && request.resource.data.reward_granted_count == resource.data.reward_granted_count
+        && request.resource.data.impression_count == resource.data.impression_count
+        && request.resource.data.click_count == resource.data.click_count;
+      allow delete: if false;
+    }
+
+    // Referral codes. Doc id IS the code, so a create against a taken code is a
+    // Firestore create-collision (blocked) - the same atomic-uniqueness trick
+    // ticker_registry uses. In practice these are minted by
+    // getOrCreateReferralCode (Admin SDK); the client rule below is a safe
+    // fallback that still forbids claiming a code on someone else's behalf.
+    match /referral_codes/{code} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Referrals are created ONLY server-side by redeemReferralCode (Admin SDK)
+    // so the client can never forge who referred them. The two parties may read
+    // their own referral rows; nobody writes them from the client.
+    match /referrals/{document} {
+      allow create: if false;
+      allow read: if request.auth != null
+        && (resource.data.referrer_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+          || resource.data.referee_ref == /databases/$(database)/documents/users/$(request.auth.uid));
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    // Per-campaign, per-region daily analytics rollup. Written server-side
+    // (Admin SDK) via FieldValue.increment; publicly readable for dashboards.
+    // Mirrors the existing analytics_daily posture.
+    match /campaign_analytics_daily/{document} {
+      allow read: if true;
+      allow create: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
   }
 }
