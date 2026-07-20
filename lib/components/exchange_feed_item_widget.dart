@@ -22,13 +22,13 @@ class ExchangeFeedItemWidget extends StatefulWidget {
   const ExchangeFeedItemWidget({
     super.key,
     required this.postRecord,
-    required this.businessRef,
+    this.businessRef,
     this.authorDisplayName,
     this.authorPhotoUrl,
   });
 
   final ExchangePostsRecord postRecord;
-  final DocumentReference businessRef;
+  final DocumentReference? businessRef;
   final String? authorDisplayName;
   final String? authorPhotoUrl;
 

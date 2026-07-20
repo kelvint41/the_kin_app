@@ -152,10 +152,20 @@ service cloud.firestore {
     }
 
     match /exchange_posts/{document} {
+      // The Exchange is a community-wide feed: any signed-in user may post,
+      // attributed to themselves (user_ref == the caller). A post MAY also be
+      // attributed to a business, but only by that business's verified owner -
+      // so business_ref, when present, is authenticated exactly as before.
+      // Community posts (customers, unverified owners) simply omit business_ref.
       allow create: if request.auth != null
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.is_verified == true;
+        && (
+          !('business_ref' in request.resource.data)
+          || (
+            get(request.resource.data.business_ref).data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+            && get(request.resource.data.business_ref).data.is_verified == true
+          )
+        );
       allow read: if true;
       allow write: if false;
       allow delete: if false;

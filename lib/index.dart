@@ -52,3 +52,4 @@ export '/business_showcase/business_showcase_widget.dart'
     show BusinessShowcaseWidget;
 export '/mobile_called_power_page/mobile_called_power_page_widget.dart'
     show MobileCalledPowerPageWidget;
+export '/pages/story_detail/story_detail_widget.dart' show StoryDetailWidget;

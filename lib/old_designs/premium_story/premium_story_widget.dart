@@ -14,10 +14,15 @@ class PremiumStoryWidget extends StatefulWidget {
     super.key,
     this.img_desc,
     this.label,
+    this.onTap,
   });
 
   final String? img_desc;
   final String? label;
+
+  /// Optional tap handler. When provided (e.g. to navigate to a story
+  /// detail page) it takes precedence over the default image viewer.
+  final VoidCallback? onTap;
 
   @override
   State<PremiumStoryWidget> createState() => _PremiumStoryWidgetState();
@@ -83,7 +88,7 @@ class _PremiumStoryWidgetState extends State<PremiumStoryWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: _openImageViewer,
+      onTap: widget.onTap ?? _openImageViewer,
       child: Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
