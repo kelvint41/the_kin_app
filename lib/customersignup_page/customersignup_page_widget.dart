@@ -558,9 +558,8 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                                   : 'customer',
                             ));
 
-                        context.pushNamedAuth(
-                            CustomerProfilePageWidget.routeName,
-                            context.mounted);
+                        context.goNamedAuth(
+                            GoogleMapPageWidget.routeName, context.mounted);
                       },
                       text: 'Join Community',
                       options: FFButtonOptions(

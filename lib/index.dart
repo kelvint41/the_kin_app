@@ -46,8 +46,6 @@ export '/clean_premium_dark_page/clean_premium_dark_page_widget.dart'
     show CleanPremiumDarkPageWidget;
 export '/customersignup_page/customersignup_page_widget.dart'
     show CustomersignupPageWidget;
-export '/mobile_sign_up_page/mobile_sign_up_page_widget.dart'
-    show MobileSignUpPageWidget;
 export '/business_showcase/business_showcase_widget.dart'
     show BusinessShowcaseWidget;
 export '/mobile_called_power_page/mobile_called_power_page_widget.dart'

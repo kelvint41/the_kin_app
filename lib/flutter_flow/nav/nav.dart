@@ -277,11 +277,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => CustomersignupPageWidget(),
         ),
         FFRoute(
-          name: MobileSignUpPageWidget.routeName,
-          path: MobileSignUpPageWidget.routePath,
-          builder: (context, params) => MobileSignUpPageWidget(),
-        ),
-        FFRoute(
           name: BusinessShowcaseWidget.routeName,
           path: BusinessShowcaseWidget.routePath,
           asyncParams: {
