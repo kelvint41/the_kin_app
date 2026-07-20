@@ -152,6 +152,21 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
         List<ActivityLogsRecord> executiveDashboardActivityLogsRecordList =
             snapshot.data!;
 
+        // Directory Reach aggregates, derived from the city-scoped activity
+        // telemetry: a 'page_view' event is a directory impression, a
+        // 'map_tap' event is a click-through to a business. Computed in
+        // memory from the already-loaded stream so no extra query (or
+        // composite index) is needed.
+        final impressionsCount = executiveDashboardActivityLogsRecordList
+            .where((log) => log.eventType == 'page_view')
+            .length;
+        final clickThroughCount = executiveDashboardActivityLogsRecordList
+            .where((log) => log.eventType == 'map_tap')
+            .length;
+        final clickThroughRate = impressionsCount == 0
+            ? 0.0
+            : (clickThroughCount / impressionsCount) * 100.0;
+
         return GestureDetector(
           onTap: () {
             FocusScope.of(context).unfocus();
@@ -277,7 +292,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                'System Overview',
+                                'Directory Reach',
                                 style: FlutterFlowTheme.of(context)
                                     .titleMedium
                                     .override(
@@ -303,44 +318,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     FutureBuilder<int>(
-                                      // The `users` collection can only ever
-                                      // be read one document at a time (rule
-                                      // is auth.uid == document), so an
-                                      // unscoped count against it is always
-                                      // rejected. signup_feed is the
-                                      // admin-readable aggregate instead.
-                                      future: querySignupFeedRecordCount(),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: SizedBox(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              child: CircularProgressIndicator(
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        final kpiCardCount = snapshot.data!;
-
-                                        return wrapWithModel(
-                                          model: _model.kpiCardModel1,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: KpiCardWidget(
-                                            value: kpiCardCount.toString(),
-                                            label: 'Total Users',
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                    FutureBuilder<int>(
+                                      // Total registered merchants in the
+                                      // selected city.
                                       future: queryBusinessesRecordCount(
                                         queryBuilder: (businessesRecord) =>
                                             businessesRecord.where(
@@ -368,101 +347,49 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                         final kpiCardCount = snapshot.data!;
 
                                         return wrapWithModel(
-                                          model: _model.kpiCardModel2,
+                                          model: _model.kpiCardModel1,
                                           updateCallback: () =>
                                               safeSetState(() {}),
                                           child: KpiCardWidget(
-                                            value: kpiCardCount.toString(),
-                                            label: 'Businesses Listed',
+                                            value: formatNumber(
+                                              kpiCardCount,
+                                              formatType: FormatType.compact,
+                                            ),
+                                            label: 'Registered Merchants',
                                           ),
                                         );
                                       },
                                     ),
-                                    FutureBuilder<int>(
-                                      future: queryBusinessesRecordCount(
-                                        queryBuilder: (businessesRecord) =>
-                                            businessesRecord
-                                                .where(
-                                                  'city',
-                                                  isEqualTo: selectedCity,
-                                                )
-                                                .where(
-                                                  'is_black_owned',
-                                                  isEqualTo: true,
-                                                ),
+                                    wrapWithModel(
+                                      model: _model.kpiCardModel2,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: KpiCardWidget(
+                                        value: formatNumber(
+                                          impressionsCount,
+                                          formatType: FormatType.compact,
+                                        ),
+                                        label: 'Impressions',
                                       ),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: SizedBox(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              child: CircularProgressIndicator(
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        final kpiCardCount = snapshot.data!;
-
-                                        return wrapWithModel(
-                                          model: _model.kpiCardModel3,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: KpiCardWidget(
-                                            value: kpiCardCount.toString(),
-                                            label: 'Black-Owned',
-                                          ),
-                                        );
-                                      },
                                     ),
-                                    FutureBuilder<int>(
-                                      future: queryBusinessesRecordCount(
-                                        queryBuilder: (businessesRecord) =>
-                                            businessesRecord
-                                                .where(
-                                                  'city',
-                                                  isEqualTo: selectedCity,
-                                                )
-                                                .where(
-                                                  'is_premium',
-                                                  isEqualTo: true,
-                                                ),
+                                    wrapWithModel(
+                                      model: _model.kpiCardModel3,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: KpiCardWidget(
+                                        value: formatNumber(
+                                          clickThroughCount,
+                                          formatType: FormatType.compact,
+                                        ),
+                                        label: 'Click-Throughs',
                                       ),
-                                      builder: (context, snapshot) {
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: SizedBox(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              child: CircularProgressIndicator(
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                        final kpiCardCount = snapshot.data!;
-
-                                        return wrapWithModel(
-                                          model: _model.kpiCardModel4,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: KpiCardWidget(
-                                            value: kpiCardCount.toString(),
-                                            label: 'Premium Tier',
-                                          ),
-                                        );
-                                      },
+                                    ),
+                                    wrapWithModel(
+                                      model: _model.kpiCardModel4,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: KpiCardWidget(
+                                        value:
+                                            '${clickThroughRate.toStringAsFixed(1)}%',
+                                        label: 'Click-Through Rate',
+                                      ),
                                     ),
                                   ].divide(SizedBox(width: 16.0)),
                                 ),
@@ -515,13 +442,45 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                       child: Container(
                                         height: 200.0,
                                         child: Builder(builder: (context) {
+                                          // Group activity into the last 7
+                                          // calendar days ending today. Bucket
+                                          // index 6 is today, 0 is 6 days ago;
+                                          // events older than 7 days (or in the
+                                          // future) are ignored.
+                                          const weekdayAbbr = [
+                                            'Mon',
+                                            'Tue',
+                                            'Wed',
+                                            'Thu',
+                                            'Fri',
+                                            'Sat',
+                                            'Sun'
+                                          ];
+                                          final now = DateTime.now();
+                                          final today = DateTime(
+                                              now.year, now.month, now.day);
+                                          final dayStarts =
+                                              List<DateTime>.generate(
+                                                  7,
+                                                  (i) => today.subtract(
+                                                      Duration(days: 6 - i)));
+                                          final dailyLabels = dayStarts
+                                              .map((d) =>
+                                                  weekdayAbbr[d.weekday - 1])
+                                              .toList();
                                           final dailyCounts =
                                               List<int>.filled(7, 0);
                                           for (final log
                                               in executiveDashboardActivityLogsRecordList) {
                                             final ts = log.timestamp;
                                             if (ts == null) continue;
-                                            dailyCounts[ts.weekday - 1]++;
+                                            final logDay = DateTime(
+                                                ts.year, ts.month, ts.day);
+                                            final diff = today
+                                                .difference(logDay)
+                                                .inDays;
+                                            if (diff < 0 || diff > 6) continue;
+                                            dailyCounts[6 - diff]++;
                                           }
                                           final maxCount = dailyCounts
                                               .reduce((a, b) => a > b ? a : b);
@@ -552,15 +511,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                               maxX: 6.0,
                                               maxY: (maxCount + 1).toDouble(),
                                             ),
-                                            xLabels: ([
-                                              'Mon',
-                                              'Tue',
-                                              'Wed',
-                                              'Thu',
-                                              'Fri',
-                                              'Sat',
-                                              'Sun'
-                                            ])!,
+                                            xLabels: dailyLabels,
                                             xAxisLabelInfo: AxisLabelInfo(
                                               showLabels: true,
                                               labelTextStyle:
@@ -869,7 +820,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Text(
-                                'Top Explored Businesses',
+                                'Prestige & Standing',
                                 style: FlutterFlowTheme.of(context)
                                     .titleMedium
                                     .override(
@@ -895,7 +846,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                             'city',
                                             isEqualTo: selectedCity,
                                           )
-                                          .orderBy('interaction_count',
+                                          .orderBy('kindex_score',
                                               descending: true),
                                   limit: 5,
                                 ),
@@ -943,9 +894,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                         category:
                                             listViewBusinessesRecord.category,
                                         views: formatNumber(
-                                          listViewBusinessesRecord
-                                              .interactionCount,
-                                          formatType: FormatType.compact,
+                                          listViewBusinessesRecord.kindexScore,
+                                          formatType: FormatType.decimal,
+                                          decimalType:
+                                              DecimalType.automatic,
                                         ),
                                       );
                                     },
