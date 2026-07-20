@@ -240,6 +240,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => ExecutiveDashboardWidget(),
         ),
         FFRoute(
+          name: CampaignDashboardWidget.routeName,
+          path: CampaignDashboardWidget.routePath,
+          builder: (context, params) => CampaignDashboardWidget(),
+        ),
+        FFRoute(
           name: CustomerProfilePageWidget.routeName,
           path: CustomerProfilePageWidget.routePath,
           builder: (context, params) => CustomerProfilePageWidget(

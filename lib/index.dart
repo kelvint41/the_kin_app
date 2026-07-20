@@ -36,6 +36,8 @@ export '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart'
     show KinBottomNav2Widget;
 export '/pages/executive_dashboard/executive_dashboard_widget.dart'
     show ExecutiveDashboardWidget;
+export '/pages/campaign_dashboard/campaign_dashboard_widget.dart'
+    show CampaignDashboardWidget;
 export '/pages/customer_profile_page/customer_profile_page_widget.dart'
     show CustomerProfilePageWidget;
 export '/pages/owner_profile/owner_profile_widget.dart' show OwnerProfileWidget;

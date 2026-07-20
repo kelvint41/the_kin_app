@@ -82,6 +82,14 @@
       "collectionGroup": "marketing_campaigns",
       "queryScope": "COLLECTION",
       "fields": [
+        { "fieldPath": "owner_ref", "order": "ASCENDING" },
+        { "fieldPath": "created_at", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "marketing_campaigns",
+      "queryScope": "COLLECTION",
+      "fields": [
         { "fieldPath": "target_regions", "arrayConfig": "CONTAINS" },
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "start_date", "order": "DESCENDING" }

@@ -175,6 +175,22 @@ For **FlutterFlow Custom Actions**, wrap any of the above in a
 header as `calculate_real_time_kindex.dart`) and call the `KinServices` method
 inside — FlutterFlow will surface it as a bindable action.
 
+### Prebuilt UI (already wired)
+- **`CampaignDashboardWidget`** (`lib/pages/campaign_dashboard/`) — owner-facing
+  dashboard. Streams the signed-in owner's campaigns and renders the live
+  server-maintained counters (redemptions, qualified, rewarded, conversion %,
+  impressions, clicks) plus an embedded share card per active referral
+  campaign. Registered as route `CampaignDashboard` (`/campaignDashboard`);
+  reach it with `context.pushNamed(CampaignDashboardWidget.routeName)`. An entry
+  button is wired into **Owner Profile** under the Power Hour section.
+- **`ReferralShareWidget`** (`lib/components/referral_share_widget.dart`) —
+  drop-in "invite friends" card. Fetches/mints the user's code via
+  `getOrCreateReferralCode`, offers Copy + Share (Share reuses
+  `KinServices.shareApp`). Use anywhere:
+  ```dart
+  ReferralShareWidget(campaignRef: campaignRef, campaignTitle: 'Share this campaign')
+  ```
+
 ---
 
 ## 4. Copy & template library
