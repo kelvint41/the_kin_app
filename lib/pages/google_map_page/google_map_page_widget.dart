@@ -134,8 +134,10 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     ),
                   ),
                   // Owner-only items are shown only to business owners (by
-                  // role). Community Feed below stays visible to everyone.
-                  if (currentUserIsBusinessOwner)
+                  // role). Community features (The Exchange, Community Feed)
+                  // are hidden for the V1 release via the feature flag.
+                  if (FFAppConstants.communityFeaturesEnabled &&
+                      currentUserIsBusinessOwner)
                     ListTile(
                       leading:
                           Icon(Icons.forum_outlined, color: theme.primaryText),
@@ -174,15 +176,16 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                         context.pushNamed(OwnerProfileWidget.routeName);
                       },
                     ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.groups_rounded, color: theme.primaryText),
-                    title: Text('Community Feed', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(CommunityPrestigeWidget.routeName);
-                    },
-                  ),
+                  if (FFAppConstants.communityFeaturesEnabled)
+                    ListTile(
+                      leading:
+                          Icon(Icons.groups_rounded, color: theme.primaryText),
+                      title: Text('Community Feed', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(CommunityPrestigeWidget.routeName);
+                      },
+                    ),
                   if (currentUserIsBusinessOwner)
                     ListTile(
                       leading:
@@ -1019,7 +1022,11 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       ),
                                     ),
                                   ),
-                                  FlutterFlowIconButton(
+                                  // This "explore" arrow opens The Exchange, so
+                                  // it is hidden with the other community
+                                  // features for the V1 release.
+                                  if (FFAppConstants.communityFeaturesEnabled)
+                                    FlutterFlowIconButton(
                                     borderRadius: 8.0,
                                     buttonSize: 40.0,
                                     fillColor:

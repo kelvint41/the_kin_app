@@ -531,7 +531,8 @@ class _BusinessProfileOwnerWidgetState
                                 ),
                               ),
                             ),
-                            Expanded(
+                            if (FFAppConstants.communityFeaturesEnabled)
+                              Expanded(
                               child: FFButtonWidget(
                                 onPressed: () async {
                                   context.pushNamed(

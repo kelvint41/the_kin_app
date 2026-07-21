@@ -483,7 +483,8 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             ),
-                            Expanded(
+                            if (FFAppConstants.communityFeaturesEnabled)
+                              Expanded(
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 0.0, 8.0, 0.0),
