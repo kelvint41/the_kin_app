@@ -21,6 +21,15 @@ import 'package:provider/provider.dart';
 import 'business_setup_page_model.dart';
 export 'business_setup_page_model.dart';
 
+// Supply via --dart-define=GOOGLE_MAPS_API_KEY=... at build time. The key that
+// used to be hardcoded here (for the place picker's Places Autocomplete/Details
+// calls) was committed to source and must be treated as compromised — restrict
+// it in Google Cloud Console (Places API, referrer/bundle/package) and rotate
+// if warranted. Note: this only removes the Dart copy; the native Maps SDK keys
+// in android/app/src/main/AndroidManifest.xml and ios/Runner/AppDelegate.swift
+// are still embedded there and must be handled separately.
+const _kGoogleMapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+
 /// Create a clean, professional, dark-mode multi-step business onboarding
 /// form page called "Biz Setup Page" for The Kin App.
 ///
@@ -825,12 +834,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                 child: Align(
                                   alignment: AlignmentDirectional(-0.04, 0.28),
                                   child: FlutterFlowPlacePicker(
-                                    iOSGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    androidGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    webGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
+                                    iOSGoogleMapsApiKey: _kGoogleMapsApiKey,
+                                    androidGoogleMapsApiKey: _kGoogleMapsApiKey,
+                                    webGoogleMapsApiKey: _kGoogleMapsApiKey,
                                     onSelect: (place) async {
                                       safeSetState(() =>
                                           _model.placePickerValue = place);
