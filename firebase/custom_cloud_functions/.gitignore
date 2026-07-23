@@ -1,1 +1,14 @@
+# Node dependencies
 node_modules/
+
+# Firebase local files and cache
+.firebase/
+hosting.*.cache
+firebase-debug.log
+
+# Build/System artifacts
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.build/
+.DS_Store

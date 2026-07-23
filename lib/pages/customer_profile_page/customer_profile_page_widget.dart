@@ -102,6 +102,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        bottomNavigationBar: KinBottomNav2Widget(activeTab: 'profile'),
         body: SingleChildScrollView(
           primary: false,
           child: Column(
@@ -200,7 +201,8 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             ),
                           ),
                         ),
-                        Expanded(
+                        if (FFAppConstants.communityFeaturesEnabled)
+                          Expanded(
                           flex: 1,
                           child: InkWell(
                             splashColor: Colors.transparent,
@@ -232,7 +234,8 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             ),
                           ),
                         ),
-                        Expanded(
+                        if (FFAppConstants.communityFeaturesEnabled)
+                          Expanded(
                           flex: 1,
                           child: InkWell(
                             splashColor: Colors.transparent,

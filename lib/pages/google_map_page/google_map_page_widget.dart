@@ -32,10 +32,10 @@ export 'google_map_page_model.dart';
 /// for Black-owned)
 /// - Top-right corner: Menu IconButton (three dots or hamburger) that opens a
 /// Bottom Sheet with navigation options:
-///   - The Exchange
-///   - My Business / Profile
-///   - Community Feed
-///   - Power Hour Blast
+///   - The Exchange          (owner-only, gated on currentUserIsBusinessOwner)
+///   - My Business / Profile  (owner-only)
+///   - Community Feed         (everyone)
+///   - Power Hour Blast       (owner-only)
 ///
 /// Bottom Navigation Bar with 4 items:
 ///   - Discover (this page, active)
@@ -133,60 +133,70 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                       borderRadius: BorderRadius.circular(2.0),
                     ),
                   ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.forum_outlined, color: theme.primaryText),
-                    title: Text('The Exchange', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      final businessRef = currentUserDocument?.ownedBusiness;
-                      if (businessRef == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Set up your business to access The Exchange.'),
-                          ),
+                  // Owner-only items are shown only to business owners (by
+                  // role). Community features (The Exchange, Community Feed)
+                  // are hidden for the V1 release via the feature flag.
+                  if (FFAppConstants.communityFeaturesEnabled &&
+                      currentUserIsBusinessOwner)
+                    ListTile(
+                      leading:
+                          Icon(Icons.forum_outlined, color: theme.primaryText),
+                      title: Text('The Exchange', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        final businessRef = currentUserDocument?.ownedBusiness;
+                        if (businessRef == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Set up your business to access The Exchange.'),
+                            ),
+                          );
+                          return;
+                        }
+                        context.pushNamed(
+                          TheExchangeWidget.routeName,
+                          queryParameters: {
+                            'businessRef': serializeParam(
+                              businessRef,
+                              ParamType.DocumentReference,
+                            ),
+                          }.withoutNulls,
                         );
-                        return;
-                      }
-                      context.pushNamed(
-                        TheExchangeWidget.routeName,
-                        queryParameters: {
-                          'businessRef': serializeParam(
-                            businessRef,
-                            ParamType.DocumentReference,
-                          ),
-                        }.withoutNulls,
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.storefront_rounded,
-                        color: theme.primaryText),
-                    title:
-                        Text('My Business / Profile', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(OwnerProfileWidget.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.groups_rounded, color: theme.primaryText),
-                    title: Text('Community Feed', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(CommunityPrestigeWidget.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.bolt_rounded, color: theme.primaryText),
-                    title: Text('Power Hour Blast', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(MobileCalledPowerPageWidget.routeName);
-                    },
-                  ),
+                      },
+                    ),
+                  if (currentUserIsBusinessOwner)
+                    ListTile(
+                      leading: Icon(Icons.storefront_rounded,
+                          color: theme.primaryText),
+                      title:
+                          Text('My Business / Profile', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(OwnerProfileWidget.routeName);
+                      },
+                    ),
+                  if (FFAppConstants.communityFeaturesEnabled)
+                    ListTile(
+                      leading:
+                          Icon(Icons.groups_rounded, color: theme.primaryText),
+                      title: Text('Community Feed', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(CommunityPrestigeWidget.routeName);
+                      },
+                    ),
+                  if (currentUserIsBusinessOwner)
+                    ListTile(
+                      leading:
+                          Icon(Icons.bolt_rounded, color: theme.primaryText),
+                      title: Text('Power Hour Blast', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context
+                            .pushNamed(MobileCalledPowerPageWidget.routeName);
+                      },
+                    ),
                 ],
               ),
             ),
@@ -1012,7 +1022,11 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       ),
                                     ),
                                   ),
-                                  FlutterFlowIconButton(
+                                  // This "explore" arrow opens The Exchange, so
+                                  // it is hidden with the other community
+                                  // features for the V1 release.
+                                  if (FFAppConstants.communityFeaturesEnabled)
+                                    FlutterFlowIconButton(
                                     borderRadius: 8.0,
                                     buttonSize: 40.0,
                                     fillColor:

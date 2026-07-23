@@ -8,15 +8,15 @@ const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 // Set via: firebase functions:secrets:set GEMINI_API_KEY
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-// Tiers that qualify for AI Marketing Orchestrator access. Real
-// subscription_tier values as written by merchant_pricing_suite_widget.dart's
-// upgrade flow (see kin_services.dart's _powerHourLimitsByTier for the same
-// convention) - not a generic "Premium" string, since no tier is actually
-// named that in this app.
-const ENTITLED_TIERS = new Set(["Pro Growth", "Elite Growth"]);
+// Which tiers qualify for AI Marketing Orchestrator access is defined in
+// the shared tier_config table (aiMarketingEntitled), the single source of
+// truth for all per-tier server decisions. Today that's Pro Growth and
+// Elite Growth - there's no generic "Premium" string, since no tier is
+// actually named that in this app.
+const { isAiMarketingEntitled } = require("./tier_config.js");
 
 function isEntitled(subscriptionTier) {
-  return ENTITLED_TIERS.has(subscriptionTier);
+  return isAiMarketingEntitled(subscriptionTier);
 }
 
 const RESPONSE_SCHEMA = {

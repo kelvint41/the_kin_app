@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
+import '/services/tier_config.dart';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -62,51 +63,6 @@ class MarketingContent {
   final String generationLogId;
 }
 
-/// Power Hour caps for one subscription tier. See
-/// [KinServices.startPowerHour].
-class _PowerHourLimits {
-  const _PowerHourLimits({required this.durationCapMinutes, this.weeklyLimit});
-
-  final int durationCapMinutes;
-
-  /// Max Power Hours per rolling 7-day window. Null means unlimited -
-  /// skip the frequency check entirely.
-  final int? weeklyLimit;
-}
-
-/// Real subscription_tier values, as written by the live upgrade flow in
-/// merchant_pricing_suite_widget.dart - not the generic 'Community' /
-/// 'Pro' / 'Elite' names a first pass might assume. Any business whose
-/// subscription_tier isn't one of these keys (a typo, or an ad-hoc value
-/// like 'Founder'/'unlimited' set outside the normal upgrade flow) falls
-/// through to [_defaultPowerHourLimits] rather than risk granting
-/// broader access than intended.
-const _powerHourLimitsByTier = <String, _PowerHourLimits>{
-  'Community': _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1),
-  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, weeklyLimit: 2),
-  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, weeklyLimit: 3),
-  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, weeklyLimit: null),
-};
-const _defaultPowerHourLimits =
-    _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1);
-
-String _powerHourLimitMessage(String tier) {
-  switch (tier) {
-    case 'Community':
-      return "You've reached your weekly Power Hour limit. Upgrade to "
-          'Founding Local or Pro Growth for more!';
-    case 'Founding Local':
-      return "You've reached your weekly Power Hour limit for Founding "
-          'Local. Upgrade to Pro Growth for more!';
-    case 'Pro Growth':
-      return "You've reached your weekly Power Hour limit for Pro Growth. "
-          'Upgrade to Elite Growth for unlimited Power Hours!';
-    default:
-      return "You've reached your weekly Power Hour limit. Upgrade your "
-          'plan for more!';
-  }
-}
-
 /// Thin, reusable wrappers around this app's Firestore-backed actions.
 ///
 /// Every method here does three things consistently: checks auth/input
@@ -116,13 +72,12 @@ String _powerHourLimitMessage(String tier) {
 class KinServices {
   KinServices._();
 
-  /// Power Hour duration cap in minutes for [tier], from the same table
-  /// [startPowerHour] enforces server-side. Exposed so UI (duration
-  /// pickers, slider validation) can show/validate against the real
-  /// limit without duplicating it.
+  /// Power Hour duration cap in minutes for [tier], from the shared
+  /// [tierConfigFor] table (mirror of what [startPowerHour] enforces
+  /// server-side). Exposed so UI (duration pickers, slider validation) can
+  /// show/validate against the real limit without duplicating it.
   static int powerHourDurationCapMinutes(String tier) =>
-      (_powerHourLimitsByTier[tier] ?? _defaultPowerHourLimits)
-          .durationCapMinutes;
+      tierConfigFor(tier).powerHourDurationCapMinutes;
 
   /// Uppercases and strips [raw] down to alphanumeric characters, returning
   /// null if the result isn't exactly 5 characters. Exposed so a
@@ -359,6 +314,10 @@ class KinServices {
       await businessRef.set(data);
       await currentUserDocument!.reference.update(createUsersRecordData(
         ownedBusiness: businessRef,
+        // Registering a business makes this user a business owner, whatever
+        // their onboarding selection wrote - set the explicit role here so
+        // it's always correct for anyone who owns a business.
+        role: 'business_owner',
       ));
       currentUserDocument = await UsersRecord.getDocumentOnce(ownerRef);
       return ServiceResult.success(businessRef);
@@ -368,16 +327,50 @@ class KinServices {
     }
   }
 
+  /// Asks the setBusinessSubscription Cloud Function to set [tierName] on
+  /// [businessRef]. The server re-checks ownership and derives every
+  /// entitlement flag (is_premium, is_priority_pinned, has_flash_beacon)
+  /// from the tier itself - the client can't supply them anymore, and
+  /// firestore.rules blocks writing those fields directly, so this callable
+  /// is the only path that can change a tier. Surfaces the server's real
+  /// error message (same pattern as generateMarketingContent).
+  static Future<ServiceResult<void>> _setSubscriptionTier({
+    required DocumentReference businessRef,
+    required String tierName,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+            'setBusinessSubscription',
+            options: HttpsCallableOptions(
+              timeout: const Duration(seconds: 30),
+            ),
+          )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        'tierName': tierName,
+      });
+      return const ServiceResult.success();
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not update your subscription.');
+    } catch (_) {
+      return const ServiceResult.failure('Could not update your subscription.');
+    }
+  }
+
   /// Purchases/activates a subscription tier for a business via RevenueCat,
-  /// then updates the business record only on a confirmed purchase.
+  /// then - only on a confirmed purchase - asks the setBusinessSubscription
+  /// Cloud Function to apply the tier. The entitlement flags are derived
+  /// server-side from [tierName]; firestore.rules no longer allows the
+  /// client to write subscription_tier/is_premium/is_priority_pinned
+  /// directly (see the paywall-bypass fix), so the callable is the only
+  /// upgrade path.
   /// Used by: Merchant Pricing Suite -> each tier card's action button.
   static Future<ServiceResult<void>> upgradeBusinessTier({
     required DocumentReference businessRef,
     required String packageId,
     required String tierName,
-    required bool isPremium,
-    bool isPriorityPinned = false,
-    bool hasFlashBeacon = false,
   }) async {
     try {
       final purchased = await revenue_cat.purchasePackage(packageId);
@@ -385,34 +378,21 @@ class KinServices {
         return const ServiceResult.failure(
             'Purchase could not be completed. Please try again.');
       }
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: tierName,
-        isPremium: isPremium,
-        isPriorityPinned: isPriorityPinned,
-        hasFlashBeacon: hasFlashBeacon,
-      ));
-      return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your subscription.');
     }
+    return _setSubscriptionTier(businessRef: businessRef, tierName: tierName);
   }
 
   /// Downgrades a business back to the free Community tier - no purchase
-  /// involved. Used by: Merchant Pricing Suite -> "Community" tier card.
+  /// involved, but the write still goes through the setBusinessSubscription
+  /// Cloud Function since the tier fields are locked to client writes.
+  /// Used by: Merchant Pricing Suite -> "Community" tier card.
   static Future<ServiceResult<void>> downgradeToCommunity({
     required DocumentReference businessRef,
   }) async {
-    try {
-      await businessRef.update(createBusinessesRecordData(
-        subscriptionTier: 'Community',
-        isPremium: false,
-        isPriorityPinned: false,
-        hasFlashBeacon: false,
-      ));
-      return const ServiceResult.success();
-    } catch (_) {
-      return const ServiceResult.failure('Could not update your plan.');
-    }
+    return _setSubscriptionTier(
+        businessRef: businessRef, tierName: 'Community');
   }
 
   /// Opens the native share sheet with [text], then records a
@@ -448,68 +428,58 @@ class KinServices {
     }
   }
 
-  /// Starts a Power Hour flash-beacon promotion, gated by the business's
-  /// subscription_tier: [durationMinutes] is capped, and a rolling
-  /// 7-day usage count is checked against a per-tier weekly limit (see
-  /// _powerHourLimitsByTier). Fetches the business fresh rather than
-  /// trusting the caller's possibly-stale cached data, since this is
-  /// enforcing a real limit, not just display. checkAndExpireBeacons (a
-  /// scheduled Cloud Function that already exists, see
-  /// firebase/custom_cloud_functions) flips has_flash_beacon back to
-  /// false once flash_beacon_expires_at passes - no new backend logic
-  /// needed for expiry itself.
+  /// Starts a Power Hour flash-beacon promotion via the startPowerHour
+  /// Cloud Function. The per-tier duration cap, the rolling 7-day usage
+  /// window, and the weekly frequency limit are all enforced server-side
+  /// now - firestore.rules no longer lets the client write the Power Hour
+  /// fields directly, so a modified client can't set them to bypass the
+  /// caps. The server surfaces the same per-tier "upgrade to unlock"
+  /// message on the weekly limit, which this method passes through (same
+  /// pattern as generateMarketingContent / setBusinessSubscription).
+  /// checkAndExpireBeacons still handles expiry itself.
   /// Used by: Owner Profile -> Power Hour panel "Start" button.
   static Future<ServiceResult<void>> startPowerHour({
     required DocumentReference businessRef,
     required int durationMinutes,
   }) async {
     try {
-      final business = await BusinessesRecord.getDocumentOnce(businessRef);
-      final limits = _powerHourLimitsByTier[business.subscriptionTier] ??
-          _defaultPowerHourLimits;
-
-      final now = DateTime.now();
-      final windowExpired = business.powerHourLastReset == null ||
-          now.difference(business.powerHourLastReset!).inDays >= 7;
-      final currentUsage = windowExpired ? 0 : business.powerHourUsageCount;
-
-      if (limits.weeklyLimit != null && currentUsage >= limits.weeklyLimit!) {
-        return ServiceResult.failure(
-            _powerHourLimitMessage(business.subscriptionTier));
-      }
-
-      final cappedDuration = durationMinutes > limits.durationCapMinutes
-          ? limits.durationCapMinutes
-          : durationMinutes;
-      final expiresAt = now.add(Duration(minutes: cappedDuration));
-
-      await businessRef.update(createBusinessesRecordData(
-        hasFlashBeacon: true,
-        flashBeaconExpiresAt: expiresAt,
-        flashBeaconDurationMinutes: cappedDuration,
-        powerHourUsageCount: currentUsage + 1,
-        powerHourLastReset:
-            windowExpired ? now : (business.powerHourLastReset ?? now),
-      ));
+      await FirebaseFunctions.instance
+          .httpsCallable(
+            'startPowerHour',
+            options: HttpsCallableOptions(
+              timeout: const Duration(seconds: 30),
+            ),
+          )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        'durationMinutes': durationMinutes,
+      });
       return const ServiceResult.success();
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not start Power Hour.');
     } catch (_) {
       return const ServiceResult.failure('Could not start Power Hour.');
     }
   }
 
-  /// Ends a Power Hour promotion early. Only clears has_flash_beacon -
-  /// leaves flash_beacon_expires_at as-is, since it's harmless once
-  /// has_flash_beacon is false and every read of it already checks that
-  /// flag first.
+  /// Ends a Power Hour promotion early via the stopPowerHour Cloud
+  /// Function. Only clears has_flash_beacon - leaves flash_beacon_expires_at
+  /// as-is, since it's harmless once has_flash_beacon is false and every
+  /// read of it already checks that flag first. Server-side because the
+  /// Power Hour fields are no longer client-writable.
   /// Used by: Owner Profile -> Power Hour panel "Stop" button.
   static Future<ServiceResult<void>> stopPowerHour({
     required DocumentReference businessRef,
   }) async {
     try {
-      await businessRef.update(createBusinessesRecordData(
-        hasFlashBeacon: false,
-      ));
+      await FirebaseFunctions.instance
+          .httpsCallable('stopPowerHour')
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+      });
       return const ServiceResult.success();
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not stop Power Hour.');
     } catch (_) {
       return const ServiceResult.failure('Could not stop Power Hour.');
     }

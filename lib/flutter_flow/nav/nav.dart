@@ -277,11 +277,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => CustomersignupPageWidget(),
         ),
         FFRoute(
-          name: MobileSignUpPageWidget.routeName,
-          path: MobileSignUpPageWidget.routePath,
-          builder: (context, params) => MobileSignUpPageWidget(),
-        ),
-        FFRoute(
           name: BusinessShowcaseWidget.routeName,
           path: BusinessShowcaseWidget.routePath,
           asyncParams: {
@@ -299,6 +294,21 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: MobileCalledPowerPageWidget.routeName,
           path: MobileCalledPowerPageWidget.routePath,
           builder: (context, params) => MobileCalledPowerPageWidget(),
+        ),
+        FFRoute(
+          name: StoryDetailWidget.routeName,
+          path: StoryDetailWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => StoryDetailWidget(
+            storyLabel: params.getParam(
+              'storyLabel',
+              ParamType.String,
+            ),
+            imgDesc: params.getParam(
+              'imgDesc',
+              ParamType.String,
+            ),
+          ),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

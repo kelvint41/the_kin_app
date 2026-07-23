@@ -49,13 +49,13 @@ onPressed: () async {
 | `generateUniqueUserTicker` | `({userRef, displayName, maxAttempts = 3})` | Customer tickers. Reserves against `ticker_registry` (see Kindex Ticker Engine) rather than querying `users`, which can't be queried client-side. |
 | `sanitizeTicker` | `(raw)` | Pure function, no Firestore access - uppercases/strips to alphanumeric, returns null unless exactly 5 chars |
 | `registerBusiness` | `({category, businessType, isBlackOwned, place, businessName, phoneNumber, email, website, description})` | Generates a ticker via `generateUniqueTicker`, then creates a `BusinessesRecord` (including `tickerSymbol`); links it to the caller's `ownedBusiness` |
-| `upgradeBusinessTier` | `({businessRef, packageId, tierName, isPremium, isPriorityPinned, hasFlashBeacon})` | RevenueCat purchase, then updates `BusinessesRecord` only on a confirmed purchase |
-| `downgradeToCommunity` | `({businessRef})` | Resets `BusinessesRecord` to the free Community tier |
+| `upgradeBusinessTier` | `({businessRef, packageId, tierName})` | RevenueCat purchase, then - only on a confirmed purchase - calls the `setBusinessSubscription` Cloud Function, which re-checks ownership, **independently verifies the active purchase with RevenueCat's REST API**, and derives `is_premium`/`is_priority_pinned`/`has_flash_beacon` from the tier server-side. Direct client writes to those fields are blocked by firestore.rules. |
+| `downgradeToCommunity` | `({businessRef})` | Calls `setBusinessSubscription` with tier `Community` - no purchase involved, but the tier fields are locked to client writes so the write still goes through the Cloud Function |
 | `fetchTopBusinessKindex` | `({limit = 20})` | Read-only: top `businesses` by `kindex_score`, for the onboarding Kindex ticker's business row. |
 | `fetchTopCustomerKindex` | `({limit = 20})` | Read-only: top `KindexScores` by `score`, for the ticker's customer row. |
 | `shareApp` | `({text, sharePositionOrigin, businessRef})` | Opens the native share sheet, then creates a `share_app` `UserEngagementEventsRecord` (best-effort) |
-| `startPowerHour` | `({businessRef, durationMinutes})` | Sets `has_flash_beacon`, `flash_beacon_expires_at` (computed client-side), `flash_beacon_duration_minutes` on `BusinessesRecord` |
-| `stopPowerHour` | `({businessRef})` | Clears `has_flash_beacon` on `BusinessesRecord` |
+| `startPowerHour` | `({businessRef, durationMinutes})` | Calls the `startPowerHour` Cloud Function, which enforces the per-tier cap + weekly limit and sets `has_flash_beacon`, `flash_beacon_expires_at`, `flash_beacon_duration_minutes` via Admin SDK. Client can't write these fields directly (firestore.rules). |
+| `stopPowerHour` | `({businessRef})` | Calls the `stopPowerHour` Cloud Function, which clears `has_flash_beacon` |
 
 ## Button map
 
@@ -88,7 +88,9 @@ a local `Timer.periodic`, not a Firestore read on a loop. Stopping early
 is confirm-gated (an `AlertDialog`); starting isn't, since an accidental
 early stop mid-promotion is the costlier mistake.
 
-`startPowerHour` gates on `subscription_tier` - real values as written by
+Power Hour limits are enforced **server-side** by the `startPowerHour`
+Cloud Function (`firebase/custom_cloud_functions/power_hour.js`), which
+gates on `subscription_tier` - real values as written by
 `merchant_pricing_suite_widget.dart`'s upgrade flow, not generic
 Community/Pro/Elite names:
 
@@ -102,12 +104,17 @@ Community/Pro/Elite names:
 
 The requested duration is silently capped, not rejected. The frequency
 check uses a rolling 7-day window (`power_hour_last_reset` +
-`power_hour_usage_count`), not a fixed calendar week.
+`power_hour_usage_count`), not a fixed calendar week, and runs in a
+Firestore transaction so two rapid taps can't both slip under the cap.
+On the weekly limit the function throws `resource-exhausted` with the
+per-tier upgrade-prompt message, which `KinServices.startPowerHour`
+passes through.
 
-`KinServices.powerHourDurationCapMinutes(tier)` exposes the same cap
-table for UI use (duration pickers, slider validation) without
-duplicating it - used by both `power_hour_panel_widget.dart` and
-`mobile_called_power_page_widget.dart`.
+`KinServices.powerHourDurationCapMinutes(tier)` exposes a **display-only**
+copy of the cap table for UI use (duration pickers, slider validation)
+without a round-trip - used by both `power_hour_panel_widget.dart` and
+`mobile_called_power_page_widget.dart`. The server holds the
+authoritative copy; keep the two in sync (tracked tech debt).
 
 ### mobile_called_power_page - a second, previously-disconnected UI
 

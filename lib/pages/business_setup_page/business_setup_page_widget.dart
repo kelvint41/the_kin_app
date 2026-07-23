@@ -21,6 +21,15 @@ import 'package:provider/provider.dart';
 import 'business_setup_page_model.dart';
 export 'business_setup_page_model.dart';
 
+// Supply via --dart-define=GOOGLE_MAPS_API_KEY=... at build time. The key that
+// used to be hardcoded here (for the place picker's Places Autocomplete/Details
+// calls) was committed to source and must be treated as compromised — restrict
+// it in Google Cloud Console (Places API, referrer/bundle/package) and rotate
+// if warranted. Note: this only removes the Dart copy; the native Maps SDK keys
+// in android/app/src/main/AndroidManifest.xml and ios/Runner/AppDelegate.swift
+// are still embedded there and must be handled separately.
+const _kGoogleMapsApiKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
+
 /// Create a clean, professional, dark-mode multi-step business onboarding
 /// form page called "Biz Setup Page" for The Kin App.
 ///
@@ -825,12 +834,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                 child: Align(
                                   alignment: AlignmentDirectional(-0.04, 0.28),
                                   child: FlutterFlowPlacePicker(
-                                    iOSGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    androidGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    webGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
+                                    iOSGoogleMapsApiKey: _kGoogleMapsApiKey,
+                                    androidGoogleMapsApiKey: _kGoogleMapsApiKey,
+                                    webGoogleMapsApiKey: _kGoogleMapsApiKey,
                                     onSelect: (place) async {
                                       safeSetState(() =>
                                           _model.placePickerValue = place);
@@ -918,7 +924,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                           ),
                                     ),
                                     Text(
-                                      'Search with Google Maps...',
+                                      _model.placePickerValue.address.isNotEmpty
+                                          ? _model.placePickerValue.address
+                                          : 'Search with Google Maps...',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -1187,6 +1195,22 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
+                        // Require the essentials before creating the record so
+                        // a business is never registered with a blank name or
+                        // no address/city.
+                        final enteredName =
+                            _model.businessNameTextController?.text.trim() ?? '';
+                        if (enteredName.isEmpty ||
+                            _model.placePickerValue.address.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Please enter a business name and select your location.'),
+                            ),
+                          );
+                          return;
+                        }
+
                         final result = await KinServices.registerBusiness(
                           category: _model.dropdownValue,
                           businessType: _model.businessType,
@@ -1207,9 +1231,11 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                           return;
                         }
 
-                        context.pushNamed(OwnerProfileWidget.routeName);
-
-                        safeSetState(() {});
+                        // Replace (not push) so the completed setup form is
+                        // dropped from the back stack - a freshly registered
+                        // owner lands on their dashboard and can't navigate
+                        // back into the form to re-submit.
+                        context.goNamed(OwnerProfileWidget.routeName);
                       },
                       text: 'Register Now',
                       options: FFButtonOptions(

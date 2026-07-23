@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/old_designs/premium_story/premium_story_widget.dart';
+import '/index.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +17,13 @@ export 'the_exchange_model.dart';
 class TheExchangeWidget extends StatefulWidget {
   const TheExchangeWidget({
     super.key,
-    required this.businessRef,
+    this.businessRef,
   });
 
+  /// Legacy parameter. The Exchange is now a global feed sourced from the
+  /// ExchangePosts collection, so it no longer depends on a single
+  /// business. Kept optional so existing callers/routes still compile;
+  /// the value is ignored.
   final DocumentReference? businessRef;
 
   static String routeName = 'TheExchange';
@@ -48,31 +53,34 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget!.businessRef!),
+    // The Exchange is a global feed: its content comes from the
+    // ExchangePosts collection, not a single business. We still stream the
+    // current user's own business (when they have one) purely to decide
+    // whether to show owner-only controls (compose, add story, verified
+    // badge) and which business to attribute their posts to.
+    final myBusinessRef = currentUserDocument?.ownedBusiness;
+    return StreamBuilder<BusinessesRecord?>(
+      stream: myBusinessRef != null
+          ? BusinessesRecord.getDocument(myBusinessRef)
+          : Stream<BusinessesRecord?>.value(null),
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
-        if (!snapshot.hasData) {
-          return Scaffold(
-            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            body: Center(
-              child: SizedBox(
-                width: 50.0,
-                height: 50.0,
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final theExchangeBusinessesRecord = snapshot.data!;
+        // Non-blocking: the global feed renders immediately. The owned
+        // business doc only gates owner-only controls, so we treat "not
+        // loaded yet" as "not a verified owner yet" and let those controls
+        // appear once (if) the doc arrives, rather than blocking the page.
+        final myBusiness = snapshot.data;
         final isVerifiedBusinessOwner = currentUserReference != null &&
-            theExchangeBusinessesRecord.ownerRef == currentUserReference &&
-            theExchangeBusinessesRecord.isVerified;
+            myBusiness != null &&
+            myBusiness.ownerRef == currentUserReference &&
+            myBusiness.isVerified;
+        // The Exchange is a community-wide feed: any signed-in user
+        // (customer or business owner) can post and interact, like a
+        // standard social feed.
+        final canPost = currentUserReference != null;
+        // Posts are attributed to a business only when the author is a
+        // verified owner; everyone else (customers, unverified owners)
+        // posts as a community member with no business_ref.
+        final postBusinessRef = isVerifiedBusinessOwner ? myBusinessRef : null;
         _model.postTextController ??= TextEditingController();
         _model.postTextFieldFocusNode ??= FocusNode();
         _model.feedComposerController ??= TextEditingController();
@@ -153,7 +161,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      if (isVerifiedBusinessOwner)
+                                      if (canPost)
                                         FlutterFlowIconButton(
                                           buttonSize: 42.0,
                                           icon: Icon(
@@ -163,7 +171,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             size: 26.0,
                                           ),
                                           onPressed: () async {
-                                            if (!isVerifiedBusinessOwner) {
+                                            if (!canPost) {
                                               return;
                                             }
                                             await showDialog(
@@ -214,8 +222,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                             userRef:
                                                                 currentUserReference,
                                                             businessRef:
-                                                                theExchangeBusinessesRecord
-                                                                    .reference,
+                                                                postBusinessRef,
                                                             postText: postText,
                                                             timestamp:
                                                                 getCurrentTimestamp,
@@ -231,8 +238,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                   userRef:
                                                                       currentUserReference,
                                                                   businessRef:
-                                                                      theExchangeBusinessesRecord
-                                                                          .reference,
+                                                                      postBusinessRef,
                                                                   targetRef:
                                                                       exchangePostsRecordReference,
                                                                   eventType:
@@ -301,11 +307,9 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                             child: StreamBuilder<List<ExchangePostsRecord>>(
                               stream: queryExchangePostsRecord(
                                 queryBuilder: (exchangePostsRecord) =>
-                                    exchangePostsRecord.where(
-                                  'business_ref',
-                                  isEqualTo:
-                                      theExchangeBusinessesRecord.reference,
-                                ),
+                                    exchangePostsRecord.orderBy('timestamp',
+                                        descending: true),
+                                limit: 50,
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
@@ -390,8 +394,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                               'Keyt40_${columnExchangePostsRecord.reference.id}'),
                                           postRecord: columnExchangePostsRecord,
                                           businessRef:
-                                              theExchangeBusinessesRecord
-                                                  .reference,
+                                              columnExchangePostsRecord
+                                                  .businessRef,
                                           authorDisplayName:
                                               feedItemUsersRecord.displayName,
                                           authorPhotoUrl:
@@ -508,6 +512,19 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         img_desc:
                                             'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
                                         label: 'The Grind',
+                                        onTap: () => context.pushNamed(
+                                          StoryDetailWidget.routeName,
+                                          queryParameters: {
+                                            'storyLabel': serializeParam(
+                                              'The Grind',
+                                              ParamType.String,
+                                            ),
+                                            'imgDesc': serializeParam(
+                                              'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
+                                              ParamType.String,
+                                            ),
+                                          }.withoutNulls,
+                                        ),
                                       ),
                                     ),
                                     wrapWithModel(
@@ -517,6 +534,19 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         img_desc:
                                             'https://dimg.dreamflow.cloud/v1/image/black%20male%20chef%20portrait',
                                         label: 'Heritage',
+                                        onTap: () => context.pushNamed(
+                                          StoryDetailWidget.routeName,
+                                          queryParameters: {
+                                            'storyLabel': serializeParam(
+                                              'Heritage',
+                                              ParamType.String,
+                                            ),
+                                            'imgDesc': serializeParam(
+                                              'https://dimg.dreamflow.cloud/v1/image/black%20male%20chef%20portrait',
+                                              ParamType.String,
+                                            ),
+                                          }.withoutNulls,
+                                        ),
                                       ),
                                     ),
                                     wrapWithModel(
@@ -526,6 +556,19 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         img_desc:
                                             'https://dimg.dreamflow.cloud/v1/image/stylish%20black%20woman%20boutique%20owner',
                                         label: 'Pearl Gold',
+                                        onTap: () => context.pushNamed(
+                                          StoryDetailWidget.routeName,
+                                          queryParameters: {
+                                            'storyLabel': serializeParam(
+                                              'Pearl Gold',
+                                              ParamType.String,
+                                            ),
+                                            'imgDesc': serializeParam(
+                                              'https://dimg.dreamflow.cloud/v1/image/stylish%20black%20woman%20boutique%20owner',
+                                              ParamType.String,
+                                            ),
+                                          }.withoutNulls,
+                                        ),
                                       ),
                                     ),
                                     wrapWithModel(
@@ -535,6 +578,19 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         img_desc:
                                             'https://dimg.dreamflow.cloud/v1/image/black%20man%20in%20creative%20studio',
                                         label: 'Urban Soul',
+                                        onTap: () => context.pushNamed(
+                                          StoryDetailWidget.routeName,
+                                          queryParameters: {
+                                            'storyLabel': serializeParam(
+                                              'Urban Soul',
+                                              ParamType.String,
+                                            ),
+                                            'imgDesc': serializeParam(
+                                              'https://dimg.dreamflow.cloud/v1/image/black%20man%20in%20creative%20studio',
+                                              ParamType.String,
+                                            ),
+                                          }.withoutNulls,
+                                        ),
                                       ),
                                     ),
                                     wrapWithModel(
@@ -544,6 +600,19 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         img_desc:
                                             'https://dimg.dreamflow.cloud/v1/image/black%20woman%20yoga%20instructor',
                                         label: 'Kindred',
+                                        onTap: () => context.pushNamed(
+                                          StoryDetailWidget.routeName,
+                                          queryParameters: {
+                                            'storyLabel': serializeParam(
+                                              'Kindred',
+                                              ParamType.String,
+                                            ),
+                                            'imgDesc': serializeParam(
+                                              'https://dimg.dreamflow.cloud/v1/image/black%20woman%20yoga%20instructor',
+                                              ParamType.String,
+                                            ),
+                                          }.withoutNulls,
+                                        ),
                                       ),
                                     ),
                                   ].divide(SizedBox(
@@ -692,7 +761,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             children: [
                                               Expanded(
                                                 flex: 1,
-                                                child: isVerifiedBusinessOwner
+                                                child: canPost
                                                     ? TextFormField(
                                                         controller: _model
                                                             .feedComposerController,
@@ -778,12 +847,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         final composerText = _model
                                             .feedComposerController?.text
                                             .trim();
-                                        if (!isVerifiedBusinessOwner ||
+                                        if (!canPost ||
                                             composerText == null ||
                                             composerText.isEmpty ||
                                             currentUserReference == null) {
                                           print(
-                                              'TheExchangeWidget: composer send ignored (not owner, empty text, or not logged in)');
+                                              'TheExchangeWidget: composer send ignored (empty text or not logged in)');
                                           return;
                                         }
                                         final exchangePostsRecordReference =
@@ -794,9 +863,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             postId:
                                                 exchangePostsRecordReference.id,
                                             userRef: currentUserReference,
-                                            businessRef:
-                                                theExchangeBusinessesRecord
-                                                    .reference,
+                                            businessRef: postBusinessRef,
                                             postText: composerText,
                                             timestamp: getCurrentTimestamp,
                                             likesCount: 0,
@@ -810,8 +877,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                 createUserEngagementEventsRecordData(
                                                   userRef: currentUserReference,
                                                   businessRef:
-                                                      theExchangeBusinessesRecord
-                                                          .reference,
+                                                      postBusinessRef,
                                                   targetRef:
                                                       exchangePostsRecordReference,
                                                   eventType: 'post',

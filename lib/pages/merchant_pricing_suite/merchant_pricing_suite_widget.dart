@@ -390,7 +390,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     businessRef: businessRef,
                                     packageId: _kFoundingLocalPackageId,
                                     tierName: 'Founding Local',
-                                    isPremium: true,
                                   );
                                   if (!result.isSuccess) {
                                     if (mounted) {
@@ -485,7 +484,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           businessRef: businessRef,
                                           packageId: _kProGrowthPackageId,
                                           tierName: 'Pro Growth',
-                                          isPremium: true,
                                         );
                                         if (!result.isSuccess) {
                                           if (mounted) {
@@ -545,9 +543,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     businessRef: businessRef,
                                     packageId: _kEliteGrowthPackageId,
                                     tierName: 'Elite Growth',
-                                    isPremium: true,
-                                    isPriorityPinned: true,
-                                    hasFlashBeacon: true,
                                   );
                                   if (!result.isSuccess) {
                                     if (mounted) {

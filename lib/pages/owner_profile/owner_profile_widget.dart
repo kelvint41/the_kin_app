@@ -115,8 +115,12 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
   @override
   Widget build(BuildContext context) {
     // This dashboard reads the signed-in owner's business; render an empty
-    // state instead of crashing when they haven't set one up yet.
-    if (currentUserDocument?.ownedBusiness == null) {
+    // state instead of crashing when the user isn't a business owner, or is
+    // one but hasn't set up their business yet. The ownedBusiness null-check
+    // still guards the ownedBusiness! derefs below - role classification and
+    // the data-presence guard are both required.
+    if (!currentUserIsBusinessOwner ||
+        currentUserDocument?.ownedBusiness == null) {
       return Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
