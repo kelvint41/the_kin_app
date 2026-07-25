@@ -89,7 +89,7 @@ class _BusinessSignUpWidgetState extends State<BusinessSignUpWidget> {
               size: 24.0,
             ),
             onPressed: () {
-              print('IconButton pressed ...');
+              context.safePop();
             },
           ),
           title: Text(

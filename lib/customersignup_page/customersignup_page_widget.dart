@@ -595,7 +595,7 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'assets/images/Untitled_design_(1).png',
+                    'assets/images/kin_logo.png',
                     width: 36.0,
                     height: 40.0,
                     fit: BoxFit.contain,

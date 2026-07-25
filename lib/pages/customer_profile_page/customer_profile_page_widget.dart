@@ -137,7 +137,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
-                          'assets/images/Untitled_design_(1).png',
+                          'assets/images/kin_logo.png',
                           width: 120.0,
                           height: 120.0,
                           fit: BoxFit.cover,

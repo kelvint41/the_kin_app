@@ -181,7 +181,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                             size: 24.0,
                           ),
                           onPressed: () {
-                            print('IconButton pressed ...');
+                            context.safePop();
                           },
                         ),
                         Text(

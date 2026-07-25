@@ -110,7 +110,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -145,7 +145,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                     size: 20.0,
                   ),
                   onPressed: () {
-                    print('IconButton pressed ...');
+                    context.safePop();
                   },
                 ),
               ),
@@ -1229,13 +1229,17 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                         ),
                         Container(
                           width: double.infinity,
-                          height: 100.0,
+                          // No fixed height: the review controls (button 40 +
+                          // rating bar 24 + dense text field ~50) need ~114px,
+                          // so a hardcoded 100 overflowed by 14. This sits
+                          // inside the page's SingleChildScrollView, so
+                          // sizing to content is safe.
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
                           ),
                           child: Column(
-                            mainAxisSize: MainAxisSize.max,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               FFButtonWidget(
                                 onPressed: () async {

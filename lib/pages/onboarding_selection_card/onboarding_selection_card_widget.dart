@@ -113,7 +113,7 @@ class _OnboardingSelectionCardWidgetState
             height: 50.0,
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                FlutterFlowTheme.of(context).primary,
+                FlutterFlowTheme.of(context).secondaryText,
               ),
             ),
           ),
@@ -142,7 +142,7 @@ class _OnboardingSelectionCardWidgetState
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -186,7 +186,7 @@ class _OnboardingSelectionCardWidgetState
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8.0),
                                     child: Image.asset(
-                                      'assets/images/Untitled_design_(1).png',
+                                      'assets/images/kin_logo.png',
                                       width: 200.0,
                                       height: 208.1,
                                       fit: BoxFit.cover,

@@ -122,7 +122,7 @@ class _TermsOfServicePageWidgetState extends State<TermsOfServicePageWidget> {
                               size: 24.0,
                             ),
                             onPressed: () {
-                              print('IconButton pressed ...');
+                              context.safePop();
                             },
                           ),
                         ),

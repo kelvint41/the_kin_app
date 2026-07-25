@@ -74,7 +74,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
               size: 25.0,
             ),
             onPressed: () {
-              print('IconButton pressed ...');
+              context.safePop();
             },
           ),
           title: Text(

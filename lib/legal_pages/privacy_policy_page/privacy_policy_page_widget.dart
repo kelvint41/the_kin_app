@@ -66,7 +66,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -129,7 +129,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
                                       size: 20.0,
                                     ),
                                     onPressed: () {
-                                      print('IconButton pressed ...');
+                                      context.safePop();
                                     },
                                   ),
                                   Text(

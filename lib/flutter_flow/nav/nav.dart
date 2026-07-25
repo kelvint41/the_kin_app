@@ -488,7 +488,7 @@ class FFRoute {
               ? Container(
                   color: Colors.transparent,
                   child: Image.asset(
-                    'assets/images/Untitled_design_(1).png',
+                    'assets/images/kin_logo.png',
                     fit: BoxFit.contain,
                   ),
                 )

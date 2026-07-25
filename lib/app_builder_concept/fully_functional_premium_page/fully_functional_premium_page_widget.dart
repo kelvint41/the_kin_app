@@ -91,7 +91,7 @@ class _FullyFunctionalPremiumPageWidgetState
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -133,7 +133,7 @@ class _FullyFunctionalPremiumPageWidgetState
                               height: 50.0,
                               child: CircularProgressIndicator(
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  FlutterFlowTheme.of(context).primary,
+                                  FlutterFlowTheme.of(context).secondaryText,
                                 ),
                               ),
                             ),
