@@ -216,9 +216,13 @@ meaning the business row's trend arrow always shows "up" today. This was
 discovered while building the customer side (which does compute a real
 trend) but was left as-is since the business ticker row was explicitly
 scoped as "keep as is." Fixing it properly would mean deciding where
-business Kindex scoring should actually happen (nothing currently
-updates `businesses.kindex_score`/`kindex_velocity` at all outside of
-manual/admin writes) - a bigger scope than the ticker feature itself.
+business Kindex scoring should actually happen - since resolved: see
+`business_kindex_engine.js` in the "Kindex formulas" section below, which
+now updates `businesses.kindex_score` automatically on review creation.
+`kindex_velocity` still has no writer - deliberately left alone rather
+than filled with a placeholder value - so this trend-arrow issue is
+unchanged for now; a real velocity metric is tracked as separate future
+work.
 
 ## Exchange Feed & Kindex Spotlight
 
@@ -442,8 +446,9 @@ pattern used correctly elsewhere (`the_exchange_widget.dart`,
 
 ## Kindex formulas (as of this audit)
 
-Three separate, disconnected systems currently calculate "Kindex" - only
-the first one actually writes to Firestore in production.
+Three separate systems currently calculate "Kindex" - the first two now
+both write to Firestore in production automatically; the third remains
+dead code.
 
 **1. Live event-weight engine** - `firebase/custom_cloud_functions/kindex_engine.js`,
 `processUserEngagementEvent`. Triggered on `UserEngagementEvents/{id}`
@@ -467,18 +472,41 @@ decay, no rolling window exists today.
 
 **2. `BusinessesRecord.kindex_score` / `kindex_velocity`** - the fields
 actually displayed everywhere (business cards, the ticker, the
-leaderboard). Nothing writes to these; they only change via manual
-Firestore console edits. No automated business-side scoring exists.
+leaderboard). `kindex_score` now has a real automated writer: see
+`firebase/custom_cloud_functions/business_kindex_engine.js`,
+`processBusinessReview`, below. `kindex_velocity` still has no writer -
+it's intentionally left untouched by the new function rather than filled
+with a placeholder sign-based value (see "Proposed velocity metric"
+below) - so it still reads as its default (0) for every business.
 
 **3. `lib/custom_code/actions/calculate_real_time_kindex.dart`** -
 `calculateRealTimeKindex(currentScore, newStarRating, isPremiumBusiness)`.
 A real formula: baseline 500 (or 850 premium) when `currentScore == 0`,
 otherwise `±15` for 5-star / `±5` for 4-star / `-5` for 2-star / `-15` for
 1-star (3-star neutral), clamped to a tier ceiling (750 standard / 900
-premium). Its only remaining call site
-(`business_profile_v2_widget.dart`, the "Customer Reviews" header tap)
-stores the result in local model state and never persists it - decorative
-today, not live.
+premium). Its original call site (`business_profile_v2_widget.dart`, the
+"Customer Reviews" header tap) stores the result in local model state and
+never persists it - still decorative, still dead code, left untouched.
+The formula itself has been ported (not moved) into
+`business_kindex_engine.js` as the live implementation - see below.
+
+**New: live business-side engine** -
+`firebase/custom_cloud_functions/business_kindex_engine.js`,
+`processBusinessReview`. Triggered on `reviews/{reviewId}` document
+creation (the review flow already wired up via
+`KinServices.submitReview`), mirroring `kindex_engine.js`'s structure:
+inside a transaction, re-reads the review and the target business,
+applies the ported `calculateRealTimeKindex` formula (item 3 above) using
+the business's current `kindex_score` and `is_premium` flag, writes the
+new `kindex_score` plus `last_kindex_review_id` onto the business doc, and
+marks the review `status: "processed"` (or `"rejected"` with an `error`
+for a missing `business_ref`, non-numeric `rating`, or a business that no
+longer exists). Idempotency guard: `reviews` docs have no client-settable
+`status` field (unlike `UserEngagementEvents`' `"pending"` convention), so
+the guard is simply "does `status` already exist at all" - it's only ever
+written by this function, so its presence means the review was already
+handled and reprocessing (from an at-least-once redelivery) is a safe
+no-op.
 
 ### Proposed velocity metric (not yet implemented)
 
