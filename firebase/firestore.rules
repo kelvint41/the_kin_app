@@ -2,9 +2,16 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /businesses/{document} {
-      allow create: if request.auth != null;
+      // kindex_score/kindex_velocity are system-managed (written only by
+      // the business_kindex_engine Cloud Function via the Admin SDK,
+      // which bypasses these rules) - blocked here on both create and
+      // update so an owner can't set/inflate their own score directly.
+      allow create: if request.auth != null
+        && !('kindex_score' in request.resource.data)
+        && !('kindex_velocity' in request.resource.data);
       allow read: if true;
-      allow write: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['kindex_score', 'kindex_velocity']);
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
