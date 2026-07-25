@@ -508,6 +508,28 @@ written by this function, so its presence means the review was already
 handled and reprocessing (from an at-least-once redelivery) is a safe
 no-op.
 
+**Tests.** `firebase/custom_cloud_functions/test/business_kindex_engine.test.js`
+covers this function against the Firestore emulator - the tier
+baselines/ceilings, the star deltas, the clamps, the rejection paths, and
+the idempotency guard (which can't be verified by reading the code
+alone). Run with:
+
+```bash
+cd firebase/custom_cloud_functions
+npm install       # first time only
+npm test
+```
+
+`npm test` shells out to `firebase emulators:exec --only firestore`
+against a throwaway `demo-kin-test` project, so it needs no credentials
+and touches no real data - but it does need Java (the Firestore emulator
+is a JAR) and downloads that JAR on first run. `firebase-tools` is a
+devDependency here so the suite is self-contained; a global install works
+too. Note these tests use the Admin SDK, which bypasses `firestore.rules`
+exactly as the deployed function does - so they say nothing about
+client-side rule enforcement, including the `kindex_score` write
+restriction described above.
+
 ### Proposed velocity metric (not yet implemented)
 
 Built for the interactive simulator (see below), not deployed:
