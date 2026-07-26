@@ -490,7 +490,17 @@ never persists it - still decorative, still dead code, left untouched.
 The formula itself has been ported (not moved) into
 `business_kindex_engine.js` as the live implementation - see below.
 
-**New: live business-side engine** -
+**SUPERSEDED (July 2026): the reactive business engine was replaced by a
+nightly recompute.** `business_kindex_engine.js` / `processBusinessReview`
+has been deleted. It applied a fixed delta per review with no verified-visit
+requirement and no per-customer cap, so one account could move a score
+without bound by submitting repeated reviews. Business scoring now lives in
+`business_kindex_nightly.js` (`recomputeBusinessKindexScores`, 2am
+America/Chicago) plus `visit_verification.js` (`recordVerifiedVisit`
+callable). See "Anti-manipulation scoring" below. The description that
+follows is retained for history only:
+
+**Former live business-side engine (deleted)** -
 `firebase/custom_cloud_functions/business_kindex_engine.js`,
 `processBusinessReview`. Triggered on `reviews/{reviewId}` document
 creation (the review flow already wired up via
@@ -699,3 +709,54 @@ follow-up if this gets used in practice).
 - No manual-entry ticker UI/service method exists yet - `generateUniqueTicker`
   failing just surfaces an error today, per the explicit ask; building the
   actual manual-input flow is future work.
+
+## Anti-manipulation business scoring (July 2026)
+
+Replaces the reactive `processBusinessReview` trigger, which had no
+manipulation protection.
+
+**`visit_verification.js` - `recordVerifiedVisit` (callable).** A review
+only counts toward a score if the customer has a GPS-verified check-in for
+that business. The client takes a single one-shot location reading (no
+background tracking) and calls this function; the radius check happens
+server-side against the business's stored coordinates, and the visit is
+written with the Admin SDK and a server timestamp. Radius (default 100m)
+and a dedup window (default 1h) are tunable from
+`kindex_config/visit_verification` without a redeploy.
+
+The collection is **`uservisits`**, not `user_visits` - worth noting because
+its rules previously read `allow create: if true`, meaning any caller, even
+unauthenticated, could forge a visit. Client writes are now denied outright.
+
+**Limits of GPS verification.** This proves the *reported* coordinates are
+in range and makes forgery require deliberately faking a location rather
+than just POSTing a document. It cannot prove physical presence - a
+mock-location provider on a rooted device still defeats it. Unspoofable
+presence needs a venue-side factor (in-store QR, or confirmed purchase).
+
+**`business_kindex_nightly.js` - `recomputeBusinessKindexScores`.** Runs at
+2:00am America/Chicago. For every business it takes the trailing 7 days of
+reviews, keeps only customers with a verified visit in that window, reduces
+each customer to their single highest star rating, and recomputes the score
+from the tier baseline using the existing deltas and ceilings. Writes
+`kindex_score`, `kindex_last_recomputed_at` and
+`kindex_qualifying_review_count`; `kindex_velocity` is deliberately never
+touched.
+
+**Behavioural consequence worth knowing:** because the score is recomputed
+from scratch each night over a 7-day window, it is now a rolling measure
+rather than a running total. A business with no qualifying reviews in the
+window sits exactly at its baseline (500 standard / 850 premium) rather
+than retaining points earned earlier. That follows from the spec's
+"recompute from scratch", but it means scores decay toward baseline instead
+of accumulating.
+
+**Reviews use composite ids** (`{businessId}_{userId}`), so re-submitting
+edits a customer's existing review rather than creating duplicates. Rules
+allow owner updates with a 2-edit cap - anti-spam only; score integrity
+comes from the nightly rules, not the cap. Grouping by customer in the
+nightly job also means legacy duplicate review documents cannot double-count.
+
+Tests: `test/business_kindex_nightly.test.js` (17 cases, emulator-backed),
+covering the manipulation scenarios directly - repeat reviews from one
+account, competitor 1-star farming, unverified reviews, window boundaries.

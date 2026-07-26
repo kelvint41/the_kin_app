@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/visit_check_in_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -1256,6 +1257,10 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              if (widget.businessDocument != null)
+                                VisitCheckInWidget(
+                                  businessRef: widget.businessDocument!,
+                                ),
                               FFButtonWidget(
                                 onPressed: () async {
                                   final businessRef = widget!.businessDocument;
