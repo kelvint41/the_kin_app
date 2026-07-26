@@ -1,3 +1,118 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
+import 'package:timeago/timeago.dart' as timeago;
+import 'lat_lng.dart';
+import 'place.dart';
+import 'uploaded_file.dart';
+import '/backend/backend.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '/backend/schema/structs/index.dart';
+import '/auth/firebase_auth/auth_util.dart';
+
+double updateKindexScore(
+  int reviewRatings,
+  String? businessName,
+  double currentScore,
+) {
+  double scoreChange = 0.0;
+
+  // Set the baseline score. If the current score is 0.0 or null, default to the 500.0 baseline.
+  double score = (currentScore == 0.0) ? 500.0 : currentScore;
+
+  switch (reviewRatings) {
+    case 5:
+      scoreChange = 15.0;
+      break;
+    case 4:
+      scoreChange = 5.0;
+      break;
+    case 3:
+      scoreChange = 0.0;
+      break;
+    case 2:
+      scoreChange = -5.0;
+      break;
+    case 1:
+      scoreChange = -15.0;
+      break;
+    default:
+      scoreChange = 0.0;
+  }
+
+  double newScore = score + scoreChange;
+
+  // Enforce strict national boundaries (Floor: 100.0, Ceiling: 1000.0)
+  return newScore.clamp(100.0, 800.0);
+}
+
+String? getMarkerIcon(String? category) {
+  if (category == 'Restaurant') {
+    return 'https://images.squarespace-cdn.com/content/v1/63ba0e8c07d353683bf1dfbf/fa24bb75-7b64-4bf8-b21a-e8d35091bfd2/Restaurant_Pin.png';
+  }
+
+  if (category == 'Salon') {
+    return 'https://images.squarespace-cdn.com/content/v1/63ba0e8c07d353683bf1dfbf/ca86bb94-01fa-4f95-bdc1-840a1bfa82bb/Salon_Pin.png';
+  }
+
+  if (category == 'Lawn Care') {
+    return 'https://images.squarespace-cdn.com/content/v1/63ba0e8c07d353683bf1dfbf/ea95bb12-98ea-4bf9-ac1b-f8319ba28ccb/Lawn_Pin.png';
+  }
+
+  // The absolute final safety net to keep the parser happy
+  return 'https://images.squarespace-cdn.com/content/v1/63ba0e8c07d353683bf1dfbf/14603cc3-d14f-4d43-9828-b0a3bb6fa2d2/Standard_Pin.png';
+}
+
+double updateCustomerKindexScore(
+  double currentScore,
+  String interactionType,
+  int starRating,
+) {
+  double runningScore = currentScore == 0.0 ? 100.0 : currentScore;
+
+  switch (interactionType) {
+    case 'delivery_click':
+      runningScore += 8.0;
+      break;
+
+    case 'purchase':
+      runningScore += 10.0;
+      break;
+
+    case 'review':
+      if (starRating >= 3) {
+        runningScore += 5.0;
+      } else {
+        runningScore += 1.0;
+      }
+      break;
+
+    case 'social_engagement':
+      runningScore += 2.0;
+      break;
+
+    case 'checkin':
+      runningScore += 2.0;
+      break;
+
+    case 'decay':
+      runningScore -= 5.0;
+      break;
+  }
+
+  if (runningScore > 850.0) {
+    runningScore = 850.0;
+  }
+  if (runningScore < 100.0) {
+    runningScore = 100.0;
+  }
+
+  return double.parse(runningScore.toStringAsFixed(1));
+}
+
 double getProgressBarValue(
   double? score,
   double? milestoneTarget,
@@ -6,13 +121,8 @@ double getProgressBarValue(
     return 0.0;
   }
 
-  // Uses the passed maximum cap, or defaults to 500.0 if empty or zero —
-  // a zero target would otherwise divide by zero and produce NaN, which
-  // clamp() does not catch (NaN comparisons are always false).
-  final double target =
-      (milestoneTarget == null || milestoneTarget == 0.0)
-          ? 500.0
-          : milestoneTarget;
+  // Uses the passed maximum cap, or defaults to 500.0 if empty
+  double target = milestoneTarget ?? 500.0;
 
   return (score / target).clamp(0.0, 1.0);
 }
@@ -83,4 +193,52 @@ bool isBusinessOpen(
 
 DateTime calculateExpiration(int durationHours) {
   return DateTime.now().add(Duration(hours: durationHours));
+}
+
+String getCardDistance(
+  LatLng userLoc,
+  LatLng businessLoc,
+) {
+  double lat1 = userLoc.latitude * math.pi / 180;
+  double lat2 = businessLoc.latitude * math.pi / 180;
+  double dLat = (businessLoc.latitude - userLoc.latitude) * math.pi / 180;
+  double dLon = (businessLoc.longitude - userLoc.longitude) * math.pi / 180;
+
+  double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(lat1) * math.cos(lat2) * math.sin(dLon / 2) * math.sin(dLon / 2);
+
+  double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  double distance = 3958.8 * c; // Earth's radius in miles
+
+  return '${distance.toStringAsFixed(1)} mi';
+}
+
+bool calculateDistance(
+  LatLng? userLocation,
+  LatLng? businessLocation,
+) {
+  if (userLocation == null || businessLocation == null) {
+    return false;
+  }
+
+  const double earthRadiusMiles = 3958.8;
+
+  final double userLat = userLocation.latitude;
+  final double userLon = userLocation.longitude;
+  final double bizLat = businessLocation.latitude;
+  final double bizLon = businessLocation.longitude;
+
+  final double dLat = (bizLat - userLat) * math.pi / 180;
+  final double dLon = (bizLon - userLon) * math.pi / 180;
+
+  final double a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+      math.cos(userLat * math.pi / 180) *
+          math.cos(bizLat * math.pi / 180) *
+          math.sin(dLon / 2) *
+          math.sin(dLon / 2);
+
+  final double c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a));
+  final double distance = earthRadiusMiles * c;
+
+  return distance < 0.1;
 }

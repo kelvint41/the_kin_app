@@ -1,15 +1,11 @@
+import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
 import '/components/metric_card3_widget.dart';
-import '/components/promo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'customer_profile_page_model.dart';
 export 'customer_profile_page_model.dart';
 
@@ -137,7 +133,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
-                          'assets/images/Untitled_design_(1).png',
+                          'assets/images/background_removal#TUFITExheklwdGcjMSM2Y2FmMjhhNTNhMzRiYzBiNTFlMTQ3ZGQxNmEyZTRmMCMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
                           width: 120.0,
                           height: 120.0,
                           fit: BoxFit.cover,
@@ -184,67 +180,11 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: () async {
-                              context.pushNamed(GoogleMapPageWidget.routeName);
-                            },
-                            child: wrapWithModel(
-                              model: _model.launchActionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: LaunchActionWidget(
-                                icon: Icon(
-                                  Icons.map_rounded,
-                                  color: Color(0xFFFFD700),
-                                  size: 28.0,
-                                ),
-                                label: 'Explore Map',
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(
-                                TheExchangeWidget.routeName,
-                                queryParameters: {
-                                  'businessRef': serializeParam(
-                                    widget!.businessRef,
-                                    ParamType.DocumentReference,
-                                  ),
-                                }.withoutNulls,
-                              );
-                            },
-                            child: wrapWithModel(
-                              model: _model.launchActionModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: LaunchActionWidget(
-                                icon: Icon(
-                                  Icons.groups_rounded,
-                                  color: Color(0xFFFFD700),
-                                  size: 28.0,
-                                ),
-                                label: 'The Exchange',
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
                               context
                                   .pushNamed(CommunityPrestigeWidget.routeName);
                             },
                             child: wrapWithModel(
-                              model: _model.launchActionModel3,
+                              model: _model.launchActionModel1,
                               updateCallback: () => safeSetState(() {}),
                               child: LaunchActionWidget(
                                 icon: Icon(
@@ -252,12 +192,63 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                   color: Color(0xFFFFD700),
                                   size: 28.0,
                                 ),
-                                label: 'Community Prestige',
+                                label: 'Explore Black owned Businesses',
+                                isComingSoon: false,
                               ),
                             ),
                           ),
                         ),
                       ].divide(SizedBox(width: 16.0)),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed(CommunityPrestigeWidget.routeName);
+                        },
+                        child: wrapWithModel(
+                          model: _model.launchActionModel2,
+                          updateCallback: () => safeSetState(() {}),
+                          child: LaunchActionWidget(
+                            icon: Icon(
+                              Icons.rate_review_rounded,
+                              color: Color(0xFFFFD700),
+                              size: 28.0,
+                            ),
+                            label: 'The Exchange',
+                            isComingSoon: false,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: () async {
+                          context.pushNamed(CommunityPrestigeWidget.routeName);
+                        },
+                        child: wrapWithModel(
+                          model: _model.launchActionModel3,
+                          updateCallback: () => safeSetState(() {}),
+                          child: LaunchActionWidget(
+                            icon: Icon(
+                              Icons.rate_review_rounded,
+                              color: Color(0xFFFFD700),
+                              size: 28.0,
+                            ),
+                            label: 'Community Prestige',
+                            isComingSoon: true,
+                          ),
+                        ),
+                      ),
                     ),
                   ].divide(SizedBox(height: 16.0)),
                 ),
@@ -366,87 +357,80 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
               ),
               Padding(
                 padding: EdgeInsets.all(24.0),
-                child: SingleChildScrollView(
-                  primary: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Exclusive Connection Stream',
-                            style: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.plusJakartaSans(
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .titleSmall
-                                        .fontStyle,
-                                  ),
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
+                child: StreamBuilder<List<ExchangePromotionsRecord>>(
+                  stream: queryExchangePromotionsRecord(),
+                  builder: (context, snapshot) {
+                    // Customize what your widget looks like when it's loading.
+                    if (!snapshot.hasData) {
+                      return Center(
+                        child: SizedBox(
+                          width: 50.0,
+                          height: 50.0,
+                          child: CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              FlutterFlowTheme.of(context).primary,
+                            ),
                           ),
-                          Icon(
-                            Icons.verified_user_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 18.0,
-                          ),
-                        ],
-                      ),
-                      Column(
+                        ),
+                      );
+                    }
+                    List<ExchangePromotionsRecord>
+                        columnExchangePromotionsRecordList = snapshot.data!;
+
+                    return SingleChildScrollView(
+                      primary: false,
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          wrapWithModel(
-                            model: _model.promoCardModel1,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'IC',
-                              business: 'The Iron Cactus',
-                              time: '2h 14m',
-                              deal:
-                                  'Exclusive: Free appetizer with your next visit!',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.promoCardModel2,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'PB',
-                              business: 'Pearl Brewery',
-                              time: '5h 45m',
-                              deal:
-                                  'Premium Tier: 20% off all craft selections tonight.',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.promoCardModel3,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'EC',
-                              business: 'Estate Coffee Co.',
-                              time: '0h 42m',
-                              deal:
-                                  'Loyalty Perk: Double Kin points on all espresso orders.',
-                            ),
-                          ),
-                        ].divide(SizedBox(height: 16.0)),
+                        children: List.generate(
+                            columnExchangePromotionsRecordList.length,
+                            (columnIndex) {
+                          final columnExchangePromotionsRecord =
+                              columnExchangePromotionsRecordList[columnIndex];
+                          return StreamBuilder<List<ExchangePromotionsRecord>>(
+                            stream: queryExchangePromotionsRecord(),
+                            builder: (context, snapshot) {
+                              // Customize what your widget looks like when it's loading.
+                              if (!snapshot.hasData) {
+                                return Center(
+                                  child: SizedBox(
+                                    width: 50.0,
+                                    height: 50.0,
+                                    child: CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        FlutterFlowTheme.of(context).primary,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              List<ExchangePromotionsRecord>
+                                  listViewExchangePromotionsRecordList =
+                                  snapshot.data!;
+
+                              return ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                itemCount:
+                                    listViewExchangePromotionsRecordList.length,
+                                itemBuilder: (context, listViewIndex) {
+                                  final listViewExchangePromotionsRecord =
+                                      listViewExchangePromotionsRecordList[
+                                          listViewIndex];
+                                  return Container(
+                                      width: 100,
+                                      height: 100,
+                                      color: Colors.green);
+                                },
+                              );
+                            },
+                          );
+                        }).divide(SizedBox(height: 16.0)),
                       ),
-                    ].divide(SizedBox(height: 16.0)),
-                  ),
+                    );
+                  },
                 ),
               ),
               Container(

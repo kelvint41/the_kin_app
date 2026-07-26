@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_item3_model.dart';
 export 'ticker_item3_model.dart';
 
@@ -57,7 +54,7 @@ class _TickerItem3WidgetState extends State<TickerItem3Widget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.symbol,
+            widget.symbol,
             'KNDX',
           ),
           style: FlutterFlowTheme.of(context).titleSmall.override(
@@ -75,7 +72,7 @@ class _TickerItem3WidgetState extends State<TickerItem3Widget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.value,
+            widget.value,
             '1.24',
           ),
           style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -108,7 +105,7 @@ class _TickerItem3WidgetState extends State<TickerItem3Widget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.percent,
+            widget.percent,
             '+14.7%',
           ),
           style: FlutterFlowTheme.of(context).titleMedium.override(

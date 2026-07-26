@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'visit_item_model.dart';
 export 'visit_item_model.dart';
 
@@ -88,7 +85,7 @@ class _VisitItemWidgetState extends State<VisitItemWidget> {
                     fadeInDuration: Duration(milliseconds: 0),
                     fadeOutDuration: Duration(milliseconds: 0),
                     imageUrl: valueOrDefault<String>(
-                      widget!.img_desc,
+                      widget.img_desc,
                       'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop',
                     ),
                     fit: BoxFit.cover,
@@ -104,7 +101,7 @@ class _VisitItemWidgetState extends State<VisitItemWidget> {
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.business_name,
+                        widget.business_name,
                         'The Southern Grind',
                       ),
                       maxLines: 1,
@@ -140,7 +137,7 @@ class _VisitItemWidgetState extends State<VisitItemWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.date,
+                            widget.date,
                             'Yesterday, 10:45 AM',
                           ),
                           style: FlutterFlowTheme.of(context)
@@ -182,7 +179,7 @@ class _VisitItemWidgetState extends State<VisitItemWidget> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '+${widget!.points?.toString()} PTs',
+                    '+${widget.points?.toString()} PTs',
                     style: FlutterFlowTheme.of(context).labelLarge.override(
                           font: GoogleFonts.plusJakartaSans(
                             fontWeight: FlutterFlowTheme.of(context)

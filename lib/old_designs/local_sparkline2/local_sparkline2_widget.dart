@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'local_sparkline2_model.dart';
 export 'local_sparkline2_model.dart';
 
@@ -50,8 +47,8 @@ class _LocalSparkline2WidgetState extends State<LocalSparkline2Widget> {
       child: FlutterFlowLineChart(
         data: [
           FFLineChartData(
-            xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])!,
-            yData: ([15.0, 22.0, 18.0, 30.0, 42.0, 38.0, 55.0])!,
+            xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
+            yData: ([15.0, 22.0, 18.0, 30.0, 42.0, 38.0, 55.0]),
             settings: LineChartBarData(
               color: FlutterFlowTheme.of(context).primary,
               barWidth: 2.0,

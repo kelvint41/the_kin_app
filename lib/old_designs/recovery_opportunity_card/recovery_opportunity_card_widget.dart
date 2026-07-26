@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'recovery_opportunity_card_model.dart';
 export 'recovery_opportunity_card_model.dart';
 
@@ -109,7 +106,7 @@ class _RecoveryOpportunityCardWidgetState
                         children: [
                           Text(
                             valueOrDefault<String>(
-                              widget!.user_name,
+                              widget.user_name,
                               'Sarah Jenkins',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -134,7 +131,7 @@ class _RecoveryOpportunityCardWidgetState
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.time,
+                              widget.time,
                               'Last Saturday',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -188,7 +185,7 @@ class _RecoveryOpportunityCardWidgetState
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.rating?.toString(),
+                              widget.rating?.toString(),
                               '3.0',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -218,7 +215,7 @@ class _RecoveryOpportunityCardWidgetState
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.comment,
+                  widget.comment,
                   'The selection was beautiful but the wait was quite long last Saturday afternoon. Hard to browse with the crowd.',
                 ),
                 maxLines: 3,

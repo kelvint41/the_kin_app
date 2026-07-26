@@ -1,11 +1,8 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'clean_elegant_mobile_model.dart';
 export 'clean_elegant_mobile_model.dart';
 
@@ -124,7 +121,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.doordashUrl);
+                      await launchURL(widget.businessDoc!.doordashUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -187,7 +184,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.ubereatsUrl);
+                      await launchURL(widget.businessDoc!.ubereatsUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -250,7 +247,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.grubhubUrl);
+                      await launchURL(widget.businessDoc!.grubhubUrl);
                     },
                     child: Container(
                       height: 56.0,

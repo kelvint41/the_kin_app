@@ -62,6 +62,7 @@ abstract class FlutterFlowTheme {
   late Color onPrimary;
   late Color onSecondary;
   late Color onError;
+  late Color customColor1;
 
   FFDesignTokens get designToken => FFDesignTokens(this);
 
@@ -155,23 +156,17 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color secondary = const Color(0xFFC5A059);
   late Color tertiary = const Color(0xFF8A7B5E);
   late Color alternate = const Color(0xFF3D3D3D);
-  // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
-  // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
-  // failing WCAG AA at every text size since this is the default color
-  // for nearly all typography styles. This shade holds the same ~5.8:1
-  // contrast ratio the app already relies on for gold-on-dark-green
-  // elsewhere, while staying legible against a near-white background.
-  late Color primaryText = const Color(0xFF7D5F16);
-  late Color secondaryText = const Color(0xFF14181B);
+  late Color primaryText = const Color(0xFF111C18);
+  late Color secondaryText = const Color(0xFF687378);
   late Color primaryBackground = const Color(0xFFFCFCFC);
-  late Color secondaryBackground = const Color(0xFFFFFFFF);
+  late Color secondaryBackground = const Color(0xFFF8EDE8);
   late Color accent1 = const Color(0xFFD4AF37);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xCCFFFFFF);
-  late Color success = const Color(0xFF2D4A3E);
+  late Color success = const Color(0xFF188A55);
   late Color warning = const Color(0xFFF9CF58);
-  late Color error = const Color(0xFFBA1A1A);
+  late Color error = const Color(0xFFC62828);
   late Color info = const Color(0xFFFFFFFF);
 
   late Color divider = const Color(0xFF3D3D3D);
@@ -180,6 +175,7 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
   late Color onError = const Color(0xFFFFFFFF);
+  late Color customColor1 = const Color(0xFFA6F4EE);
 }
 
 abstract class Typography {
@@ -364,17 +360,17 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color secondary = const Color(0xFFC5A059);
   late Color tertiary = const Color(0xFF8A7B5E);
   late Color alternate = const Color(0xFF3D3D3D);
-  late Color primaryText = const Color(0xFFD4AF37);
-  late Color secondaryText = const Color(0xFFC5A059);
-  late Color primaryBackground = const Color(0xFF121212);
-  late Color secondaryBackground = const Color(0xFF242424);
+  late Color primaryText = const Color(0xFFE6F0EA);
+  late Color secondaryText = const Color(0xFF7A9A8C);
+  late Color primaryBackground = const Color(0xFF0D1A12);
+  late Color secondaryBackground = const Color(0xFF162318);
   late Color accent1 = const Color(0xFFD4AF37);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xB2262D34);
-  late Color success = const Color(0xFF82FAAF);
+  late Color success = const Color(0xFF2EBF6A);
   late Color warning = const Color(0xFFF9CF58);
-  late Color error = const Color(0xFFFFB4AB);
+  late Color error = const Color(0xFFEF5350);
   late Color info = const Color(0xFFFFFFFF);
 
   late Color divider = const Color(0xFF3D3D3D);
@@ -383,6 +379,7 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
   late Color onError = const Color(0xFFFFFFFF);
+  late Color customColor1 = const Color(0xFFA6F4EE);
 }
 
 class FFDesignTokens {
@@ -454,7 +451,7 @@ extension TextStyleHelper on TextStyle {
     List<Shadow>? shadows,
     String? package,
   }) {
-    if (useGoogleFonts && fontFamily != null) {
+    if (useGoogleFonts && fontFamily != null && fontFamily.isNotEmpty) {
       font = GoogleFonts.getFont(fontFamily,
           fontWeight: fontWeight ?? this.fontWeight,
           fontStyle: fontStyle ?? this.fontStyle);

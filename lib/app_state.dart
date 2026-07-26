@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import '/backend/backend.dart';
-import '/backend/schema/structs/index.dart';
-import '/backend/api_requests/api_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'flutter_flow/flutter_flow_util.dart';
-import 'dart:convert';
 
 class FFAppState extends ChangeNotifier {
   static FFAppState _instance = FFAppState._internal();
@@ -153,7 +150,7 @@ class FFAppState extends ChangeNotifier {
     _kindexscore = value;
   }
 
-  String _currentCity = '';
+  String _currentCity = 'San Antonio';
   String get currentCity => _currentCity;
   set currentCity(String value) {
     _currentCity = value;
@@ -163,6 +160,30 @@ class FFAppState extends ChangeNotifier {
   String get signupType => _signupType;
   set signupType(String value) {
     _signupType = value;
+  }
+
+  double _userLat = 0.0;
+  double get userLat => _userLat;
+  set userLat(double value) {
+    _userLat = value;
+  }
+
+  double _userLong = 0.0;
+  double get userLong => _userLong;
+  set userLong(double value) {
+    _userLong = value;
+  }
+
+  String _activeranking = '';
+  String get activeranking => _activeranking;
+  set activeranking(String value) {
+    _activeranking = value;
+  }
+
+  String _uploadedHeroImageUrl = '';
+  String get uploadedHeroImageUrl => _uploadedHeroImageUrl;
+  set uploadedHeroImageUrl(String value) {
+    _uploadedHeroImageUrl = value;
   }
 }
 

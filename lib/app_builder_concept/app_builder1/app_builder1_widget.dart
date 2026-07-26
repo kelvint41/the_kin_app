@@ -3,11 +3,8 @@ import '/backend/backend.dart';
 import '/components/milestone_step_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'app_builder1_model.dart';
 export 'app_builder1_model.dart';
 
@@ -375,7 +372,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                           Text(
                                             valueOrDefault<String>(
                                               appBuilder1AgencyQueueRecord
-                                                  ?.projectId,
+                                                  .projectId,
                                               '#00000',
                                             ),
                                             style: FlutterFlowTheme.of(context)
@@ -479,7 +476,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                               ),
                                             ),
                                           ),
-                                        if (appBuilder1AgencyQueueRecord!
+                                        if (appBuilder1AgencyQueueRecord
                                                 .currentStep >=
                                             2)
                                           Expanded(
@@ -495,7 +492,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                               ),
                                             ),
                                           ),
-                                        if (appBuilder1AgencyQueueRecord!
+                                        if (appBuilder1AgencyQueueRecord
                                                 .currentStep >=
                                             3)
                                           Expanded(
@@ -511,7 +508,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                               ),
                                             ),
                                           ),
-                                        if (appBuilder1AgencyQueueRecord!
+                                        if (appBuilder1AgencyQueueRecord
                                                 .currentStep >=
                                             4)
                                           Expanded(
@@ -625,56 +622,56 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                                 Text(
                                                   () {
                                                     if (appBuilder1AgencyQueueRecord
-                                                            ?.projectType ==
+                                                            .projectType ==
                                                         'App Build') {
                                                       return 'Project Strategy & Kickoff';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'App Build') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             2)) {
                                                       return 'High-Fidelity UI Design';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'App Build') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             2)) {
                                                       return 'Active Core Development';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'App Build') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             4)) {
                                                       return 'Quality Assurance & Launch';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'Marketing Design') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             1)) {
                                                       return 'Brand Strategy & Blueprint';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'Marketing Designs') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             2)) {
                                                       return 'Asset Production Underway';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'Marketing Designs') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             3)) {
                                                       return 'Internal Review & Polish';
                                                     } else if ((appBuilder1AgencyQueueRecord
-                                                                ?.projectType ==
+                                                                .projectType ==
                                                             'Marketing Design') &&
                                                         (appBuilder1AgencyQueueRecord
-                                                                ?.currentStep ==
+                                                                .currentStep ==
                                                             4)) {
                                                       return 'Final Handoff & Export';
                                                     } else {
@@ -748,52 +745,52 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                         Text(
                                           () {
                                             if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'App Build') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     1)) {
                                               return 'We are currently establishing your app shell, configuring the global theme architecture, designing your launch splash screens, and prepping the repository for app store alignment.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'App Build') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     2)) {
                                               return 'We are engineering user account architecture, structuring secure authentication states, building real-time profile dashboards, and designing custom interactive component layouts.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'App Build') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     3)) {
                                               return 'Active technical compilation is underway. We are wiring up live database logic streams, integrating specialized map location layers, and linking core functional features.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'Marketing Design') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     1)) {
                                               return 'We are conducting brand asset evaluation, mapping out structural design layouts, aligning typography hierarchies, and establishing the baseline creative blueprint for your campaign.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'Marketing Design') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     2)) {
                                               return 'High-fidelity asset execution is now underway. We are constructing tailored marketing materials, rendering custom vector compositions, and establishing complete brand design sets.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'Marketing Design') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     3)) {
                                               return 'Your marketing assets are currently entering internal review. We are refining alignment metrics, running balance checks across all variants, and polishing final visual presentation states.';
                                             } else if ((appBuilder1AgencyQueueRecord
-                                                        ?.projectType ==
+                                                        .projectType ==
                                                     'Marketing Design') &&
                                                 (appBuilder1AgencyQueueRecord
-                                                        ?.currentStep ==
+                                                        .currentStep ==
                                                     4)) {
                                               return 'Preparing final package fulfillment. We are exporting high-resolution assets, assembling organized digital deliverable kits, and deploying your complete asset pack for immediate distribution.';
                                             } else {
@@ -884,7 +881,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.center,
                                                 children: [
-                                                  if (appBuilder1AgencyQueueRecord!
+                                                  if (appBuilder1AgencyQueueRecord
                                                           .currentStep <=
                                                       2)
                                                     Container(
@@ -973,7 +970,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                                       ),
                                                     ),
                                                   if (appBuilder1AgencyQueueRecord
-                                                          ?.currentStep ==
+                                                          .currentStep ==
                                                       2)
                                                     Container(
                                                       height: 34.0,
@@ -1053,7 +1050,7 @@ class _AppBuilder1WidgetState extends State<AppBuilder1Widget> {
                                                         ),
                                                       ),
                                                     ),
-                                                  if (appBuilder1AgencyQueueRecord!
+                                                  if (appBuilder1AgencyQueueRecord
                                                           .currentStep >=
                                                       3)
                                                     Container(

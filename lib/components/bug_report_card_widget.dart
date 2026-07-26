@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'bug_report_card_model.dart';
 export 'bug_report_card_model.dart';
 
@@ -89,7 +86,7 @@ class _BugReportCardWidgetState extends State<BugReportCardWidget> {
                           children: [
                             Text(
                               valueOrDefault<String>(
-                                widget!.testerName,
+                                widget.testerName,
                                 'Alex Rivera',
                               ),
                               maxLines: 1,
@@ -147,7 +144,7 @@ class _BugReportCardWidgetState extends State<BugReportCardWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.pageWhereItHappened,
+                                    widget.pageWhereItHappened,
                                     'Checkout Screen',
                                   ),
                                   maxLines: 1,
@@ -230,7 +227,7 @@ class _BugReportCardWidgetState extends State<BugReportCardWidget> {
                       child: Container(
                         child: Text(
                           valueOrDefault<String>(
-                            widget!.issueDescription,
+                            widget.issueDescription,
                             'The \'Pay Now\' button remains disabled even after all credit card fields are correctly filled. Happens specifically on iOS 17 devices.',
                           ),
                           style: FlutterFlowTheme.of(context)
@@ -273,7 +270,7 @@ class _BugReportCardWidgetState extends State<BugReportCardWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.timestamp,
+                          widget.timestamp,
                           '2 mins ago',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(

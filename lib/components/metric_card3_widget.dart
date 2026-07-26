@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'metric_card3_model.dart';
 export 'metric_card3_model.dart';
 
@@ -76,10 +73,10 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  widget!.icon!,
+                  widget.icon!,
                   Text(
                     valueOrDefault<String>(
-                      widget!.label,
+                      widget.label,
                       '7-Day Support Streak',
                     ),
                     maxLines: 1,
@@ -107,7 +104,7 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.value,
+                  widget.value,
                   '14 🔥',
                 ),
                 style: FlutterFlowTheme.of(context).titleLarge.override(

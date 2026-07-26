@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import '../cloud_functions/cloud_functions.dart';
-import '../schema/structs/index.dart';
 
 import 'package:flutter/foundation.dart';
 
@@ -27,6 +25,33 @@ class GetBusinessDetailsCall {
     );
     return ApiCallResponse.fromCloudCallResponse(response);
   }
+
+  static String? businessname(dynamic response) =>
+      castToType<String>(getJsonField(
+        response,
+        r'''$.result.name''',
+      ));
+  static String? address(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.result.formatted_address''',
+      ));
+  static String? phonenumber(dynamic response) =>
+      castToType<String>(getJsonField(
+        response,
+        r'''$.result.formatted_phone_number''',
+      ));
+  static String? website(dynamic response) => castToType<String>(getJsonField(
+        response,
+        r'''$.result.website''',
+      ));
+  static double? rating(dynamic response) => castToType<double>(getJsonField(
+        response,
+        r'''$.result.rating''',
+      ));
+  static int? totalreviews(dynamic response) => castToType<int>(getJsonField(
+        response,
+        r'''$.result.user_ratings_total''',
+      ));
 }
 
 class GooglePlacesAutocompleteCall {

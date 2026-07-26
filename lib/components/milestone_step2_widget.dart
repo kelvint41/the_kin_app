@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'milestone_step2_model.dart';
 export 'milestone_step2_model.dart';
 
@@ -61,12 +58,12 @@ class _MilestoneStep2WidgetState extends State<MilestoneStep2Widget> {
             color: valueOrDefault<Color>(
               () {
                 if (valueOrDefault<bool>(
-                  widget!.completed,
+                  widget.completed,
                   true,
                 )) {
                   return FlutterFlowTheme.of(context).primary;
                 } else if (valueOrDefault<bool>(
-                  widget!.active,
+                  widget.active,
                   false,
                 )) {
                   return FlutterFlowTheme.of(context).primary;
@@ -93,7 +90,7 @@ class _MilestoneStep2WidgetState extends State<MilestoneStep2Widget> {
                 children: [
                   if (valueOrDefault<bool>(
                     valueOrDefault<bool>(
-                      widget!.completed,
+                      widget.completed,
                       true,
                     )
                         ? true
@@ -105,12 +102,12 @@ class _MilestoneStep2WidgetState extends State<MilestoneStep2Widget> {
                       color: valueOrDefault<Color>(
                         () {
                           if (valueOrDefault<bool>(
-                            widget!.active,
+                            widget.active,
                             false,
                           )) {
                             return FlutterFlowTheme.of(context).primary;
                           } else if (valueOrDefault<bool>(
-                            widget!.completed,
+                            widget.completed,
                             true,
                           )) {
                             return FlutterFlowTheme.of(context).primary;
@@ -127,7 +124,7 @@ class _MilestoneStep2WidgetState extends State<MilestoneStep2Widget> {
             ),
             Text(
               valueOrDefault<String>(
-                widget!.label,
+                widget.label,
                 'Strategy',
               ),
               style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -139,7 +136,7 @@ class _MilestoneStep2WidgetState extends State<MilestoneStep2Widget> {
                     ),
                     color: valueOrDefault<Color>(
                       valueOrDefault<bool>(
-                        widget!.active,
+                        widget.active,
                         false,
                       )
                           ? FlutterFlowTheme.of(context).primaryText

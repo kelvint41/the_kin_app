@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_row_model.dart';
 export 'ticker_row_model.dart';
 
@@ -76,7 +73,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                     width: 80.0,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.symbol,
+                        widget.symbol,
                         'JOYX',
                       ),
                       style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -100,7 +97,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                     flex: 1,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.score,
+                        widget.score,
                         '545',
                       ),
                       textAlign: TextAlign.center,
@@ -137,7 +134,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                             children: [
                               if (valueOrDefault<bool>(
                                 valueOrDefault<bool>(
-                                  widget!.isUp,
+                                  widget.isUp,
                                   true,
                                 )
                                     ? true
@@ -147,14 +144,14 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                                 Icon(
                                   Icons.trending_up_rounded,
                                   color: valueOrDefault<Color>(
-                                    widget!.trendColor,
+                                    widget.trendColor,
                                     Color(0xFF10B981),
                                   ),
                                   size: 18.0,
                                 ),
                               if (valueOrDefault<bool>(
                                 valueOrDefault<bool>(
-                                  widget!.isUp,
+                                  widget.isUp,
                                   true,
                                 )
                                     ? false
@@ -164,7 +161,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                                 Icon(
                                   Icons.trending_down_rounded,
                                   color: valueOrDefault<Color>(
-                                    widget!.trendColor,
+                                    widget.trendColor,
                                     Color(0xFF10B981),
                                   ),
                                   size: 18.0,
@@ -174,7 +171,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.trend,
+                            widget.trend,
                             '+1.2%',
                           ),
                           style:
@@ -186,7 +183,7 @@ class _TickerRowWidgetState extends State<TickerRowWidget> {
                                           .fontStyle,
                                     ),
                                     color: valueOrDefault<Color>(
-                                      widget!.trendColor,
+                                      widget.trendColor,
                                       Color(0xFF10B981),
                                     ),
                                     letterSpacing: 0.0,

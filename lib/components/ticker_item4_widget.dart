@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_item4_model.dart';
 export 'ticker_item4_model.dart';
 
@@ -57,7 +54,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.ticker,
+            widget.ticker,
             'ALMO',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -74,7 +71,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
         ),
         Text(
           valueOrDefault<String>(
-            '${widget!.score}',
+            '${widget.score}',
             '1240',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -85,7 +82,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
                 ),
                 color: valueOrDefault<Color>(
                   valueOrDefault<bool>(
-                    widget!.up,
+                    widget.up,
                     true,
                   )
                       ? Color(0xFF10B981)
@@ -106,7 +103,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
             children: [
               if (valueOrDefault<bool>(
                 valueOrDefault<bool>(
-                  widget!.up,
+                  widget.up,
                   true,
                 )
                     ? true
@@ -117,7 +114,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
                   Icons.change_history_rounded,
                   color: valueOrDefault<Color>(
                     valueOrDefault<bool>(
-                      widget!.up,
+                      widget.up,
                       true,
                     )
                         ? Color(0xFF10B981)
@@ -128,7 +125,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
                 ),
               if (valueOrDefault<bool>(
                 valueOrDefault<bool>(
-                  widget!.up,
+                  widget.up,
                   true,
                 )
                     ? false
@@ -139,7 +136,7 @@ class _TickerItem4WidgetState extends State<TickerItem4Widget> {
                   Icons.arrow_drop_down_rounded,
                   color: valueOrDefault<Color>(
                     valueOrDefault<bool>(
-                      widget!.up,
+                      widget.up,
                       true,
                     )
                         ? Color(0xFF10B981)

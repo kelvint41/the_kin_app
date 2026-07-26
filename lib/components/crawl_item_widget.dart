@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'crawl_item_model.dart';
 export 'crawl_item_model.dart';
 
@@ -54,7 +51,7 @@ class _CrawlItemWidgetState extends State<CrawlItemWidget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.symbol,
+            widget.symbol,
             'JOYX',
           ),
           style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -71,7 +68,7 @@ class _CrawlItemWidgetState extends State<CrawlItemWidget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.score,
+            widget.score,
             '545',
           ),
           style: FlutterFlowTheme.of(context).labelSmall.override(

@@ -1,20 +1,16 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
-import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
-import '/components/power_hour_panel_widget.dart';
 import '/components/review_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'owner_profile_model.dart';
 export 'owner_profile_model.dart';
 
@@ -114,51 +110,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // This dashboard reads the signed-in owner's business; render an empty
-    // state instead of crashing when they haven't set one up yet.
-    if (currentUserDocument?.ownedBusiness == null) {
-      return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Center(
-          child: Padding(
-            padding: EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Set up your business to see your owner dashboard.',
-                  textAlign: TextAlign.center,
-                  style: FlutterFlowTheme.of(context).bodyLarge.override(
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                      ),
-                ),
-                SizedBox(height: 24.0),
-                FFButtonWidget(
-                  onPressed: () {
-                    context.pushNamed(BusinessSetupPageWidget.routeName);
-                  },
-                  text: 'Set Up Business',
-                  options: FFButtonOptions(
-                    height: 44.0,
-                    padding:
-                        EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 0.0),
-                    color: FlutterFlowTheme.of(context).secondary,
-                    textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                          color: Colors.white,
-                        ),
-                    elevation: 0.0,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -166,7 +117,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        backgroundColor: FlutterFlowTheme.of(context).primary,
         body: SingleChildScrollView(
           primary: false,
           child: Column(
@@ -198,9 +149,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           gradient: LinearGradient(
                             colors: [
                               Colors.transparent,
-                              FlutterFlowTheme.of(context)
-                                  .primary
-                                  .withAlpha(153),
+                              Color(0x990B3D2E),
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 0.7, 1.0],
@@ -417,10 +366,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                             width: 100.0,
                                             height: 100.0,
                                             decoration: BoxDecoration(
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryBackground
-                                                      .withAlpha(154),
+                                              color: Color(0x9A242424),
                                             ),
                                             child: Column(
                                               mainAxisSize: MainAxisSize.max,
@@ -678,7 +624,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        color: Color(0xFF242424),
                         borderRadius: BorderRadius.circular(24.0),
                         shape: BoxShape.rectangle,
                       ),
@@ -720,8 +666,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                     .bodyLarge
                                                     .fontStyle,
                                           ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          color: Colors.white,
                                           letterSpacing: 0.0,
                                           fontWeight: FontWeight.bold,
                                           fontStyle:
@@ -746,8 +691,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                          color:
-                                              FlutterFlowTheme.of(context).hint,
+                                          color: Color(0xFF999999),
                                           letterSpacing: 0.0,
                                           fontWeight:
                                               FlutterFlowTheme.of(context)
@@ -775,7 +719,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                             .bodySmall
                                             .fontStyle,
                                       ),
-                                      color: FlutterFlowTheme.of(context).hint,
+                                      color: Color(0xFF999999),
                                       letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodySmall
@@ -808,64 +752,42 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       children: [
                         Icon(
                           Icons.bolt_rounded,
-                          color: FlutterFlowTheme.of(context).primaryText,
+                          color: Colors.white,
                           size: 18.0,
                         ),
                         Text(
                           'Active Promotion',
-                          style: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                font: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
+                          style:
+                              FlutterFlowTheme.of(context).titleSmall.override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    color: Colors.white,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                  ),
                         ),
                       ].divide(SizedBox(width: 4.0)),
                     ),
                     Container(
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
+                        color: Color(0xFF242424),
                         borderRadius: BorderRadius.circular(24.0),
                         shape: BoxShape.rectangle,
                       ),
                       child: Padding(
                         padding: EdgeInsets.all(24.0),
-                        child: StreamBuilder<BusinessesRecord>(
-                          stream: BusinessesRecord.getDocument(
-                              currentUserDocument!.ownedBusiness!),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 24.0,
-                                  height: 24.0,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).primary,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                            final powerHourBusinessesRecord = snapshot.data!;
-                            return PowerHourPanelWidget(
-                              businessRef: powerHourBusinessesRecord.reference,
-                              hasFlashBeacon:
-                                  powerHourBusinessesRecord.hasFlashBeacon,
-                              flashBeaconExpiresAt: powerHourBusinessesRecord
-                                  .flashBeaconExpiresAt,
-                            );
-                          },
+                        child: Container(
+                          child: Container(
+                            width: 0.0,
+                            height: 0.0,
+                          ),
                         ),
                       ),
                     ),
@@ -888,7 +810,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   .titleSmall
                                   .fontStyle,
                             ),
-                            color: FlutterFlowTheme.of(context).primaryText,
+                            color: Colors.white,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.bold,
                             fontStyle: FlutterFlowTheme.of(context)
@@ -964,7 +886,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   .titleSmall
                                   .fontStyle,
                             ),
-                            color: FlutterFlowTheme.of(context).primaryText,
+                            color: Colors.white,
                             letterSpacing: 0.0,
                             fontWeight: FontWeight.bold,
                             fontStyle: FlutterFlowTheme.of(context)
@@ -992,7 +914,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              FlutterFlowTheme.of(context).secondaryBackground,
+                              Color(0xFF242424),
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 1.0],
@@ -1002,9 +924,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           borderRadius: BorderRadius.circular(24.0),
                           shape: BoxShape.rectangle,
                           border: Border.all(
-                            color: FlutterFlowTheme.of(context)
-                                .accent1
-                                .withAlpha(51),
+                            color: Color(0x33D4AF37),
                             width: 1.0,
                           ),
                         ),
@@ -1018,9 +938,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               children: [
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .accent1
-                                        .withAlpha(51),
+                                    color: Color(0x33D4AF37),
                                     borderRadius: BorderRadius.circular(9999.0),
                                     shape: BoxShape.rectangle,
                                   ),
@@ -1117,9 +1035,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                color: Colors.white,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1165,9 +1081,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                color: Colors.white,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1213,9 +1127,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                color: Colors.white,
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1284,12 +1196,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: () async {
-                              await KinServices.shareApp(
-                                text:
-                                    'Check out my business on KIN:${currentUserDocument?.ownedBusiness?.id}',
+                              await Share.share(
+                                'Check out my business on KIN:${currentUserDocument?.ownedBusiness?.id}',
                                 sharePositionOrigin:
                                     getWidgetBoundingBox(context),
-                                businessRef: currentUserDocument?.ownedBusiness,
                               );
                             },
                             child: wrapWithModel(
@@ -1314,14 +1224,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           highlightColor: Colors.transparent,
                           onTap: () async {
                             context.pushNamed(
-                              BusinessProfileOwnerWidget.routeName,
-                              queryParameters: {
-                                'businessRef': serializeParam(
-                                  currentUserDocument?.ownedBusiness,
-                                  ParamType.DocumentReference,
-                                ),
-                              }.withoutNulls,
-                            );
+                                BusinessProfileOwnerWidget.routeName);
                           },
                           child: wrapWithModel(
                             model: _model.actionBtnModel3,
@@ -1348,30 +1251,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             label: 'Get Support',
                           ),
                         ),
-                        if (currentUserDocument?.isAdmin == true)
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(
-                                  ExecutiveDashboardWidget.routeName);
-                            },
-                            child: wrapWithModel(
-                              model: _model.actionBtnModel5,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ActionBtnWidget(
-                                icon: Icon(
-                                  Icons.dashboard_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  size: 24.0,
-                                ),
-                                label: 'Dashboard',
-                              ),
-                            ),
-                          ),
                       ],
                     ),
                   ),

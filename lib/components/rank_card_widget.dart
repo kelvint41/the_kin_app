@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'rank_card_model.dart';
 export 'rank_card_model.dart';
 
@@ -75,7 +72,7 @@ class _RankCardWidgetState extends State<RankCardWidget> {
                 width: 24.0,
                 child: Text(
                   valueOrDefault<String>(
-                    '${widget!.rank}',
+                    '${widget.rank}',
                     '4',
                   ),
                   style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -104,7 +101,7 @@ class _RankCardWidgetState extends State<RankCardWidget> {
                 alignment: AlignmentDirectional(0.0, 0.0),
                 child: Text(
                   valueOrDefault<String>(
-                    widget!.name,
+                    widget.name,
                     'Urban Greens',
                   ),
                   textAlign: TextAlign.center,
@@ -136,7 +133,7 @@ class _RankCardWidgetState extends State<RankCardWidget> {
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.name,
+                        widget.name,
                         'Urban Greens',
                       ),
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
@@ -157,7 +154,7 @@ class _RankCardWidgetState extends State<RankCardWidget> {
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.desc,
+                        widget.desc,
                         'Sustainable Dining',
                       ),
                       style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -198,7 +195,7 @@ class _RankCardWidgetState extends State<RankCardWidget> {
                   child: Container(
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.score,
+                        widget.score,
                         '912',
                       ),
                       style: FlutterFlowTheme.of(context).titleSmall.override(

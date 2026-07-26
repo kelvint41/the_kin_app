@@ -1,12 +1,9 @@
 import '/components/rating_bar_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_card2_model.dart';
 export 'business_card2_model.dart';
 
@@ -86,7 +83,7 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                 fadeInDuration: Duration(milliseconds: 0),
                 fadeOutDuration: Duration(milliseconds: 0),
                 imageUrl: valueOrDefault<String>(
-                  widget!.imgDesc,
+                  widget.imgDesc,
                   'https://dimg.dreamflow.cloud/v1/image/luxury%20restaurant%20interior',
                 ),
                 fit: BoxFit.cover,
@@ -102,7 +99,7 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.name,
+                      widget.name,
                       'The Gilded Rose',
                     ),
                     maxLines: 1,
@@ -125,7 +122,7 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.category,
+                      widget.category,
                       'Fine Dining',
                     ),
                     style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -164,7 +161,7 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.city,
+                              widget.city,
                               'New York',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -197,7 +194,7 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                         updateCallback: () => safeSetState(() {}),
                         child: RatingBarWidget(
                           score: valueOrDefault<String>(
-                            widget!.rating,
+                            widget.rating,
                             '4.9',
                           ),
                         ),

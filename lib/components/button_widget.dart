@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
-import 'package:provider/provider.dart';
 import 'button_model.dart';
 export 'button_model.dart';
 
@@ -73,7 +70,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
     return Opacity(
       opacity: valueOrDefault<double>(
         valueOrDefault<bool>(
-          widget!.disabled,
+          widget.disabled,
           false,
         )
             ? 0.55
@@ -87,13 +84,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             topLeft: Radius.circular(valueOrDefault<double>(
               () {
                 if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'small') {
                   return 8.0;
                 } else if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'large') {
@@ -107,13 +104,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             topRight: Radius.circular(valueOrDefault<double>(
               () {
                 if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'small') {
                   return 8.0;
                 } else if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'large') {
@@ -127,13 +124,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             bottomLeft: Radius.circular(valueOrDefault<double>(
               () {
                 if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'small') {
                   return 8.0;
                 } else if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'large') {
@@ -147,13 +144,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             bottomRight: Radius.circular(valueOrDefault<double>(
               () {
                 if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'small') {
                   return 8.0;
                 } else if (valueOrDefault<String>(
-                      widget!.size,
+                      widget.size,
                       'medium',
                     ) ==
                     'large') {
@@ -170,7 +167,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             color: FlutterFlowTheme.of(context).secondary,
             width: valueOrDefault<double>(
               valueOrDefault<String>(
-                        widget!.variant,
+                        widget.variant,
                         'ghost',
                       ) ==
                       'outline'
@@ -186,7 +183,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             Opacity(
               opacity: valueOrDefault<double>(
                 valueOrDefault<bool>(
-                  widget!.loading,
+                  widget.loading,
                   false,
                 )
                     ? 0.0
@@ -198,13 +195,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     valueOrDefault<double>(
                       () {
                         if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'small') {
                           return 16.0;
                         } else if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'large') {
@@ -218,13 +215,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     valueOrDefault<double>(
                       () {
                         if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'small') {
                           return 4.0;
                         } else if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'large') {
@@ -238,13 +235,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     valueOrDefault<double>(
                       () {
                         if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'small') {
                           return 16.0;
                         } else if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'large') {
@@ -258,13 +255,13 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     valueOrDefault<double>(
                       () {
                         if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'small') {
                           return 4.0;
                         } else if (valueOrDefault<String>(
-                              widget!.size,
+                              widget.size,
                               'medium',
                             ) ==
                             'large') {
@@ -281,7 +278,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     if (valueOrDefault<bool>(
-                      widget!.iconPresent,
+                      widget.iconPresent,
                       false,
                     ))
                       Icon(
@@ -289,25 +286,25 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                         color: valueOrDefault<Color>(
                           () {
                             if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'secondary') {
                               return FlutterFlowTheme.of(context).secondary;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'outline') {
                               return FlutterFlowTheme.of(context).primaryText;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'ghost') {
                               return FlutterFlowTheme.of(context).primary;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'destructive') {
@@ -322,7 +319,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                       ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.content,
+                        widget.content,
                         'SlotValue(\$cancel_label)',
                       ),
                       maxLines: 1,
@@ -338,27 +335,27 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                             color: valueOrDefault<Color>(
                               () {
                                 if (valueOrDefault<String>(
-                                      widget!.variant,
+                                      widget.variant,
                                       'ghost',
                                     ) ==
                                     'secondary') {
                                   return FlutterFlowTheme.of(context)
                                       .onSecondary;
                                 } else if (valueOrDefault<String>(
-                                      widget!.variant,
+                                      widget.variant,
                                       'ghost',
                                     ) ==
                                     'outline') {
                                   return FlutterFlowTheme.of(context)
                                       .primaryText;
                                 } else if (valueOrDefault<String>(
-                                      widget!.variant,
+                                      widget.variant,
                                       'ghost',
                                     ) ==
                                     'ghost') {
                                   return FlutterFlowTheme.of(context).primary;
                                 } else if (valueOrDefault<String>(
-                                      widget!.variant,
+                                      widget.variant,
                                       'ghost',
                                     ) ==
                                     'destructive') {
@@ -382,7 +379,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                       overflow: TextOverflow.clip,
                     ),
                     if (valueOrDefault<bool>(
-                      widget!.iconEndPresent,
+                      widget.iconEndPresent,
                       false,
                     ))
                       Icon(
@@ -390,25 +387,25 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                         color: valueOrDefault<Color>(
                           () {
                             if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'secondary') {
                               return FlutterFlowTheme.of(context).onSecondary;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'outline') {
                               return FlutterFlowTheme.of(context).primaryText;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'ghost') {
                               return FlutterFlowTheme.of(context).primary;
                             } else if (valueOrDefault<String>(
-                                  widget!.variant,
+                                  widget.variant,
                                   'ghost',
                                 ) ==
                                 'destructive') {
@@ -427,7 +424,7 @@ class _ButtonWidgetState extends State<ButtonWidget> {
             ),
             if (valueOrDefault<bool>(
               valueOrDefault<bool>(
-                widget!.loading,
+                widget.loading,
                 false,
               )
                   ? true
@@ -443,25 +440,25 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                 progressColor: valueOrDefault<Color>(
                   () {
                     if (valueOrDefault<String>(
-                          widget!.variant,
+                          widget.variant,
                           'ghost',
                         ) ==
                         'secondary') {
                       return FlutterFlowTheme.of(context).onSecondary;
                     } else if (valueOrDefault<String>(
-                          widget!.variant,
+                          widget.variant,
                           'ghost',
                         ) ==
                         'outline') {
                       return FlutterFlowTheme.of(context).primaryText;
                     } else if (valueOrDefault<String>(
-                          widget!.variant,
+                          widget.variant,
                           'ghost',
                         ) ==
                         'ghost') {
                       return FlutterFlowTheme.of(context).primary;
                     } else if (valueOrDefault<String>(
-                          widget!.variant,
+                          widget.variant,
                           'ghost',
                         ) ==
                         'destructive') {

@@ -5,7 +5,6 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'delivery_button_component_model.dart';
 export 'delivery_button_component_model.dart';
 
@@ -58,7 +57,7 @@ class _DeliveryButtonComponentWidgetState
             return Padding(
               padding: MediaQuery.viewInsetsOf(context),
               child: CleanElegantMobileWidget(
-                businessDoc: widget!.businessDoc!,
+                businessDoc: widget.businessDoc!,
               ),
             );
           },

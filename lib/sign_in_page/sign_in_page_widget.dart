@@ -3,11 +3,9 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'sign_in_page_model.dart';
 export 'sign_in_page_model.dart';
 
@@ -464,7 +462,7 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                   }
 
                   context.goNamedAuth(
-                      GoogleMapPageWidget.routeName, context.mounted);
+                      BusinessProfileOwnerWidget.routeName, context.mounted);
                 },
                 text: 'Welcome Back!',
                 options: FFButtonOptions(

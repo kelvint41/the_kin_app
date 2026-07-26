@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'feature_bullet_model.dart';
 export 'feature_bullet_model.dart';
 
@@ -61,7 +58,7 @@ class _FeatureBulletWidgetState extends State<FeatureBulletWidget> {
             flex: 1,
             child: Text(
               valueOrDefault<String>(
-                widget!.label,
+                widget.label,
                 'Verified Gold Status Badge',
               ),
               maxLines: 2,

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'tracking_step_model.dart';
 export 'tracking_step_model.dart';
 
@@ -69,7 +66,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
               decoration: BoxDecoration(
                 color: valueOrDefault<Color>(
                   valueOrDefault<bool>(
-                    widget!.isActive,
+                    widget.isActive,
                     true,
                   )
                       ? FlutterFlowTheme.of(context).primaryText
@@ -81,7 +78,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
                 border: Border.all(
                   color: valueOrDefault<Color>(
                     valueOrDefault<bool>(
-                      widget!.isActive,
+                      widget.isActive,
                       true,
                     )
                         ? FlutterFlowTheme.of(context).primaryText
@@ -94,7 +91,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
             ),
             if (valueOrDefault<bool>(
               valueOrDefault<bool>(
-                widget!.isLast,
+                widget.isLast,
                 false,
               )
                   ? false
@@ -107,7 +104,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
                 decoration: BoxDecoration(
                   color: valueOrDefault<Color>(
                     valueOrDefault<bool>(
-                      widget!.isActive,
+                      widget.isActive,
                       true,
                     )
                         ? FlutterFlowTheme.of(context).primaryText
@@ -128,7 +125,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.title,
+                  widget.title,
                   'Order Confirmed',
                 ),
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -139,7 +136,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
                       ),
                       color: valueOrDefault<Color>(
                         valueOrDefault<bool>(
-                          widget!.isActive,
+                          widget.isActive,
                           true,
                         )
                             ? FlutterFlowTheme.of(context).primaryText
@@ -155,7 +152,7 @@ class _TrackingStepWidgetState extends State<TrackingStepWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.subtitle,
+                  widget.subtitle,
                   'Today, 11:15 AM',
                 ),
                 style: FlutterFlowTheme.of(context).labelSmall.override(

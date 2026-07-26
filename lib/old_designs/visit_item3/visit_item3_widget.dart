@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'visit_item3_model.dart';
 export 'visit_item3_model.dart';
 
@@ -88,7 +85,7 @@ class _VisitItem3WidgetState extends State<VisitItem3Widget> {
                     fadeInDuration: Duration(milliseconds: 0),
                     fadeOutDuration: Duration(milliseconds: 0),
                     imageUrl: valueOrDefault<String>(
-                      widget!.img_desc,
+                      widget.img_desc,
                       'https://dimg.dreamflow.cloud/v1/image/yoga%20studio%20interior',
                     ),
                     fit: BoxFit.cover,
@@ -104,7 +101,7 @@ class _VisitItem3WidgetState extends State<VisitItem3Widget> {
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.business_name,
+                        widget.business_name,
                         'Black Swan Yoga',
                       ),
                       maxLines: 1,
@@ -138,7 +135,7 @@ class _VisitItem3WidgetState extends State<VisitItem3Widget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.date,
+                            widget.date,
                             'Yesterday',
                           ),
                           style: FlutterFlowTheme.of(context)
@@ -178,7 +175,7 @@ class _VisitItem3WidgetState extends State<VisitItem3Widget> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '+${widget!.points?.toString()} PTs',
+                    '+${widget.points?.toString()} PTs',
                     style: FlutterFlowTheme.of(context).labelLarge.override(
                           font: GoogleFonts.playfairDisplay(
                             fontWeight: FontWeight.w600,

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'metric_card_model.dart';
 export 'metric_card_model.dart';
 
@@ -69,7 +66,7 @@ class _MetricCardWidgetState extends State<MetricCardWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.label,
+                  widget.label,
                   'Total Bugs',
                 ),
                 style: FlutterFlowTheme.of(context).labelMedium.override(
@@ -95,7 +92,7 @@ class _MetricCardWidgetState extends State<MetricCardWidget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.value,
+                      widget.value,
                       '142',
                     ),
                     style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -114,7 +111,7 @@ class _MetricCardWidgetState extends State<MetricCardWidget> {
                           lineHeight: 1.4,
                         ),
                   ),
-                  widget!.icon!,
+                  widget.icon!,
                 ].divide(SizedBox(width: 8.0)),
               ),
             ].divide(SizedBox(height: 4.0)),

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_item_model.dart';
 export 'ticker_item_model.dart';
 
@@ -79,7 +76,7 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                     children: [
                       Text(
                         valueOrDefault<String>(
-                          widget!.label,
+                          widget.label,
                           'Community Value',
                         ),
                         style: FlutterFlowTheme.of(context)
@@ -106,7 +103,7 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.value,
+                          widget.value,
                           '\$1,284,902.45',
                         ),
                         style: FlutterFlowTheme.of(context)
@@ -145,18 +142,18 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                             child: Stack(
                               alignment: AlignmentDirectional(0.0, 0.0),
                               children: [
-                                if (widget!.isUp ? true : false)
+                                if (widget.isUp ? true : false)
                                   Icon(
                                     Icons.trending_up_rounded,
-                                    color: widget!.isUp
+                                    color: widget.isUp
                                         ? FlutterFlowTheme.of(context).success
                                         : FlutterFlowTheme.of(context).error,
                                     size: 16.0,
                                   ),
-                                if (widget!.isUp ? false : true)
+                                if (widget.isUp ? false : true)
                                   Icon(
                                     Icons.trending_down_rounded,
-                                    color: widget!.isUp
+                                    color: widget.isUp
                                         ? FlutterFlowTheme.of(context).success
                                         : FlutterFlowTheme.of(context).error,
                                     size: 16.0,
@@ -166,7 +163,7 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.change,
+                              widget.change,
                               '+12.4%',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -180,7 +177,7 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                                         .labelSmall
                                         .fontStyle,
                                   ),
-                                  color: widget!.isUp
+                                  color: widget.isUp
                                       ? FlutterFlowTheme.of(context).success
                                       : FlutterFlowTheme.of(context).error,
                                   letterSpacing: 0.0,
@@ -197,7 +194,7 @@ class _TickerItemWidgetState extends State<TickerItemWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.subValue,
+                          widget.subValue,
                           'Live Pool',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(

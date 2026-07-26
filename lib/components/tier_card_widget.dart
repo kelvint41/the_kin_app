@@ -1,11 +1,8 @@
 import '/components/feature_item_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'tier_card_model.dart';
 export 'tier_card_model.dart';
 
@@ -21,7 +18,6 @@ class TierCardWidget extends StatefulWidget {
     String? f2,
     String? f3,
     String? f4,
-    this.beaconText,
   })  : this.isPro = isPro ?? false,
         this.isElite = isElite ?? false,
         this.title = title ?? 'Community',
@@ -42,19 +38,12 @@ class TierCardWidget extends StatefulWidget {
   final String f3;
   final String f4;
 
-  /// Text shown on a small pulsing "beacon" badge at the card's top-left
-  /// corner (e.g. 'Free' or 'Upgrade'). Null hides the beacon entirely.
-  final String? beaconText;
-
   @override
   State<TierCardWidget> createState() => _TierCardWidgetState();
 }
 
-class _TierCardWidgetState extends State<TierCardWidget>
-    with SingleTickerProviderStateMixin {
+class _TierCardWidgetState extends State<TierCardWidget> {
   late TierCardModel _model;
-  late AnimationController _beaconController;
-  late Animation<double> _beaconOpacity;
 
   @override
   void setState(VoidCallback callback) {
@@ -66,71 +55,13 @@ class _TierCardWidgetState extends State<TierCardWidget>
   void initState() {
     super.initState();
     _model = createModel(context, () => TierCardModel());
-    _beaconController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 900),
-    )..repeat(reverse: true);
-    _beaconOpacity = Tween<double>(begin: 0.35, end: 1.0).animate(
-      CurvedAnimation(parent: _beaconController, curve: Curves.easeInOut),
-    );
   }
 
   @override
   void dispose() {
-    _beaconController.dispose();
     _model.maybeDispose();
 
     super.dispose();
-  }
-
-  Widget _buildBeacon(BuildContext context) {
-    final isFree = widget!.beaconText == 'Free';
-    return FadeTransition(
-      opacity: _beaconOpacity,
-      child: Container(
-        padding: EdgeInsetsDirectional.fromSTEB(10.0, 5.0, 10.0, 5.0),
-        decoration: BoxDecoration(
-          color:
-              isFree ? FlutterFlowTheme.of(context).success : Color(0xFFD4AF37),
-          borderRadius: BorderRadius.circular(9999.0),
-          boxShadow: [
-            BoxShadow(
-              color: (isFree
-                      ? FlutterFlowTheme.of(context).success
-                      : Color(0xFFD4AF37))
-                  .withOpacity(0.6),
-              blurRadius: 8.0,
-              spreadRadius: 1.0,
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 6.0,
-              height: 6.0,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-              ),
-            ),
-            SizedBox(width: 6.0),
-            Text(
-              widget!.beaconText!,
-              style: FlutterFlowTheme.of(context).labelSmall.override(
-                    font: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.bold,
-                    ),
-                    color: Colors.black,
-                    letterSpacing: 0.0,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -157,7 +88,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                   alignment: AlignmentDirectional(-1.0, -1.0),
                   children: [
                     if (valueOrDefault<bool>(
-                      widget!.isElite,
+                      widget.isElite,
                       false,
                     ))
                       Container(
@@ -170,12 +101,6 @@ class _TierCardWidgetState extends State<TierCardWidget>
                           ),
                           shape: BoxShape.rectangle,
                         ),
-                      ),
-                    if (widget!.beaconText != null)
-                      PositionedDirectional(
-                        top: -8.0,
-                        start: -8.0,
-                        child: _buildBeacon(context),
                       ),
                     Column(
                       mainAxisSize: MainAxisSize.min,
@@ -194,7 +119,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               children: [
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.title,
+                                    widget.title,
                                     'Community',
                                   ),
                                   style: FlutterFlowTheme.of(context)
@@ -207,7 +132,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                                   .titleLarge
                                                   .fontStyle,
                                         ),
-                                        color: widget!.isElite
+                                        color: widget.isElite
                                             ? Color(0xFFD4AF37)
                                             : FlutterFlowTheme.of(context)
                                                 .primaryText,
@@ -221,7 +146,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                 ),
                                 Container(
                                   decoration: BoxDecoration(
-                                    color: widget!.isElite
+                                    color: widget.isElite
                                         ? Color(0x33D4AF37)
                                         : Color(0x00000000),
                                     borderRadius: BorderRadius.circular(9999.0),
@@ -233,7 +158,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                     child: Container(
                                       child: Text(
                                         valueOrDefault<String>(
-                                          widget!.badgeLabel,
+                                          widget.badgeLabel,
                                           'Free Community Tier',
                                         ),
                                         style: FlutterFlowTheme.of(context)
@@ -249,7 +174,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                                         .labelSmall
                                                         .fontStyle,
                                               ),
-                                              color: widget!.isElite
+                                              color: widget.isElite
                                                   ? Color(0xFFD4AF37)
                                                   : FlutterFlowTheme.of(context)
                                                       .secondaryText,
@@ -271,7 +196,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               ].divide(SizedBox(height: 4.0)),
                             ),
                             if (valueOrDefault<bool>(
-                              widget!.isPro,
+                              widget.isPro,
                               false,
                             ))
                               Container(
@@ -319,7 +244,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                           children: [
                             Text(
                               valueOrDefault<String>(
-                                widget!.price,
+                                widget.price,
                                 '\$0',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -384,11 +309,11 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel1,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                iconColor: widget!.isElite
+                                iconColor: widget.isElite
                                     ? Color(0xFFD4AF37)
                                     : FlutterFlowTheme.of(context).primary,
                                 benefit: valueOrDefault<String>(
-                                  widget!.f1,
+                                  widget.f1,
                                   'Access to public community forums',
                                 ),
                               ),
@@ -397,11 +322,11 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel2,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                iconColor: widget!.isElite
+                                iconColor: widget.isElite
                                     ? Color(0xFFD4AF37)
                                     : FlutterFlowTheme.of(context).primary,
                                 benefit: valueOrDefault<String>(
-                                  widget!.f2,
+                                  widget.f2,
                                   'Basic business profile page on local directory',
                                 ),
                               ),
@@ -410,11 +335,11 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel3,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                iconColor: widget!.isElite
+                                iconColor: widget.isElite
                                     ? Color(0xFFD4AF37)
                                     : FlutterFlowTheme.of(context).primary,
                                 benefit: valueOrDefault<String>(
-                                  widget!.f3,
+                                  widget.f3,
                                   'Up to 3 active local connections',
                                 ),
                               ),
@@ -423,11 +348,11 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel4,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                iconColor: widget!.isElite
+                                iconColor: widget.isElite
                                     ? Color(0xFFD4AF37)
                                     : FlutterFlowTheme.of(context).primary,
                                 benefit: valueOrDefault<String>(
-                                  widget!.f4,
+                                  widget.f4,
                                   'Basic community support',
                                 ),
                               ),

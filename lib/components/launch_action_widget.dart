@@ -1,10 +1,9 @@
+import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'launch_action_model.dart';
 export 'launch_action_model.dart';
 
@@ -13,17 +12,22 @@ class LaunchActionWidget extends StatefulWidget {
     super.key,
     this.icon,
     String? label,
+    this.isComingSoon,
   }) : this.label = label ?? 'Explore Map';
 
   final Widget? icon;
   final String label;
+  final bool? isComingSoon;
 
   @override
   State<LaunchActionWidget> createState() => _LaunchActionWidgetState();
 }
 
-class _LaunchActionWidgetState extends State<LaunchActionWidget> {
+class _LaunchActionWidgetState extends State<LaunchActionWidget>
+    with TickerProviderStateMixin {
   late LaunchActionModel _model;
+
+  final animationsMap = <String, AnimationInfo>{};
 
   @override
   void setState(VoidCallback callback) {
@@ -35,6 +39,21 @@ class _LaunchActionWidgetState extends State<LaunchActionWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => LaunchActionModel());
+
+    animationsMap.addAll({
+      'textOnPageLoadAnimation': AnimationInfo(
+        trigger: AnimationTrigger.onPageLoad,
+        effectsBuilder: () => [
+          FadeEffect(
+            curve: Curves.easeInOut,
+            delay: 0.0.ms,
+            duration: 600.0.ms,
+            begin: 0.0,
+            end: 1.0,
+          ),
+        ],
+      ),
+    });
   }
 
   @override
@@ -75,10 +94,27 @@ class _LaunchActionWidgetState extends State<LaunchActionWidget> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              widget!.icon!,
+              widget.icon!,
+              if (widget.isComingSoon ?? true)
+                Text(
+                  'Coming Soon!',
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        font: GoogleFonts.plusJakartaSans(
+                          fontWeight: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .fontWeight,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        color: Color(0xFFF06555),
+                        letterSpacing: 0.0,
+                        fontWeight:
+                            FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                        fontStyle: FontStyle.italic,
+                      ),
+                ).animateOnPageLoad(animationsMap['textOnPageLoadAnimation']!),
               Text(
                 valueOrDefault<String>(
-                  widget!.label,
+                  widget.label,
                   'Explore Map',
                 ),
                 style: FlutterFlowTheme.of(context).labelMedium.override(

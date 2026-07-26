@@ -1,15 +1,11 @@
 import '/auth/firebase_auth/auth_util.dart';
-import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'refined_post_model.dart';
 export 'refined_post_model.dart';
 
@@ -25,8 +21,6 @@ class RefinedPostWidget extends StatefulWidget {
     this.caption,
     this.comments,
     this.timestamp,
-    this.postRef,
-    this.businessRef,
   });
 
   final String? owner_photo;
@@ -38,8 +32,6 @@ class RefinedPostWidget extends StatefulWidget {
   final String? caption;
   final double? comments;
   final String? timestamp;
-  final DocumentReference? postRef;
-  final DocumentReference? businessRef;
 
   @override
   State<RefinedPostWidget> createState() => _RefinedPostWidgetState();
@@ -47,90 +39,6 @@ class RefinedPostWidget extends StatefulWidget {
 
 class _RefinedPostWidgetState extends State<RefinedPostWidget> {
   late RefinedPostModel _model;
-  bool _hasLiked = false;
-  bool _isSharing = false;
-
-  void _openImageViewer(String imageUrl) {
-    print('RefinedPostWidget: post image tapped');
-    showDialog(
-      context: context,
-      barrierColor: Colors.black,
-      builder: (dialogContext) => GestureDetector(
-        onTap: () => Navigator.pop(dialogContext),
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: IconButton(
-              icon: Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.pop(dialogContext),
-            ),
-          ),
-          extendBodyBehindAppBar: true,
-          body: Center(
-            child: InteractiveViewer(
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleLike() async {
-    if (_hasLiked || currentUserReference == null || widget.postRef == null) {
-      return;
-    }
-    setState(() => _hasLiked = true);
-    final likeEventRef = UserEngagementEventsRecord.collection.doc(
-      '${currentUserReference!.id}_${widget.postRef!.id}_like',
-    );
-    try {
-      await likeEventRef.set(createUserEngagementEventsRecordData(
-        userRef: currentUserReference,
-        businessRef: widget.businessRef,
-        targetRef: widget.postRef,
-        eventType: 'like',
-        createdAt: getCurrentTimestamp,
-      ));
-    } catch (_) {
-      // A duplicate create for the same user+post is rejected server-side
-      // (deterministic doc id + rules) — that just means it was already
-      // liked, not a failure worth surfacing to the user.
-    }
-  }
-
-  Future<void> _handleShare() async {
-    if (_isSharing) {
-      return;
-    }
-    setState(() => _isSharing = true);
-    try {
-      await Share.share(
-        'Check out ${valueOrDefault<String>(widget.business_name, 'this business')} on KIN',
-        sharePositionOrigin: getWidgetBoundingBox(context),
-      );
-      if (currentUserReference != null && widget.postRef != null) {
-        await UserEngagementEventsRecord.collection
-            .doc()
-            .set(createUserEngagementEventsRecordData(
-              userRef: currentUserReference,
-              businessRef: widget.businessRef,
-              targetRef: widget.postRef,
-              eventType: 'share',
-              createdAt: getCurrentTimestamp,
-            ));
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSharing = false);
-      }
-    }
-  }
 
   @override
   void setState(VoidCallback callback) {
@@ -210,7 +118,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 fadeInDuration: Duration(milliseconds: 0),
                                 fadeOutDuration: Duration(milliseconds: 0),
                                 imageUrl: valueOrDefault<String>(
-                                  widget!.owner_photo,
+                                  widget.owner_photo,
                                   'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
                                 ),
                                 fit: BoxFit.cover,
@@ -229,7 +137,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 children: [
                                   Text(
                                     valueOrDefault<String>(
-                                      widget!.business_name,
+                                      widget.business_name,
                                       'The Southern Grind',
                                     ),
                                     style: FlutterFlowTheme.of(context)
@@ -265,7 +173,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                               ),
                               Text(
                                 valueOrDefault<String>(
-                                  widget!.location,
+                                  widget.location,
                                   'East Side',
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -318,23 +226,15 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                   height: 380.0,
                   child: Stack(
                     children: [
-                      GestureDetector(
-                        onTap: () => _openImageViewer(valueOrDefault<String>(
-                          widget.post_image,
-                          'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop%20interior%20gold%20accents',
-                        )),
-                        child: CachedNetworkImage(
+                      AuthUserStreamWidget(
+                        builder: (context) => CachedNetworkImage(
                           fadeInDuration: Duration(milliseconds: 0),
                           fadeOutDuration: Duration(milliseconds: 0),
-                          imageUrl: valueOrDefault<String>(
-                            widget.post_image,
-                            'https://dimg.dreamflow.cloud/v1/image/luxury%20coffee%20shop%20interior%20gold%20accents',
-                          ),
+                          imageUrl: currentUserPhoto,
                           height: 380.0,
                           fit: BoxFit.cover,
                         ),
                       ),
-                      if (widget.is_carousel ?? false)
                       Align(
                         alignment: AlignmentDirectional(1.0, -1.0),
                         child: Container(
@@ -441,13 +341,13 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                           FlutterFlowIconButton(
                             buttonSize: 40.0,
                             icon: Icon(
-                              _hasLiked
-                                  ? Icons.favorite_rounded
-                                  : Icons.favorite_border_rounded,
+                              Icons.favorite_border_rounded,
                               color: FlutterFlowTheme.of(context).accent1,
                               size: 24.0,
                             ),
-                            onPressed: _handleLike,
+                            onPressed: () {
+                              print('IconButton pressed ...');
+                            },
                           ),
                           FlutterFlowIconButton(
                             buttonSize: 40.0,
@@ -467,7 +367,9 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                               color: FlutterFlowTheme.of(context).primary,
                               size: 22.0,
                             ),
-                            onPressed: _handleShare,
+                            onPressed: () {
+                              print('IconButton pressed ...');
+                            },
                           ),
                         ].divide(SizedBox(
                             width: FlutterFlowTheme.of(context)
@@ -503,7 +405,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Liked by Kinvest and ${widget!.likes} others',
+                        'Liked by Kinvest and ${widget.likes} others',
                         style: FlutterFlowTheme.of(context)
                             .labelMedium
                             .override(
@@ -539,7 +441,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                               children: [
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.business_name,
+                                    widget.business_name,
                                     'The Southern Grind',
                                   ),
                                   style: FlutterFlowTheme.of(context)
@@ -563,7 +465,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.caption,
+                                    widget.caption,
                                     'Morning light and fresh brews. Our new Champagne Gold roast is officially served. ✨☕️',
                                   ),
                                   maxLines: 3,
@@ -602,7 +504,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                                 .xs)),
                       ),
                       Text(
-                        'View all ${widget!.comments?.toString()} comments',
+                        'View all ${widget.comments?.toString()} comments',
                         style: FlutterFlowTheme.of(context).bodySmall.override(
                               font: GoogleFonts.playfairDisplay(
                                 fontWeight: FlutterFlowTheme.of(context)
@@ -627,7 +529,7 @@ class _RefinedPostWidgetState extends State<RefinedPostWidget> {
                             EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
                         child: Text(
                           valueOrDefault<String>(
-                            widget!.timestamp,
+                            widget.timestamp,
                             '2 HOURS AGO',
                           ),
                           style:

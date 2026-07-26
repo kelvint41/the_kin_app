@@ -6,12 +6,9 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:async';
-import 'dart:ui';
 import '/index.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'partner_l_o_i_page_model.dart';
 export 'partner_l_o_i_page_model.dart';
 
@@ -480,7 +477,7 @@ class _PartnerLOIPageWidgetState extends State<PartnerLOIPageWidget> {
                                                         color:
                                                             FlutterFlowTheme.of(
                                                                     context)
-                                                                .alternate!,
+                                                                .alternate,
                                                       )
                                                     : null,
                                                 activeColor:

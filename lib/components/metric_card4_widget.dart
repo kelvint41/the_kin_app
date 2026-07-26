@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'metric_card4_model.dart';
 export 'metric_card4_model.dart';
 
@@ -68,10 +65,10 @@ class _MetricCard4WidgetState extends State<MetricCard4Widget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              widget!.icon!,
+              widget.icon!,
               Text(
                 valueOrDefault<String>(
-                  widget!.value,
+                  widget.value,
                   '1,284',
                 ),
                 style: FlutterFlowTheme.of(context).titleLarge.override(
@@ -90,7 +87,7 @@ class _MetricCard4WidgetState extends State<MetricCard4Widget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.label,
+                  widget.label,
                   'Profile Views',
                 ),
                 style: FlutterFlowTheme.of(context).labelSmall.override(

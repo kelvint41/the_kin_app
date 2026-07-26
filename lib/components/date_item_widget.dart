@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'date_item_model.dart';
 export 'date_item_model.dart';
 
@@ -56,7 +53,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
     return Opacity(
       opacity: valueOrDefault<double>(
         valueOrDefault<bool>(
-          widget!.disabled,
+          widget.disabled,
           true,
         )
             ? 0.4
@@ -69,7 +66,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
         decoration: BoxDecoration(
           color: valueOrDefault<Color>(
             valueOrDefault<bool>(
-              widget!.active,
+              widget.active,
               false,
             )
                 ? FlutterFlowTheme.of(context).primaryText
@@ -81,7 +78,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
           border: Border.all(
             color: valueOrDefault<Color>(
               valueOrDefault<bool>(
-                widget!.active,
+                widget.active,
                 false,
               )
                   ? FlutterFlowTheme.of(context).primaryText
@@ -98,7 +95,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
           children: [
             Text(
               valueOrDefault<String>(
-                widget!.day,
+                widget.day,
                 'MON',
               ),
               style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -109,7 +106,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
                     ),
                     color: valueOrDefault<Color>(
                       valueOrDefault<bool>(
-                        widget!.active,
+                        widget.active,
                         false,
                       )
                           ? Color(0xFF121212)
@@ -125,7 +122,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
             ),
             Text(
               valueOrDefault<String>(
-                widget!.date,
+                widget.date,
                 '23',
               ),
               style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -136,7 +133,7 @@ class _DateItemWidgetState extends State<DateItemWidget> {
                     ),
                     color: valueOrDefault<Color>(
                       valueOrDefault<bool>(
-                        widget!.active,
+                        widget.active,
                         false,
                       )
                           ? Color(0xFF121212)

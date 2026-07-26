@@ -1,21 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
 import '/backend/backend.dart';
-import '/backend/schema/structs/index.dart';
 
 import '/auth/base_auth_user_provider.dart';
 
-import '/main.dart';
-import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/lat_lng.dart';
-import '/flutter_flow/place.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import 'serialization_util.dart';
 
 import '/index.dart';
 
@@ -79,51 +70,25 @@ class AppStateNotifier extends ChangeNotifier {
   }
 }
 
-/// Set by main.dart's debug-only dev-bypass sign-in (see
-/// _maybeSignInDevBypass), via --dart-define=DEV_ROUTE=... - defaults to
-/// the Business Sign Up page since a fresh dev account has no business
-/// yet. When non-null and the dev account is signed in, `/` redirects
-/// here instead of the normal post-login landing page, so you land on
-/// whatever you're testing immediately after launch. Change the
-/// DEV_ROUTE dart-define per run to point at a different test page -
-/// no code edit needed. Always null in release/profile builds.
-String? devBypassTargetRoute;
-
 GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
       initialLocation: '/',
       debugLogDiagnostics: true,
       refreshListenable: appStateNotifier,
       navigatorKey: appNavigatorKey,
-      redirect: (context, state) {
-        // devBypassTargetRoute is only ever set after a real sign-in
-        // succeeds (see main.dart's _maybeSignInDevBypass), so it's
-        // already a reliable signal by itself - checking
-        // appStateNotifier.loggedIn here too was redundant and raced
-        // against its auth-stream listener, which isn't registered until
-        // after this router is constructed and so still reads false on
-        // the very first redirect evaluation.
-        if (kDebugMode &&
-            devBypassTargetRoute != null &&
-            state.uri.path == '/') {
-          return devBypassTargetRoute;
-        }
-        return null;
-      },
       errorBuilder: (context, state) => appStateNotifier.loggedIn
-          ? GoogleMapPageWidget()
+          ? BusinessProfileOwnerWidget()
           : OnboardingSelectionCardWidget(),
       routes: [
         FFRoute(
           name: '_initialize',
           path: '/',
           builder: (context, _) => appStateNotifier.loggedIn
-              ? GoogleMapPageWidget()
+              ? BusinessProfileOwnerWidget()
               : OnboardingSelectionCardWidget(),
         ),
         FFRoute(
           name: TheExchangeWidget.routeName,
           path: TheExchangeWidget.routePath,
-          requireAuth: true,
           builder: (context, params) => TheExchangeWidget(
             businessRef: params.getParam(
               'businessRef',
@@ -157,11 +122,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: BusinessProfileV2Widget.routeName,
           path: BusinessProfileV2Widget.routePath,
           builder: (context, params) => BusinessProfileV2Widget(
-            businessDocument: params.getParam(
-              'businessDocument',
-              ParamType.DocumentReference,
-              isList: false,
-              collectionNamePath: ['businesses'],
+            placeID: params.getParam(
+              'placeID',
+              ParamType.String,
             ),
           ),
         ),
@@ -277,11 +240,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => CustomersignupPageWidget(),
         ),
         FFRoute(
-          name: MobileSignUpPageWidget.routeName,
-          path: MobileSignUpPageWidget.routePath,
-          builder: (context, params) => MobileSignUpPageWidget(),
-        ),
-        FFRoute(
           name: BusinessShowcaseWidget.routeName,
           path: BusinessShowcaseWidget.routePath,
           asyncParams: {
@@ -299,6 +257,36 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: MobileCalledPowerPageWidget.routeName,
           path: MobileCalledPowerPageWidget.routePath,
           builder: (context, params) => MobileCalledPowerPageWidget(),
+        ),
+        FFRoute(
+          name: BusinessSignUpPageWidget.routeName,
+          path: BusinessSignUpPageWidget.routePath,
+          builder: (context, params) => BusinessSignUpPageWidget(),
+        ),
+        FFRoute(
+          name: BlankPageWidget.routeName,
+          path: BlankPageWidget.routePath,
+          builder: (context, params) => BlankPageWidget(),
+        ),
+        FFRoute(
+          name: ExecutiveDashboard1Widget.routeName,
+          path: ExecutiveDashboard1Widget.routePath,
+          builder: (context, params) => ExecutiveDashboard1Widget(),
+        ),
+        FFRoute(
+          name: SingleMobileNamedPageWidget.routeName,
+          path: SingleMobileNamedPageWidget.routePath,
+          builder: (context, params) => SingleMobileNamedPageWidget(),
+        ),
+        FFRoute(
+          name: LegalCompliancePageWidget.routeName,
+          path: LegalCompliancePageWidget.routePath,
+          builder: (context, params) => LegalCompliancePageWidget(),
+        ),
+        FFRoute(
+          name: MobileUiPageWidget.routeName,
+          path: MobileUiPageWidget.routePath,
+          builder: (context, params) => MobileUiPageWidget(),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'legal_header_model.dart';
 export 'legal_header_model.dart';
 
@@ -54,7 +51,7 @@ class _LegalHeaderWidgetState extends State<LegalHeaderWidget> {
           children: [
             Text(
               valueOrDefault<String>(
-                widget!.title,
+                widget.title,
                 '1. PILOT PHASE OVERVIEW',
               ),
               style: FlutterFlowTheme.of(context).titleSmall.override(

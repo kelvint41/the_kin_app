@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'feature_item_model.dart';
 export 'feature_item_model.dart';
 
@@ -54,13 +51,13 @@ class _FeatureItemWidgetState extends State<FeatureItemWidget> {
       children: [
         Icon(
           Icons.check_circle_rounded,
-          color: widget!.iconColor,
+          color: widget.iconColor,
           size: 18.0,
         ),
         Expanded(
           flex: 1,
           child: Text(
-            widget!.benefit,
+            widget.benefit,
             maxLines: 2,
             style: FlutterFlowTheme.of(context).bodySmall.override(
                   font: GoogleFonts.playfairDisplay(

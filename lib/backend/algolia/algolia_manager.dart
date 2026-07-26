@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:algolia/algolia.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 
 import '/backend/backend.dart';
 
@@ -56,11 +55,6 @@ class FFAlgoliaManager {
     LatLng? loc;
     if (location != null) {
       loc = await location;
-      // Either the user denied permissions, we could not access
-      // their location, or null location specified.
-      if (loc == null) {
-        return [];
-      }
     }
     final params =
         AlgoliaQueryParams(index, term, loc, maxResults, searchRadiusMeters);

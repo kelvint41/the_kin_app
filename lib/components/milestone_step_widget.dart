@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'milestone_step_model.dart';
 export 'milestone_step_model.dart';
 
@@ -61,12 +58,12 @@ class _MilestoneStepWidgetState extends State<MilestoneStepWidget> {
             color: valueOrDefault<Color>(
               () {
                 if (valueOrDefault<bool>(
-                  widget!.isCompleted,
+                  widget.isCompleted,
                   true,
                 )) {
                   return FlutterFlowTheme.of(context).tertiary;
                 } else if (valueOrDefault<bool>(
-                  widget!.isActive,
+                  widget.isActive,
                   false,
                 )) {
                   return FlutterFlowTheme.of(context).tertiary;
@@ -93,7 +90,7 @@ class _MilestoneStepWidgetState extends State<MilestoneStepWidget> {
                 children: [
                   if (valueOrDefault<bool>(
                     valueOrDefault<bool>(
-                      widget!.isCompleted,
+                      widget.isCompleted,
                       true,
                     )
                         ? true
@@ -109,7 +106,7 @@ class _MilestoneStepWidgetState extends State<MilestoneStepWidget> {
             ),
             Text(
               valueOrDefault<String>(
-                widget!.label,
+                widget.label,
                 'Strategy',
               ),
               style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -121,7 +118,7 @@ class _MilestoneStepWidgetState extends State<MilestoneStepWidget> {
                     ),
                     color: valueOrDefault<Color>(
                       valueOrDefault<bool>(
-                        widget!.isActive,
+                        widget.isActive,
                         false,
                       )
                           ? FlutterFlowTheme.of(context).primaryText

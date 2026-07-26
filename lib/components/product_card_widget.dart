@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'product_card_model.dart';
 export 'product_card_model.dart';
 
@@ -78,7 +75,7 @@ class _ProductCardWidgetState extends State<ProductCardWidget> {
                   shape: BoxShape.rectangle,
                 ),
                 alignment: AlignmentDirectional(0.0, 0.0),
-                child: widget!.icon!,
+                child: widget.icon!,
               ),
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -86,7 +83,7 @@ class _ProductCardWidgetState extends State<ProductCardWidget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   if (valueOrDefault<bool>(
-                    widget!.isDigital,
+                    widget.isDigital,
                     false,
                   ))
                     Row(
@@ -127,7 +124,7 @@ class _ProductCardWidgetState extends State<ProductCardWidget> {
                     ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.title,
+                      widget.title,
                       'Raw Virgin Bundle',
                     ),
                     maxLines: 1,
@@ -149,7 +146,7 @@ class _ProductCardWidgetState extends State<ProductCardWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.price,
+                      widget.price,
                       '\$350',
                     ),
                     style: FlutterFlowTheme.of(context).titleSmall.override(

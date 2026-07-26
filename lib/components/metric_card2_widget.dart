@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'metric_card2_model.dart';
 export 'metric_card2_model.dart';
 
@@ -85,7 +82,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                     flex: 1,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.title,
+                        widget.title,
                         'Active Users',
                       ),
                       maxLines: 1,
@@ -111,7 +108,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  widget!.icon!,
+                  widget.icon!,
                 ],
               ),
               Column(
@@ -121,7 +118,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.value,
+                      widget.value,
                       '12.4k',
                     ),
                     style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -142,7 +139,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: widget!.trendUp
+                      color: widget.trendUp
                           ? Color(0x262D4A3E)
                           : Color(0x26BA1A1A),
                       borderRadius: BorderRadius.circular(14.0),
@@ -163,18 +160,18 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                               child: Stack(
                                 alignment: AlignmentDirectional(0.0, 0.0),
                                 children: [
-                                  if (widget!.trendUp ? true : false)
+                                  if (widget.trendUp ? true : false)
                                     Icon(
                                       Icons.trending_up_rounded,
-                                      color: widget!.trendUp
+                                      color: widget.trendUp
                                           ? FlutterFlowTheme.of(context).success
                                           : FlutterFlowTheme.of(context).error,
                                       size: 14.0,
                                     ),
-                                  if (widget!.trendUp ? false : true)
+                                  if (widget.trendUp ? false : true)
                                     Icon(
                                       Icons.trending_down_rounded,
-                                      color: widget!.trendUp
+                                      color: widget.trendUp
                                           ? FlutterFlowTheme.of(context).success
                                           : FlutterFlowTheme.of(context).error,
                                       size: 14.0,
@@ -184,7 +181,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                             ),
                             Text(
                               valueOrDefault<String>(
-                                widget!.trendVal,
+                                widget.trendVal,
                                 '+12%',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -196,7 +193,7 @@ class _MetricCard2WidgetState extends State<MetricCard2Widget> {
                                           .labelSmall
                                           .fontStyle,
                                     ),
-                                    color: widget!.trendUp
+                                    color: widget.trendUp
                                         ? FlutterFlowTheme.of(context).success
                                         : FlutterFlowTheme.of(context).error,
                                     letterSpacing: 0.0,

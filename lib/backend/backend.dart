@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../auth/firebase_auth/auth_util.dart';
 
 import '../flutter_flow/flutter_flow_util.dart';
-import '../flutter_flow/kindex_ticker_util.dart';
 import 'schema/util/firestore_util.dart';
 
 import 'schema/businesses_record.dart';
@@ -24,9 +23,8 @@ import 'schema/tier_privileges_record.dart';
 import 'schema/entitlements_record.dart';
 import 'schema/uservisits_record.dart';
 import 'schema/reviews_record.dart';
-import 'schema/user_engagement_events_record.dart';
-import 'schema/kindex_scores_record.dart';
-import 'schema/signup_feed_record.dart';
+import 'schema/favorites_record.dart';
+import 'schema/prestige_points_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -53,9 +51,8 @@ export 'schema/tier_privileges_record.dart';
 export 'schema/entitlements_record.dart';
 export 'schema/uservisits_record.dart';
 export 'schema/reviews_record.dart';
-export 'schema/user_engagement_events_record.dart';
-export 'schema/kindex_scores_record.dart';
-export 'schema/signup_feed_record.dart';
+export 'schema/favorites_record.dart';
+export 'schema/prestige_points_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -723,75 +720,75 @@ Future<List<ReviewsRecord>> queryReviewsRecordOnce({
       singleRecord: singleRecord,
     );
 
-/// Functions to query UserEngagementEventsRecords (as a Stream and as a Future).
-Future<int> queryUserEngagementEventsRecordCount({
+/// Functions to query FavoritesRecords (as a Stream and as a Future).
+Future<int> queryFavoritesRecordCount({
   Query Function(Query)? queryBuilder,
   int limit = -1,
 }) =>
     queryCollectionCount(
-      UserEngagementEventsRecord.collection,
+      FavoritesRecord.collection,
       queryBuilder: queryBuilder,
       limit: limit,
     );
 
-Stream<List<UserEngagementEventsRecord>> queryUserEngagementEventsRecord({
+Stream<List<FavoritesRecord>> queryFavoritesRecord({
   Query Function(Query)? queryBuilder,
   int limit = -1,
   bool singleRecord = false,
 }) =>
     queryCollection(
-      UserEngagementEventsRecord.collection,
-      UserEngagementEventsRecord.fromSnapshot,
+      FavoritesRecord.collection,
+      FavoritesRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
     );
 
-Future<List<UserEngagementEventsRecord>> queryUserEngagementEventsRecordOnce({
+Future<List<FavoritesRecord>> queryFavoritesRecordOnce({
   Query Function(Query)? queryBuilder,
   int limit = -1,
   bool singleRecord = false,
 }) =>
     queryCollectionOnce(
-      UserEngagementEventsRecord.collection,
-      UserEngagementEventsRecord.fromSnapshot,
+      FavoritesRecord.collection,
+      FavoritesRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
     );
 
-/// Functions to query KindexScoresRecords (as a Stream and as a Future).
-Future<int> queryKindexScoresRecordCount({
+/// Functions to query PrestigePointsRecords (as a Stream and as a Future).
+Future<int> queryPrestigePointsRecordCount({
   Query Function(Query)? queryBuilder,
   int limit = -1,
 }) =>
     queryCollectionCount(
-      KindexScoresRecord.collection,
+      PrestigePointsRecord.collection,
       queryBuilder: queryBuilder,
       limit: limit,
     );
 
-Stream<List<KindexScoresRecord>> queryKindexScoresRecord({
+Stream<List<PrestigePointsRecord>> queryPrestigePointsRecord({
   Query Function(Query)? queryBuilder,
   int limit = -1,
   bool singleRecord = false,
 }) =>
     queryCollection(
-      KindexScoresRecord.collection,
-      KindexScoresRecord.fromSnapshot,
+      PrestigePointsRecord.collection,
+      PrestigePointsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
     );
 
-Future<List<KindexScoresRecord>> queryKindexScoresRecordOnce({
+Future<List<PrestigePointsRecord>> queryPrestigePointsRecordOnce({
   Query Function(Query)? queryBuilder,
   int limit = -1,
   bool singleRecord = false,
 }) =>
     queryCollectionOnce(
-      KindexScoresRecord.collection,
-      KindexScoresRecord.fromSnapshot,
+      PrestigePointsRecord.collection,
+      PrestigePointsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
@@ -941,35 +938,12 @@ Future maybeCreateUser(User user) async {
     return;
   }
 
-  final displayName =
-      user.displayName ?? FirebaseAuth.instance.currentUser?.displayName;
-
-  // Best-effort Kindex ticker symbol for the onboarding ticker's customer
-  // row. Reserved against `ticker_registry` (see KindexTickerUtil) since
-  // the self-only `users` collection can't be queried for a uniqueness
-  // check. A failure here should never block account creation, so this
-  // just leaves ticker_symbol unset rather than surfacing an error.
-  String? tickerSymbol;
-  if (displayName != null) {
-    final semantic = KindexTickerUtil.semanticCandidate(displayName);
-    if (semantic != null &&
-        await KindexTickerUtil.reserve(semantic, userRecord)) {
-      tickerSymbol = semantic;
-    }
-  }
-  for (var attempt = 0; tickerSymbol == null && attempt < 3; attempt++) {
-    final candidate = KindexTickerUtil.randomCandidate();
-    if (await KindexTickerUtil.reserve(candidate, userRecord)) {
-      tickerSymbol = candidate;
-    }
-  }
-
   final userData = createUsersRecordData(
     email: user.email ??
         FirebaseAuth.instance.currentUser?.email ??
         user.providerData.firstOrNull?.email,
-    displayName: displayName,
-    tickerSymbol: tickerSymbol,
+    displayName:
+        user.displayName ?? FirebaseAuth.instance.currentUser?.displayName,
     photoUrl: user.photoURL,
     uid: user.uid,
     phoneNumber: user.phoneNumber,
@@ -978,44 +952,9 @@ Future maybeCreateUser(User user) async {
 
   await userRecord.set(userData);
   currentUserDocument = UsersRecord.getDocumentFromData(userData, userRecord);
-
-  // Denormalized admin-facing feed of new signups. The `users` collection
-  // itself can't be listed by admins (rules only allow reading your own
-  // doc), so this is written once here, at the single point every new
-  // account is created regardless of sign-in method.
-  await SignupFeedRecord.collection.add(createSignupFeedRecordData(
-    userRef: userRecord,
-    displayName: currentUserDocument?.displayName,
-    subscriptionStatus: currentUserDocument?.subscriptionStatus,
-    timestamp: getCurrentTimestamp,
-  ));
 }
 
 Future updateUserDocument({String? email}) async {
   await currentUserDocument?.reference
       .update(createUsersRecordData(email: email));
 }
-
-/// Functions to query SignupFeedRecords (as a Stream and as a Future).
-Future<int> querySignupFeedRecordCount({
-  Query Function(Query)? queryBuilder,
-  int limit = -1,
-}) =>
-    queryCollectionCount(
-      SignupFeedRecord.collection,
-      queryBuilder: queryBuilder,
-      limit: limit,
-    );
-
-Stream<List<SignupFeedRecord>> querySignupFeedRecord({
-  Query Function(Query)? queryBuilder,
-  int limit = -1,
-  bool singleRecord = false,
-}) =>
-    queryCollection(
-      SignupFeedRecord.collection,
-      SignupFeedRecord.fromSnapshot,
-      queryBuilder: queryBuilder,
-      limit: limit,
-      singleRecord: singleRecord,
-    );

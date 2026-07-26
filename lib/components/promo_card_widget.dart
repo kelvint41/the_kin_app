@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'promo_card_model.dart';
 export 'promo_card_model.dart';
 
@@ -92,7 +89,7 @@ class _PromoCardWidgetState extends State<PromoCardWidget> {
                 alignment: AlignmentDirectional(0.0, 0.0),
                 child: Text(
                   valueOrDefault<String>(
-                    widget!.initial,
+                    widget.initial,
                     'IC',
                   ),
                   textAlign: TextAlign.center,
@@ -131,7 +128,7 @@ class _PromoCardWidgetState extends State<PromoCardWidget> {
                           flex: 1,
                           child: Text(
                             valueOrDefault<String>(
-                              widget!.business,
+                              widget.business,
                               'The Iron Cactus',
                             ),
                             maxLines: 1,
@@ -178,7 +175,7 @@ class _PromoCardWidgetState extends State<PromoCardWidget> {
                                   ),
                                   Text(
                                     valueOrDefault<String>(
-                                      widget!.time,
+                                      widget.time,
                                       '2h 14m',
                                     ),
                                     style: FlutterFlowTheme.of(context)
@@ -210,7 +207,7 @@ class _PromoCardWidgetState extends State<PromoCardWidget> {
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.deal,
+                        widget.deal,
                         'Exclusive: Free appetizer with your next visit!',
                       ),
                       maxLines: 2,

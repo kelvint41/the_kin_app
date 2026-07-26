@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'activity_item_model.dart';
 export 'activity_item_model.dart';
 
@@ -79,14 +76,14 @@ class _ActivityItemWidgetState extends State<ActivityItemWidget> {
                     height: 40.0,
                     decoration: BoxDecoration(
                       color: valueOrDefault<Color>(
-                        widget!.bgColor,
+                        widget.bgColor,
                         Color(0x00000000),
                       ),
                       borderRadius: BorderRadius.circular(9999.0),
                       shape: BoxShape.rectangle,
                     ),
                     alignment: AlignmentDirectional(0.0, 0.0),
-                    child: widget!.icon!,
+                    child: widget.icon!,
                   ),
                   Expanded(
                     flex: 1,
@@ -97,7 +94,7 @@ class _ActivityItemWidgetState extends State<ActivityItemWidget> {
                       children: [
                         Text(
                           valueOrDefault<String>(
-                            widget!.user,
+                            widget.user,
                             'Sarah Jenkins',
                           ),
                           maxLines: 1,
@@ -122,7 +119,7 @@ class _ActivityItemWidgetState extends State<ActivityItemWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.action,
+                            widget.action,
                             'Uploaded new assets to Project K',
                           ),
                           maxLines: 1,
@@ -155,7 +152,7 @@ class _ActivityItemWidgetState extends State<ActivityItemWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.time,
+                      widget.time,
                       '2m ago',
                     ),
                     style: FlutterFlowTheme.of(context).labelSmall.override(

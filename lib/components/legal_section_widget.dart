@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'legal_section_model.dart';
 export 'legal_section_model.dart';
 
@@ -77,7 +74,7 @@ class _LegalSectionWidgetState extends State<LegalSectionWidget> {
                       flex: 1,
                       child: Text(
                         valueOrDefault<String>(
-                          widget!.title,
+                          widget.title,
                           '1. Acceptance of Terms',
                         ),
                         style:
@@ -109,7 +106,7 @@ class _LegalSectionWidgetState extends State<LegalSectionWidget> {
                 child: Container(
                   child: Text(
                     valueOrDefault<String>(
-                      widget!.body,
+                      widget.body,
                       'Welcome to The KIN App. By creating an account or accessing our directory, you agree to comply with our community standards and networking guidelines. If you do not agree, please do not use our services.',
                     ),
                     style: FlutterFlowTheme.of(context).bodyMedium.override(

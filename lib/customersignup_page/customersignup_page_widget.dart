@@ -4,11 +4,9 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'customersignup_page_model.dart';
 export 'customersignup_page_model.dart';
 
@@ -595,7 +593,7 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.asset(
-                    'assets/images/Untitled_design_(1).png',
+                    'assets/images/background_removal#TUFITExheklwdGcjMSM2Y2FmMjhhNTNhMzRiYzBiNTFlMTQ3ZGQxNmEyZTRmMCMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
                     width: 36.0,
                     height: 40.0,
                     fit: BoxFit.contain,

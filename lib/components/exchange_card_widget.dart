@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'exchange_card_model.dart';
 export 'exchange_card_model.dart';
 
@@ -91,13 +88,13 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
                     width: 40.0,
                     height: 40.0,
                     decoration: BoxDecoration(
-                      color: widget!.accentColor,
+                      color: widget.accentColor,
                       shape: BoxShape.circle,
                     ),
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.initials,
+                        widget.initials,
                         'GH',
                       ),
                       textAlign: TextAlign.center,
@@ -130,7 +127,7 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
                       children: [
                         Text(
                           valueOrDefault<String>(
-                            widget!.businessName,
+                            widget.businessName,
                             'Green Horizon Tech',
                           ),
                           style:
@@ -152,7 +149,7 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.time,
+                            widget.time,
                             '2h ago',
                           ),
                           style: FlutterFlowTheme.of(context)
@@ -198,7 +195,7 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.content,
+                  widget.content,
                   'Just launched our new sustainability dashboard for local partners. The feedback on the carbon tracking module has been incredible!',
                 ),
                 maxLines: 4,
@@ -243,12 +240,12 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
                         children: [
                           Icon(
                             Icons.favorite_border_rounded,
-                            color: widget!.accentColor,
+                            color: widget.accentColor,
                             size: 18.0,
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.likes,
+                              widget.likes,
                               '124',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -288,7 +285,7 @@ class _ExchangeCardWidgetState extends State<ExchangeCardWidget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.comments,
+                              widget.comments,
                               '18',
                             ),
                             style: FlutterFlowTheme.of(context)

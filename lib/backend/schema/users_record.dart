@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
-import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -25,11 +24,6 @@ class UsersRecord extends FirestoreRecord {
   String? _displayName;
   String get displayName => _displayName ?? '';
   bool hasDisplayName() => _displayName != null;
-
-  // "ticker_symbol" field.
-  String? _tickerSymbol;
-  String get tickerSymbol => _tickerSymbol ?? '';
-  bool hasTickerSymbol() => _tickerSymbol != null;
 
   // "photo_url" field.
   String? _photoUrl;
@@ -91,10 +85,24 @@ class UsersRecord extends FirestoreRecord {
   bool get isAdmin => _isAdmin ?? false;
   bool hasIsAdmin() => _isAdmin != null;
 
+  // "account_status" field.
+  String? _accountStatus;
+  String get accountStatus => _accountStatus ?? '';
+  bool hasAccountStatus() => _accountStatus != null;
+
+  // "verification_submitted_at" field.
+  DateTime? _verificationSubmittedAt;
+  DateTime? get verificationSubmittedAt => _verificationSubmittedAt;
+  bool hasVerificationSubmittedAt() => _verificationSubmittedAt != null;
+
+  // "is_business_owner" field.
+  bool? _isBusinessOwner;
+  bool get isBusinessOwner => _isBusinessOwner ?? false;
+  bool hasIsBusinessOwner() => _isBusinessOwner != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
-    _tickerSymbol = snapshotData['ticker_symbol'] as String?;
     _photoUrl = snapshotData['photo_url'] as String?;
     _uid = snapshotData['uid'] as String?;
     _createdTime = snapshotData['created_time'] as DateTime?;
@@ -107,6 +115,10 @@ class UsersRecord extends FirestoreRecord {
     _lastLogin = snapshotData['last_login'] as DateTime?;
     _arToursCompleted = castToType<int>(snapshotData['ar_tours_completed']);
     _isAdmin = snapshotData['is_admin'] as bool?;
+    _accountStatus = snapshotData['account_status'] as String?;
+    _verificationSubmittedAt =
+        snapshotData['verification_submitted_at'] as DateTime?;
+    _isBusinessOwner = snapshotData['is_business_owner'] as bool?;
   }
 
   static CollectionReference get collection =>
@@ -145,7 +157,6 @@ class UsersRecord extends FirestoreRecord {
 Map<String, dynamic> createUsersRecordData({
   String? email,
   String? displayName,
-  String? tickerSymbol,
   String? photoUrl,
   String? uid,
   DateTime? createdTime,
@@ -158,12 +169,14 @@ Map<String, dynamic> createUsersRecordData({
   DateTime? lastLogin,
   int? arToursCompleted,
   bool? isAdmin,
+  String? accountStatus,
+  DateTime? verificationSubmittedAt,
+  bool? isBusinessOwner,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
       'email': email,
       'display_name': displayName,
-      'ticker_symbol': tickerSymbol,
       'photo_url': photoUrl,
       'uid': uid,
       'created_time': createdTime,
@@ -176,6 +189,9 @@ Map<String, dynamic> createUsersRecordData({
       'last_login': lastLogin,
       'ar_tours_completed': arToursCompleted,
       'is_admin': isAdmin,
+      'account_status': accountStatus,
+      'verification_submitted_at': verificationSubmittedAt,
+      'is_business_owner': isBusinessOwner,
     }.withoutNulls,
   );
 
@@ -189,7 +205,6 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
   bool equals(UsersRecord? e1, UsersRecord? e2) {
     return e1?.email == e2?.email &&
         e1?.displayName == e2?.displayName &&
-        e1?.tickerSymbol == e2?.tickerSymbol &&
         e1?.photoUrl == e2?.photoUrl &&
         e1?.uid == e2?.uid &&
         e1?.createdTime == e2?.createdTime &&
@@ -201,14 +216,16 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.isActive == e2?.isActive &&
         e1?.lastLogin == e2?.lastLogin &&
         e1?.arToursCompleted == e2?.arToursCompleted &&
-        e1?.isAdmin == e2?.isAdmin;
+        e1?.isAdmin == e2?.isAdmin &&
+        e1?.accountStatus == e2?.accountStatus &&
+        e1?.verificationSubmittedAt == e2?.verificationSubmittedAt &&
+        e1?.isBusinessOwner == e2?.isBusinessOwner;
   }
 
   @override
   int hash(UsersRecord? e) => const ListEquality().hash([
         e?.email,
         e?.displayName,
-        e?.tickerSymbol,
         e?.photoUrl,
         e?.uid,
         e?.createdTime,
@@ -220,7 +237,10 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.isActive,
         e?.lastLogin,
         e?.arToursCompleted,
-        e?.isAdmin
+        e?.isAdmin,
+        e?.accountStatus,
+        e?.verificationSubmittedAt,
+        e?.isBusinessOwner
       ]);
 
   @override

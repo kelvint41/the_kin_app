@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'category_item_model.dart';
 export 'category_item_model.dart';
 
@@ -63,10 +60,10 @@ class _CategoryItemWidgetState extends State<CategoryItemWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              widget!.icon!,
+              widget.icon!,
               Text(
                 valueOrDefault<String>(
-                  widget!.label,
+                  widget.label,
                   'Legal Services',
                 ),
                 style: FlutterFlowTheme.of(context).labelLarge.override(

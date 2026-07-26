@@ -1,9 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'cat_chip2_model.dart';
 export 'cat_chip2_model.dart';
 
@@ -47,7 +45,7 @@ class _CatChip2WidgetState extends State<CatChip2Widget> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: widget!.selected == false
+        color: widget.selected == false
             ? FlutterFlowTheme.of(context).secondaryBackground
             : FlutterFlowTheme.of(context).primary,
         borderRadius: BorderRadius.circular(
@@ -65,7 +63,7 @@ class _CatChip2WidgetState extends State<CatChip2Widget> {
             FlutterFlowTheme.of(context).designToken.spacing.md),
         child: Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'Coffee',
           ),
           style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -73,7 +71,7 @@ class _CatChip2WidgetState extends State<CatChip2Widget> {
                   fontWeight: FontWeight.w600,
                   fontStyle: FlutterFlowTheme.of(context).labelLarge.fontStyle,
                 ),
-                color: widget!.selected == false
+                color: widget.selected == false
                     ? FlutterFlowTheme.of(context).primaryText
                     : FlutterFlowTheme.of(context).primaryBackground,
                 fontSize: 14.0,

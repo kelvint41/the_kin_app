@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'time_picker_model.dart';
 export 'time_picker_model.dart';
 
@@ -54,7 +51,7 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'Start Time',
           ),
           style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -92,7 +89,7 @@ class _TimePickerWidgetState extends State<TimePickerWidget> {
                     flex: 1,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.value,
+                        widget.value,
                         '12:00 PM',
                       ),
                       maxLines: 1,

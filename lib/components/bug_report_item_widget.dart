@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'bug_report_item_model.dart';
 export 'bug_report_item_model.dart';
 
@@ -98,7 +95,7 @@ class _BugReportItemWidgetState extends State<BugReportItemWidget> {
                             alignment: AlignmentDirectional(0.0, 0.0),
                             child: Text(
                               valueOrDefault<String>(
-                                widget!.initials,
+                                widget.initials,
                                 'AR',
                               ),
                               textAlign: TextAlign.center,
@@ -131,7 +128,7 @@ class _BugReportItemWidgetState extends State<BugReportItemWidget> {
                             children: [
                               Text(
                                 valueOrDefault<String>(
-                                  widget!.testerName,
+                                  widget.testerName,
                                   'Alex Rivera',
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -155,7 +152,7 @@ class _BugReportItemWidgetState extends State<BugReportItemWidget> {
                               ),
                               Text(
                                 valueOrDefault<String>(
-                                  widget!.page,
+                                  widget.page,
                                   'CHECKOUT_FLOW',
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -182,7 +179,7 @@ class _BugReportItemWidgetState extends State<BugReportItemWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.timestamp,
+                          widget.timestamp,
                           '2 mins ago',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -209,7 +206,7 @@ class _BugReportItemWidgetState extends State<BugReportItemWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.description,
+                      widget.description,
                       'The \'Pay Now\' button remains disabled even after all card details are entered correctly on mobile devices.',
                     ),
                     maxLines: 3,

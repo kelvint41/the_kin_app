@@ -3,12 +3,11 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_showcase_model.dart';
 export 'business_showcase_model.dart';
 
@@ -41,6 +40,11 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => BusinessShowcaseModel());
+
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      context.pushNamed(GoogleMapPageWidget.routeName);
+    });
   }
 
   @override
@@ -207,7 +211,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                                         shape: BoxShape.circle,
                                                       ),
                                                     ),
-                                                    if (widget!.businessRecord
+                                                    if (widget.businessRecord
                                                             ?.isPremium ??
                                                         true)
                                                       Text(
@@ -248,7 +252,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                                 ),
                                                 Text(
                                                   valueOrDefault<String>(
-                                                    widget!.businessRecord
+                                                    widget.businessRecord
                                                         ?.businessName,
                                                     'Business Name',
                                                   ),
@@ -280,7 +284,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                                 ),
                                                 Text(
                                                   valueOrDefault<String>(
-                                                    widget!.businessRecord
+                                                    widget.businessRecord
                                                         ?.category,
                                                     'Category',
                                                   ),
@@ -359,7 +363,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                               Text(
                                                 valueOrDefault<String>(
                                                   formatNumber(
-                                                    widget!.businessRecord
+                                                    widget.businessRecord
                                                         ?.reviewScore,
                                                     formatType:
                                                         FormatType.decimal,
@@ -397,7 +401,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                                         ),
                                               ),
                                               Text(
-                                                widget!
+                                                widget
                                                     .businessRecord!.reviewCount
                                                     .toString(),
                                                 style:
@@ -443,11 +447,10 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                           context.pushNamed(
                                             BusinessProfileV2Widget.routeName,
                                             queryParameters: {
-                                              'businessDocument':
-                                                  serializeParam(
-                                                widget!
-                                                    .businessRecord?.reference,
-                                                ParamType.DocumentReference,
+                                              'placeID': serializeParam(
+                                                widget.businessRecord
+                                                    ?.googlePlaceId,
+                                                ParamType.String,
                                               ),
                                             }.withoutNulls,
                                           );
@@ -541,7 +544,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                 ),
                                 Text(
                                   valueOrDefault<String>(
-                                    widget!.businessRecord?.description,
+                                    widget.businessRecord?.description,
                                     'No description available for this business.',
                                   ),
                                   style: FlutterFlowTheme.of(context)
@@ -587,7 +590,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                         children: [
                                           Text(
                                             valueOrDefault<String>(
-                                              widget!.businessRecord
+                                              widget.businessRecord
                                                   ?.businessLocation
                                                   ?.toString(),
                                               '1',
@@ -672,7 +675,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                           Text(
                                             valueOrDefault<String>(
                                               formatNumber(
-                                                widget!.businessRecord
+                                                widget.businessRecord
                                                     ?.interactionCount,
                                                 formatType: FormatType.compact,
                                               ),
@@ -757,9 +760,9 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                         children: [
                                           Text(
                                             '${valueOrDefault<String>(
-                                              widget!.businessRecord
+                                              widget.businessRecord
                                                   ?.establishedYear
-                                                  ?.toString(),
+                                                  .toString(),
                                               '2026',
                                             )}+',
                                             style: FlutterFlowTheme.of(context)
@@ -893,7 +896,7 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                           padding: EdgeInsets.all(8.0),
                                           child: Text(
                                             valueOrDefault<String>(
-                                              widget!.businessRecord?.category,
+                                              widget.businessRecord?.category,
                                               'Services',
                                             ),
                                             style: FlutterFlowTheme.of(context)
@@ -970,9 +973,9 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                 ),
                                 Builder(
                                   builder: (context) {
-                                    final galleryImages = widget!
+                                    final galleryImages = widget
                                             .businessRecord?.photoGallery
-                                            ?.toList() ??
+                                            .toList() ??
                                         [];
 
                                     return Row(

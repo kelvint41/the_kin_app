@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_preview_card_model.dart';
 export 'business_preview_card_model.dart';
 
@@ -67,7 +64,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
         border: Border.all(
           color: valueOrDefault<Color>(
             valueOrDefault<bool>(
-              widget!.isPriority,
+              widget.isPriority,
               true,
             )
                 ? FlutterFlowTheme.of(context).tertiary
@@ -119,7 +116,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                       children: [
                         Text(
                           valueOrDefault<String>(
-                            widget!.name,
+                            widget.name,
                             'Harlem Coffee Co.',
                           ),
                           maxLines: 1,
@@ -142,7 +139,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (valueOrDefault<bool>(
-                          widget!.isPriority,
+                          widget.isPriority,
                           true,
                         ))
                           Icon(
@@ -154,7 +151,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.category,
+                        widget.category,
                         'Cafe & Bakery',
                       ),
                       style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -194,7 +191,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                             ),
                             Text(
                               valueOrDefault<String>(
-                                widget!.rating,
+                                widget.rating,
                                 '4.9',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -224,7 +221,7 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.distance,
+                            widget.distance,
                             '0.2 mi',
                           ),
                           style: FlutterFlowTheme.of(context)

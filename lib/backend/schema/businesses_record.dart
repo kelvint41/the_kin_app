@@ -1,12 +1,10 @@
 import 'dart:async';
 
-import 'package:from_css_color/from_css_color.dart';
 import '/backend/algolia/serialization_util.dart';
 import '/backend/algolia/algolia_manager.dart';
 import 'package:collection/collection.dart';
 
 import '/backend/schema/util/firestore_util.dart';
-import '/backend/schema/util/schema_util.dart';
 
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -28,11 +26,6 @@ class BusinessesRecord extends FirestoreRecord {
   String? _category;
   String get category => _category ?? '';
   bool hasCategory() => _category != null;
-
-  // "business_type" field.
-  String? _businessType;
-  String get businessType => _businessType ?? '';
-  bool hasBusinessType() => _businessType != null;
 
   // "website" field.
   String? _website;
@@ -138,31 +131,6 @@ class BusinessesRecord extends FirestoreRecord {
   bool? _hasFlashBeacon;
   bool get hasFlashBeacon => _hasFlashBeacon ?? false;
   bool hasHasFlashBeacon() => _hasFlashBeacon != null;
-
-  // "flash_beacon_expires_at" field. Read by the checkAndExpireBeacons
-  // Cloud Function (firebase/custom_cloud_functions), which flips
-  // has_flash_beacon back to false once this passes.
-  DateTime? _flashBeaconExpiresAt;
-  DateTime? get flashBeaconExpiresAt => _flashBeaconExpiresAt;
-  bool hasFlashBeaconExpiresAt() => _flashBeaconExpiresAt != null;
-
-  // "flash_beacon_duration_minutes" field.
-  int? _flashBeaconDurationMinutes;
-  int get flashBeaconDurationMinutes => _flashBeaconDurationMinutes ?? 0;
-  bool hasFlashBeaconDurationMinutes() => _flashBeaconDurationMinutes != null;
-
-  // "power_hour_usage_count" field. Count of Power Hours started within
-  // the current rolling 7-day window (see power_hour_last_reset).
-  int? _powerHourUsageCount;
-  int get powerHourUsageCount => _powerHourUsageCount ?? 0;
-  bool hasPowerHourUsageCount() => _powerHourUsageCount != null;
-
-  // "power_hour_last_reset" field. When the rolling 7-day usage window
-  // last reset; power_hour_usage_count is treated as 0 once 7 days have
-  // passed since this timestamp.
-  DateTime? _powerHourLastReset;
-  DateTime? get powerHourLastReset => _powerHourLastReset;
-  bool hasPowerHourLastReset() => _powerHourLastReset != null;
 
   // "is_priority_pinned" field.
   bool? _isPriorityPinned;
@@ -359,10 +327,14 @@ class BusinessesRecord extends FirestoreRecord {
   List<String> get photoGallery => _photoGallery ?? const [];
   bool hasPhotoGallery() => _photoGallery != null;
 
+  // "google_place_id" field.
+  String? _googlePlaceId;
+  String get googlePlaceId => _googlePlaceId ?? '';
+  bool hasGooglePlaceId() => _googlePlaceId != null;
+
   void _initializeFields() {
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
     _category = snapshotData['category'] as String?;
-    _businessType = snapshotData['business_type'] as String?;
     _website = snapshotData['website'] as String?;
     _tickerSymbol = snapshotData['ticker_symbol'] as String?;
     _heroImage = snapshotData['hero_image'] as String?;
@@ -384,13 +356,6 @@ class BusinessesRecord extends FirestoreRecord {
     _isArEnabled = snapshotData['is_ar_enabled'] as bool?;
     _subscriptionTier = snapshotData['subscription_tier'] as String?;
     _hasFlashBeacon = snapshotData['has_flash_beacon'] as bool?;
-    _flashBeaconExpiresAt =
-        snapshotData['flash_beacon_expires_at'] as DateTime?;
-    _flashBeaconDurationMinutes =
-        castToType<int>(snapshotData['flash_beacon_duration_minutes']);
-    _powerHourUsageCount =
-        castToType<int>(snapshotData['power_hour_usage_count']);
-    _powerHourLastReset = snapshotData['power_hour_last_reset'] as DateTime?;
     _isPriorityPinned = snapshotData['is_priority_pinned'] as bool?;
     _loiSigned = snapshotData['loi_signed'] as bool?;
     _loiDate = snapshotData['loi_date'] as DateTime?;
@@ -433,6 +398,7 @@ class BusinessesRecord extends FirestoreRecord {
     _openingTime = snapshotData['opening_time'] as String?;
     _closingTime = snapshotData['closing_time'] as String?;
     _photoGallery = getDataList(snapshotData['photo_gallery']);
+    _googlePlaceId = snapshotData['google_place_id'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -603,6 +569,7 @@ class BusinessesRecord extends FirestoreRecord {
           'photo_gallery': safeGet(
             () => snapshot.data['photo_gallery'].toList(),
           ),
+          'google_place_id': snapshot.data['google_place_id'],
         },
         BusinessesRecord.collection.doc(snapshot.objectID),
       );
@@ -641,7 +608,6 @@ class BusinessesRecord extends FirestoreRecord {
 Map<String, dynamic> createBusinessesRecordData({
   bool? isBlackOwned,
   String? category,
-  String? businessType,
   String? website,
   String? tickerSymbol,
   String? heroImage,
@@ -663,10 +629,6 @@ Map<String, dynamic> createBusinessesRecordData({
   bool? isArEnabled,
   String? subscriptionTier,
   bool? hasFlashBeacon,
-  DateTime? flashBeaconExpiresAt,
-  int? flashBeaconDurationMinutes,
-  int? powerHourUsageCount,
-  DateTime? powerHourLastReset,
   bool? isPriorityPinned,
   bool? loiSigned,
   DateTime? loiDate,
@@ -705,12 +667,12 @@ Map<String, dynamic> createBusinessesRecordData({
   int? connectionCount,
   String? openingTime,
   String? closingTime,
+  String? googlePlaceId,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
       'is_black_owned': isBlackOwned,
       'category': category,
-      'business_type': businessType,
       'website': website,
       'ticker_symbol': tickerSymbol,
       'hero_image': heroImage,
@@ -732,10 +694,6 @@ Map<String, dynamic> createBusinessesRecordData({
       'is_ar_enabled': isArEnabled,
       'subscription_tier': subscriptionTier,
       'has_flash_beacon': hasFlashBeacon,
-      'flash_beacon_expires_at': flashBeaconExpiresAt,
-      'flash_beacon_duration_minutes': flashBeaconDurationMinutes,
-      'power_hour_usage_count': powerHourUsageCount,
-      'power_hour_last_reset': powerHourLastReset,
       'is_priority_pinned': isPriorityPinned,
       'loi_signed': loiSigned,
       'loi_date': loiDate,
@@ -774,6 +732,7 @@ Map<String, dynamic> createBusinessesRecordData({
       'connection_count': connectionCount,
       'opening_time': openingTime,
       'closing_time': closingTime,
+      'google_place_id': googlePlaceId,
     }.withoutNulls,
   );
 
@@ -788,7 +747,6 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
     const listEquality = ListEquality();
     return e1?.isBlackOwned == e2?.isBlackOwned &&
         e1?.category == e2?.category &&
-        e1?.businessType == e2?.businessType &&
         e1?.website == e2?.website &&
         e1?.tickerSymbol == e2?.tickerSymbol &&
         e1?.heroImage == e2?.heroImage &&
@@ -810,10 +768,6 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.isArEnabled == e2?.isArEnabled &&
         e1?.subscriptionTier == e2?.subscriptionTier &&
         e1?.hasFlashBeacon == e2?.hasFlashBeacon &&
-        e1?.flashBeaconExpiresAt == e2?.flashBeaconExpiresAt &&
-        e1?.flashBeaconDurationMinutes == e2?.flashBeaconDurationMinutes &&
-        e1?.powerHourUsageCount == e2?.powerHourUsageCount &&
-        e1?.powerHourLastReset == e2?.powerHourLastReset &&
         e1?.isPriorityPinned == e2?.isPriorityPinned &&
         e1?.loiSigned == e2?.loiSigned &&
         e1?.loiDate == e2?.loiDate &&
@@ -852,14 +806,14 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.connectionCount == e2?.connectionCount &&
         e1?.openingTime == e2?.openingTime &&
         e1?.closingTime == e2?.closingTime &&
-        listEquality.equals(e1?.photoGallery, e2?.photoGallery);
+        listEquality.equals(e1?.photoGallery, e2?.photoGallery) &&
+        e1?.googlePlaceId == e2?.googlePlaceId;
   }
 
   @override
   int hash(BusinessesRecord? e) => const ListEquality().hash([
         e?.isBlackOwned,
         e?.category,
-        e?.businessType,
         e?.website,
         e?.tickerSymbol,
         e?.heroImage,
@@ -881,10 +835,6 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.isArEnabled,
         e?.subscriptionTier,
         e?.hasFlashBeacon,
-        e?.flashBeaconExpiresAt,
-        e?.flashBeaconDurationMinutes,
-        e?.powerHourUsageCount,
-        e?.powerHourLastReset,
         e?.isPriorityPinned,
         e?.loiSigned,
         e?.loiDate,
@@ -923,7 +873,8 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.connectionCount,
         e?.openingTime,
         e?.closingTime,
-        e?.photoGallery
+        e?.photoGallery,
+        e?.googlePlaceId
       ]);
 
   @override

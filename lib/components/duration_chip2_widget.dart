@@ -1,9 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'duration_chip2_model.dart';
 export 'duration_chip2_model.dart';
 
@@ -55,7 +53,7 @@ class _DurationChip2WidgetState extends State<DurationChip2Widget> {
         border: Border.all(
           color: valueOrDefault<Color>(
             valueOrDefault<bool>(
-              widget!.active,
+              widget.active,
               true,
             )
                 ? FlutterFlowTheme.of(context).primaryText
@@ -68,7 +66,7 @@ class _DurationChip2WidgetState extends State<DurationChip2Widget> {
       alignment: AlignmentDirectional(0.0, 0.0),
       child: Text(
         valueOrDefault<String>(
-          widget!.label,
+          widget.label,
           '1 Hour',
         ),
         style: FlutterFlowTheme.of(context).bodyMedium.override(

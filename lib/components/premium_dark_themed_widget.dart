@@ -2,10 +2,8 @@ import '/components/text_field_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'premium_dark_themed_model.dart';
 export 'premium_dark_themed_model.dart';
 
@@ -95,7 +93,7 @@ class _PremiumDarkThemedWidgetState extends State<PremiumDarkThemedWidget> {
                     size: 32.0,
                   ),
                   Text(
-                    widget!.title,
+                    widget.title,
                     textAlign: TextAlign.center,
                     style: FlutterFlowTheme.of(context).titleLarge.override(
                           font: GoogleFonts.plusJakartaSans(
@@ -133,7 +131,7 @@ class _PremiumDarkThemedWidgetState extends State<PremiumDarkThemedWidget> {
                         ),
                         leadingIconPresent: true,
                         trailingIconPresent: false,
-                        hint: widget!.hint,
+                        hint: widget.hint,
                         value: '',
                         onChange: '',
                         onSubmit: '',

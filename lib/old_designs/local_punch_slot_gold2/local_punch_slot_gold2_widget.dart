@@ -1,9 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'local_punch_slot_gold2_model.dart';
 export 'local_punch_slot_gold2_model.dart';
 
@@ -48,7 +45,7 @@ class _LocalPunchSlotGold2WidgetState extends State<LocalPunchSlotGold2Widget> {
       width: 32.0,
       height: 32.0,
       decoration: BoxDecoration(
-        color: widget!.completed == true
+        color: widget.completed == true
             ? FlutterFlowTheme.of(context).primary
             : FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(

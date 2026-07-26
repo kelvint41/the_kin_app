@@ -1,12 +1,9 @@
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'investment_item_refined_model.dart';
 export 'investment_item_refined_model.dart';
 
@@ -97,7 +94,7 @@ class _InvestmentItemRefinedWidgetState
                     fadeInDuration: Duration(milliseconds: 0),
                     fadeOutDuration: Duration(milliseconds: 0),
                     imageUrl: valueOrDefault<String>(
-                      widget!.img_desc,
+                      widget.img_desc,
                       'https://dimg.dreamflow.cloud/v1/image/gourmet%20bbq%20plate',
                     ),
                     fit: BoxFit.cover,
@@ -113,7 +110,7 @@ class _InvestmentItemRefinedWidgetState
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.name,
+                        widget.name,
                         'Heritage BBQ',
                       ),
                       maxLines: 1,
@@ -137,7 +134,7 @@ class _InvestmentItemRefinedWidgetState
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.category,
+                        widget.category,
                         'Food & Beverage',
                       ),
                       style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -168,7 +165,7 @@ class _InvestmentItemRefinedWidgetState
                           child: FlutterFlowLineChart(
                             data: [
                               FFLineChartData(
-                                xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0])!,
+                                xData: ([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0]),
                                 yData: ([
                                   10.0,
                                   15.0,
@@ -177,7 +174,7 @@ class _InvestmentItemRefinedWidgetState
                                   30.0,
                                   28.0,
                                   45.0
-                                ])!,
+                                ]),
                                 settings: LineChartBarData(
                                   color: FlutterFlowTheme.of(context).success,
                                   barWidth: 2.0,
@@ -207,7 +204,7 @@ class _InvestmentItemRefinedWidgetState
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.trend,
+                            widget.trend,
                             '+12%',
                           ),
                           style:
@@ -246,7 +243,7 @@ class _InvestmentItemRefinedWidgetState
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.points?.toString(),
+                      widget.points?.toString(),
                       '150',
                     ),
                     style: FlutterFlowTheme.of(context).labelLarge.override(

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'legal_section2_model.dart';
 export 'legal_section2_model.dart';
 
@@ -58,7 +55,7 @@ class _LegalSection2WidgetState extends State<LegalSection2Widget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.title,
+            widget.title,
             '2. User Obligations',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -66,7 +63,7 @@ class _LegalSection2WidgetState extends State<LegalSection2Widget> {
                   fontWeight: FontWeight.bold,
                   fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
                 ),
-                color: widget!.headerColor,
+                color: widget.headerColor,
                 fontSize: 18.0,
                 letterSpacing: 0.0,
                 fontWeight: FontWeight.bold,
@@ -76,7 +73,7 @@ class _LegalSection2WidgetState extends State<LegalSection2Widget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.body,
+            widget.body,
             'Users must provide accurate information when registering for the directory. Any fraudulent activity or misuse of the platform will lead to immediate account termination without notice.',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(

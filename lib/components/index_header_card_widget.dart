@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'index_header_card_model.dart';
 export 'index_header_card_model.dart';
 
@@ -76,7 +73,7 @@ class _IndexHeaderCardWidgetState extends State<IndexHeaderCardWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.title,
+                  widget.title,
                   'PERSONAL INDEX',
                 ),
                 style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -100,7 +97,7 @@ class _IndexHeaderCardWidgetState extends State<IndexHeaderCardWidget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.ticker,
+                      widget.ticker,
                       'KTAY',
                     ),
                     style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -127,14 +124,14 @@ class _IndexHeaderCardWidgetState extends State<IndexHeaderCardWidget> {
                       Icon(
                         Icons.arrow_drop_up_rounded,
                         color: valueOrDefault<Color>(
-                          widget!.deltaColor,
+                          widget.deltaColor,
                           Color(0xFF10B981),
                         ),
                         size: 18.0,
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.delta,
+                          widget.delta,
                           '+2',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -145,7 +142,7 @@ class _IndexHeaderCardWidgetState extends State<IndexHeaderCardWidget> {
                                     .fontStyle,
                               ),
                               color: valueOrDefault<Color>(
-                                widget!.deltaColor,
+                                widget.deltaColor,
                                 Color(0xFF10B981),
                               ),
                               letterSpacing: 0.0,
@@ -162,7 +159,7 @@ class _IndexHeaderCardWidgetState extends State<IndexHeaderCardWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.score,
+                  widget.score,
                   '112',
                 ),
                 style: FlutterFlowTheme.of(context).headlineMedium.override(

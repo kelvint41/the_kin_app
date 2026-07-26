@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'form_field_model.dart';
 export 'form_field_model.dart';
 
@@ -58,7 +55,7 @@ class _FormFieldWidgetState extends State<FormFieldWidget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'Full Name',
           ),
           style: FlutterFlowTheme.of(context).labelLarge.override(

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'review_item_model.dart';
 export 'review_item_model.dart';
 
@@ -77,7 +74,7 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.name,
+                        widget.name,
                         'Julian V.',
                       ),
                       textAlign: TextAlign.center,
@@ -115,7 +112,7 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                           children: [
                             Text(
                               valueOrDefault<String>(
-                                widget!.name,
+                                widget.name,
                                 'Julian V.',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -138,7 +135,7 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                             ),
                             Text(
                               valueOrDefault<String>(
-                                widget!.time,
+                                widget.time,
                                 '2h ago',
                               ),
                               style: FlutterFlowTheme.of(context)
@@ -199,7 +196,7 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                         ),
                         Text(
                           valueOrDefault<String>(
-                            widget!.text,
+                            widget.text,
                             'Absolutely incredible atmosphere and the service was impeccable.',
                           ),
                           maxLines: 2,

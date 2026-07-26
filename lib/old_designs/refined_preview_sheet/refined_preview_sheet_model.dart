@@ -1,13 +1,7 @@
-import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import '/pages/local_verified_badge/local_verified_badge_widget.dart';
-import 'dart:ui';
 import 'refined_preview_sheet_widget.dart' show RefinedPreviewSheetWidget;
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 
 class RefinedPreviewSheetModel
     extends FlutterFlowModel<RefinedPreviewSheetWidget> {

@@ -4,12 +4,15 @@ const qs = require("qs");
 async function _getBusinessDetailsCall(context, ffVariables) {
   var placeId = ffVariables["placeId"];
 
-  var url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=AIzaSyD1w4m7laWva5Bxl9fsbsZglLC7R8wf_Go`;
+  var url = `https://maps.googleapis.com/maps/api/place/details/json`;
   var headers = {
     "X-Goog-Api-Key": `AIzaSyC15e22EaRQ7xu5eC832JtNrx2tTHgk8zc`,
     "X-Goog-FieldMask": `displayName,rating,reviews,photos`,
   };
-  var params = {};
+  var params = {
+    key: `AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go`,
+    place_id: placeId,
+  };
   var ffApiRequestBody = undefined;
 
   return makeApiRequest({

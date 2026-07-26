@@ -1,9 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'local_punch_slot_gold_b15344203ba6999d_model.dart';
 export 'local_punch_slot_gold_b15344203ba6999d_model.dart';
 
@@ -50,7 +47,7 @@ class _LocalPunchSlotGoldB15344203ba6999dWidgetState
       width: 44.0,
       height: 44.0,
       decoration: BoxDecoration(
-        color: widget!.completed == false
+        color: widget.completed == false
             ? Colors.transparent
             : FlutterFlowTheme.of(context).primary,
         borderRadius: BorderRadius.circular(

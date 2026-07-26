@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_card_model.dart';
 export 'business_card_model.dart';
 
@@ -86,7 +83,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                 fadeInDuration: Duration(milliseconds: 0),
                 fadeOutDuration: Duration(milliseconds: 0),
                 imageUrl: valueOrDefault<String>(
-                  widget!.imageDesc,
+                  widget.imageDesc,
                   'https://dimg.dreamflow.cloud/v1/image/Modern%20law%20office%20interior',
                 ),
                 fit: BoxFit.cover,
@@ -107,7 +104,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                     children: [
                       Text(
                         valueOrDefault<String>(
-                          widget!.category,
+                          widget.category,
                           'Legal',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -142,7 +139,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.rating,
+                              widget.rating,
                               '4.9',
                             ),
                             style: FlutterFlowTheme.of(context)
@@ -168,7 +165,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.name,
+                      widget.name,
                       'Sterling & Associates',
                     ),
                     maxLines: 1,
@@ -201,7 +198,7 @@ class _BusinessCardWidgetState extends State<BusinessCardWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.location,
+                          widget.location,
                           'Financial District',
                         ),
                         maxLines: 1,

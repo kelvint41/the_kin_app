@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'featured_card_model.dart';
 export 'featured_card_model.dart';
 
@@ -83,7 +80,7 @@ class _FeaturedCardWidgetState extends State<FeaturedCardWidget> {
                 fadeInDuration: Duration(milliseconds: 0),
                 fadeOutDuration: Duration(milliseconds: 0),
                 imageUrl: valueOrDefault<String>(
-                  widget!.imgDesc,
+                  widget.imgDesc,
                   'https://dimg.dreamflow.cloud/v1/image/Delicious%20vegan%20cupcakes%20and%20pastries',
                 ),
                 fit: BoxFit.cover,
@@ -108,7 +105,7 @@ class _FeaturedCardWidgetState extends State<FeaturedCardWidget> {
                             flex: 1,
                             child: Text(
                               valueOrDefault<String>(
-                                widget!.name,
+                                widget.name,
                                 'Southern Roots Vegan Bakery',
                               ),
                               maxLines: 1,
@@ -145,7 +142,7 @@ class _FeaturedCardWidgetState extends State<FeaturedCardWidget> {
                               ),
                               Text(
                                 valueOrDefault<String>(
-                                  widget!.rating,
+                                  widget.rating,
                                   '4.9',
                                 ),
                                 style: FlutterFlowTheme.of(context)
@@ -177,7 +174,7 @@ class _FeaturedCardWidgetState extends State<FeaturedCardWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.category,
+                          widget.category,
                           'Bakery • Food',
                         ),
                         style: FlutterFlowTheme.of(context).bodySmall.override(

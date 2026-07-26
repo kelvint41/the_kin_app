@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'signup_item_model.dart';
 export 'signup_item_model.dart';
 
@@ -76,7 +73,7 @@ class _SignupItemWidgetState extends State<SignupItemWidget> {
                     children: [
                       Text(
                         valueOrDefault<String>(
-                          widget!.user,
+                          widget.user,
                           'Marcus Johnson',
                         ),
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -97,7 +94,7 @@ class _SignupItemWidgetState extends State<SignupItemWidget> {
                       ),
                       Text(
                         valueOrDefault<String>(
-                          widget!.city,
+                          widget.city,
                           'San Antonio',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -126,7 +123,7 @@ class _SignupItemWidgetState extends State<SignupItemWidget> {
                     height: 34.0,
                     decoration: BoxDecoration(
                       color: valueOrDefault<Color>(
-                        widget!.statusColor,
+                        widget.statusColor,
                         FlutterFlowTheme.of(context).secondary,
                       ),
                       borderRadius: BorderRadius.circular(8.0),
@@ -151,7 +148,7 @@ class _SignupItemWidgetState extends State<SignupItemWidget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.status,
+                              widget.status,
                               'Elite',
                             ),
                             style: FlutterFlowTheme.of(context)

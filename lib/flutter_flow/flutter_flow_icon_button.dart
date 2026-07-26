@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FlutterFlowIconButton extends StatefulWidget {
   const FlutterFlowIconButton({
@@ -59,26 +60,32 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
   }
 
   void _updateIcon() {
-    // FaIcon extends Icon and its `.icon` getter already returns a flattened
-    // IconData carrying the correct font/glyph info, so a plain Icon here
-    // renders identically whether the source was a material Icon or a
-    // FaIcon — no need to special-case FontAwesome (and font_awesome_flutter
-    // 11+ no longer exposes the FaIconData needed to reconstruct a FaIcon).
-    Icon icon = widget.icon as Icon;
-    effectiveIcon = Icon(
-      icon.icon,
-      size: icon.size,
-    );
-    iconSize = icon.size;
-    iconColor = icon.color;
+    final isFontAwesome = widget.icon is FaIcon;
+    if (isFontAwesome) {
+      FaIcon icon = widget.icon as FaIcon;
+      effectiveIcon = FaIcon(
+        icon.icon,
+        size: icon.size,
+      );
+      iconSize = icon.size;
+      iconColor = icon.color;
+    } else {
+      Icon icon = widget.icon as Icon;
+      effectiveIcon = Icon(
+        icon.icon,
+        size: icon.size,
+      );
+      iconSize = icon.size;
+      iconColor = icon.color;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     ButtonStyle style = ButtonStyle(
-      shape: MaterialStateProperty.resolveWith<OutlinedBorder>(
+      shape: WidgetStateProperty.resolveWith<OutlinedBorder>(
         (states) {
-          if (states.contains(MaterialState.hovered)) {
+          if (states.contains(WidgetState.hovered)) {
             return RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(widget.borderRadius ?? 0),
               side: BorderSide(
@@ -106,26 +113,26 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           );
         },
       ),
-      iconColor: MaterialStateProperty.resolveWith<Color?>(
+      iconColor: WidgetStateProperty.resolveWith<Color?>(
         (states) {
-          if (states.contains(MaterialState.disabled) &&
+          if (states.contains(WidgetState.disabled) &&
               widget.disabledIconColor != null) {
             return widget.disabledIconColor;
           }
-          if (states.contains(MaterialState.hovered) &&
+          if (states.contains(WidgetState.hovered) &&
               widget.hoverIconColor != null) {
             return widget.hoverIconColor;
           }
           return iconColor;
         },
       ),
-      backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
         (states) {
-          if (states.contains(MaterialState.disabled) &&
+          if (states.contains(WidgetState.disabled) &&
               widget.disabledColor != null) {
             return widget.disabledColor;
           }
-          if (states.contains(MaterialState.hovered) &&
+          if (states.contains(WidgetState.hovered) &&
               widget.hoverColor != null) {
             return widget.hoverColor;
           }
@@ -133,8 +140,8 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           return widget.fillColor;
         },
       ),
-      overlayColor: MaterialStateProperty.resolveWith<Color?>((states) {
-        if (states.contains(MaterialState.pressed)) {
+      overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
+        if (states.contains(WidgetState.pressed)) {
           return null;
         }
         return widget.hoverColor == null ? null : Colors.transparent;

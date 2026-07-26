@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'rating_bar_model.dart';
 export 'rating_bar_model.dart';
 
@@ -55,7 +52,7 @@ class _RatingBarWidgetState extends State<RatingBarWidget> {
           size: 16.0,
         ),
         Text(
-          '${widget!.score}',
+          '${widget.score}',
           style: FlutterFlowTheme.of(context).labelMedium.override(
                 font: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold,

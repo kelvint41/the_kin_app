@@ -1,20 +1,6 @@
 {
   "indexes": [
     {
-      "collectionGroup": "businesses",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "city",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "kindex_score",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "reviews",
       "queryScope": "COLLECTION",
       "fields": [
@@ -47,29 +33,15 @@
       ]
     },
     {
-      "collectionGroup": "UserEngagementEvents",
+      "collectionGroup": "prestige_points",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "user_ref",
+          "fieldPath": "location_city",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "created_at",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "UserEngagementEvents",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "business_ref",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "created_at",
+          "fieldPath": "kindex_score",
           "order": "DESCENDING"
         }
       ]

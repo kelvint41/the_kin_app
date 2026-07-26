@@ -1,31 +1,17 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/tier_card_widget.dart';
-import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
-import 'dart:math';
-import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'merchant_pricing_suite_model.dart';
 export 'merchant_pricing_suite_model.dart';
-
-// TODO: Replace with the real RevenueCat package identifiers once the
-// corresponding products are configured in the RevenueCat dashboard.
-const _kFoundingLocalPackageId = 'founding_local_monthly';
-const _kProGrowthPackageId = 'pro_growth_monthly';
-const _kEliteGrowthPackageId = 'elite_growth_monthly';
 
 /// Create a high-fidelity mobile pricing subscription page for a premium
 /// local discovery app.
@@ -124,32 +110,13 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
 
   @override
   Widget build(BuildContext context) {
-    // Some navigation call sites push this route without a businessRef
-    // (e.g. when the signed-in user has no claimed business yet). This
-    // page always means "the signed-in owner's own business", so fall
-    // back to that instead of crashing on a null reference.
-    final businessRef =
-        widget!.businessRef ?? currentUserDocument?.ownedBusiness;
-    if (businessRef == null) {
-      return Scaffold(
-        key: scaffoldKey,
-        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Center(
-          child: Text(
-            'This business could not be found.',
-            style: FlutterFlowTheme.of(context).bodyLarge,
-          ),
-        ),
-      );
-    }
-
     return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(businessRef),
+      stream: BusinessesRecord.getDocument(widget.businessRef!),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
-            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            backgroundColor: FlutterFlowTheme.of(context).primary,
             body: Center(
               child: SizedBox(
                 width: 50.0,
@@ -173,7 +140,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
           },
           child: Scaffold(
             key: scaffoldKey,
-            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            backgroundColor: FlutterFlowTheme.of(context).primary,
             body: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
@@ -325,33 +292,19 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  // Free tier: no purchase needed, just reset
-                                  // the business back to the unpaid Community
-                                  // plan.
-                                  final businessRef =
-                                      currentUserDocument?.ownedBusiness;
-                                  if (businessRef == null) {
-                                    return;
-                                  }
-                                  final result =
-                                      await KinServices.downgradeToCommunity(
-                                    businessRef: businessRef,
-                                  );
-                                  if (!result.isSuccess) {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(content: Text(result.error!)),
-                                      );
-                                    }
-                                    return;
-                                  }
+                                  await currentUserDocument!.ownedBusiness!
+                                      .update(createBusinessesRecordData(
+                                    subscriptionTier: 'Elite',
+                                    isPriorityPinned: true,
+                                    hasFlashBeacon: false,
+                                    isPremium: true,
+                                  ));
 
                                   context.pushNamed(
                                     BusinessProfileOwnerWidget.routeName,
                                     queryParameters: {
                                       'businessRef': serializeParam(
-                                        businessRef,
+                                        currentUserDocument?.ownedBusiness,
                                         ParamType.DocumentReference,
                                       ),
                                     }.withoutNulls,
@@ -370,7 +323,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     f2: 'Basic business profile page on local directory',
                                     f3: 'Up to 3 active local connections',
                                     f4: 'Basic community support',
-                                    beaconText: 'Free',
                                   ),
                                 ),
                               ),
@@ -380,33 +332,19 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  final businessRef =
-                                      currentUserDocument?.ownedBusiness;
-                                  if (businessRef == null) {
-                                    return;
-                                  }
-                                  final result =
-                                      await KinServices.upgradeBusinessTier(
-                                    businessRef: businessRef,
-                                    packageId: _kFoundingLocalPackageId,
-                                    tierName: 'Founding Local',
+                                  await currentUserDocument!.ownedBusiness!
+                                      .update(createBusinessesRecordData(
+                                    subscriptionTier: 'Founding Local',
+                                    isPriorityPinned: false,
+                                    hasFlashBeacon: false,
                                     isPremium: true,
-                                  );
-                                  if (!result.isSuccess) {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(content: Text(result.error!)),
-                                      );
-                                    }
-                                    return;
-                                  }
+                                  ));
 
                                   context.pushNamed(
                                     BusinessProfileOwnerWidget.routeName,
                                     queryParameters: {
                                       'businessRef': serializeParam(
-                                        businessRef,
+                                        currentUserDocument?.ownedBusiness,
                                         ParamType.DocumentReference,
                                       ),
                                     }.withoutNulls,
@@ -425,7 +363,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     f2: 'Up to 5 gallery photos on profile',
                                     f3: 'Basic profile analytics (views & trends)',
                                     f4: 'Post 1 promotion per month on The Exchange',
-                                    beaconText: 'Upgrade',
                                   ),
                                 ),
                               ),
@@ -475,34 +412,12 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       onTap: () async {
-                                        final businessRef =
-                                            tierCardBusinessesRecord?.reference;
-                                        if (businessRef == null) {
-                                          return;
-                                        }
-                                        final result = await KinServices
-                                            .upgradeBusinessTier(
-                                          businessRef: businessRef,
-                                          packageId: _kProGrowthPackageId,
-                                          tierName: 'Pro Growth',
-                                          isPremium: true,
-                                        );
-                                        if (!result.isSuccess) {
-                                          if (mounted) {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(result.error!)),
-                                            );
-                                          }
-                                          return;
-                                        }
-
                                         context.pushNamed(
                                           BusinessProfileOwnerWidget.routeName,
                                           queryParameters: {
                                             'businessRef': serializeParam(
-                                              businessRef,
+                                              tierCardBusinessesRecord
+                                                  ?.reference,
                                               ParamType.DocumentReference,
                                             ),
                                           }.withoutNulls,
@@ -522,7 +437,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           f2: 'Clutter-free promotion updates on \'The Exchange\'',
                                           f3: 'Premium performance analytics dashboard',
                                           f4: 'Priority support ticket handling',
-                                          beaconText: 'Upgrade',
                                         ),
                                       ),
                                     ).animateOnPageLoad(animationsMap[
@@ -536,38 +450,13 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                 hoverColor: Colors.transparent,
                                 highlightColor: Colors.transparent,
                                 onTap: () async {
-                                  final businessRef = widget!.businessRef;
-                                  if (businessRef == null) {
-                                    return;
-                                  }
-                                  final result =
-                                      await KinServices.upgradeBusinessTier(
-                                    businessRef: businessRef,
-                                    packageId: _kEliteGrowthPackageId,
-                                    tierName: 'Elite Growth',
-                                    isPremium: true,
-                                    isPriorityPinned: true,
-                                    hasFlashBeacon: true,
-                                  );
-                                  if (!result.isSuccess) {
-                                    if (mounted) {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(content: Text(result.error!)),
-                                      );
-                                    }
-                                    return;
-                                  }
+                                  await widget.businessRef!
+                                      .update(createBusinessesRecordData(
+                                    subscriptionTier: 'Elite AR Navigator',
+                                  ));
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
-                                    queryParameters: {
-                                      'businessRef': serializeParam(
-                                        businessRef,
-                                        ParamType.DocumentReference,
-                                      ),
-                                    }.withoutNulls,
-                                  );
+                                      BusinessProfileOwnerWidget.routeName);
                                 },
                                 child: wrapWithModel(
                                   model: _model.tierCardModel4,
@@ -582,7 +471,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     f2: 'Interactive KINDEX dynamic ticker badge',
                                     f3: 'Geo-Fenced Flash Beacons (3-block radius)',
                                     f4: 'Priority Glowing Visual Map Pinning',
-                                    beaconText: 'Upgrade',
                                   ),
                                 ),
                               ).animateOnPageLoad(animationsMap[

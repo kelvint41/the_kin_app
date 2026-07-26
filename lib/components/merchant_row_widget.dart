@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'merchant_row_model.dart';
 export 'merchant_row_model.dart';
 
@@ -72,7 +69,7 @@ class _MerchantRowWidgetState extends State<MerchantRowWidget> {
                     flex: 1,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.tag,
+                        widget.tag,
                         'VLTX',
                       ),
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
@@ -96,7 +93,7 @@ class _MerchantRowWidgetState extends State<MerchantRowWidget> {
                     flex: 1,
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.score,
+                        widget.score,
                         '892',
                       ),
                       textAlign: TextAlign.center,
@@ -121,7 +118,7 @@ class _MerchantRowWidgetState extends State<MerchantRowWidget> {
                     flex: 1,
                     child: Container(
                       alignment: AlignmentDirectional(1.0, -1.0),
-                      child: widget!.statusIcon!,
+                      child: widget.statusIcon!,
                     ),
                   ),
                 ].divide(SizedBox(width: 16.0)),

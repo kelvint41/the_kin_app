@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'input_field_model.dart';
 export 'input_field_model.dart';
 
@@ -56,7 +53,7 @@ class _InputFieldWidgetState extends State<InputFieldWidget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'Email Address',
           ),
           style: FlutterFlowTheme.of(context).labelMedium.override(

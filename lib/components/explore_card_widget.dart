@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'explore_card_model.dart';
 export 'explore_card_model.dart';
 
@@ -79,7 +76,7 @@ class _ExploreCardWidgetState extends State<ExploreCardWidget> {
                 fadeInDuration: Duration(milliseconds: 0),
                 fadeOutDuration: Duration(milliseconds: 0),
                 imageUrl: valueOrDefault<String>(
-                  widget!.imgDesc,
+                  widget.imgDesc,
                   'https://dimg.dreamflow.cloud/v1/image/Hand-tossed%20artisan%20pizza',
                 ),
                 fit: BoxFit.cover,
@@ -97,7 +94,7 @@ class _ExploreCardWidgetState extends State<ExploreCardWidget> {
                     children: [
                       Text(
                         valueOrDefault<String>(
-                          widget!.name,
+                          widget.name,
                           'Tank\'s Pizza',
                         ),
                         maxLines: 1,
@@ -130,7 +127,7 @@ class _ExploreCardWidgetState extends State<ExploreCardWidget> {
                           ),
                           Text(
                             valueOrDefault<String>(
-                              widget!.distance,
+                              widget.distance,
                               '1.2 miles',
                             ),
                             style: FlutterFlowTheme.of(context)

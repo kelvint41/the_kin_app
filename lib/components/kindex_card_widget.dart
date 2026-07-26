@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'kindex_card_model.dart';
 export 'kindex_card_model.dart';
 
@@ -73,7 +70,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.title,
+                  widget.title,
                   'Personal Kindex',
                 ),
                 style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -99,7 +96,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.ticker,
+                      widget.ticker,
                       'KTAY',
                     ),
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -126,7 +123,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
                       children: [
                         if (valueOrDefault<bool>(
                           valueOrDefault<bool>(
-                            widget!.up,
+                            widget.up,
                             true,
                           )
                               ? true
@@ -137,7 +134,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
                             Icons.arrow_upward_rounded,
                             color: valueOrDefault<Color>(
                               valueOrDefault<bool>(
-                                widget!.up,
+                                widget.up,
                                 true,
                               )
                                   ? Color(0xFF10B981)
@@ -148,7 +145,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
                           ),
                         if (valueOrDefault<bool>(
                           valueOrDefault<bool>(
-                            widget!.up,
+                            widget.up,
                             true,
                           )
                               ? false
@@ -159,7 +156,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
                             Icons.arrow_downward_rounded,
                             color: valueOrDefault<Color>(
                               valueOrDefault<bool>(
-                                widget!.up,
+                                widget.up,
                                 true,
                               )
                                   ? Color(0xFF10B981)
@@ -175,7 +172,7 @@ class _KindexCardWidgetState extends State<KindexCardWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  '${widget!.score}',
+                  '${widget.score}',
                   '112',
                 ),
                 style: FlutterFlowTheme.of(context).headlineSmall.override(

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_pulse_item2_model.dart';
 export 'ticker_pulse_item2_model.dart';
 
@@ -67,7 +64,7 @@ class _TickerPulseItem2WidgetState extends State<TickerPulseItem2Widget> {
               ),
         ),
         Text(
-          '▲ ${widget!.change}',
+          '▲ ${widget.change}',
           style: FlutterFlowTheme.of(context).labelLarge.override(
                 font: GoogleFonts.roboto(
                   fontWeight: FontWeight.bold,

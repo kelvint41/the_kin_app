@@ -1,11 +1,8 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'business_item_model.dart';
 export 'business_item_model.dart';
 
@@ -79,7 +76,7 @@ class _BusinessItemWidgetState extends State<BusinessItemWidget> {
                   fadeInDuration: Duration(milliseconds: 0),
                   fadeOutDuration: Duration(milliseconds: 0),
                   imageUrl: valueOrDefault<String>(
-                    widget!.imgDesc,
+                    widget.imgDesc,
                     'https://dimg.dreamflow.cloud/v1/image/soul%20food%20plate',
                   ),
                   width: 44.0,
@@ -97,7 +94,7 @@ class _BusinessItemWidgetState extends State<BusinessItemWidget> {
                   children: [
                     Text(
                       valueOrDefault<String>(
-                        widget!.name,
+                        widget.name,
                         'The Southern Grill',
                       ),
                       style: FlutterFlowTheme.of(context).titleSmall.override(
@@ -117,7 +114,7 @@ class _BusinessItemWidgetState extends State<BusinessItemWidget> {
                     ),
                     Text(
                       valueOrDefault<String>(
-                        widget!.category,
+                        widget.category,
                         'Dining & Soul Food',
                       ),
                       style: FlutterFlowTheme.of(context).labelMedium.override(

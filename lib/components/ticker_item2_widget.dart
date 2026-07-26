@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'ticker_item2_model.dart';
 export 'ticker_item2_model.dart';
 
@@ -57,7 +54,7 @@ class _TickerItem2WidgetState extends State<TickerItem2Widget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.symbol,
+            widget.symbol,
             'KNDX',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -75,7 +72,7 @@ class _TickerItem2WidgetState extends State<TickerItem2Widget> {
         ),
         Text(
           valueOrDefault<String>(
-            widget!.price,
+            widget.price,
             '1.24',
           ),
           style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -93,7 +90,7 @@ class _TickerItem2WidgetState extends State<TickerItem2Widget> {
               ),
         ),
         Text(
-          '▲ +${widget!.percent}%',
+          '▲ +${widget.percent}%',
           style: FlutterFlowTheme.of(context).bodyMedium.override(
                 font: GoogleFonts.plusJakartaSans(
                   fontWeight:

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'stat_panel_model.dart';
 export 'stat_panel_model.dart';
 
@@ -74,7 +71,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
             children: [
               Text(
                 valueOrDefault<String>(
-                  widget!.label,
+                  widget.label,
                   'PATRON LEVEL',
                 ),
                 style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -98,7 +95,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
                 children: [
                   Text(
                     valueOrDefault<String>(
-                      widget!.tag,
+                      widget.tag,
                       'KTAY',
                     ),
                     style: FlutterFlowTheme.of(context).titleMedium.override(
@@ -119,7 +116,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.value,
+                      widget.value,
                       '112',
                     ),
                     style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -142,7 +139,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
               ),
               if (valueOrDefault<bool>(
                 valueOrDefault<String>(
-                          widget!.badgeText,
+                          widget.badgeText,
                           '🔥 STREAK',
                         ) !=
                         ''
@@ -153,7 +150,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
                 Container(
                   decoration: BoxDecoration(
                     color: valueOrDefault<Color>(
-                      widget!.accent,
+                      widget.accent,
                       Color(0xFF00FF41),
                     ),
                     shape: BoxShape.rectangle,
@@ -163,10 +160,10 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      widget!.badgeIcon!,
+                      widget.badgeIcon!,
                       Text(
                         valueOrDefault<String>(
-                          widget!.badgeText,
+                          widget.badgeText,
                           '🔥 STREAK',
                         ),
                         style: FlutterFlowTheme.of(context).labelSmall.override(
@@ -177,7 +174,7 @@ class _StatPanelWidgetState extends State<StatPanelWidget> {
                                     .fontStyle,
                               ),
                               color: valueOrDefault<Color>(
-                                widget!.accent,
+                                widget.accent,
                                 Color(0xFF00FF41),
                               ),
                               letterSpacing: 0.0,

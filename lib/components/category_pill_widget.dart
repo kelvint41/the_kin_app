@@ -1,9 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'category_pill_model.dart';
 export 'category_pill_model.dart';
 
@@ -50,7 +48,7 @@ class _CategoryPillWidgetState extends State<CategoryPillWidget> {
       decoration: BoxDecoration(
         color: valueOrDefault<Color>(
           valueOrDefault<bool>(
-            widget!.active,
+            widget.active,
             true,
           )
               ? FlutterFlowTheme.of(context).secondary
@@ -62,7 +60,7 @@ class _CategoryPillWidgetState extends State<CategoryPillWidget> {
         border: Border.all(
           color: valueOrDefault<Color>(
             valueOrDefault<bool>(
-              widget!.active,
+              widget.active,
               true,
             )
                 ? FlutterFlowTheme.of(context).secondary
@@ -77,7 +75,7 @@ class _CategoryPillWidgetState extends State<CategoryPillWidget> {
         child: Container(
           child: Text(
             valueOrDefault<String>(
-              widget!.label,
+              widget.label,
               'Food',
             ),
             style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -88,7 +86,7 @@ class _CategoryPillWidgetState extends State<CategoryPillWidget> {
                   ),
                   color: valueOrDefault<Color>(
                     valueOrDefault<bool>(
-                      widget!.active,
+                      widget.active,
                       true,
                     )
                         ? Color(0xFF121212)

@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'form_field2_model.dart';
 export 'form_field2_model.dart';
 
@@ -43,7 +40,7 @@ class _FormField2WidgetState extends State<FormField2Widget> {
     super.initState();
     _model = createModel(context, () => FormField2Model());
 
-    _model.textController ??= TextEditingController(text: widget!.textValue);
+    _model.textController ??= TextEditingController(text: widget.textValue);
     _model.textFieldFocusNode ??= FocusNode();
   }
 
@@ -63,7 +60,7 @@ class _FormField2WidgetState extends State<FormField2Widget> {
       children: [
         Text(
           valueOrDefault<String>(
-            widget!.label,
+            widget.label,
             'Full Name',
           ),
           style: FlutterFlowTheme.of(context).labelMedium.override(

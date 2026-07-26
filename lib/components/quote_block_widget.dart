@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'quote_block_model.dart';
 export 'quote_block_model.dart';
 
@@ -73,7 +70,7 @@ class _QuoteBlockWidgetState extends State<QuoteBlockWidget> {
               ),
               Text(
                 valueOrDefault<String>(
-                  widget!.quote,
+                  widget.quote,
                   'We believe that every cup tells a story of heritage, precision, and the pursuit of the perfect roast. It\'s more than coffee; it\'s a community ritual.',
                 ),
                 style: FlutterFlowTheme.of(context).bodyLarge.override(
@@ -105,7 +102,7 @@ class _QuoteBlockWidgetState extends State<QuoteBlockWidget> {
                   ),
                   Text(
                     valueOrDefault<String>(
-                      widget!.author,
+                      widget.author,
                       'Marcus Vane, Founder',
                     ),
                     style: FlutterFlowTheme.of(context).labelSmall.override(

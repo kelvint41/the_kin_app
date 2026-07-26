@@ -32,8 +32,6 @@ export '/pages/business_setup_page/business_setup_page_widget.dart'
     show BusinessSetupPageWidget;
 export '/pages/google_map_page/google_map_page_widget.dart'
     show GoogleMapPageWidget;
-export '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart'
-    show KinBottomNav2Widget;
 export '/pages/executive_dashboard/executive_dashboard_widget.dart'
     show ExecutiveDashboardWidget;
 export '/pages/customer_profile_page/customer_profile_page_widget.dart'
@@ -46,9 +44,17 @@ export '/clean_premium_dark_page/clean_premium_dark_page_widget.dart'
     show CleanPremiumDarkPageWidget;
 export '/customersignup_page/customersignup_page_widget.dart'
     show CustomersignupPageWidget;
-export '/mobile_sign_up_page/mobile_sign_up_page_widget.dart'
-    show MobileSignUpPageWidget;
 export '/business_showcase/business_showcase_widget.dart'
     show BusinessShowcaseWidget;
 export '/mobile_called_power_page/mobile_called_power_page_widget.dart'
     show MobileCalledPowerPageWidget;
+export '/business_sign_up_page/business_sign_up_page_widget.dart'
+    show BusinessSignUpPageWidget;
+export '/blank_page/blank_page_widget.dart' show BlankPageWidget;
+export '/executive_dashboard1/executive_dashboard1_widget.dart'
+    show ExecutiveDashboard1Widget;
+export '/single_mobile_named_page/single_mobile_named_page_widget.dart'
+    show SingleMobileNamedPageWidget;
+export '/legal_compliance_page/legal_compliance_page_widget.dart'
+    show LegalCompliancePageWidget;
+export '/mobile_ui_page/mobile_ui_page_widget.dart' show MobileUiPageWidget;

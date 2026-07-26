@@ -12,22 +12,18 @@ import 'package:flutter/material.dart';
 Future<double> calculateRealTimeKindex(
   double currentScore,
   int newStarRating,
-  bool isPremiumBusiness,
+  String businessName,
 ) async {
   const double standardBaseline = 500.0;
   const double premiumBaseline = 850.0;
   const double minimumScore = 0.0;
-  const double standardMaximumScore = 750.0;
-  const double premiumMaximumScore = 900.0;
+  const double maximumScore = 750.0;
+  const String premiumBusinessName = 'Hair Maddness LLC';
 
   // Determine the correct starting baseline for this business.
-  final double baseline =
-      isPremiumBusiness ? premiumBaseline : standardBaseline;
-  // Premium's 850 baseline exceeded the old shared 750 ceiling, so it was
-  // clamped away on every call — this gives each tier its own ceiling
-  // instead of silently truncating the premium baseline.
-  final double maximumScore =
-      isPremiumBusiness ? premiumMaximumScore : standardMaximumScore;
+  final double baseline = (businessName.trim() == premiumBusinessName)
+      ? premiumBaseline
+      : standardBaseline;
 
   // Treat 0.0 as "no score set yet" and apply the baseline.
   final double score = (currentScore == 0.0)

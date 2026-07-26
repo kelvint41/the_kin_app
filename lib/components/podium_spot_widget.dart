@@ -1,10 +1,7 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'podium_spot_model.dart';
 export 'podium_spot_model.dart';
 
@@ -64,11 +61,11 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
           children: [
             Container(
               width: valueOrDefault<double>(
-                widget!.size,
+                widget.size,
                 70.0,
               ),
               height: valueOrDefault<double>(
-                widget!.size,
+                widget.size,
                 70.0,
               ),
               decoration: BoxDecoration(
@@ -89,7 +86,7 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
                     alignment: AlignmentDirectional(0.0, 0.0),
                     child: Text(
                       valueOrDefault<String>(
-                        widget!.name,
+                        widget.name,
                         'Heritage Coffee',
                       ),
                       textAlign: TextAlign.center,
@@ -121,7 +118,7 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
               child: Container(
                 decoration: BoxDecoration(
                   color: valueOrDefault<Color>(
-                    widget!.accent,
+                    widget.accent,
                     Color(0xFFC0C0C0),
                   ),
                   borderRadius: BorderRadius.circular(9999.0),
@@ -130,7 +127,7 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
                 child: Padding(
                   padding: EdgeInsets.all(4.0),
                   child: Container(
-                    child: widget!.icon!,
+                    child: widget.icon!,
                   ),
                 ),
               ),
@@ -144,7 +141,7 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
           children: [
             Text(
               valueOrDefault<String>(
-                widget!.name,
+                widget.name,
                 'Heritage Coffee',
               ),
               maxLines: 1,
@@ -165,14 +162,14 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
             Container(
               decoration: BoxDecoration(
                 color: valueOrDefault<Color>(
-                  widget!.accent,
+                  widget.accent,
                   Color(0xFFC0C0C0),
                 ),
                 shape: BoxShape.rectangle,
               ),
               child: Text(
                 valueOrDefault<String>(
-                  widget!.score?.toString(),
+                  widget.score?.toString(),
                   '982',
                 ),
                 style: FlutterFlowTheme.of(context).labelLarge.override(
@@ -182,7 +179,7 @@ class _PodiumSpotWidgetState extends State<PodiumSpotWidget> {
                             FlutterFlowTheme.of(context).labelLarge.fontStyle,
                       ),
                       color: valueOrDefault<Color>(
-                        widget!.accent,
+                        widget.accent,
                         Color(0xFFC0C0C0),
                       ),
                       letterSpacing: 0.0,
