@@ -958,63 +958,132 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.center,
                                         children: [
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel1,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: FFAppState().businessname,
-                                              isPriority: true,
-                                              category: FFAppState().category,
-                                              rating: formatNumber(
-                                                googleMapPageBusinessesRecordList
-                                                    .elementAtOrNull(0)
-                                                    ?.reviewScore,
-                                                formatType: FormatType.decimal,
-                                                decimalType:
-                                                    DecimalType.periodDecimal,
+                                          // All three cards read from the
+                                          // businesses query. Card 1 used to
+                                          // take its name/category from
+                                          // FFAppState().businessname/.category,
+                                          // which nothing in the app ever
+                                          // assigns, so it fell through to the
+                                          // widget's dummy defaults; cards 2 and
+                                          // 3 were hardcoded literals. Each card
+                                          // now renders only when a real record
+                                          // exists at its index.
+                                          //
+                                          // `distance` is intentionally omitted:
+                                          // it was previously passed the
+                                          // business's LatLng, which rendered as
+                                          // 'LatLng(lat: .., lng: ..)' and
+                                          // overflowed the row. The app has no
+                                          // user-location value or distance
+                                          // helper, so the field stays hidden
+                                          // until there's a real number.
+                                          if (googleMapPageBusinessesRecordList
+                                              .isNotEmpty)
+                                            wrapWithModel(
+                                              model: _model
+                                                  .businessPreviewCardModel1,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child: BusinessPreviewCardWidget(
+                                                name:
+                                                    googleMapPageBusinessesRecordList[
+                                                            0]
+                                                        .businessName,
+                                                isPriority:
+                                                    googleMapPageBusinessesRecordList[
+                                                            0]
+                                                        .isPriorityPinned,
+                                                category:
+                                                    googleMapPageBusinessesRecordList[
+                                                            0]
+                                                        .category,
+                                                rating: formatNumber(
+                                                  googleMapPageBusinessesRecordList[
+                                                          0]
+                                                      .reviewScore,
+                                                  formatType:
+                                                      FormatType.decimal,
+                                                  decimalType:
+                                                      DecimalType.periodDecimal,
+                                                ),
+                                                imageUrl:
+                                                    googleMapPageBusinessesRecordList[
+                                                            0]
+                                                        .heroImage,
                                               ),
-                                              // `distance` was being passed the
-                                              // business's LatLng, which renders
-                                              // as 'LatLng(lat: .., lng: ..)' and
-                                              // overflowed the row. There's no
-                                              // distance helper or user-location
-                                              // value in this app yet, so the
-                                              // field stays hidden until there is
-                                              // a real number to show.
-                                              imageUrl:
-                                                  googleMapPageBusinessesRecordList
-                                                      .elementAtOrNull(0)
-                                                      ?.heroImage,
                                             ),
-                                          ),
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel2,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: 'Nourish Beauty Lab',
-                                              isPriority: false,
-                                              category: 'Skin Care',
-                                              rating: '4.8',
-                                              distance: '0.5 mi',
+                                          if (googleMapPageBusinessesRecordList
+                                                  .length >
+                                              1)
+                                            wrapWithModel(
+                                              model: _model
+                                                  .businessPreviewCardModel2,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child: BusinessPreviewCardWidget(
+                                                name:
+                                                    googleMapPageBusinessesRecordList[
+                                                            1]
+                                                        .businessName,
+                                                isPriority:
+                                                    googleMapPageBusinessesRecordList[
+                                                            1]
+                                                        .isPriorityPinned,
+                                                category:
+                                                    googleMapPageBusinessesRecordList[
+                                                            1]
+                                                        .category,
+                                                rating: formatNumber(
+                                                  googleMapPageBusinessesRecordList[
+                                                          1]
+                                                      .reviewScore,
+                                                  formatType:
+                                                      FormatType.decimal,
+                                                  decimalType:
+                                                      DecimalType.periodDecimal,
+                                                ),
+                                                imageUrl:
+                                                    googleMapPageBusinessesRecordList[
+                                                            1]
+                                                        .heroImage,
+                                              ),
                                             ),
-                                          ),
-                                          wrapWithModel(
-                                            model: _model
-                                                .businessPreviewCardModel3,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: BusinessPreviewCardWidget(
-                                              name: 'The Kin Exchange',
-                                              isPriority: true,
-                                              category: 'Co-working',
-                                              rating: '5.0',
-                                              distance: '0.8 mi',
+                                          if (googleMapPageBusinessesRecordList
+                                                  .length >
+                                              2)
+                                            wrapWithModel(
+                                              model: _model
+                                                  .businessPreviewCardModel3,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child: BusinessPreviewCardWidget(
+                                                name:
+                                                    googleMapPageBusinessesRecordList[
+                                                            2]
+                                                        .businessName,
+                                                isPriority:
+                                                    googleMapPageBusinessesRecordList[
+                                                            2]
+                                                        .isPriorityPinned,
+                                                category:
+                                                    googleMapPageBusinessesRecordList[
+                                                            2]
+                                                        .category,
+                                                rating: formatNumber(
+                                                  googleMapPageBusinessesRecordList[
+                                                          2]
+                                                      .reviewScore,
+                                                  formatType:
+                                                      FormatType.decimal,
+                                                  decimalType:
+                                                      DecimalType.periodDecimal,
+                                                ),
+                                                imageUrl:
+                                                    googleMapPageBusinessesRecordList[
+                                                            2]
+                                                        .heroImage,
+                                              ),
                                             ),
-                                          ),
                                         ].divide(SizedBox(width: 16.0)),
                                       ),
                                     ),

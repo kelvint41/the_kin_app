@@ -152,8 +152,8 @@ class LightModeTheme extends FlutterFlowTheme {
   Color get tertiaryColor => tertiary;
 
   late Color primary = const Color(0xFF0B3D2E);
-  late Color secondary = const Color(0xFFC5A059);
-  late Color tertiary = const Color(0xFF8A7B5E);
+  late Color secondary = const Color(0xFF8F7032);
+  late Color tertiary = const Color(0xFF827358);
   late Color alternate = const Color(0xFF3D3D3D);
   // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
   // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
@@ -175,7 +175,7 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
 
   late Color divider = const Color(0xFF3D3D3D);
-  late Color hint = const Color(0xFF8A7B5E);
+  late Color hint = const Color(0xFF827358);
   late Color outline = const Color(0xFF3D3D3D);
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
@@ -362,7 +362,7 @@ class DarkModeTheme extends FlutterFlowTheme {
 
   late Color primary = const Color(0xFF0B3D2E);
   late Color secondary = const Color(0xFFC5A059);
-  late Color tertiary = const Color(0xFF8A7B5E);
+  late Color tertiary = const Color(0xFF998969);
   late Color alternate = const Color(0xFF3D3D3D);
   late Color primaryText = const Color(0xFFD4AF37);
   late Color secondaryText = const Color(0xFFC5A059);
@@ -378,7 +378,7 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
 
   late Color divider = const Color(0xFF3D3D3D);
-  late Color hint = const Color(0xFF8A7B5E);
+  late Color hint = const Color(0xFF998969);
   late Color outline = const Color(0xFF3D3D3D);
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
