@@ -975,11 +975,18 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                                 decimalType:
                                                     DecimalType.periodDecimal,
                                               ),
-                                              distance:
+                                              // `distance` was being passed the
+                                              // business's LatLng, which renders
+                                              // as 'LatLng(lat: .., lng: ..)' and
+                                              // overflowed the row. There's no
+                                              // distance helper or user-location
+                                              // value in this app yet, so the
+                                              // field stays hidden until there is
+                                              // a real number to show.
+                                              imageUrl:
                                                   googleMapPageBusinessesRecordList
                                                       .elementAtOrNull(0)
-                                                      ?.businessLocation
-                                                      ?.toString(),
+                                                      ?.heroImage,
                                             ),
                                           ),
                                           wrapWithModel(

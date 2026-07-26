@@ -132,7 +132,7 @@ class _BusinessProfileOwnerWidgetState
                     size: 20.0,
                   ),
                   onPressed: () async {
-                    context.pushNamed(OwnerProfileWidget.routeName);
+                    context.safePop();
                   },
                 ),
               ),

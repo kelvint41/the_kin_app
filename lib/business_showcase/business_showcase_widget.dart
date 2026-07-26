@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/components/business_image_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -145,12 +146,9 @@ class _BusinessShowcaseWidgetState extends State<BusinessShowcaseWidget> {
                                       ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(20.0),
-                                        child: CachedNetworkImage(
-                                          fadeInDuration:
-                                              Duration(milliseconds: 0),
-                                          fadeOutDuration:
-                                              Duration(milliseconds: 0),
-                                          imageUrl: '800x400?luxury-business#1',
+                                        child: BusinessImage(
+                                          imageUrl:
+                                              widget.businessRecord?.heroImage,
                                           width: double.infinity,
                                           height: 180.0,
                                           fit: BoxFit.cover,

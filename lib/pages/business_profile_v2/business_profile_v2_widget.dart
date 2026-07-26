@@ -3,6 +3,7 @@ import '/backend/backend.dart';
 import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
+import '/components/business_image_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -164,8 +165,9 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(0.0),
-                          child: Image.network(
-                            'https://images.unsplash.com/photo-1662228665279-1d8e8f7484ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzc1Mjk1OTN8&ixlib=rb-4.1.0&q=80&w=1080',
+                          child: BusinessImage(
+                            imageUrl:
+                                businessProfileV2BusinessesRecord.heroImage,
                             width: double.infinity,
                             height: 280.0,
                             fit: BoxFit.cover,
@@ -180,7 +182,13 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'The Grand Bistro',
+                                valueOrDefault<String>(
+                                  businessProfileV2BusinessesRecord
+                                      .businessName,
+                                  'Business',
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                                 style: FlutterFlowTheme.of(context)
                                     .displaySmall
                                     .override(
@@ -204,7 +212,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 4.0, 0.0, 0.0),
                                 child: Text(
-                                  'Italian · Fine Dining · Downtown',
+                                  [
+                                    businessProfileV2BusinessesRecord.category,
+                                    businessProfileV2BusinessesRecord.city,
+                                  ]
+                                      .where((part) => part.trim().isNotEmpty)
+                                      .join(' · '),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: FlutterFlowTheme.of(context)
                                       .bodyMedium
                                       .override(

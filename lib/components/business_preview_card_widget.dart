@@ -1,8 +1,8 @@
+import '/components/business_image_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -16,18 +16,28 @@ class BusinessPreviewCardWidget extends StatefulWidget {
     bool? isPriority,
     String? category,
     String? rating,
-    String? distance,
+    this.distance,
+    this.imageUrl,
   })  : this.name = name ?? 'Harlem Coffee Co.',
         this.isPriority = isPriority ?? true,
         this.category = category ?? 'Cafe & Bakery',
-        this.rating = rating ?? '4.9',
-        this.distance = distance ?? '0.2 mi';
+        this.rating = rating ?? '4.9';
 
   final String name;
   final bool isPriority;
   final String category;
   final String rating;
-  final String distance;
+
+  /// Null when no real distance is known. The app has no user-location
+  /// plumbing or distance helper yet, so callers can't compute one -
+  /// rendering a placeholder like '0.2 mi' would be inventing data, and
+  /// the previous caller passed a raw LatLng here, which blew the row's
+  /// width out. Null hides the field entirely instead.
+  final String? distance;
+
+  /// Business hero photo. Null/empty/unloadable falls back to the KIN
+  /// logo via [BusinessImage].
+  final String? imageUrl;
 
   @override
   State<BusinessPreviewCardWidget> createState() =>
@@ -95,13 +105,11 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                     borderRadius: BorderRadius.circular(14.0),
                     shape: BoxShape.rectangle,
                   ),
-                  child: CachedNetworkImage(
-                    fadeInDuration: Duration(milliseconds: 0),
-                    fadeOutDuration: Duration(milliseconds: 0),
-                    imageUrl:
-                        'https://dimg.dreamflow.cloud/v1/image/business%20storefront',
+                  child: BusinessImage(
+                    imageUrl: widget.imageUrl,
+                    width: 64.0,
+                    height: 64.0,
                     fit: BoxFit.cover,
-                    alignment: Alignment(0.0, 0.0),
                   ),
                 ),
               ),
@@ -117,15 +125,20 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          valueOrDefault<String>(
-                            widget!.name,
-                            'Harlem Coffee Co.',
-                          ),
-                          maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
+                        // Flexible so the ellipsis actually applies: a Text
+                        // directly in a Row gets unbounded width, which makes
+                        // `overflow: ellipsis` a no-op and lets a long
+                        // business name overflow the card horizontally.
+                        Flexible(
+                          child: Text(
+                            valueOrDefault<String>(
+                              widget!.name,
+                              'Harlem Coffee Co.',
+                            ),
+                            maxLines: 1,
+                            style: FlutterFlowTheme.of(context)
+                                .titleSmall
+                                .override(
                                 font: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.bold,
                                   fontStyle: FlutterFlowTheme.of(context)
@@ -139,7 +152,8 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                                     .titleSmall
                                     .fontStyle,
                               ),
-                          overflow: TextOverflow.ellipsis,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                         if (valueOrDefault<bool>(
                           widget!.isPriority,
@@ -222,34 +236,40 @@ class _BusinessPreviewCardWidgetState extends State<BusinessPreviewCardWidget> {
                             ),
                           ].divide(SizedBox(width: 4.0)),
                         ),
-                        Text(
-                          valueOrDefault<String>(
-                            widget!.distance,
-                            '0.2 mi',
+                        // Only rendered when a real distance is supplied -
+                        // and Flexible so an unexpectedly long value
+                        // truncates instead of overflowing the row.
+                        if (widget.distance != null &&
+                            widget.distance!.trim().isNotEmpty)
+                          Flexible(
+                            child: Text(
+                              widget.distance!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: FlutterFlowTheme.of(context)
+                                  .labelSmall
+                                  .override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .labelSmall
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .labelSmall
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .fontStyle,
+                                    lineHeight: 1.4,
+                                  ),
+                            ),
                           ),
-                          style: FlutterFlowTheme.of(context)
-                              .labelSmall
-                              .override(
-                                font: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .fontWeight,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .labelSmall
-                                      .fontStyle,
-                                ),
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .fontStyle,
-                                lineHeight: 1.4,
-                              ),
-                        ),
                       ].divide(SizedBox(width: 16.0)),
                     ),
                   ].divide(SizedBox(height: 4.0)),

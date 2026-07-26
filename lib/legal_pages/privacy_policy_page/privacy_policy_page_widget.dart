@@ -545,7 +545,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                       child: Image.asset(
-                        'assets/images/magic_edit#TUFIS2dNYnIxM2cjMSMzMzc1ZDMwNWI0NDJlN2QyY2RiYjVjYTMwYmI3MmE2NyMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
+                        'assets/images/kin_logo.png',
                         width: 36.0,
                         height: 40.0,
                         fit: BoxFit.cover,
