@@ -6,7 +6,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "test": "firebase emulators:exec --only firestore --project demo-kin-test --config ../firebase.json \"node --test test/*.test.js\""
+    "test": "firebase emulators:exec --only firestore --project demo-kin-test --config ../firebase.json \"node --test --test-concurrency=1 test/*.test.js\""
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
