@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/business_category_filter.dart';
+import '/services/kin_services.dart';
 import '/services/premium_placement.dart';
 import 'dart:ui';
 import '/index.dart';
@@ -207,6 +208,46 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                       context.pushNamed(MobileCalledPowerPageWidget.routeName);
                     },
                   ),
+                  Divider(
+                    height: theme.designToken.spacing.md,
+                    thickness: 1.0,
+                    indent: 16.0,
+                    endIndent: 16.0,
+                    color: theme.alternate,
+                  ),
+                  // The account row. Before this existed there was no way to
+                  // sign out anywhere in the app, so a device stayed signed in
+                  // to whoever used it first.
+                  if (loggedIn)
+                    ListTile(
+                      leading:
+                          Icon(Icons.logout_rounded, color: theme.error),
+                      title: Text(
+                        'Sign Out',
+                        style: theme.bodyLarge.override(color: theme.error),
+                      ),
+                      subtitle: currentUserEmail.isEmpty
+                          ? null
+                          : Text(
+                              currentUserEmail,
+                              style: theme.bodySmall
+                                  .override(color: theme.secondaryText),
+                            ),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        _confirmSignOut(context);
+                      },
+                    )
+                  else
+                    ListTile(
+                      leading:
+                          Icon(Icons.login_rounded, color: theme.primaryText),
+                      title: Text('Sign In', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(SignInPageWidget.routeName);
+                      },
+                    ),
                 ],
               ),
             ),
@@ -214,6 +255,59 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
         );
       },
     );
+  }
+
+  /// Confirm-gated, matching how Power Hour's stop button is gated: this sits
+  /// one tap away from four navigation items, and an accidental sign-out
+  /// strands someone until they remember their password.
+  Future<void> _confirmSignOut(BuildContext context) async {
+    final theme = FlutterFlowTheme.of(context);
+    final email = currentUserEmail;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: theme.secondaryBackground,
+        title: Text('Sign out?', style: theme.titleMedium),
+        content: Text(
+          email.isEmpty
+              ? 'You\'ll need to sign in again to claim a business, check in, or post.'
+              : 'You\'ll be signed out of $email, and will need to sign in '
+                  'again to claim a business, check in, or post.',
+          style: theme.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel', style: theme.bodyMedium),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'Sign Out',
+              style: theme.bodyMedium.override(color: theme.error),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    // The router rebuilds on an auth change unless it's told one is coming,
+    // which would interrupt the navigation below. See
+    // AppStateNotifier.updateNotifyOnAuthChange.
+    GoRouter.of(context).prepareAuthEvent();
+
+    final result = await KinServices.signOut();
+    if (!mounted) return;
+
+    if (!result.isSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.error!)),
+      );
+      return;
+    }
+    context.goNamedAuth(SignInPageWidget.routeName, context.mounted);
   }
 
   void _openBusiness(BusinessesRecord business) {

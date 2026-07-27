@@ -1,4 +1,5 @@
 import '/auth/firebase_auth/auth_util.dart';
+import '/auth/firebase_auth/google_auth.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
@@ -874,6 +875,47 @@ class KinServices {
       });
     } catch (_) {
       // Best-effort - see doc comment above.
+    }
+  }
+
+  /// Signs the current user out of every service the app signed them in to.
+  ///
+  /// `authManager.signOut()` alone only clears Firebase Auth. Two other
+  /// sessions outlive it and have to be closed explicitly:
+  ///
+  ///   - Google keeps its own session, so the next sign-in would silently
+  ///     reuse the previous Google account instead of offering the picker -
+  ///     which on a shared device means signing back in as someone else.
+  ///   - RevenueCat keeps attributing purchases to the old uid until it is
+  ///     told otherwise, so entitlements could follow the wrong account.
+  ///
+  /// Both are best-effort: neither failing should trap someone in a signed-in
+  /// state they asked to leave, so only the Firebase step decides the result.
+  /// `signOutWithGoogle` is safe to call on an email/password session - it's
+  /// a no-op when there's no Google session to clear.
+  ///
+  /// Navigation is deliberately left to the caller. The router refreshes on
+  /// auth change unless `prepareAuthEvent()` is called first, so the widget
+  /// has to own that ordering.
+  ///
+  /// Used by: the map page's hamburger menu -> Sign Out.
+  static Future<ServiceResult<void>> signOut() async {
+    try {
+      await revenue_cat.login(null);
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+    try {
+      await signOutWithGoogle();
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+    try {
+      await authManager.signOut();
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not sign out. Please try again.');
     }
   }
 }
