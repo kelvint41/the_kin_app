@@ -77,31 +77,38 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   widget!.icon!,
-                  Text(
-                    valueOrDefault<String>(
-                      widget!.label,
-                      '7-Day Support Streak',
-                    ),
-                    maxLines: 1,
-                    style: FlutterFlowTheme.of(context).labelSmall.override(
-                          font: GoogleFonts.plusJakartaSans(
+                  // maxLines and ellipsis below only take effect once the
+                  // Text has a bounded width. Unwrapped in a
+                  // MainAxisSize.min Row inside a fixed-width card, it took
+                  // its natural width and overflowed the card instead.
+                  Flexible(
+                    child: Text(
+                      valueOrDefault<String>(
+                        widget!.label,
+                        '7-Day Support Streak',
+                      ),
+                      maxLines: 1,
+                      style: FlutterFlowTheme.of(context).labelSmall.override(
+                            font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FlutterFlowTheme.of(context)
+                                  .labelSmall
+                                  .fontWeight,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .labelSmall
+                                  .fontStyle,
+                            ),
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            letterSpacing: 0.0,
                             fontWeight: FlutterFlowTheme.of(context)
                                 .labelSmall
                                 .fontWeight,
                             fontStyle: FlutterFlowTheme.of(context)
                                 .labelSmall
                                 .fontStyle,
+                            lineHeight: 1.4,
                           ),
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          letterSpacing: 0.0,
-                          fontWeight: FlutterFlowTheme.of(context)
-                              .labelSmall
-                              .fontWeight,
-                          fontStyle:
-                              FlutterFlowTheme.of(context).labelSmall.fontStyle,
-                          lineHeight: 1.4,
-                        ),
-                    overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ].divide(SizedBox(width: 4.0)),
               ),

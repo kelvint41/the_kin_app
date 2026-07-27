@@ -1,9 +1,13 @@
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
 import '/components/metric_card3_widget.dart';
 import '/components/promo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
+import '/services/engagement_stats.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +16,33 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'customer_profile_page_model.dart';
 export 'customer_profile_page_model.dart';
+
+/// The three "Personal Milestones" figures, derived from the signed-in user's
+/// own activity. See lib/services/engagement_stats.dart for the arithmetic.
+class _MilestoneStats {
+  const _MilestoneStats({
+    required this.streakDays,
+    required this.reviewCount,
+    required this.kindexScore,
+  });
+
+  final int streakDays;
+  final int reviewCount;
+  final double? kindexScore;
+}
+
+/// A Connection Stream promotion, already joined to its business.
+class _PromoView {
+  const _PromoView({
+    required this.businessName,
+    required this.deal,
+    required this.countdown,
+  });
+
+  final String businessName;
+  final String deal;
+  final String countdown;
+}
 
 /// Generate a vibrant, premium dark-mode dashboard page named
 /// "CustomerProfile_Engage" that gamifies community support.
@@ -79,10 +110,110 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // Kicked off once in initState rather than inside build - a FutureBuilder
+  // handed a future created during build re-queries on every rebuild.
+  late final Future<_MilestoneStats> _statsFuture;
+  late final Future<List<_PromoView>> _promosFuture;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => CustomerProfilePageModel());
+    _statsFuture = _loadStats();
+    _promosFuture = _loadPromos();
+  }
+
+  /// Reads the signed-in user's activity, reviews and Kindex score.
+  ///
+  /// Each of the three is independent, so a failure in one (a missing index,
+  /// a rules denial) should not blank the other two - they are caught
+  /// separately and degrade to a zero/null rather than throwing the whole
+  /// card row away.
+  Future<_MilestoneStats> _loadStats() async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const _MilestoneStats(
+          streakDays: 0, reviewCount: 0, kindexScore: null);
+    }
+
+    Future<T> orDefault<T>(Future<T> future, T fallback) =>
+        future.catchError((_) => fallback);
+
+    final results = await Future.wait([
+      orDefault(
+        queryActivityLogsRecordOnce(
+          queryBuilder: (q) => q.where('user_ref', isEqualTo: userRef),
+        ),
+        <ActivityLogsRecord>[],
+      ),
+      orDefault(
+        queryReviewsRecordOnce(
+          queryBuilder: (q) => q.where('user_ref', isEqualTo: userRef),
+        ),
+        <ReviewsRecord>[],
+      ),
+      orDefault(
+        queryKindexScoresRecordOnce(
+          queryBuilder: (q) => q.where('user_ref', isEqualTo: userRef),
+          limit: 1,
+        ),
+        <KindexScoresRecord>[],
+      ),
+    ]);
+
+    final activity = results[0] as List<ActivityLogsRecord>;
+    final reviews = results[1] as List<ReviewsRecord>;
+    final scores = results[2] as List<KindexScoresRecord>;
+
+    final timestamps = activity
+        .map((a) => a.timestamp)
+        .whereType<DateTime>()
+        .toList(growable: false);
+
+    return _MilestoneStats(
+      streakDays: supportStreakDays(timestamps, now: DateTime.now()),
+      reviewCount: reviews.length,
+      kindexScore: scores.isEmpty ? null : scores.first.score,
+    );
+  }
+
+  /// Reads live promotions and joins each to the business offering it.
+  ///
+  /// Promotions without an expiry, already lapsed, or whose business_ref is
+  /// missing or dangling are dropped: the card's whole premise is a named
+  /// business making a time-limited offer, and it cannot honestly render
+  /// without both halves.
+  Future<List<_PromoView>> _loadPromos() async {
+    final List<ExchangePromotionsRecord> promotions;
+    try {
+      promotions = await queryExchangePromotionsRecordOnce(limit: 20);
+    } catch (_) {
+      return const [];
+    }
+
+    final now = DateTime.now();
+    final views = <_PromoView>[];
+    for (final promo in promotions) {
+      final countdown = countdownLabel(promo.expiresAt, now: now);
+      if (countdown == null) continue;
+      final businessRef = promo.businessRef;
+      if (businessRef == null) continue;
+
+      BusinessesRecord business;
+      try {
+        business = await BusinessesRecord.getDocumentOnce(businessRef);
+      } catch (_) {
+        continue;
+      }
+      if (business.businessName.isEmpty) continue;
+
+      views.add(_PromoView(
+        businessName: business.businessName,
+        deal: promo.body.isNotEmpty ? promo.body : promo.title,
+        countdown: countdown,
+      ));
+    }
+    return views;
   }
 
   @override
@@ -109,44 +240,57 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 100.0,
-                height: 100.0,
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                ),
-                child: Stack(
-                  children: [
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Icon(
-                              Icons.arrow_back,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 24.0,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Align(
-                      alignment: AlignmentDirectional(0.0, 1.0),
-                      child: ClipRRect(
+              // The header was a 100x100 Container holding a 120x120 image,
+              // outside any SafeArea - so the logo overflowed its box and ran
+              // under the status bar and notch. The Stack now sizes to the
+              // logo, and SafeArea keeps it clear of the inset.
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 0.0),
+                  child: Stack(
+                    alignment: AlignmentDirectional(0.0, 0.0),
+                    children: [
+                      ClipRRect(
                         borderRadius: BorderRadius.circular(8.0),
                         child: Image.asset(
                           'assets/images/kin_logo.png',
                           width: 120.0,
                           height: 120.0,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                         ),
                       ),
-                    ),
-                  ],
+                      // Previously a bare Icon with no gesture handler, so
+                      // the arrow was decorative and the only way off the
+                      // page was the system back swipe.
+                      Align(
+                        alignment: AlignmentDirectional(-1.0, -1.0),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(24.0),
+                          onTap: () => context.safePop(),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.arrow_back,
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              size: 24.0,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              if (currentUserDocument?.displayName.isNotEmpty ?? false)
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+                  child: Text(
+                    currentUserDocument!.displayName,
+                    textAlign: TextAlign.center,
+                    style: FlutterFlowTheme.of(context).headlineSmall,
+                  ),
+                ),
               Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Column(
@@ -305,57 +449,76 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                         Padding(
                           padding: EdgeInsets.all(24.0),
                           child: Container(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                wrapWithModel(
-                                  model: _model.metricCardModel1,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: MetricCard3Widget(
-                                    icon: Icon(
-                                      Icons.local_fire_department_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      size: 20.0,
+                            // These three were the literals '14 🔥',
+                            // '5 Reviews' and 'Top 5%', so every account saw
+                            // the same numbers regardless of what it had
+                            // done. They now come from the user's own
+                            // activity_logs, reviews and KindexScores rows.
+                            child: FutureBuilder<_MilestoneStats>(
+                              future: _statsFuture,
+                              builder: (context, snapshot) {
+                                final stats = snapshot.data;
+                                return Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    wrapWithModel(
+                                      model: _model.metricCardModel1,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: MetricCard3Widget(
+                                        icon: Icon(
+                                          Icons.local_fire_department_rounded,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          size: 20.0,
+                                        ),
+                                        tint: Color(0xFFFF8C00),
+                                        label: 'Support Streak',
+                                        value: stats == null
+                                            ? '--'
+                                            : '${stats.streakDays} 🔥',
+                                      ),
                                     ),
-                                    tint: Color(0xFFFF8C00),
-                                    label: '7-Day Support Streak',
-                                    value: '14 🔥',
-                                  ),
-                                ),
-                                wrapWithModel(
-                                  model: _model.metricCardModel2,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: MetricCard3Widget(
-                                    icon: Icon(
-                                      Icons.workspace_premium_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      size: 20.0,
+                                    wrapWithModel(
+                                      model: _model.metricCardModel2,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: MetricCard3Widget(
+                                        icon: Icon(
+                                          Icons.workspace_premium_rounded,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          size: 20.0,
+                                        ),
+                                        tint: Color(0xFFFFD700),
+                                        label: 'Milestones Unlocked',
+                                        value: stats == null
+                                            ? '--'
+                                            : reviewMilestoneLabel(
+                                                stats.reviewCount),
+                                      ),
                                     ),
-                                    tint: Color(0xFFFFD700),
-                                    label: 'Milestones Unlocked',
-                                    value: '5 Reviews',
-                                  ),
-                                ),
-                                wrapWithModel(
-                                  model: _model.metricCardModel3,
-                                  updateCallback: () => safeSetState(() {}),
-                                  child: MetricCard3Widget(
-                                    icon: Icon(
-                                      Icons.volunteer_activism_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      size: 20.0,
+                                    wrapWithModel(
+                                      model: _model.metricCardModel3,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: MetricCard3Widget(
+                                        icon: Icon(
+                                          Icons.volunteer_activism_rounded,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          size: 20.0,
+                                        ),
+                                        tint: Color(0xFFFFD700),
+                                        label: 'Impact Score',
+                                        value: stats == null
+                                            ? '--'
+                                            : impactScoreLabel(
+                                                stats.kindexScore),
+                                      ),
                                     ),
-                                    tint: Color(0xFFFFD700),
-                                    label: 'Impact Score',
-                                    value: 'Top 5%',
-                                  ),
-                                ),
-                              ].divide(SizedBox(width: 16.0)),
+                                  ].divide(SizedBox(width: 16.0)),
+                                );
+                              },
                             ),
                           ),
                         ),
@@ -405,45 +568,69 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                           ),
                         ],
                       ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          wrapWithModel(
-                            model: _model.promoCardModel1,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'IC',
-                              business: 'The Iron Cactus',
-                              time: '2h 14m',
-                              deal:
-                                  'Exclusive: Free appetizer with your next visit!',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.promoCardModel2,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'PB',
-                              business: 'Pearl Brewery',
-                              time: '5h 45m',
-                              deal:
-                                  'Premium Tier: 20% off all craft selections tonight.',
-                            ),
-                          ),
-                          wrapWithModel(
-                            model: _model.promoCardModel3,
-                            updateCallback: () => safeSetState(() {}),
-                            child: PromoCardWidget(
-                              initial: 'EC',
-                              business: 'Estate Coffee Co.',
-                              time: '0h 42m',
-                              deal:
-                                  'Loyalty Perk: Double Kin points on all espresso orders.',
-                            ),
-                          ),
-                        ].divide(SizedBox(height: 16.0)),
+                      // These three cards were hardcoded offers attributed to
+                      // The Iron Cactus, Pearl Brewery and Estate Coffee Co.
+                      // Those are real San Antonio businesses, and the deals
+                      // were invented - so the page was publishing
+                      // promotional claims on their behalf that they never
+                      // made. Now driven by exchange_promotions, with an
+                      // empty state when there is nothing live.
+                      FutureBuilder<List<_PromoView>>(
+                        future: _promosFuture,
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24.0),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 28.0,
+                                  height: 28.0,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.0,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+
+                          final promos = snapshot.data!;
+                          if (promos.isEmpty) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24.0),
+                              child: Text(
+                                'No live offers right now. Check back after '
+                                'you visit a few more local businesses.',
+                                textAlign: TextAlign.center,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                    ),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: promos
+                                .map((promo) => PromoCardWidget(
+                                      initial:
+                                          businessInitials(promo.businessName),
+                                      business: promo.businessName,
+                                      time: promo.countdown,
+                                      deal: promo.deal,
+                                    ))
+                                .toList()
+                                .divide(SizedBox(height: 16.0)),
+                          );
+                        },
                       ),
                     ].divide(SizedBox(height: 16.0)),
                   ),
@@ -455,6 +642,10 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
             ],
           ),
         ),
+        // Without this the Directory tab was a dead end: no nav bar, and the
+        // back arrow above was decorative, so the only way out was the
+        // system back-swipe gesture.
+        bottomNavigationBar: KinBottomNav2Widget(),
       ),
     );
   }

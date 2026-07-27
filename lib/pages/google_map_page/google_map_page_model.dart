@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/premium_placement.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'google_map_page_widget.dart' show GoogleMapPageWidget;
@@ -21,27 +22,25 @@ class GoogleMapPageModel extends FlutterFlowModel<GoogleMapPageWidget> {
   // State field(s) for Map Google Map widget.
   LatLng? mapGoogleMapsCenter;
   final mapGoogleMapsController = Completer<GoogleMapController>();
-  // Model for BusinessPreviewCard.
-  late BusinessPreviewCardModel businessPreviewCardModel1;
-  // Model for BusinessPreviewCard.
-  late BusinessPreviewCardModel businessPreviewCardModel2;
-  // Model for BusinessPreviewCard.
-  late BusinessPreviewCardModel businessPreviewCardModel3;
+
+  /// One model per premium carousel slot. Fixed length, since the
+  /// carousel always renders at most [kPremiumCarouselSlots] cards and
+  /// the businesses occupying them change with the rotation window, not
+  /// the slot count.
+  late final List<BusinessPreviewCardModel> premiumCardModels;
 
   @override
   void initState(BuildContext context) {
-    businessPreviewCardModel1 =
-        createModel(context, () => BusinessPreviewCardModel());
-    businessPreviewCardModel2 =
-        createModel(context, () => BusinessPreviewCardModel());
-    businessPreviewCardModel3 =
-        createModel(context, () => BusinessPreviewCardModel());
+    premiumCardModels = List.generate(
+      kPremiumCarouselSlots,
+      (_) => createModel(context, () => BusinessPreviewCardModel()),
+    );
   }
 
   @override
   void dispose() {
-    businessPreviewCardModel1.dispose();
-    businessPreviewCardModel2.dispose();
-    businessPreviewCardModel3.dispose();
+    for (final model in premiumCardModels) {
+      model.dispose();
+    }
   }
 }

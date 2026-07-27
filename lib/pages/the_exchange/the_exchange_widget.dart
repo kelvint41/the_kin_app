@@ -46,11 +46,89 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     super.dispose();
   }
 
+  /// Shown when there is no business to display a feed for - reached from the
+  /// Directory tab by a user who does not own a business yet.
+  Widget _buildNoBusinessState(BuildContext context) {
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(32.0, 0.0, 32.0, 0.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.storefront_outlined,
+                color: FlutterFlowTheme.of(context).secondaryText,
+                size: 48.0,
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 8.0),
+                child: Text(
+                  'No business selected',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).headlineSmall,
+                ),
+              ),
+              Text(
+                'Open The Exchange from a business profile, or claim your own '
+                'business to start posting.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+                child: TextButton(
+                  onPressed: () => context.safePop(),
+                  child: Text(
+                    'Go back',
+                    // Not `primary` - that token is the brand dark green,
+                    // which is close to unreadable on the dark background
+                    // this page uses.
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // The Exchange is a per-business feed, but not every entry point knows
+    // which business that is. The Directory tab opens CustomerProfilePage
+    // with no businessRef, so its "The Exchange" card forwards a null one
+    // (queryParameters uses .withoutNulls, which drops the key entirely).
+    // Force-unwrapping that here crashed the page for anyone arriving from
+    // the bottom nav - the common path. Fall back to the business the
+    // signed-in user owns, and show an empty state when there is none.
+    final businessRef =
+        widget.businessRef ?? currentUserDocument?.ownedBusiness;
+    if (businessRef == null) {
+      return _buildNoBusinessState(context);
+    }
+
     return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget!.businessRef!),
+      stream: BusinessesRecord.getDocument(businessRef),
       builder: (context, snapshot) {
+        // A reference can outlive the document it points at - the businesses
+        // collection was re-imported at least once, which left several
+        // users.owned_business refs pointing at deleted docs. fromSnapshot
+        // throws on a non-existent document, so without this the page sat on
+        // the spinner forever instead of ever resolving.
+        if (snapshot.hasError) {
+          return _buildNoBusinessState(context);
+        }
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
@@ -317,7 +395,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                       child: CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).secondaryText,
+                                          FlutterFlowTheme.of(context)
+                                              .secondaryText,
                                         ),
                                       ),
                                     ),
