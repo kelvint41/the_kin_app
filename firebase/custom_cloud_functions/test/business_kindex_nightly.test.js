@@ -33,18 +33,33 @@ beforeEach(async () => {
     clear("businesses"),
     clear("reviews"),
     clear("uservisits"),
+    clear("kindex_score_history"),
   ]);
 });
 
 const daysAgo = (n) =>
   admin.firestore.Timestamp.fromMillis(Date.now() - n * 24 * 60 * 60 * 1000);
 
-async function seed({ isPremium = false, reviews = [], visits = [], owner }) {
+async function seed({
+  isPremium = false,
+  reviews = [],
+  visits = [],
+  owner,
+  score,
+  lastActivityDaysAgo,
+  decayedThroughWeek,
+}) {
   const businessRef = db.collection("businesses").doc(uniq("biz"));
   await businessRef.set({
     is_premium: isPremium,
-    kindex_score: 0,
+    kindex_score: score === undefined ? 0 : score,
     ...(owner ? { owner_ref: db.collection("users").doc(owner) } : {}),
+    ...(lastActivityDaysAgo === undefined
+      ? {}
+      : { kindex_last_activity_at: daysAgo(lastActivityDaysAgo) }),
+    ...(decayedThroughWeek === undefined
+      ? {}
+      : { kindex_decayed_through_week: decayedThroughWeek }),
   });
 
   for (const r of reviews) {
@@ -168,7 +183,7 @@ test("a customer's highest rating in the window is the one that counts", async (
   assert.equal(await scoreAfterRecompute(biz), 515);
 });
 
-test("distinct verified customers each count", async () => {
+test("distinct verified customers each count, but movement is capped", async () => {
   const biz = await seed({
     reviews: [
       { user: "alice", rating: 5 },
@@ -177,7 +192,9 @@ test("distinct verified customers each count", async () => {
     ],
     visits: [{ user: "alice" }, { user: "bob" }, { user: "carol" }],
   });
-  assert.equal(await scoreAfterRecompute(biz), 535); // 500 +15 +15 +5
+  // Target is 535 (500 +15 +15 +5) but the nightly cap is 20, so the score
+  // only reaches 520 tonight and closes the rest on subsequent nights.
+  assert.equal(await scoreAfterRecompute(biz), 520);
 });
 
 test("reviews outside the 7-day window are excluded", async () => {
@@ -295,4 +312,179 @@ test("kindex_velocity is never written", async () => {
   });
   await recomputeAll(db, Date.now());
   assert.equal((await businessRef.get()).data().kindex_velocity, 42);
+});
+
+// --- Smoothing (capped nightly movement) --------------------------------
+
+test("a huge single-day spike does NOT jump straight to the maximum", async () => {
+  // 50 verified 5-star check-ins - a grand opening, not manipulation. The
+  // raw target is the tier ceiling (750); the score must climb toward it.
+  const reviews = [];
+  const visits = [];
+  for (let i = 0; i < 50; i += 1) {
+    reviews.push({ user: `cust${i}`, rating: 5 });
+    visits.push({ user: `cust${i}` });
+  }
+  const biz = await seed({ reviews, visits });
+  assert.equal(await scoreAfterRecompute(biz), 520, "score jumped past the cap");
+});
+
+test("repeated nights close the gap toward the target", async () => {
+  const reviews = [];
+  const visits = [];
+  for (let i = 0; i < 50; i += 1) {
+    reviews.push({ user: `cust${i}`, rating: 5 });
+    visits.push({ user: `cust${i}` });
+  }
+  const biz = await seed({ reviews, visits });
+  const seen = [];
+  for (let night = 0; night < 5; night += 1) {
+    await recomputeAll(db, Date.now());
+    seen.push((await biz.get()).data().kindex_score);
+  }
+  assert.deepEqual(seen, [520, 540, 560, 580, 600]);
+});
+
+test("a downward target is also capped", async () => {
+  // Sitting at 700, but this window's verified reviews only justify 485.
+  const biz = await seed({
+    score: 700,
+    reviews: [{ user: "alice", rating: 1 }],
+    visits: [{ user: "alice" }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 680);
+});
+
+test("movement stops exactly at the target, never overshooting", async () => {
+  // Target 515, current 500 - a 15-point gap, under the 20-point cap.
+  const biz = await seed({
+    score: 500,
+    reviews: [{ user: "alice", rating: 5 }],
+    visits: [{ user: "alice" }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 515);
+});
+
+// --- Inactivity decay ---------------------------------------------------
+
+test("no decay before a full week of inactivity has passed", async () => {
+  const biz = await seed({ score: 600, lastActivityDaysAgo: 6 });
+  assert.equal(await scoreAfterRecompute(biz), 600);
+});
+
+test("decay escalates across consecutive inactive weeks", async () => {
+  const week1 = await seed({ score: 600, lastActivityDaysAgo: 7 });
+  assert.equal(await scoreAfterRecompute(week1), 590); // -10
+
+  // Week 2, having already been charged for week 1.
+  const week2 = await seed({
+    score: 590,
+    lastActivityDaysAgo: 14,
+    decayedThroughWeek: 1,
+  });
+  assert.equal(await scoreAfterRecompute(week2), 570); // -20
+
+  const week3 = await seed({
+    score: 570,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+  });
+  assert.equal(await scoreAfterRecompute(week3), 545); // -25
+});
+
+test("decay holds at the week-3 rate by default rather than escalating", async () => {
+  const week5 = await seed({
+    score: 600,
+    lastActivityDaysAgo: 35,
+    decayedThroughWeek: 4,
+  });
+  assert.equal(await scoreAfterRecompute(week5), 575); // still -25
+});
+
+test("decay never takes a score below its tier baseline", async () => {
+  const biz = await seed({
+    score: 505,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500, "decayed through the floor");
+});
+
+test("a premium business decays only to the premium baseline", async () => {
+  const biz = await seed({
+    isPremium: true,
+    score: 855,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+  });
+  assert.equal(await scoreAfterRecompute(biz), 850);
+});
+
+test("decay is not charged twice for the same week on a re-run", async () => {
+  const biz = await seed({ score: 600, lastActivityDaysAgo: 7 });
+  await recomputeAll(db, Date.now());
+  await recomputeAll(db, Date.now());
+  await recomputeAll(db, Date.now());
+  assert.equal((await biz.get()).data().kindex_score, 590, "double-charged");
+});
+
+test("new activity resets the inactivity streak immediately", async () => {
+  const biz = await seed({
+    score: 560,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+    reviews: [{ user: "alice", rating: 5 }],
+    visits: [{ user: "alice" }],
+  });
+  await recomputeAll(db, Date.now());
+  const data = (await biz.get()).data();
+  assert.equal(data.kindex_inactivity_weeks, 0, "streak not reset");
+  assert.equal(data.kindex_decayed_through_week, 0, "decay ledger not cleared");
+  // Target 515 from 560, capped at 20 -> moves down to 540, no decay charged.
+  assert.equal(data.kindex_score, 540);
+});
+
+test("a business never seen active is not decayed on first run", async () => {
+  // Pre-existing businesses have no kindex_last_activity_at. Treating that
+  // as infinite inactivity would decay the whole collection on deploy.
+  const biz = await seed({ score: 600 });
+  assert.equal(await scoreAfterRecompute(biz), 600);
+  const data = (await biz.get()).data();
+  assert.ok(data.kindex_last_activity_at, "activity clock not started");
+});
+
+// --- Dashboard history --------------------------------------------------
+
+test("each run writes a history row with before/after and context", async () => {
+  const biz = await seed({
+    reviews: [{ user: "alice", rating: 5 }],
+    visits: [{ user: "alice" }],
+  });
+  await recomputeAll(db, Date.now());
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("business_ref", "==", biz)
+    .get();
+  assert.equal(rows.size, 1);
+  const row = rows.docs[0].data();
+  assert.equal(row.entity_type, "business");
+  assert.equal(row.score_before, 500);
+  assert.equal(row.score_after, 515);
+  assert.equal(row.target_score, 515);
+  assert.equal(row.qualifying_review_count, 1);
+  assert.equal(row.verified_visit_count, 1);
+});
+
+test("re-running the same day updates that day's row instead of duplicating", async () => {
+  const biz = await seed({
+    reviews: [{ user: "alice", rating: 5 }],
+    visits: [{ user: "alice" }],
+  });
+  await recomputeAll(db, Date.now());
+  await recomputeAll(db, Date.now());
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("business_ref", "==", biz)
+    .get();
+  assert.equal(rows.size, 1, "history duplicated within a single day");
 });

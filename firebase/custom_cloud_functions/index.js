@@ -21,6 +21,10 @@ const businessKindexNightly = require("./business_kindex_nightly.js");
 exports.recomputeBusinessKindexScores =
   businessKindexNightly.recomputeBusinessKindexScores;
 
+const customerKindexNightly = require("./customer_kindex_nightly.js");
+exports.recomputeCustomerKindexScores =
+  customerKindexNightly.recomputeCustomerKindexScores;
+
 const visitVerification = require("./visit_verification.js");
 exports.recordVerifiedVisit = visitVerification.recordVerifiedVisit;
 

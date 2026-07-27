@@ -771,3 +771,57 @@ nightly job also means legacy duplicate review documents cannot double-count.
 Tests: `test/business_kindex_nightly.test.js` (21 cases, emulator-backed),
 covering the manipulation scenarios directly - repeat reviews from one
 account, competitor 1-star farming, unverified reviews, window boundaries.
+
+## Kindex smoothing & decay (Phase 2, July 2026)
+
+Layered on top of the anti-manipulation redesign. Config lives in
+`kindex_config/scoring_dynamics` (same tunable pattern as
+`visit_verification`): per-side max nightly change (default 20) and
+per-side weekly decay amounts (10 / 20 / 25, holding at the week-3 rate
+unless `*_decay_escalates` is set).
+
+**Capped movement.** Each night a score moves toward its windowed target by
+at most the configured cap rather than jumping to it, so a grand opening
+with 50 verified check-ins climbs like a ticker instead of snapping to the
+ceiling. The cap applies in both directions.
+
+**Escalating inactivity decay.** With no qualifying activity, the score
+decays on an escalating weekly schedule. Decay is charged per *week
+crossing*, not per nightly run - the amounts in the spec are weekly and the
+job runs nightly, so `kindex_decayed_through_week` acts as a ledger that
+keeps re-runs idempotent. Any qualifying activity resets both the streak
+and the ledger immediately.
+
+**Floor semantics.** The floor bounds *decay* only: business scores stop at
+their tier baseline (500/850), customers at 0. Movement toward a target may
+still land below baseline, because a genuinely badly-reviewed business
+should be able to score under it - mere inactivity should not.
+
+**First-run safety.** A business or customer with no recorded
+`last_activity_at` starts its clock on the first run rather than being
+treated as infinitely inactive, which would otherwise decay every
+pre-existing record the night the job first ships.
+
+**Customer side: one writer.** `kindex_engine.js` no longer writes `score`
+or `is_trending_up`. It remains the validator and audit trail (rejects
+unknown event types, stamps `points_awarded`, denormalizes
+`ticker_symbol`), while `customer_kindex_nightly.js` owns the score. Two
+writers would make smoothing meaningless - the score would still jump the
+instant an event landed. `is_trending_up` now reflects real score movement
+rather than the sign of the last processed event.
+
+**Customer dedup.** Events with a `business_ref` are grouped per business
+and only the highest-weighted one counts, so breadth of engagement beats
+repetition. Events without one (`post`, `share_app`) are deduped per
+event_type - an extension beyond the spec, without which `post` at 10
+points could be farmed by posting repeatedly.
+
+**Dashboard feed.** Every run writes a `kindex_score_history` row per
+entity at a deterministic `{type}_{id}_{YYYY-MM-DD}` id, so re-runs update
+the day rather than duplicating while days accumulate. Rows carry
+score_before/after, target, capped, decay_applied, inactivity_weeks,
+qualifying counts, and (business) verified_visit_count.
+
+Tests: 50 emulator-backed cases across
+`test/business_kindex_nightly.test.js` and
+`test/customer_kindex_nightly.test.js`.

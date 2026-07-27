@@ -71,7 +71,6 @@ exports.processUserEngagementEvent = functions.firestore
       const scoreRef = db.collection("KindexScores").doc(userRef.id);
       const scoreSnap = await tx.get(scoreRef);
       const scoreData = scoreSnap.exists ? scoreSnap.data() : {};
-      const currentScore = scoreData.score || 0;
 
       // Denormalize the user's ticker symbol onto the score doc so
       // ticker-style UI (e.g. the onboarding Kindex ticker) can read it
@@ -84,16 +83,24 @@ exports.processUserEngagementEvent = functions.firestore
         tickerSymbol = userSnap.exists ? userSnap.data().ticker_symbol || null : null;
       }
 
+      // `score` and `is_trending_up` are deliberately NOT written here
+      // any more. They are owned by recomputeCustomerKindexScores
+      // (customer_kindex_nightly.js), which moves the score toward a
+      // windowed target by a capped amount each night and applies
+      // inactivity decay. If this trigger also incremented the score
+      // per-event, that smoothing would be meaningless - the score would
+      // still jump the instant an event landed, and the nightly job would
+      // just be fighting it. There must be exactly one writer.
+      //
+      // This function remains the validator and audit trail: it rejects
+      // unknown event types, stamps points_awarded, and keeps the
+      // ticker_symbol denormalization the ticker UI depends on. The
+      // nightly job only counts events this one marked "processed".
       tx.set(
         scoreRef,
         {
           user_ref: userRef,
-          score: currentScore + points,
           ticker_symbol: tickerSymbol,
-          // Reflects whether the most recently processed event added or
-          // subtracted points - a simple, real signal for the ticker's
-          // trend arrow rather than a time-windowed momentum calculation.
-          is_trending_up: points >= 0,
           last_event_id: eventRef.id,
           last_updated: admin.firestore.FieldValue.serverTimestamp(),
         },

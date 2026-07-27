@@ -4,6 +4,9 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
+const dynamics = require("./kindex_scoring_dynamics.js");
+const { applyNightlyMovement } = dynamics;
+
 const VISITS_COLLECTION = "uservisits";
 const WINDOW_DAYS = 7;
 
@@ -98,7 +101,12 @@ function highestRatingPerVerifiedCustomer(
   return [...byUser.values()];
 }
 
+function tierBaseline(isPremium) {
+  return isPremium ? PREMIUM_BASELINE : STANDARD_BASELINE;
+}
+
 async function recomputeAll(db, now) {
+  const config = await dynamics.getScoringDynamics(db);
   const windowStart = admin.firestore.Timestamp.fromMillis(
     now - WINDOW_DAYS * 24 * 60 * 60 * 1000,
   );
@@ -149,22 +157,74 @@ async function recomputeAll(db, now) {
       verified,
       business.owner_ref ? business.owner_ref.id : null,
     );
-    const newScore = computeScore(ratings, business.is_premium === true);
 
-    if (business.kindex_score === newScore) continue;
+    const isPremium = business.is_premium === true;
+    const baseline = tierBaseline(isPremium);
+    const scoreBefore =
+      typeof business.kindex_score === "number" && business.kindex_score > 0
+        ? business.kindex_score
+        : baseline;
 
-    // kindex_score only - kindex_velocity is deliberately untouched, per
-    // the spec's out-of-scope list.
-    batch.update(businessDoc.ref, {
-      kindex_score: newScore,
-      kindex_last_recomputed_at: admin.firestore.FieldValue.serverTimestamp(),
-      kindex_qualifying_review_count: ratings.length,
+    const outcome = applyNightlyMovement({
+      hasActivity: ratings.length > 0,
+      target: computeScore(ratings, isPremium),
+      scoreBefore,
+      floor: baseline,
+      lastActivityMs: business.kindex_last_activity_at
+        ? business.kindex_last_activity_at.toMillis()
+        : null,
+      decayedThroughWeek: business.kindex_decayed_through_week || 0,
+      now,
+      config,
+      prefix: "business",
     });
-    updated += 1;
+
+    const update = {
+      kindex_score: outcome.scoreAfter,
+      kindex_inactivity_weeks: outcome.inactivityWeeks,
+      kindex_decayed_through_week: outcome.decayedThroughWeek,
+      kindex_qualifying_review_count: ratings.length,
+      kindex_last_recomputed_at: admin.firestore.FieldValue.serverTimestamp(),
+    };
+    if (outcome.hasActivity) {
+      update.kindex_last_activity_at =
+        admin.firestore.Timestamp.fromMillis(now);
+    } else if (!business.kindex_last_activity_at) {
+      // First run for a business we've never seen active: start the clock
+      // now rather than treating "no record" as infinite inactivity, which
+      // would decay every pre-existing business on the first deploy.
+      update.kindex_last_activity_at =
+        admin.firestore.Timestamp.fromMillis(now);
+    }
+
+    // kindex_velocity remains deliberately untouched.
+    batch.update(businessDoc.ref, update);
     batchCount += 1;
 
-    // Firestore caps a batch at 500 writes.
-    if (batchCount === 400) {
+    batch.set(
+      db
+        .collection(dynamics.HISTORY_COLLECTION)
+        .doc(dynamics.historyDocId("business", businessDoc.id, now)),
+      {
+        entity_type: "business",
+        business_ref: businessDoc.ref,
+        score_before: scoreBefore,
+        score_after: outcome.scoreAfter,
+        target_score: outcome.target,
+        capped: outcome.capped,
+        decay_applied: outcome.decayApplied,
+        inactivity_weeks: outcome.inactivityWeeks,
+        qualifying_review_count: ratings.length,
+        verified_visit_count: verified.size,
+        recorded_at: admin.firestore.FieldValue.serverTimestamp(),
+      },
+    );
+    batchCount += 1;
+
+    if (outcome.scoreAfter !== business.kindex_score) updated += 1;
+
+    // Firestore caps a batch at 500 writes; each business costs two.
+    if (batchCount >= 400) {
       await batch.commit();
       batch = db.batch();
       batchCount = 0;
