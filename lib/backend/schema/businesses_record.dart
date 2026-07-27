@@ -24,6 +24,33 @@ class BusinessesRecord extends FirestoreRecord {
   bool get isBlackOwned => _isBlackOwned ?? false;
   bool hasIsBlackOwned() => _isBlackOwned != null;
 
+  // "is_certified_black_owned" field.
+  //
+  // Distinct from is_black_owned, which arrived from the bulk import as a
+  // blanket per-file constant and carries no real information. This one is
+  // only ever set by firebase/scripts/apply_bob_certification.js against a
+  // named certification body, with the source and its date alongside, so it
+  // is the only ownership signal safe to surface to users.
+  //
+  // Read-only in the app: nothing here writes it, so it is deliberately
+  // absent from createBusinessesRecordData.
+  bool? _isCertifiedBlackOwned;
+  bool get isCertifiedBlackOwned => _isCertifiedBlackOwned ?? false;
+  bool hasIsCertifiedBlackOwned() => _isCertifiedBlackOwned != null;
+
+  // "certification_source" field.
+  String? _certificationSource;
+  String get certificationSource => _certificationSource ?? '';
+  bool hasCertificationSource() => _certificationSource != null;
+
+  // "certification_as_of" field.
+  //
+  // The date of the *source list*, not of the import, so the staleness of a
+  // certification travels with the record instead of looking freshly checked.
+  String? _certificationAsOf;
+  String get certificationAsOf => _certificationAsOf ?? '';
+  bool hasCertificationAsOf() => _certificationAsOf != null;
+
   // "category" field.
   String? _category;
   String get category => _category ?? '';
@@ -361,6 +388,9 @@ class BusinessesRecord extends FirestoreRecord {
 
   void _initializeFields() {
     _isBlackOwned = snapshotData['is_black_owned'] as bool?;
+    _isCertifiedBlackOwned = snapshotData['is_certified_black_owned'] as bool?;
+    _certificationSource = snapshotData['certification_source'] as String?;
+    _certificationAsOf = snapshotData['certification_as_of'] as String?;
     _category = snapshotData['category'] as String?;
     _businessType = snapshotData['business_type'] as String?;
     _website = snapshotData['website'] as String?;

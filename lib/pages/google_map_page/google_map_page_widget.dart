@@ -346,17 +346,21 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                             () async {
                               print(
                                   'GoogleMapPageWidget: business pin tapped (${marker.businessName})');
+                              // Straight to the full profile. This used to
+                              // open BusinessShowcase, a thinner page that
+                              // duplicated this one and rendered only fields
+                              // that are empty on every business (hero image,
+                              // established year, interaction count, photo
+                              // gallery) while omitting the address, phone
+                              // and website that are actually populated.
                               context.pushNamed(
-                                BusinessShowcaseWidget.routeName,
+                                BusinessProfileV2Widget.routeName,
                                 queryParameters: {
-                                  'businessRecord': serializeParam(
-                                    marker,
-                                    ParamType.Document,
+                                  'businessDocument': serializeParam(
+                                    marker.reference,
+                                    ParamType.DocumentReference,
                                   ),
                                 }.withoutNulls,
-                                extra: <String, dynamic>{
-                                  'businessRecord': marker,
-                                },
                               );
                             },
                           ),
@@ -581,16 +585,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       // card next to it. Removed in favour of
                                       // per-card taps.
                                       onTap: () => context.pushNamed(
-                                        BusinessShowcaseWidget.routeName,
+                                        BusinessProfileV2Widget.routeName,
                                         queryParameters: {
-                                          'businessRecord': serializeParam(
-                                            business,
-                                            ParamType.Document,
+                                          'businessDocument': serializeParam(
+                                            business.reference,
+                                            ParamType.DocumentReference,
                                           ),
                                         }.withoutNulls,
-                                        extra: <String, dynamic>{
-                                          'businessRecord': business,
-                                        },
                                       ),
                                       child: wrapWithModel(
                                         model: _model.premiumCardModels[index],

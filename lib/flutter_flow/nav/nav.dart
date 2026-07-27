@@ -302,20 +302,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => MobileSignUpPageWidget(),
         ),
         FFRoute(
-          name: BusinessShowcaseWidget.routeName,
-          path: BusinessShowcaseWidget.routePath,
-          asyncParams: {
-            'businessRecord':
-                getDoc(['businesses'], BusinessesRecord.fromSnapshot),
-          },
-          builder: (context, params) => BusinessShowcaseWidget(
-            businessRecord: params.getParam(
-              'businessRecord',
-              ParamType.Document,
-            ),
-          ),
-        ),
-        FFRoute(
           name: MobileCalledPowerPageWidget.routeName,
           path: MobileCalledPowerPageWidget.routePath,
           builder: (context, params) => MobileCalledPowerPageWidget(),

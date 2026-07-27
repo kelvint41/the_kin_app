@@ -173,6 +173,22 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             fit: BoxFit.cover,
                           ),
                         ),
+                        // The scrim used to sit AFTER the name in this Stack, so it painted
+                        // over the title instead of behind it - the business name rendered
+                        // dimmed to grey against a bright hero. It has to precede the text
+                        // it is darkening.
+                        Container(
+                          width: double.infinity,
+                          height: 280.0,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Colors.transparent, Color(0xCC000000)],
+                              stops: [0.0, 1.0],
+                              begin: AlignmentDirectional(0.0, -1.0),
+                              end: AlignmentDirectional(0, 1.0),
+                            ),
+                          ),
+                        ),
                         Padding(
                           padding: EdgeInsetsDirectional.fromSTEB(
                               20.0, 0.0, 20.0, 24.0),
@@ -246,19 +262,84 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       ),
                                 ),
                               ),
+                              // KIN's whole premise, and it was nowhere on
+                              // the page. Driven by is_certified_black_owned,
+                              // which only apply_bob_certification.js sets -
+                              // never by the meaningless bulk-imported
+                              // is_black_owned flag. Shows the certifying
+                              // body and its date so the claim is auditable
+                              // rather than asserted.
+                              if (businessProfileV2BusinessesRecord
+                                  .isCertifiedBlackOwned)
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 10.0, 0.0, 0.0),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Color(0xE60B3D2E),
+                                      borderRadius: BorderRadius.circular(20.0),
+                                      border: Border.all(
+                                        color: Color(0xFFFFD700),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          10.0, 6.0, 12.0, 6.0),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.verified_rounded,
+                                            color: Color(0xFFFFD700),
+                                            size: 16.0,
+                                          ),
+                                          Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    6.0, 0.0, 0.0, 0.0),
+                                            child: Text(
+                                              'Certified Black-Owned',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .labelMedium
+                                                  .override(
+                                                    color: Color(0xFFFFD700),
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              if (businessProfileV2BusinessesRecord
+                                      .isCertifiedBlackOwned &&
+                                  businessProfileV2BusinessesRecord
+                                      .certificationSource.isNotEmpty)
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 6.0, 0.0, 0.0),
+                                  child: Text(
+                                    [
+                                      businessProfileV2BusinessesRecord
+                                          .certificationSource,
+                                      businessProfileV2BusinessesRecord
+                                          .certificationAsOf,
+                                    ]
+                                        .where((p) => p.trim().isNotEmpty)
+                                        .join(' · '),
+                                    maxLines: 2,
+                                    style: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .override(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                        ),
+                                  ),
+                                ),
                             ],
-                          ),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          height: 280.0,
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [Colors.transparent, Color(0xCC000000)],
-                              stops: [0.0, 1.0],
-                              begin: AlignmentDirectional(0.0, -1.0),
-                              end: AlignmentDirectional(0, 1.0),
-                            ),
                           ),
                         ),
                         Align(
@@ -441,12 +522,20 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         .set(createActivityLogsRecordData(
                                           eventType: 'map_tap',
                                           userRef: currentUserReference,
-                                          city: 'San Antonio',
+                                          // Was hardcoded to 'San Antonio',
+                                          // which mislabelled every map_tap
+                                          // outside it. The directory now
+                                          // spans El Paso, Lubbock, Houston
+                                          // and Dallas, so that would have
+                                          // skewed the whole city breakdown.
+                                          city:
+                                              businessProfileV2BusinessesRecord
+                                                  .city,
                                           sessionId: FFAppState().sessionId,
                                           timestamp: getCurrentTimestamp,
                                         ));
                                   },
-                                  text: 'Open in Maps',
+                                  text: 'Directions',
                                   icon: Icon(
                                     Icons.location_on_rounded,
                                     size: 18.0,
@@ -454,7 +543,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                   options: FFButtonOptions(
                                     height: 48.0,
                                     padding: EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
+                                        6.0, 0.0, 6.0, 0.0),
                                     iconPadding: EdgeInsetsDirectional.fromSTEB(
                                         0.0, 0.0, 0.0, 0.0),
                                     iconColor:
@@ -515,7 +604,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       }.withoutNulls,
                                     );
                                   },
-                                  text: 'The Exchange',
+                                  text: 'Exchange',
                                   icon: Icon(
                                     Icons.group_add,
                                     size: 18.0,
@@ -523,7 +612,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                   options: FFButtonOptions(
                                     height: 48.0,
                                     padding: EdgeInsetsDirectional.fromSTEB(
-                                        12.0, 0.0, 12.0, 0.0),
+                                        6.0, 0.0, 6.0, 0.0),
                                     iconPadding: EdgeInsetsDirectional.fromSTEB(
                                         0.0, 0.0, 0.0, 0.0),
                                     iconColor:
@@ -598,7 +687,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         },
                                       ).then((value) => safeSetState(() {}));
                                     },
-                                    text: 'Order on KIN',
+                                    text: 'Order',
                                     icon: Icon(
                                       Icons.delivery_dining_sharp,
                                       size: 18.0,
@@ -678,8 +767,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 padding: EdgeInsets.all(16.0),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       'Is this your business?',
@@ -688,17 +776,15 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                           .override(
                                             font: GoogleFonts.plusJakartaSans(
                                                 fontWeight: FontWeight.bold),
-                                            color:
-                                                FlutterFlowTheme.of(context)
-                                                    .primaryText,
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
                                             letterSpacing: 0.0,
                                             fontWeight: FontWeight.bold,
                                           ),
                                     ),
                                     Padding(
-                                      padding:
-                                          EdgeInsetsDirectional.fromSTEB(
-                                              0.0, 4.0, 0.0, 12.0),
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          0.0, 4.0, 0.0, 12.0),
                                       child: Text(
                                         'Claim it to edit your details and tell '
                                         'the community you\'re Black-owned or '
@@ -706,8 +792,8 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         style: FlutterFlowTheme.of(context)
                                             .bodySmall
                                             .override(
-                                              font: GoogleFonts
-                                                  .plusJakartaSans(),
+                                              font:
+                                                  GoogleFonts.plusJakartaSans(),
                                               color:
                                                   FlutterFlowTheme.of(context)
                                                       .secondaryText,
@@ -739,21 +825,18 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                             FlutterFlowTheme.of(context).info,
                                         color: FlutterFlowTheme.of(context)
                                             .primary,
-                                        textStyle:
-                                            FlutterFlowTheme.of(context)
-                                                .titleSmall
-                                                .override(
-                                                  font: GoogleFonts
-                                                      .plusJakartaSans(
-                                                          fontWeight:
-                                                              FontWeight.w600),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
+                                        textStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                  fontWeight: FontWeight.w600),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
                                                       .info,
-                                                  fontSize: 14.0,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
+                                              fontSize: 14.0,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                         elevation: 0.0,
                                         borderRadius:
                                             BorderRadius.circular(12.0),
@@ -940,36 +1023,56 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                               ),
                             ),
                           ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: 44.0,
-                              height: 44.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).accent1,
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Icon(
-                                  Icons.location_on_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 22.0,
+                        // Address, Hours, Website, About and Photo Gallery are all optional on a
+                        // bulk-imported listing. Hours and photo_gallery are empty on every one
+                        // of the 498 businesses today, and description on all but 71, so
+                        // rendering these unconditionally filled the page with empty headings
+                        // and blank rows. Each section now appears only once it has content.
+                        if (businessProfileV2BusinessesRecord
+                            .address.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Container(
+                                width: 44.0,
+                                height: 44.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  child: Icon(
+                                    Icons.location_on_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 22.0,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Address',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Address',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
                                             fontWeight:
                                                 FlutterFlowTheme.of(context)
                                                     .labelMedium
@@ -979,216 +1082,9 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                     .labelMedium
                                                     .fontStyle,
                                           ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          fontSize: 12.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                  Text(
-                                    businessProfileV2BusinessesRecord.address,
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.w500,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w500,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ].divide(SizedBox(width: 16.0)),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: 44.0,
-                              height: 44.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).accent1,
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Icon(
-                                  Icons.access_time_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 22.0,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Hours',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          fontSize: 12.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                  Text(
-                                    '${businessProfileV2BusinessesRecord.openingTime}-${businessProfileV2BusinessesRecord.closingTime}',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.w500,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMedium
-                                                    .fontStyle,
-                                          ),
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.w500,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                  Text(
-                                    '${businessProfileV2BusinessesRecord.openingTime}-${businessProfileV2BusinessesRecord.closingTime}',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodySmall
-                                        .override(
-                                          font: GoogleFonts.playfairDisplay(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodySmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodySmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodySmall
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ].divide(SizedBox(width: 16.0)),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Container(
-                              width: 44.0,
-                              height: 44.0,
-                              decoration: BoxDecoration(
-                                color: FlutterFlowTheme.of(context).accent1,
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              child: Align(
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Icon(
-                                  Icons.language_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  size: 22.0,
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Website',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          fontSize: 12.0,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                  ),
-                                  InkWell(
-                                    splashColor: Colors.transparent,
-                                    focusColor: Colors.transparent,
-                                    hoverColor: Colors.transparent,
-                                    highlightColor: Colors.transparent,
-                                    onTap: () async {
-                                      await launchURL(
-                                          businessProfileV2BusinessesRecord
-                                              .website);
-                                    },
-                                    child: Text(
-                                      businessProfileV2BusinessesRecord.website,
+                                    ),
+                                    Text(
+                                      businessProfileV2BusinessesRecord.address,
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -1199,8 +1095,6 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                       .bodyMedium
                                                       .fontStyle,
                                             ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
                                             letterSpacing: 0.0,
                                             fontWeight: FontWeight.w500,
                                             fontStyle:
@@ -1209,135 +1103,346 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                     .fontStyle,
                                           ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                          ].divide(SizedBox(width: 16.0)),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          height: 1.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).alternate,
+                            ].divide(SizedBox(width: 16.0)),
                           ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'About the Business',
-                              style: FlutterFlowTheme.of(context)
-                                  .headlineSmall
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
+                        if (businessProfileV2BusinessesRecord
+                                .openingTime.isNotEmpty ||
+                            businessProfileV2BusinessesRecord
+                                .closingTime.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Container(
+                                width: 44.0,
+                                height: 44.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  child: Icon(
+                                    Icons.access_time_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 22.0,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Hours',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    Text(
+                                      '${businessProfileV2BusinessesRecord.openingTime}-${businessProfileV2BusinessesRecord.closingTime}',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight: FontWeight.w500,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                            ),
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w500,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    Text(
+                                      '${businessProfileV2BusinessesRecord.openingTime}-${businessProfileV2BusinessesRecord.closingTime}',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            font: GoogleFonts.playfairDisplay(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ].divide(SizedBox(width: 16.0)),
+                          ),
+                        if (businessProfileV2BusinessesRecord
+                            .website.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Container(
+                                width: 44.0,
+                                height: 44.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  child: Icon(
+                                    Icons.language_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 22.0,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Website',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        await launchURL(
+                                            businessProfileV2BusinessesRecord
+                                                .website);
+                                      },
+                                      child: Text(
+                                        businessProfileV2BusinessesRecord
+                                            .website,
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.w500,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .fontStyle,
+                                              ),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .fontStyle,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ].divide(SizedBox(width: 16.0)),
+                          ),
+                        if (businessProfileV2BusinessesRecord
+                            .description.isNotEmpty) ...[
+                          Container(
+                            width: double.infinity,
+                            height: 1.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'About the Business',
+                                style: FlutterFlowTheme.of(context)
+                                    .headlineSmall
+                                    .override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .headlineSmall
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
                                       fontWeight: FontWeight.bold,
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .headlineSmall
                                           .fontStyle,
                                     ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .headlineSmall
-                                        .fontStyle,
-                                  ),
-                            ),
-                            Text(
-                              businessProfileV2BusinessesRecord.description,
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
+                              ),
+                              Text(
+                                businessProfileV2BusinessesRecord.description,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                      ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .fontWeight,
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .fontStyle,
+                                      lineHeight: 1.6,
                                     ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.6,
-                                  ),
-                            ),
-                          ].divide(SizedBox(height: 12.0)),
-                        ),
-                        Container(
-                          width: double.infinity,
-                          height: 1.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).alternate,
+                              ),
+                            ].divide(SizedBox(height: 12.0)),
                           ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Photo Gallery',
-                              style: FlutterFlowTheme.of(context)
-                                  .headlineSmall
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
+                        ],
+                        if (businessProfileV2BusinessesRecord
+                            .photoGallery.isNotEmpty) ...[
+                          Container(
+                            width: double.infinity,
+                            height: 1.0,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context).alternate,
+                            ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Photo Gallery',
+                                style: FlutterFlowTheme.of(context)
+                                    .headlineSmall
+                                    .override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .headlineSmall
+                                            .fontStyle,
+                                      ),
+                                      letterSpacing: 0.0,
                                       fontWeight: FontWeight.bold,
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .headlineSmall
                                           .fontStyle,
                                     ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .headlineSmall
-                                        .fontStyle,
-                                  ),
-                            ),
-                            Builder(
-                              builder: (context) {
-                                final galleryItem =
-                                    businessProfileV2BusinessesRecord
-                                        .photoGallery
-                                        .toList();
+                              ),
+                              Builder(
+                                builder: (context) {
+                                  final galleryItem =
+                                      businessProfileV2BusinessesRecord
+                                          .photoGallery
+                                          .toList();
 
-                                return GridView.builder(
-                                  padding: EdgeInsets.zero,
-                                  gridDelegate:
-                                      SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: 10.0,
-                                    mainAxisSpacing: 10.0,
-                                    childAspectRatio: 0.7,
-                                  ),
-                                  primary: false,
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.vertical,
-                                  itemCount: galleryItem.length,
-                                  itemBuilder: (context, galleryItemIndex) {
-                                    final galleryItemItem =
-                                        galleryItem[galleryItemIndex];
-                                    return ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      child: Image.network(
-                                        'https://picsum.photos/seed/726/600',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ].divide(SizedBox(height: 12.0)),
-                        ),
+                                  return GridView.builder(
+                                    padding: EdgeInsets.zero,
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: 10.0,
+                                      mainAxisSpacing: 10.0,
+                                      childAspectRatio: 0.7,
+                                    ),
+                                    primary: false,
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: galleryItem.length,
+                                    itemBuilder: (context, galleryItemIndex) {
+                                      final galleryItemItem =
+                                          galleryItem[galleryItemIndex];
+                                      return ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        child: Image.network(
+                                          'https://picsum.photos/seed/726/600',
+                                          width: 200.0,
+                                          height: 200.0,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ].divide(SizedBox(height: 12.0)),
+                          ),
+                        ],
                         Container(
                           width: double.infinity,
                           height: 1.0,
