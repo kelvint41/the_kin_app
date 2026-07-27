@@ -588,6 +588,75 @@ class KinServices {
     }
   }
 
+  /// Whether [userRef]'s owner has accepted the Exchange code of conduct.
+  ///
+  /// Acceptance lives in `exchange_profiles`, keyed by uid so
+  /// firestore.rules can check it in a single get() when a post is created.
+  /// The client check here is a UX affordance only - the rule is what
+  /// actually enforces it.
+  static Future<bool> hasAcceptedExchangeConduct(String uid) async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('exchange_profiles')
+          .doc(uid)
+          .get();
+      return snap.exists && snap.data()?['agreed_to_conduct'] == true;
+    } catch (_) {
+      // Treat an unreadable profile as "not accepted" - the worst case is
+      // the user is asked to accept again, whereas assuming acceptance
+      // would send them into a post that the rules then reject.
+      return false;
+    }
+  }
+
+  /// Records acceptance of the Exchange code of conduct.
+  ///
+  /// Doc ID is the uid, matching the rule in firestore.rules. Uses set with
+  /// merge so re-accepting is harmless and never clobbers display_name.
+  static Future<ServiceResult<void>> acceptExchangeConduct({
+    required String uid,
+    String? displayName,
+  }) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('exchange_profiles')
+          .doc(uid)
+          .set({
+        'user_ref': FirebaseFirestore.instance.collection('users').doc(uid),
+        'display_name': displayName ?? '',
+        'agreed_to_conduct': true,
+        'created_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your agreement. Please try again.');
+    }
+  }
+
+  /// Files a report against an Exchange post.
+  ///
+  /// Reports are write-only from the client (see firestore.rules) - an
+  /// operator reads them with the Admin SDK. Nothing here can take a post
+  /// down; only its author can delete it from the app.
+  static Future<ServiceResult<void>> reportExchangePost({
+    required DocumentReference postRef,
+    required DocumentReference reporterRef,
+    String? reason,
+  }) async {
+    try {
+      await FirebaseFirestore.instance.collection('exchange_post_reports').add({
+        'post_ref': postRef,
+        'reporter_ref': reporterRef,
+        'reason': reason ?? '',
+        'created_at': FieldValue.serverTimestamp(),
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not send the report.');
+    }
+  }
+
   /// Generates one AI social media post concept (caption + 3 hashtags + CTA
   /// + image concept) for [businessRef], optionally guided by [theme] (e.g.
   /// "weekend brunch special").

@@ -314,6 +314,81 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                     ),
                                   ),
                                 ),
+                              // Kindex score with its trajectory. The score
+                              // is the app's core trust signal and appeared
+                              // nowhere on the profile.
+                              //
+                              // The arrow is driven by kindex_velocity and
+                              // shows only when that is non-zero. It is
+                              // deliberately not derived from the score
+                              // itself: business_kindex_engine.js declines to
+                              // write a velocity precisely because a
+                              // sign-based placeholder "would look more
+                              // meaningful than it is", and inventing a
+                              // direction here would be the same mistake one
+                              // layer up. No velocity yet means no arrow, not
+                              // a guessed one.
+                              if (businessProfileV2BusinessesRecord
+                                  .hasKindexScore())
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 10.0, 0.0, 0.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Kindex',
+                                        style: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .override(
+                                              color: Colors.white70,
+                                            ),
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            6.0, 0.0, 0.0, 0.0),
+                                        child: Text(
+                                          businessProfileV2BusinessesRecord
+                                              .kindexScore
+                                              .round()
+                                              .toString(),
+                                          style: FlutterFlowTheme.of(context)
+                                              .headlineSmall
+                                              .override(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      ),
+                                      if (businessProfileV2BusinessesRecord
+                                              .kindexVelocity !=
+                                          0)
+                                        Padding(
+                                          padding:
+                                              EdgeInsetsDirectional.fromSTEB(
+                                                  4.0, 0.0, 0.0, 0.0),
+                                          child: Icon(
+                                            businessProfileV2BusinessesRecord
+                                                        .kindexVelocity >
+                                                    0
+                                                ? Icons.arrow_upward_rounded
+                                                : Icons.arrow_downward_rounded,
+                                            color:
+                                                businessProfileV2BusinessesRecord
+                                                            .kindexVelocity >
+                                                        0
+                                                    ? Color(0xFF2ECC71)
+                                                    : FlutterFlowTheme.of(
+                                                            context)
+                                                        .error,
+                                            size: 20.0,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
                               if (businessProfileV2BusinessesRecord
                                       .isCertifiedBlackOwned &&
                                   businessProfileV2BusinessesRecord
@@ -428,64 +503,74 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             ),
                       ),
                     ),
-                  Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
-                    child: Container(
-                      height: 28.0,
-                      decoration: BoxDecoration(
-                        color: functions.isBusinessOpen(
-                                businessProfileV2BusinessesRecord.openingTime,
-                                businessProfileV2BusinessesRecord.closingTime)
-                            ? FlutterFlowTheme.of(context).primary
-                            : FlutterFlowTheme.of(context).error,
-                        borderRadius: BorderRadius.circular(6.0),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            10.0, 0.0, 10.0, 0.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.circle,
-                              color: Colors.white,
-                              size: 14.0,
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  6.0, 0.0, 6.0, 0.0),
-                              child: Text(
-                                functions.isBusinessOpen(
-                                        businessProfileV2BusinessesRecord
-                                            .openingTime,
-                                        businessProfileV2BusinessesRecord
-                                            .closingTime)
-                                    ? 'Open Now'
-                                    : 'Closed',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .override(
-                                      font: GoogleFonts.playfairDisplay(
+                  // isBusinessOpen() correctly returns false when hours are missing, but
+                  // the pill then asserted "Closed" in red - and opening_time and
+                  // closing_time are empty on all 498 businesses, so every listing was
+                  // telling shoppers it was shut. Not knowing the hours is not the same
+                  // as being closed, so the pill only appears once hours exist.
+                  if (businessProfileV2BusinessesRecord
+                          .openingTime.isNotEmpty &&
+                      businessProfileV2BusinessesRecord.closingTime.isNotEmpty)
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
+                      child: Container(
+                        height: 28.0,
+                        decoration: BoxDecoration(
+                          color: functions.isBusinessOpen(
+                                  businessProfileV2BusinessesRecord.openingTime,
+                                  businessProfileV2BusinessesRecord.closingTime)
+                              ? FlutterFlowTheme.of(context).primary
+                              : FlutterFlowTheme.of(context).error,
+                          borderRadius: BorderRadius.circular(6.0),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              10.0, 0.0, 10.0, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                color: Colors.white,
+                                size: 14.0,
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    6.0, 0.0, 6.0, 0.0),
+                                child: Text(
+                                  functions.isBusinessOpen(
+                                          businessProfileV2BusinessesRecord
+                                              .openingTime,
+                                          businessProfileV2BusinessesRecord
+                                              .closingTime)
+                                      ? 'Open Now'
+                                      : 'Closed',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.playfairDisplay(
+                                          fontWeight: FontWeight.w600,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodySmall
+                                                  .fontStyle,
+                                        ),
+                                        color: Colors.white,
+                                        fontSize: 12.0,
+                                        letterSpacing: 0.0,
                                         fontWeight: FontWeight.w600,
                                         fontStyle: FlutterFlowTheme.of(context)
                                             .bodySmall
                                             .fontStyle,
                                       ),
-                                      color: Colors.white,
-                                      fontSize: 12.0,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.w600,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontStyle,
-                                    ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
                   Padding(
                     padding:
                         EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),

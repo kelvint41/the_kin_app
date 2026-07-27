@@ -15,6 +15,7 @@ class MetricCard3Widget extends StatefulWidget {
     Color? tint,
     String? label,
     String? value,
+    this.isTrendingUp,
   })  : this.tint = tint ?? const Color(0xFFFF8C00),
         this.label = label ?? '7-Day Support Streak',
         this.value = value ?? '14 🔥';
@@ -23,6 +24,11 @@ class MetricCard3Widget extends StatefulWidget {
   final Color tint;
   final String label;
   final String value;
+
+  /// Direction arrow shown beside [value]. Null means no arrow at all -
+  /// "we do not know which way this is moving" is a real state and must not
+  /// render as flat or as an arbitrary direction.
+  final bool? isTrendingUp;
 
   @override
   State<MetricCard3Widget> createState() => _MetricCard3WidgetState();
@@ -112,24 +118,46 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
                   ),
                 ].divide(SizedBox(width: 4.0)),
               ),
-              Text(
-                valueOrDefault<String>(
-                  widget!.value,
-                  '14 🔥',
-                ),
-                style: FlutterFlowTheme.of(context).titleLarge.override(
-                      font: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.bold,
-                        fontStyle:
-                            FlutterFlowTheme.of(context).titleLarge.fontStyle,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      valueOrDefault<String>(
+                        widget!.value,
+                        '14 🔥',
                       ),
-                      color: FlutterFlowTheme.of(context).primaryText,
-                      letterSpacing: 0.0,
-                      fontWeight: FontWeight.bold,
-                      fontStyle:
-                          FlutterFlowTheme.of(context).titleLarge.fontStyle,
-                      lineHeight: 1.4,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: FlutterFlowTheme.of(context).titleLarge.override(
+                            font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold,
+                              fontStyle: FlutterFlowTheme.of(context)
+                                  .titleLarge
+                                  .fontStyle,
+                            ),
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.bold,
+                            fontStyle: FlutterFlowTheme.of(context)
+                                .titleLarge
+                                .fontStyle,
+                            lineHeight: 1.4,
+                          ),
                     ),
+                  ),
+                  if (widget!.isTrendingUp != null)
+                    Icon(
+                      widget!.isTrendingUp!
+                          ? Icons.arrow_upward_rounded
+                          : Icons.arrow_downward_rounded,
+                      color: widget!.isTrendingUp!
+                          ? const Color(0xFF2ECC71)
+                          : FlutterFlowTheme.of(context).error,
+                      size: 20.0,
+                    ),
+                ],
               ),
             ].divide(SizedBox(height: 16.0)),
           ),

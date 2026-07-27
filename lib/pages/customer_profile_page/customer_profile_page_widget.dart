@@ -24,11 +24,17 @@ class _MilestoneStats {
     required this.streakDays,
     required this.reviewCount,
     required this.kindexScore,
+    this.isTrendingUp,
   });
 
   final int streakDays;
   final int reviewCount;
   final double? kindexScore;
+
+  /// Direction of the user's Kindex score, straight from the
+  /// KindexScores row's is_trending_up. Null when they have no score yet,
+  /// so the card shows no arrow rather than guessing one.
+  final bool? isTrendingUp;
 }
 
 /// A Connection Stream promotion, already joined to its business.
@@ -174,6 +180,9 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
       streakDays: supportStreakDays(timestamps, now: DateTime.now()),
       reviewCount: reviews.length,
       kindexScore: scores.isEmpty ? null : scores.first.score,
+      isTrendingUp: scores.isEmpty || !scores.first.hasIsTrendingUp()
+          ? null
+          : scores.first.isTrendingUp,
     );
   }
 
@@ -514,6 +523,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                             ? '--'
                                             : impactScoreLabel(
                                                 stats.kindexScore),
+                                        isTrendingUp: stats?.isTrendingUp,
                                       ),
                                     ),
                                   ].divide(SizedBox(width: 16.0)),

@@ -78,13 +78,55 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // The Exchange is a per-business wall that both customers and owners
+    // post to. Posting used to require owning the business AND that business
+    // being is_verified, which made it unpostable by anyone: no business has
+    // an owner yet, and the composer's text field was hidden client-side on
+    // the same condition.
+    //
+    // Posting now requires a signed-in user who has accepted the code of
+    // conduct (an exchange_profiles doc keyed by their uid with
+    // agreed_to_conduct == true). Ownership is no longer required to post -
+    // it only determines the "Owner" badge, which is derived at read time
+    // from the business's owner_ref rather than trusted from the post.
     match /exchange_posts/{document} {
       allow create: if request.auth != null
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.is_verified == true;
+        && exists(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid)).data.agreed_to_conduct == true
+        && request.resource.data.post_text is string
+        && request.resource.data.post_text.size() > 0
+        && request.resource.data.post_text.size() <= 2000;
       allow read: if true;
-      allow write: if false;
+      // Authors may remove their own post. Taking down someone else's is
+      // deliberately not possible from a client - that runs server-side with
+      // the Admin SDK (firebase/scripts/moderate_exchange.js), the same
+      // pattern as approve_claim.js, so a takedown always has an operator
+      // behind it.
+      allow delete: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if false;
+    }
+
+    // Code-of-conduct acceptance, keyed by uid so the exchange_posts rule
+    // above can look it up in one get(). A user may only ever write their
+    // own, and acceptance is public-read so a post can show its author.
+    match /exchange_profiles/{document} {
+      allow create: if request.auth != null && request.auth.uid == document;
+      allow read: if true;
+      allow update: if request.auth != null && request.auth.uid == document;
+      allow delete: if false;
+    }
+
+    // Reports of posts. Anyone signed in may file one against a post that is
+    // not their own; nobody can read them back from a client, since the
+    // reporter's identity is not something other users should be able to
+    // enumerate. Operators read them with the Admin SDK.
+    match /exchange_post_reports/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.reporter_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow read: if false;
+      allow update: if false;
       allow delete: if false;
     }
 

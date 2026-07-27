@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/services/kin_services.dart';
 import '/components/exchange_feed_item_widget.dart';
 import '/components/kindex_spotlight_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -33,10 +34,83 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Whether the signed-in user has accepted the Exchange code of conduct.
+  /// Mirrors the exchange_profiles doc that firestore.rules checks on every
+  /// post; this copy only drives whether we prompt before the first post.
+  bool _acceptedConduct = false;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => TheExchangeModel());
+    _loadConductAcceptance();
+  }
+
+  Future<void> _loadConductAcceptance() async {
+    final uid = currentUserUid;
+    if (uid.isEmpty) return;
+    final accepted = await KinServices.hasAcceptedExchangeConduct(uid);
+    if (mounted && accepted) setState(() => _acceptedConduct = true);
+  }
+
+  /// Prompts for the code of conduct if it has not been accepted yet.
+  ///
+  /// Returns true when the user may post. Posting without this would simply
+  /// be rejected by firestore.rules, so the prompt is what turns a silent
+  /// permission-denied into an explicit, answerable question.
+  Future<bool> _ensureConductAccepted() async {
+    if (_acceptedConduct) return true;
+    final uid = currentUserUid;
+    if (uid.isEmpty) return false;
+
+    final agreed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        title: Text('Before you post',
+            style: FlutterFlowTheme.of(context).headlineSmall),
+        content: Text(
+          'The Exchange is for supporting local businesses and the people '
+          'behind them.\n\nKeep it respectful: no harassment, no spam, no '
+          'false claims about a business. You are responsible for what you '
+          'post, and you can delete your own posts at any time.',
+          style: FlutterFlowTheme.of(context).bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    )),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text('I agree',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                      fontWeight: FontWeight.bold,
+                    )),
+          ),
+        ],
+      ),
+    );
+    if (agreed != true) return false;
+
+    final result = await KinServices.acceptExchangeConduct(
+      uid: uid,
+      displayName: currentUserDisplayName,
+    );
+    if (!result.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.error ?? 'Could not save agreement.')),
+        );
+      }
+      return false;
+    }
+    if (mounted) setState(() => _acceptedConduct = true);
+    return true;
   }
 
   @override
@@ -771,39 +845,48 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             children: [
                                               Expanded(
                                                 flex: 1,
-                                                child: isVerifiedBusinessOwner
-                                                    ? TextFormField(
-                                                        controller: _model
-                                                            .feedComposerController,
-                                                        focusNode: _model
-                                                            .feedComposerFocusNode,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          hintText:
-                                                              'Join the conversation...',
-                                                          hintStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .override(
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .hint,
-                                                                  ),
-                                                          border:
-                                                              InputBorder.none,
-                                                          isDense: true,
-                                                        ),
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
+                                                // Was gated on
+                                                // isVerifiedBusinessOwner, so
+                                                // the field itself did not
+                                                // exist for anyone - no
+                                                // business has an owner yet.
+                                                // The Exchange is a
+                                                // conversation, so anyone
+                                                // signed in gets the composer;
+                                                // the code of conduct is
+                                                // checked on send.
+                                                child:
+                                                    currentUserReference != null
+                                                        ? TextFormField(
+                                                            controller: _model
+                                                                .feedComposerController,
+                                                            focusNode: _model
+                                                                .feedComposerFocusNode,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              hintText:
+                                                                  'Join the conversation...',
+                                                              hintStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .override(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .hint,
+                                                                      ),
+                                                              border:
+                                                                  InputBorder
+                                                                      .none,
+                                                              isDense: true,
+                                                            ),
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
                                                                 .bodyMedium,
-                                                      )
-                                                    : Text(
-                                                        'Join the conversation...',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
+                                                          )
+                                                        : Text(
+                                                            'Join the conversation...',
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
                                                                 .bodyMedium
                                                                 .override(
                                                                   font: GoogleFonts
@@ -831,7 +914,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                      ),
+                                                          ),
                                               ),
                                               Icon(
                                                 Icons.gif_box_outlined,
@@ -857,12 +940,16 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         final composerText = _model
                                             .feedComposerController?.text
                                             .trim();
-                                        if (!isVerifiedBusinessOwner ||
-                                            composerText == null ||
+                                        if (composerText == null ||
                                             composerText.isEmpty ||
                                             currentUserReference == null) {
                                           print(
-                                              'TheExchangeWidget: composer send ignored (not owner, empty text, or not logged in)');
+                                              'TheExchangeWidget: composer send ignored (empty text or not logged in)');
+                                          return;
+                                        }
+                                        if (!await _ensureConductAccepted()) {
+                                          print(
+                                              'TheExchangeWidget: composer send ignored (conduct not accepted)');
                                           return;
                                         }
                                         final exchangePostsRecordReference =
