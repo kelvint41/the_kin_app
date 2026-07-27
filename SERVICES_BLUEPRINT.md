@@ -751,12 +751,23 @@ than retaining points earned earlier. That follows from the spec's
 "recompute from scratch", but it means scores decay toward baseline instead
 of accumulating.
 
+**Owner self-farming is blocked at three layers.** An owner checking in to
+their own business would make their own review count toward their own
+score, so: the check-in control is hidden for the owner on their own
+profile; `recordVerifiedVisit` refuses a check-in whose caller matches the
+business's `owner_ref`; and the nightly recompute drops the owner's review
+outright regardless of whether a verified visit exists. The nightly gate is
+the authoritative one - it decides scoring directly, so it holds even for
+visits recorded before the callable check existed, or written directly back
+when `uservisits` was still client-writable. The UI gate alone would be
+bypassable by invoking the callable directly.
+
 **Reviews use composite ids** (`{businessId}_{userId}`), so re-submitting
 edits a customer's existing review rather than creating duplicates. Rules
 allow owner updates with a 2-edit cap - anti-spam only; score integrity
 comes from the nightly rules, not the cap. Grouping by customer in the
 nightly job also means legacy duplicate review documents cannot double-count.
 
-Tests: `test/business_kindex_nightly.test.js` (17 cases, emulator-backed),
+Tests: `test/business_kindex_nightly.test.js` (21 cases, emulator-backed),
 covering the manipulation scenarios directly - repeat reviews from one
 account, competitor 1-star farming, unverified reviews, window boundaries.

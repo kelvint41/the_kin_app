@@ -39,9 +39,13 @@ beforeEach(async () => {
 const daysAgo = (n) =>
   admin.firestore.Timestamp.fromMillis(Date.now() - n * 24 * 60 * 60 * 1000);
 
-async function seed({ isPremium = false, reviews = [], visits = [] }) {
+async function seed({ isPremium = false, reviews = [], visits = [], owner }) {
   const businessRef = db.collection("businesses").doc(uniq("biz"));
-  await businessRef.set({ is_premium: isPremium, kindex_score: 0 });
+  await businessRef.set({
+    is_premium: isPremium,
+    kindex_score: 0,
+    ...(owner ? { owner_ref: db.collection("users").doc(owner) } : {}),
+  });
 
   for (const r of reviews) {
     await db.collection("reviews").doc(uniq("review")).set({
@@ -223,6 +227,52 @@ test("recompute is idempotent", async () => {
   await recomputeAll(db, Date.now());
   await recomputeAll(db, Date.now());
   assert.equal((await biz.get()).data().kindex_score, 515);
+});
+
+// --- Owner self-farming ------------------------------------------------
+
+test("an owner's own review never counts, even with a verified visit", async () => {
+  // The visit is present on purpose: it models a check-in recorded before
+  // recordVerifiedVisit refused owner check-ins, or written directly back
+  // when uservisits was still client-writable. The nightly job must still
+  // refuse to score it.
+  const biz = await seed({
+    owner: "owner1",
+    reviews: [{ user: "owner1", rating: 5 }],
+    visits: [{ user: "owner1" }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500, "owner farmed own score");
+});
+
+test("an owner cannot tank a competitor by owning it - only their own review is dropped", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    reviews: [
+      { user: "owner1", rating: 5 },
+      { user: "alice", rating: 5 },
+    ],
+    visits: [{ user: "owner1" }, { user: "alice" }],
+  });
+  // Only alice's +15 lands.
+  assert.equal(await scoreAfterRecompute(biz), 515);
+});
+
+test("owner exclusion is keyed to the owning business only", async () => {
+  // Someone who owns business A is an ordinary customer at business B.
+  const other = await seed({
+    owner: "owner2",
+    reviews: [{ user: "owner1", rating: 5 }],
+    visits: [{ user: "owner1" }],
+  });
+  assert.equal(await scoreAfterRecompute(other), 515);
+});
+
+test("a business with no owner_ref still scores normally", async () => {
+  const biz = await seed({
+    reviews: [{ user: "alice", rating: 5 }],
+    visits: [{ user: "alice" }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 515);
 });
 
 test("kindex_velocity is never written", async () => {

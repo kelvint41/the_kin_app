@@ -137,7 +137,22 @@ exports.recordVerifiedVisit = onCall(async (request) => {
     throw new HttpsError("not-found", "Business not found.");
   }
 
-  const coords = businessCoords(businessSnap.data());
+  const business = businessSnap.data();
+
+  // An owner must not be able to verify a visit to their own business:
+  // that would let them self-farm, since a verified visit is exactly what
+  // makes their own review count toward their own score. Enforced here as
+  // well as in the UI because the UI gate is trivially bypassed by calling
+  // this function directly, and again in the nightly recompute in case a
+  // visit predating this check already exists.
+  if (business.owner_ref && business.owner_ref.id === uid) {
+    throw new HttpsError(
+      "permission-denied",
+      "You can't check in to your own business.",
+    );
+  }
+
+  const coords = businessCoords(business);
   if (!coords) {
     // The business has no usable location on file, so proximity can't be
     // established. Fail closed - never record an unverifiable visit.

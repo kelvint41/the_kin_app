@@ -71,11 +71,23 @@ function computeScore(qualifyingRatings, isPremiumBusiness) {
  * documents for the same customer - which matters while older
  * auto-ID reviews coexist with the newer composite-ID scheme.
  */
-function highestRatingPerVerifiedCustomer(reviews, verifiedUserIds) {
+function highestRatingPerVerifiedCustomer(
+  reviews,
+  verifiedUserIds,
+  ownerUserId,
+) {
   const byUser = new Map();
   for (const review of reviews) {
     const userRef = review.user_ref;
     if (!userRef || typeof review.rating !== "number") continue;
+    // The owner's own review never counts toward their own score, even if
+    // a verified visit exists for them - a visit predating the check in
+    // recordVerifiedVisit, or one written back when the uservisits
+    // collection was still client-writable, would otherwise let an owner
+    // farm their own score. This is the authoritative gate: it decides
+    // scoring directly, so it holds regardless of what the UI or the
+    // check-in callable allowed earlier.
+    if (ownerUserId && userRef.id === ownerUserId) continue;
     if (!verifiedUserIds.has(userRef.id)) continue;
     const rating = Math.round(review.rating);
     const current = byUser.get(userRef.id);
@@ -132,7 +144,11 @@ async function recomputeAll(db, now) {
     const reviews = reviewsByBusiness.get(businessDoc.id) || [];
     const verified = verifiedByBusiness.get(businessDoc.id) || new Set();
 
-    const ratings = highestRatingPerVerifiedCustomer(reviews, verified);
+    const ratings = highestRatingPerVerifiedCustomer(
+      reviews,
+      verified,
+      business.owner_ref ? business.owner_ref.id : null,
+    );
     const newScore = computeScore(ratings, business.is_premium === true);
 
     if (business.kindex_score === newScore) continue;

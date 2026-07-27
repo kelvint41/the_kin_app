@@ -1257,7 +1257,19 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if (widget.businessDocument != null)
+                              // Hidden for the owner viewing their own
+                              // profile: an owner checking in to their own
+                              // business would make their own review count
+                              // toward their own score, which is the
+                              // self-farming case the verified-visit rule
+                              // exists to prevent. This is only the first
+                              // of three gates - recordVerifiedVisit
+                              // refuses owner check-ins, and the nightly
+                              // recompute drops owner reviews outright -
+                              // since a UI check alone is bypassable.
+                              if (widget.businessDocument != null &&
+                                  businessProfileV2BusinessesRecord.ownerRef !=
+                                      currentUserReference)
                                 VisitCheckInWidget(
                                   businessRef: widget.businessDocument!,
                                 ),
