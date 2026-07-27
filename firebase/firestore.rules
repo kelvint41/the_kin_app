@@ -15,10 +15,24 @@ service cloud.firestore {
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
+    // `is_admin` is the only thing gating the Executive Dashboard and the
+    // signup_feed read rule below, and both of those read it straight off
+    // this doc. A blanket `allow write` therefore meant any signed-in user
+    // could set is_admin on themselves and grant themselves admin - so it's
+    // frozen here on both create and update, the same way kindex_score is
+    // frozen on businesses above. It is now writable only via the Admin SDK,
+    // which bypasses these rules.
+    //
+    // Every client write to this collection passes named fields only
+    // (email / display_name / owned_business) through createUsersRecordData,
+    // whose map is `.withoutNulls`, so is_admin is simply absent from them
+    // and neither clause below rejects a legitimate write.
     match /users/{document} {
-      allow create: if request.auth.uid == document;
+      allow create: if request.auth.uid == document
+        && !('is_admin' in request.resource.data);
       allow read: if request.auth.uid == document;
-      allow write: if request.auth.uid == document;
+      allow update: if request.auth.uid == document
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['is_admin']);
       allow delete: if request.auth.uid == document;
     }
 
