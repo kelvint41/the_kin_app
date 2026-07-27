@@ -490,7 +490,17 @@ never persists it - still decorative, still dead code, left untouched.
 The formula itself has been ported (not moved) into
 `business_kindex_engine.js` as the live implementation - see below.
 
-**New: live business-side engine** -
+**SUPERSEDED (July 2026): the reactive business engine was replaced by a
+nightly recompute.** `business_kindex_engine.js` / `processBusinessReview`
+has been deleted. It applied a fixed delta per review with no verified-visit
+requirement and no per-customer cap, so one account could move a score
+without bound by submitting repeated reviews. Business scoring now lives in
+`business_kindex_nightly.js` (`recomputeBusinessKindexScores`, 2am
+America/Chicago) plus `visit_verification.js` (`recordVerifiedVisit`
+callable). See "Anti-manipulation scoring" below. The description that
+follows is retained for history only:
+
+**Former live business-side engine (deleted)** -
 `firebase/custom_cloud_functions/business_kindex_engine.js`,
 `processBusinessReview`. Triggered on `reviews/{reviewId}` document
 creation (the review flow already wired up via
@@ -699,3 +709,119 @@ follow-up if this gets used in practice).
 - No manual-entry ticker UI/service method exists yet - `generateUniqueTicker`
   failing just surfaces an error today, per the explicit ask; building the
   actual manual-input flow is future work.
+
+## Anti-manipulation business scoring (July 2026)
+
+Replaces the reactive `processBusinessReview` trigger, which had no
+manipulation protection.
+
+**`visit_verification.js` - `recordVerifiedVisit` (callable).** A review
+only counts toward a score if the customer has a GPS-verified check-in for
+that business. The client takes a single one-shot location reading (no
+background tracking) and calls this function; the radius check happens
+server-side against the business's stored coordinates, and the visit is
+written with the Admin SDK and a server timestamp. Radius (default 100m)
+and a dedup window (default 1h) are tunable from
+`kindex_config/visit_verification` without a redeploy.
+
+The collection is **`uservisits`**, not `user_visits` - worth noting because
+its rules previously read `allow create: if true`, meaning any caller, even
+unauthenticated, could forge a visit. Client writes are now denied outright.
+
+**Limits of GPS verification.** This proves the *reported* coordinates are
+in range and makes forgery require deliberately faking a location rather
+than just POSTing a document. It cannot prove physical presence - a
+mock-location provider on a rooted device still defeats it. Unspoofable
+presence needs a venue-side factor (in-store QR, or confirmed purchase).
+
+**`business_kindex_nightly.js` - `recomputeBusinessKindexScores`.** Runs at
+2:00am America/Chicago. For every business it takes the trailing 7 days of
+reviews, keeps only customers with a verified visit in that window, reduces
+each customer to their single highest star rating, and recomputes the score
+from the tier baseline using the existing deltas and ceilings. Writes
+`kindex_score`, `kindex_last_recomputed_at` and
+`kindex_qualifying_review_count`; `kindex_velocity` is deliberately never
+touched.
+
+**Behavioural consequence worth knowing:** because the score is recomputed
+from scratch each night over a 7-day window, it is now a rolling measure
+rather than a running total. A business with no qualifying reviews in the
+window sits exactly at its baseline (500 standard / 850 premium) rather
+than retaining points earned earlier. That follows from the spec's
+"recompute from scratch", but it means scores decay toward baseline instead
+of accumulating.
+
+**Owner self-farming is blocked at three layers.** An owner checking in to
+their own business would make their own review count toward their own
+score, so: the check-in control is hidden for the owner on their own
+profile; `recordVerifiedVisit` refuses a check-in whose caller matches the
+business's `owner_ref`; and the nightly recompute drops the owner's review
+outright regardless of whether a verified visit exists. The nightly gate is
+the authoritative one - it decides scoring directly, so it holds even for
+visits recorded before the callable check existed, or written directly back
+when `uservisits` was still client-writable. The UI gate alone would be
+bypassable by invoking the callable directly.
+
+**Reviews use composite ids** (`{businessId}_{userId}`), so re-submitting
+edits a customer's existing review rather than creating duplicates. Rules
+allow owner updates with a 2-edit cap - anti-spam only; score integrity
+comes from the nightly rules, not the cap. Grouping by customer in the
+nightly job also means legacy duplicate review documents cannot double-count.
+
+Tests: `test/business_kindex_nightly.test.js` (21 cases, emulator-backed),
+covering the manipulation scenarios directly - repeat reviews from one
+account, competitor 1-star farming, unverified reviews, window boundaries.
+
+## Kindex smoothing & decay (Phase 2, July 2026)
+
+Layered on top of the anti-manipulation redesign. Config lives in
+`kindex_config/scoring_dynamics` (same tunable pattern as
+`visit_verification`): per-side max nightly change (default 20) and
+per-side weekly decay amounts (10 / 20 / 25, holding at the week-3 rate
+unless `*_decay_escalates` is set).
+
+**Capped movement.** Each night a score moves toward its windowed target by
+at most the configured cap rather than jumping to it, so a grand opening
+with 50 verified check-ins climbs like a ticker instead of snapping to the
+ceiling. The cap applies in both directions.
+
+**Escalating inactivity decay.** With no qualifying activity, the score
+decays on an escalating weekly schedule. Decay is charged per *week
+crossing*, not per nightly run - the amounts in the spec are weekly and the
+job runs nightly, so `kindex_decayed_through_week` acts as a ledger that
+keeps re-runs idempotent. Any qualifying activity resets both the streak
+and the ledger immediately.
+
+**Floor semantics.** The floor bounds *decay* only: business scores stop at
+their tier baseline (500/850), customers at 0. Movement toward a target may
+still land below baseline, because a genuinely badly-reviewed business
+should be able to score under it - mere inactivity should not.
+
+**First-run safety.** A business or customer with no recorded
+`last_activity_at` starts its clock on the first run rather than being
+treated as infinitely inactive, which would otherwise decay every
+pre-existing record the night the job first ships.
+
+**Customer side: one writer.** `kindex_engine.js` no longer writes `score`
+or `is_trending_up`. It remains the validator and audit trail (rejects
+unknown event types, stamps `points_awarded`, denormalizes
+`ticker_symbol`), while `customer_kindex_nightly.js` owns the score. Two
+writers would make smoothing meaningless - the score would still jump the
+instant an event landed. `is_trending_up` now reflects real score movement
+rather than the sign of the last processed event.
+
+**Customer dedup.** Events with a `business_ref` are grouped per business
+and only the highest-weighted one counts, so breadth of engagement beats
+repetition. Events without one (`post`, `share_app`) are deduped per
+event_type - an extension beyond the spec, without which `post` at 10
+points could be farmed by posting repeatedly.
+
+**Dashboard feed.** Every run writes a `kindex_score_history` row per
+entity at a deterministic `{type}_{id}_{YYYY-MM-DD}` id, so re-runs update
+the day rather than duplicating while days accumulate. Rows carry
+score_before/after, target, capped, decay_applied, inactivity_weeks,
+qualifying counts, and (business) verified_visit_count.
+
+Tests: 50 emulator-backed cases across
+`test/business_kindex_nightly.test.js` and
+`test/customer_kindex_nightly.test.js`.

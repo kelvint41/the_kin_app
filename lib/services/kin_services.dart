@@ -22,6 +22,24 @@ class ServiceResult<T> {
   bool get isSuccess => error == null;
 }
 
+/// Result of a GPS-verified check-in (see
+/// [KinServices.checkInToBusiness]).
+class VisitCheckIn {
+  const VisitCheckIn({
+    required this.visitId,
+    required this.alreadyCheckedIn,
+    required this.distanceMeters,
+  });
+
+  final String visitId;
+
+  /// True when a recent visit was reused rather than a new one recorded,
+  /// so repeated taps during one trip don't stack duplicate visits.
+  final bool alreadyCheckedIn;
+
+  final int distanceMeters;
+}
+
 /// A single row of display data for the Kindex ticker (see
 /// [KinServices.fetchTopBusinessKindex]).
 class KindexTickerEntry {
@@ -277,7 +295,111 @@ class KinServices {
     }
   }
 
-  /// Submits a star rating + text review for a business.
+  /// Deterministic review id: one review document per customer per
+  /// business, so re-submitting edits the existing review in place instead
+  /// of stacking duplicates.
+  static String reviewDocId({
+    required DocumentReference businessRef,
+    required DocumentReference userRef,
+  }) =>
+      '${businessRef.id}_${userRef.id}';
+
+  /// Records a GPS-verified check-in, the prerequisite for a review to
+  /// count toward the business's Kindex score.
+  ///
+  /// Takes a single one-shot location reading (no background tracking) and
+  /// hands it to the `recordVerifiedVisit` callable, which does the radius
+  /// check server-side and writes the visit with the Admin SDK - clients
+  /// cannot write `uservisits` directly.
+  ///
+  /// Used by: Business Profile V2 -> "I'm Here" check-in.
+  static Future<ServiceResult<VisitCheckIn>> checkInToBusiness({
+    required DocumentReference businessRef,
+  }) async {
+    if (currentUserReference == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to check in.');
+    }
+
+    LatLng? position;
+    try {
+      position = await queryCurrentUserLocation();
+    } catch (e) {
+      // queryCurrentUserLocation surfaces denied/disabled as errors. Say
+      // why location is needed rather than just failing - the review can
+      // still be posted, it just won't count toward the score.
+      final message = e.toString();
+      if (message.contains('denied') || message.contains('disabled')) {
+        return const ServiceResult.failure(
+            'Location access is needed to verify you visited this business. '
+            'You can still leave a review without checking in - it just '
+            "won't count toward the business's Kindex score.");
+      }
+      return const ServiceResult.failure(
+          'Could not read your location. Please try again.');
+    }
+
+    if (position == null) {
+      return const ServiceResult.failure(
+          'Could not get a location fix. Please try again.');
+    }
+
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'recordVerifiedVisit',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      });
+      final data = result.data;
+      return ServiceResult.success(VisitCheckIn(
+        visitId: data['visitId'] as String,
+        alreadyCheckedIn: data['alreadyCheckedIn'] as bool? ?? false,
+        distanceMeters: (data['distanceMeters'] as num?)?.toInt() ?? 0,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not check you in.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not check you in. Please try again.');
+    }
+  }
+
+  /// Whether the signed-in user has a verified visit to this business
+  /// inside the scoring window, which is what decides if their review
+  /// counts toward the Kindex score.
+  static Future<bool> hasVerifiedVisit({
+    required DocumentReference businessRef,
+    Duration window = const Duration(days: 7),
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) return false;
+    try {
+      final snapshot = await UservisitsRecord.collection
+          .where('user_ref', isEqualTo: userRef)
+          .where('business_ref', isEqualTo: businessRef)
+          .where('visit_timestamp',
+              isGreaterThanOrEqualTo: DateTime.now().subtract(window))
+          .limit(1)
+          .get();
+      return snapshot.docs.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Submits or updates a star rating + text review for a business.
+  ///
+  /// Reviews always post, whether or not the customer checked in - only
+  /// whether they *count toward the score* depends on a verified visit,
+  /// which the nightly recompute decides. Writing at a composite id means a
+  /// second submission edits the customer's existing review rather than
+  /// creating a duplicate.
+  ///
   /// Used by: Business Profile V2 -> "Submit Review".
   static Future<ServiceResult<void>> submitReview({
     required DocumentReference businessRef,
@@ -289,14 +411,37 @@ class KinServices {
       return const ServiceResult.failure(
           'You need to be signed in to leave a review.');
     }
+    final docRef = ReviewsRecord.collection
+        .doc(reviewDocId(businessRef: businessRef, userRef: userRef));
     try {
-      await ReviewsRecord.collection.doc().set(createReviewsRecordData(
-            businessRef: businessRef,
-            userRef: userRef,
-            rating: rating,
-            reviewText: reviewText,
-            timestamp: getCurrentTimestamp,
-          ));
+      final existing = await docRef.get();
+      if (!existing.exists) {
+        await docRef.set(createReviewsRecordData(
+          businessRef: businessRef,
+          userRef: userRef,
+          rating: rating,
+          reviewText: reviewText,
+          timestamp: getCurrentTimestamp,
+          editCount: 0,
+        ));
+        return const ServiceResult.success();
+      }
+
+      // Editing an existing review. The cap is enforced in Firestore rules
+      // too; this check exists to give a clear message instead of a bare
+      // permission-denied.
+      final currentEdits =
+          (existing.data() as Map<String, dynamic>?)?['edit_count'] as int? ?? 0;
+      if (currentEdits >= 2) {
+        return const ServiceResult.failure(
+            "You've reached the edit limit for this review.");
+      }
+      await docRef.update({
+        'rating': rating,
+        'review_text': reviewText,
+        'timestamp': getCurrentTimestamp,
+        'edit_count': currentEdits + 1,
+      });
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure(

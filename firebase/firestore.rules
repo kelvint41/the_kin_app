@@ -179,22 +179,49 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Visits gate whether a review counts toward kindex_score, so a client
+    // must never be able to assert one. This was previously
+    // `allow create: if true` - any caller, even unauthenticated, could
+    // POST a visit document and make their reviews count. All writes now
+    // go through the recordVerifiedVisit callable, which does the radius
+    // check server-side and writes via the Admin SDK (bypassing rules).
+    // Reads stay open so the app can show a user's own check-in state.
     match /uservisits/{document} {
-      allow create: if true;
+      allow create: if false;
       allow read: if true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // Reviews use a composite id, {businessId}_{userId}, so a customer has
+    // one review document per business and re-submitting edits it in place
+    // rather than stacking duplicates.
     match /reviews/{document} {
       allow create: if request.auth != null
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
         && request.resource.data.business_ref is path
         && request.resource.data.rating is number
         && request.resource.data.rating >= 1
-        && request.resource.data.rating <= 5;
+        && request.resource.data.rating <= 5
+        && request.resource.data.edit_count == 0;
       allow read: if true;
-      allow write: if false;
+
+      // Owners may edit their own review, capped at 2 edits purely as an
+      // anti-spam measure - score manipulation is handled by the nightly
+      // recompute (verified visits + highest-per-customer), not by this
+      // cap. The identity fields are frozen so an edit can't reassign a
+      // review to another user or business, and edit_count must advance by
+      // exactly one so the cap can't be sidestepped.
+      allow update: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.user_ref == resource.data.user_ref
+        && request.resource.data.business_ref == resource.data.business_ref
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && resource.data.edit_count < 2
+        && request.resource.data.edit_count == resource.data.edit_count + 1;
+
       allow delete: if false;
     }
 
