@@ -93,7 +93,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
           .set(createActivityLogsRecordData(
             eventType: 'page_view',
             userRef: currentUserReference,
-            city: 'San Antonio',
+            // No city. This was hardcoded to 'San Antonio', which stamped
+            // every map page view in the directory's 76 cities as a San
+            // Antonio one. Unlike the profile page's map_tap - which can log
+            // the business's own city - a page view has no business in
+            // context, and the app still has no user-location plumbing, so
+            // there is no honest value. An absent field is a gap in the
+            // analytics; a fabricated one is a wrong answer.
             pageName: 'GoogleMapPage',
             sessionId: FFAppState().sessionId,
             timestamp: getCurrentTimestamp,
