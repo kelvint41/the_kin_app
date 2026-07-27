@@ -1,0 +1,45 @@
+{
+  "mode": "commit",
+  "claim_id": "zWkXftrNpJmyHobx6Fbd",
+  "business_id": "70KCKcsAYHO9NzexXGS9",
+  "business_name": "The Big Bib, LLC",
+  "prior_state": {
+    "business": {
+      "owner_ref": "users/kYpDYaJXD2RlmyDrv7Up8vFjIjs2",
+      "is_claimed": true,
+      "claimed_by_user_id": "kYpDYaJXD2RlmyDrv7Up8vFjIjs2",
+      "is_verified": true
+    },
+    "user": {
+      "uid": "kYpDYaJXD2RlmyDrv7Up8vFjIjs2",
+      "owned_business": "businesses/70KCKcsAYHO9NzexXGS9"
+    },
+    "claim": {
+      "business_id": "70KCKcsAYHO9NzexXGS9",
+      "business_name": "The Big Bib, LLC",
+      "applicant_user_id": "kYpDYaJXD2RlmyDrv7Up8vFjIjs2",
+      "claimant_name": "kelvin@apptest.com",
+      "claimant_role": "Owner",
+      "contact_email": "kelvin@apptest.com",
+      "contact_phone": "2106548400",
+      "verification_proof_link": "",
+      "attested": true,
+      "declared_black_owned": true,
+      "declared_veteran": false,
+      "source": "operator-test",
+      "attested_at": {
+        "_seconds": 1785138906,
+        "_nanoseconds": 268000000
+      },
+      "timestamp": {
+        "_seconds": 1785138906,
+        "_nanoseconds": 268000000
+      },
+      "reviewed_at": {
+        "_seconds": 1785139193,
+        "_nanoseconds": 18000000
+      },
+      "status": "approved"
+    }
+  }
+}
