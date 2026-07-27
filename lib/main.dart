@@ -11,6 +11,7 @@ import 'auth/firebase_auth/auth_util.dart';
 
 import 'backend/backend.dart';
 import 'backend/firebase/firebase_config.dart';
+import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
@@ -197,10 +198,20 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
-    Future.delayed(
-      Duration(milliseconds: 1000),
-      () => _appStateNotifier.stopShowingSplashImage(),
-    );
+    // Held for the length of the intro animation rather than a bare 1000ms,
+    // so the splash isn't cut off part-way through. KinSplashWidget owns the
+    // duration so the two can't drift apart.
+    //
+    // Timed from the first rendered frame rather than from initState: the
+    // engine spends a noticeable stretch on the native launch screen before
+    // the splash is ever on screen, and counting that stretch against the
+    // hold meant the animation was being torn down part-way through.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(
+        KinSplashWidget.introDuration,
+        () => _appStateNotifier.stopShowingSplashImage(),
+      );
+    });
   }
 
   @override

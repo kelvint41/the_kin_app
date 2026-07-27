@@ -11,6 +11,7 @@ import '/backend/schema/structs/index.dart';
 import '/auth/base_auth_user_provider.dart';
 
 import '/main.dart';
+import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/lat_lng.dart';
 import '/flutter_flow/place.dart';
@@ -490,15 +491,8 @@ class FFRoute {
                   builder: (context, _) => builder(context, ffParams),
                 )
               : builder(context, ffParams);
-          final child = appStateNotifier.loading
-              ? Container(
-                  color: Colors.transparent,
-                  child: Image.asset(
-                    'assets/images/kin_logo.png',
-                    fit: BoxFit.contain,
-                  ),
-                )
-              : page;
+          final child =
+              appStateNotifier.loading ? const KinSplashWidget() : page;
 
           final transitionInfo = state.transitionInfo;
           return transitionInfo.hasTransition
