@@ -146,6 +146,39 @@ void main() {
     });
   });
 
+  group('signup dropdown categories', () {
+    // business_setup_page offers a fixed five-value dropdown, separate from
+    // the free-text Google-Places wording the bulk import carries. Two of
+    // those five ('Professional Services', 'Retail') previously matched no
+    // keyword at all, so anyone registering through the app's own form under
+    // them was reachable only via Near Me - invisible under every category
+    // chip. Asserted here because nothing else connects the dropdown's
+    // wording to this keyword list.
+    test('every dropdown value reaches at least one chip', () {
+      for (final category in const [
+        'Restaurant & Food',
+        'Beauty & Personal Care',
+        'Health & Wellness',
+        'Professional Services',
+        'Retail',
+      ]) {
+        expect(_chipsFor(category), isNotEmpty, reason: category);
+      }
+    });
+
+    test('dropdown values land on the chip a user would expect', () {
+      expect(_chipsFor('Restaurant & Food'), contains('Restaurants'));
+      expect(_chipsFor('Beauty & Personal Care'), contains('Beauty'));
+      expect(_chipsFor('Health & Wellness'), contains('Wellness'));
+      expect(_chipsFor('Professional Services'), contains('Professional'));
+      expect(_chipsFor('Retail'), contains('Shopping'));
+    });
+
+    test("'professional' still reaches the organizer case it replaced", () {
+      expect(_chipsFor('Professional organizer'), contains('Professional'));
+    });
+  });
+
   group('deliberate non-matches', () {
     // These are genuinely none of the above. Forcing them into a chip
     // would be worse than leaving them to Near Me, so the residual is

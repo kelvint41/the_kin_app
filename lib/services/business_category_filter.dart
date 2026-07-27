@@ -187,7 +187,11 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'business development',
       'business networking',
       'business to business',
-      'professional organizer',
+      // Subsumes the narrower 'professional organizer' this replaced. Needed
+      // because 'Professional Services' is one of business_setup_page's five
+      // dropdown values, and without this every business registered through
+      // the app's own form under that category reached no chip at all.
+      'professional',
       'wholesaler',
     ],
   ),
@@ -198,6 +202,11 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       // 'store' is the broad retail token and is safe - every category
       // containing it is genuinely retail.
       'store',
+      // 'Retail' is business_setup_page's dropdown value. It matches no
+      // bulk-imported category (those use Google-Places wording like
+      // 'Clothing store'), so this exists purely so app-registered
+      // businesses aren't stranded off every chip.
+      'retail',
       'boutique',
       'gift shop',
       'grocery',
