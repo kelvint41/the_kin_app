@@ -34,8 +34,15 @@ class ClaimBusinessModel extends FlutterFlowModel<ClaimBusinessWidget> {
   bool declaredBlackOwned = false;
   bool declaredVeteran = false;
 
-  /// Required ownership attestation. Submit stays disabled until this is true.
+  /// Required ownership attestation. Submit is always tappable - an unticked
+  /// box surfaces [showAttestationError] rather than a dead button, because a
+  /// disabled Submit with no explanation reads as "the app is broken" or, worse,
+  /// as a claim that silently went through.
   bool attested = false;
+
+  /// Set when Submit is tapped with [attested] still false. Cleared as soon as
+  /// the box is ticked.
+  bool showAttestationError = false;
 
   /// Guards against double-submits while the write is in flight.
   bool isSubmitting = false;

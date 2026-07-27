@@ -210,6 +210,161 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     );
   }
 
+  void _openBusiness(BusinessesRecord business) {
+    // Straight to the full profile. This used to open BusinessShowcase, a
+    // thinner page that duplicated this one and rendered only fields that are
+    // empty on every business (hero image, established year, interaction
+    // count, photo gallery) while omitting the address, phone and website
+    // that are actually populated.
+    context.pushNamed(
+      BusinessProfileV2Widget.routeName,
+      queryParameters: {
+        'businessDocument': serializeParam(
+          business.reference,
+          ParamType.DocumentReference,
+        ),
+      }.withoutNulls,
+    );
+  }
+
+  /// Businesses that share a building - a barbecue joint and a tech firm at one
+  /// address, a salon and a studio in adjacent suites - geocode to identical
+  /// coordinates, and Google Maps then draws one pin exactly on top of the
+  /// other. The pin underneath never receives the tap, and with no search on
+  /// this page there is no other route to its profile: the business is simply
+  /// unreachable in the app.
+  ///
+  /// So co-located businesses share one pin and the tap opens a picker instead
+  /// of guessing which the user meant. Nudging the pins apart was the
+  /// alternative and was rejected: at the default zoom, separating two ~40pt
+  /// targets means moving a business a few hundred metres, onto the wrong
+  /// block.
+  List<FlutterFlowMarker> _buildMarkers(List<BusinessesRecord> businesses) {
+    final clusters = <String, List<BusinessesRecord>>{};
+    for (final business in businesses) {
+      final location = business.businessLocation;
+      // Some businesses (e.g. bulk-imported rows with corrupted source
+      // coordinates) have no business_location - skip them rather than
+      // crashing the whole map on a null pin location.
+      if (location == null) continue;
+      // 5dp is roughly a metre: any closer and no zoom level tells the two
+      // pins apart anyway.
+      final key = '${location.latitude.toStringAsFixed(5)},'
+          '${location.longitude.toStringAsFixed(5)}';
+      clusters.putIfAbsent(key, () => []).add(business);
+    }
+
+    return clusters.entries.map((entry) {
+      final group = entry.value;
+      return FlutterFlowMarker(
+        // Keyed on the shared coordinate so the id stays stable across
+        // rebuilds regardless of which business sorts first.
+        entry.key,
+        group.first.businessLocation!,
+        () async {
+          if (group.length == 1) {
+            _openBusiness(group.first);
+          } else {
+            _showCoLocatedPicker(group);
+          }
+        },
+      );
+    }).toList();
+  }
+
+  /// Disambiguates a pin that stands for more than one business.
+  void _showCoLocatedPicker(List<BusinessesRecord> businesses) {
+    final theme = FlutterFlowTheme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (sheetContext) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(sheetContext).size.height * 0.6,
+          ),
+          decoration: BoxDecoration(
+            color: theme.primaryBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(theme.designToken.radius.lg),
+              topRight: Radius.circular(theme.designToken.radius.lg),
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40.0,
+                  height: 4.0,
+                  margin: EdgeInsets.symmetric(
+                      vertical: theme.designToken.spacing.md),
+                  decoration: BoxDecoration(
+                    color: theme.alternate,
+                    borderRadius: BorderRadius.circular(2.0),
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 4.0),
+                  child: Align(
+                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    child: Text(
+                      '${businesses.length} businesses here',
+                      style: theme.titleMedium,
+                    ),
+                  ),
+                ),
+                if (businesses.first.address.isNotEmpty)
+                  Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 8.0),
+                    child: Align(
+                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      child: Text(
+                        businesses.first.address,
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: businesses.length,
+                    itemBuilder: (listContext, index) {
+                      final business = businesses[index];
+                      return ListTile(
+                        leading: Icon(Icons.storefront_rounded,
+                            color: theme.primaryText),
+                        title:
+                            Text(business.businessName, style: theme.bodyLarge),
+                        subtitle: business.category.isNotEmpty
+                            ? Text(business.category, style: theme.bodySmall)
+                            : null,
+                        trailing: Icon(Icons.chevron_right_rounded,
+                            color: theme.secondaryText),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          _openBusiness(business);
+                        },
+                      );
+                    },
+                  ),
+                ),
+                SizedBox(height: theme.designToken.spacing.md),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   /// One category filter chip. The chips used to be a hand-unrolled set of
   /// five Containers with no tap handler at all, rebuilt once per business
   /// document by a `List.generate(businessList.length, ...)` over a second
@@ -333,39 +488,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                         _model.mapGoogleMapsCenter = latLng,
                     initialLocation: _model.mapGoogleMapsCenter ??=
                         LatLng(29.4241, -98.4936),
-                    markers: visibleBusinesses
-                        // Some businesses (e.g. bulk-imported rows with
-                        // corrupted source coordinates) have no
-                        // business_location - skip them rather than
-                        // crashing the whole map on a null pin location.
-                        .where((record) => record.businessLocation != null)
-                        .map(
-                          (marker) => FlutterFlowMarker(
-                            marker.reference.path,
-                            marker.businessLocation!,
-                            () async {
-                              print(
-                                  'GoogleMapPageWidget: business pin tapped (${marker.businessName})');
-                              // Straight to the full profile. This used to
-                              // open BusinessShowcase, a thinner page that
-                              // duplicated this one and rendered only fields
-                              // that are empty on every business (hero image,
-                              // established year, interaction count, photo
-                              // gallery) while omitting the address, phone
-                              // and website that are actually populated.
-                              context.pushNamed(
-                                BusinessProfileV2Widget.routeName,
-                                queryParameters: {
-                                  'businessDocument': serializeParam(
-                                    marker.reference,
-                                    ParamType.DocumentReference,
-                                  ),
-                                }.withoutNulls,
-                              );
-                            },
-                          ),
-                        )
-                        .toList(),
+                    markers: _buildMarkers(visibleBusinesses),
                     // Amber, to match the app's gold/amber identity - violet
                     // belonged to no palette in the app. Google only exposes
                     // ten preset marker hues, and orange (hue 30) is the one

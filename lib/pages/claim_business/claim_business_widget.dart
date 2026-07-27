@@ -54,7 +54,15 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
 
   Future<void> _submit(BusinessesRecord business) async {
     if (_model.isSubmitting) return;
-    if (!(_model.formKey.currentState?.validate() ?? false)) return;
+
+    // Validate the fields and the attestation together so one tap surfaces
+    // everything that's missing, rather than the form errors first and the
+    // attestation only after those are fixed.
+    final fieldsValid = _model.formKey.currentState?.validate() ?? false;
+    if (!_model.attested) {
+      safeSetState(() => _model.showAttestationError = true);
+    }
+    if (!fieldsValid || !_model.attested) return;
 
     safeSetState(() => _model.isSubmitting = true);
     final result = await KinServices.submitClaimRequest(
@@ -119,7 +127,8 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
           title: Text(
             'Claim Your Business',
             style: FlutterFlowTheme.of(context).headlineSmall.override(
-                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  font:
+                      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
                   color: FlutterFlowTheme.of(context).info,
                   fontSize: 20.0,
                   letterSpacing: 0.0,
@@ -216,7 +225,8 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
                               .labelSmall
                               .override(
                                 font: GoogleFonts.plusJakartaSans(),
-                                color: FlutterFlowTheme.of(context).secondaryText,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
                                 letterSpacing: 0.0,
                                 lineHeight: 1.4,
                               ),
@@ -241,7 +251,8 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
                               .labelSmall
                               .override(
                                 font: GoogleFonts.plusJakartaSans(),
-                                color: FlutterFlowTheme.of(context).secondaryText,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
                                 letterSpacing: 0.0,
                                 lineHeight: 1.4,
                               ),
@@ -263,9 +274,9 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
                         _attestationTile(),
                         SizedBox(height: 24.0),
                         FFButtonWidget(
-                          onPressed: (_model.attested && !_model.isSubmitting)
-                              ? () => _submit(business)
-                              : null,
+                          onPressed: _model.isSubmitting
+                              ? null
+                              : () => _submit(business),
                           text: _model.isSubmitting
                               ? 'Submitting...'
                               : 'Submit Claim',
@@ -444,57 +455,87 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
 
   /// The whole tile toggles, not just the checkbox - a bare Checkbox is a
   /// ~24pt target, which is under the 44pt minimum and easy to miss.
-  Widget _attestationTile() => Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12.0),
-          onTap: () => safeSetState(() => _model.attested = !_model.attested),
-          child: Container(
-            decoration: BoxDecoration(
-              color: FlutterFlowTheme.of(context).secondaryBackground,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(
-                color: _model.attested
-                    ? FlutterFlowTheme.of(context).primary
-                    : FlutterFlowTheme.of(context).alternate,
-                width: _model.attested ? 1.5 : 1.0,
+  Widget _attestationTile() {
+    final showError = _model.showAttestationError && !_model.attested;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12.0),
+            onTap: () => safeSetState(() {
+              _model.attested = !_model.attested;
+              if (_model.attested) _model.showAttestationError = false;
+            }),
+            child: Container(
+              decoration: BoxDecoration(
+                color: FlutterFlowTheme.of(context).secondaryBackground,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                  color: showError
+                      ? FlutterFlowTheme.of(context).error
+                      : _model.attested
+                          ? FlutterFlowTheme.of(context).primary
+                          : FlutterFlowTheme.of(context).alternate,
+                  width: (_model.attested || showError) ? 1.5 : 1.0,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(4.0, 8.0, 12.0, 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Ignores its own pointer events so the tap always resolves
-                  // to the InkWell above rather than racing it in the arena.
-                  IgnorePointer(
-                    child: Checkbox(
-                      value: _model.attested,
-                      activeColor: FlutterFlowTheme.of(context).primary,
-                      onChanged: (_) {},
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 12.0),
-                      child: Text(
-                        'I confirm I am the owner of this business or am '
-                        'authorized to act on its behalf, and that the '
-                        'information I\'ve given is accurate.',
-                        style: FlutterFlowTheme.of(context).bodySmall.override(
-                              font: GoogleFonts.plusJakartaSans(),
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              letterSpacing: 0.0,
-                              lineHeight: 1.4,
-                            ),
+              child: Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(4.0, 8.0, 12.0, 8.0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Ignores its own pointer events so the tap always resolves
+                    // to the InkWell above rather than racing it in the arena.
+                    IgnorePointer(
+                      child: Checkbox(
+                        value: _model.attested,
+                        activeColor: FlutterFlowTheme.of(context).primary,
+                        onChanged: (_) {},
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(
+                            0.0, 12.0, 0.0, 12.0),
+                        child: Text(
+                          'I confirm I am the owner of this business or am '
+                          'authorized to act on its behalf, and that the '
+                          'information I\'ve given is accurate.',
+                          style: FlutterFlowTheme.of(context)
+                              .bodySmall
+                              .override(
+                                font: GoogleFonts.plusJakartaSans(),
+                                color: FlutterFlowTheme.of(context).primaryText,
+                                letterSpacing: 0.0,
+                                lineHeight: 1.4,
+                              ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
-      );
+        if (showError) ...[
+          SizedBox(height: 8.0),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(4.0, 0.0, 0.0, 0.0),
+            child: Text(
+              'Please confirm the statement above before submitting your claim.',
+              style: FlutterFlowTheme.of(context).bodySmall.override(
+                    font: GoogleFonts.plusJakartaSans(),
+                    color: FlutterFlowTheme.of(context).error,
+                    letterSpacing: 0.0,
+                  ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
 }
