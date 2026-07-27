@@ -14,7 +14,18 @@ import '/backend/backend.dart';
 ///
 /// Chips are allowed to overlap - a 'Day spa' is reachable from both
 /// Beauty and Wellness, which is the useful behaviour for a discovery
-/// filter.
+/// filter. 'Beauty supply store' likewise sits in both Beauty and
+/// Shopping.
+///
+/// Keywords are raw substrings, so a few tempting ones are booby traps
+/// and are deliberately absent:
+///
+///   - 'shop'   matches 'Barber shop' (21 rows) and 'Coffee shop' (7).
+///   - 'bar'    matches 'Barber shop' and 'Barbecue restaurant'.
+///   - 'market' matches 'marketing', pulling agencies into Shopping.
+///
+/// Prefer a longer, unambiguous substring ('gift shop', 'cocktail',
+/// 'supermarket') over a short one that happens to work today.
 @immutable
 class BusinessCategoryFilter {
   const BusinessCategoryFilter({
@@ -32,12 +43,17 @@ class BusinessCategoryFilter {
 
   bool get isMatchAll => keywords.isEmpty;
 
-  bool matches(BusinessesRecord business) {
+  /// The matching rule itself, on a raw category string. Kept separate
+  /// from [matches] so it can be tested without building a Firestore
+  /// record.
+  bool matchesCategory(String category) {
     if (isMatchAll) return true;
-    final category = business.category.toLowerCase();
-    if (category.isEmpty) return false;
-    return keywords.any(category.contains);
+    final normalized = category.toLowerCase();
+    if (normalized.isEmpty) return false;
+    return keywords.any(normalized.contains);
   }
+
+  bool matches(BusinessesRecord business) => matchesCategory(business.category);
 }
 
 /// Near Me is the default/cleared state. It does not actually sort by
@@ -82,6 +98,16 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'bistro',
       'brunch',
       'bakery shop',
+      // Drink-led venues. Spelled out rather than matching 'bar',
+      // which collides with 'Barber shop'.
+      'brewery',
+      'brewpub',
+      'taproom',
+      'winery',
+      'wine bar',
+      'cocktail',
+      'hookah',
+      'distillery',
     ],
   ),
   BusinessCategoryFilter(
@@ -106,6 +132,10 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'esthetic',
       'tattoo',
       'spa',
+      'stylist',
+      'loctician',
+      'waxing',
+      'electrolysis',
     ],
   ),
   BusinessCategoryFilter(
@@ -142,6 +172,47 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'staffing',
       'non-profit',
       'nonprofit',
+      // Trades and business-to-business services. These read as
+      // 'Professional' to a user browsing for someone to hire.
+      'cleaning',
+      'janitorial',
+      'security service',
+      'mover',
+      'moving service',
+      'plumb',
+      'electric',
+      'trucking',
+      'event planner',
+      'event venue',
+      'business development',
+      'business networking',
+      'business to business',
+      'professional organizer',
+      'wholesaler',
+    ],
+  ),
+  BusinessCategoryFilter(
+    label: 'Shopping',
+    icon: Icons.shopping_bag_rounded,
+    keywords: [
+      // 'store' is the broad retail token and is safe - every category
+      // containing it is genuinely retail.
+      'store',
+      'boutique',
+      'gift shop',
+      'grocery',
+      'supermarket',
+      'farmers market',
+      'clothing',
+      'apparel',
+      'shoe',
+      'handbag',
+      'jewelry',
+      'custom tailor',
+      'thrift',
+      'furniture',
+      'plant nursery',
+      'african goods',
     ],
   ),
   BusinessCategoryFilter(
