@@ -654,8 +654,124 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                               ),
                           ].divide(SizedBox(width: 12.0)),
                         ),
-                        if (businessProfileV2BusinessesRecord.ownerRef ==
-                            currentUserReference)
+                        // Unclaimed listing (all ~500 bulk-imported businesses
+                        // start this way) - invite the owner to take it over.
+                        // This is the entry point into the claim flow: owners
+                        // find themselves on the map, then claim rather than
+                        // registering a duplicate via BusinessSetupPage.
+                        if (businessProfileV2BusinessesRecord.ownerRef == null)
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 4.0, 0.0, 0.0),
+                            child: Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryBackground,
+                                borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Is this your business?',
+                                      style: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.bold),
+                                            color:
+                                                FlutterFlowTheme.of(context)
+                                                    .primaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    Padding(
+                                      padding:
+                                          EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 4.0, 0.0, 12.0),
+                                      child: Text(
+                                        'Claim it to edit your details and tell '
+                                        'the community you\'re Black-owned or '
+                                        'veteran-owned.',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodySmall
+                                            .override(
+                                              font: GoogleFonts
+                                                  .plusJakartaSans(),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
+                                              letterSpacing: 0.0,
+                                              lineHeight: 1.4,
+                                            ),
+                                      ),
+                                    ),
+                                    FFButtonWidget(
+                                      onPressed: () async {
+                                        context.pushNamed(
+                                          ClaimBusinessWidget.routeName,
+                                          queryParameters: {
+                                            'businessRef': serializeParam(
+                                              businessProfileV2BusinessesRecord
+                                                  .reference,
+                                              ParamType.DocumentReference,
+                                            ),
+                                          }.withoutNulls,
+                                        );
+                                      },
+                                      text: 'Claim This Business',
+                                      icon: Icon(Icons.verified_outlined,
+                                          size: 18.0),
+                                      options: FFButtonOptions(
+                                        width: double.infinity,
+                                        height: 48.0,
+                                        iconColor:
+                                            FlutterFlowTheme.of(context).info,
+                                        color: FlutterFlowTheme.of(context)
+                                            .primary,
+                                        textStyle:
+                                            FlutterFlowTheme.of(context)
+                                                .titleSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontWeight:
+                                                              FontWeight.w600),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .info,
+                                                  fontSize: 14.0,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                        elevation: 0.0,
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        // Null-guarded: without the null check this panel also
+                        // renders for signed-out visitors on unclaimed
+                        // businesses, where ownerRef and currentUserReference
+                        // are both null and compare equal.
+                        if (businessProfileV2BusinessesRecord.ownerRef !=
+                                null &&
+                            businessProfileV2BusinessesRecord.ownerRef ==
+                                currentUserReference)
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
                                 0.0, 4.0, 0.0, 0.0),

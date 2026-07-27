@@ -368,6 +368,79 @@ class KinServices {
     }
   }
 
+  /// Files a claim on an existing (bulk-imported, unclaimed) business.
+  /// Used by: Claim Business Page -> "Submit Claim".
+  ///
+  /// Deliberately writes *only* to `claim_requests` and never touches the
+  /// business doc: firestore.rules gates business updates on
+  /// `owner_ref == the signed-in user`, and an unclaimed business has a null
+  /// owner_ref, so ownership can only be granted server-side after review.
+  /// That's what stops anyone from claiming a business they don't run.
+  ///
+  /// [declaredBlackOwned] and [declaredVeteran] are recorded here as the
+  /// claimant's own declaration - they are NOT copied onto the business until
+  /// a reviewer approves the claim. We never ask for documentation of either.
+  ///
+  /// Note: `claim_requests` is write-only for clients (allow read: if false),
+  /// so this can't check whether the same user already has a claim pending on
+  /// this business. Duplicate submissions are expected and de-duped by the
+  /// reviewer on business_id + applicant_user_id.
+  static Future<ServiceResult<void>> submitClaimRequest({
+    required DocumentReference businessRef,
+    required String businessName,
+    required String claimantName,
+    required String claimantRole,
+    required String contactEmail,
+    required String contactPhone,
+    required bool attested,
+    required bool declaredBlackOwned,
+    required bool declaredVeteran,
+    String? verificationProofLink,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to claim a business.');
+    }
+    if (!attested) {
+      return const ServiceResult.failure(
+          'Please confirm you are authorized to claim this business.');
+    }
+    if (claimantName.trim().isEmpty) {
+      return const ServiceResult.failure('Please enter your name.');
+    }
+    if (contactEmail.trim().isEmpty && contactPhone.trim().isEmpty) {
+      return const ServiceResult.failure(
+          'Please give us an email or phone number so we can reach you.');
+    }
+
+    try {
+      final now = getCurrentTimestamp;
+      await ClaimRequestsRecord.collection
+          .doc()
+          .set(createClaimRequestsRecordData(
+            businessId: businessRef.id,
+            businessName: businessName,
+            applicantUserId: userRef.id,
+            claimantName: claimantName.trim(),
+            claimantRole: claimantRole.trim(),
+            contactEmail: contactEmail.trim(),
+            contactPhone: contactPhone.trim(),
+            verificationProofLink: verificationProofLink?.trim(),
+            attested: true,
+            attestedAt: now,
+            declaredBlackOwned: declaredBlackOwned,
+            declaredVeteran: declaredVeteran,
+            status: 'pending',
+            timestamp: now,
+          ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit your claim. Please try again.');
+    }
+  }
+
   /// Purchases/activates a subscription tier for a business via RevenueCat,
   /// then updates the business record only on a confirmed purchase.
   /// Used by: Merchant Pricing Suite -> each tier card's action button.

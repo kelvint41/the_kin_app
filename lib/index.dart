@@ -10,6 +10,9 @@ export '/pages/onboarding_selection_card/onboarding_selection_card_widget.dart'
     show OnboardingSelectionCardWidget;
 export '/pages/business_profile_v2/business_profile_v2_widget.dart'
     show BusinessProfileV2Widget;
+export '/pages/claim_business/claim_business_widget.dart'
+    show ClaimBusinessWidget;
+export '/pages/nearby_feed/nearby_feed_widget.dart' show NearbyFeedWidget;
 export '/pages/business_profile_owner/business_profile_owner_widget.dart'
     show BusinessProfileOwnerWidget;
 export '/pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart'

@@ -166,6 +166,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
+          // Same requireAuth as TheExchange - this is the same content, just
+          // aggregated across nearby businesses.
+          name: NearbyFeedWidget.routeName,
+          path: NearbyFeedWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => NearbyFeedWidget(),
+        ),
+        FFRoute(
+          name: ClaimBusinessWidget.routeName,
+          path: ClaimBusinessWidget.routePath,
+          builder: (context, params) => ClaimBusinessWidget(
+            businessRef: params.getParam(
+              'businessRef',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['businesses'],
+            ),
+          ),
+        ),
+        FFRoute(
           name: BusinessProfileOwnerWidget.routeName,
           path: BusinessProfileOwnerWidget.routePath,
           builder: (context, params) => BusinessProfileOwnerWidget(
