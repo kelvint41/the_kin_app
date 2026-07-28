@@ -36,6 +36,7 @@ class AiMarketingStats {
     required this.byTier,
     required this.byEngagement,
     required this.unrecognisedStatus,
+    required this.engagementUnavailable,
   });
 
   final int total;
@@ -58,6 +59,10 @@ class AiMarketingStats {
   /// about, so the breakdown under-reports and should be trusted less
   /// than [total].
   final int unrecognisedStatus;
+
+  /// True when the engagement counts could not be read at all - so an
+  /// empty [byEngagement] means "unknown", not "nobody responded".
+  final bool engagementUnavailable;
 
   int get succeeded => byStatus['success'] ?? 0;
   int get turnedAwayUnentitled => byStatus['rejected_not_entitled'] ?? 0;
@@ -1023,6 +1028,7 @@ class KinServices {
         byTier: counts('byTier'),
         byEngagement: counts('byEngagement'),
         unrecognisedStatus: (data['unrecognisedStatus'] as num?)?.toInt() ?? 0,
+        engagementUnavailable: data['engagementUnavailable'] == true,
       ));
     } on FirebaseFunctionsException catch (e) {
       return ServiceResult.failure(

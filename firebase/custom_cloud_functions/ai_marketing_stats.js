@@ -62,11 +62,26 @@ exports.getAiMarketingStats = onCall(async (request) => {
     ),
     // collectionGroup, because engagement lives in a subcollection under
     // each log. Counting it per-parent would be one query per log.
+    //
+    // Degrades on its own rather than taking the panel down with it. This
+    // query needs a COLLECTION_GROUP_ASC exemption on engagement.action
+    // (see firestore.indexes.json); before that index existed the whole
+    // callable returned INTERNAL and the panel showed nothing, when the
+    // request/status/tier counts beside it were all perfectly readable.
+    // A missing index on one row of a dashboard should cost that row.
     Promise.all(
-      ACTIONS.map(async (a) => [
-        a,
-        await countWhere(db.collectionGroup("engagement").where("action", "==", a)),
-      ]),
+      ACTIONS.map(async (a) => {
+        try {
+          return [
+            a,
+            await countWhere(
+              db.collectionGroup("engagement").where("action", "==", a),
+            ),
+          ];
+        } catch (_) {
+          return [a, null];
+        }
+      }),
     ),
   ]);
 
@@ -83,6 +98,11 @@ exports.getAiMarketingStats = onCall(async (request) => {
     byStatus: statusCounts,
     unrecognisedStatus: total - accountedFor,
     byTier: Object.fromEntries(byTier),
-    byEngagement: Object.fromEntries(byAction),
+    // Nulls (a failed count) are dropped rather than sent as zero: "we
+    // couldn't read this" and "this happened zero times" are different
+    // claims, and the second one is the kind a dashboard should never
+    // make up.
+    byEngagement: Object.fromEntries(byAction.filter(([, n]) => n !== null)),
+    engagementUnavailable: byAction.some(([, n]) => n === null),
   };
 });

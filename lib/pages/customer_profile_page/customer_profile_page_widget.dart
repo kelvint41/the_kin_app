@@ -750,7 +750,10 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
           ),
           child: Row(
             children: [
-              Icon(Icons.campaign_rounded, color: theme.primary, size: 22.0),
+              // accentOnSurface rather than `primary` - the dark brand
+              // green all but disappears against this card in dark mode.
+              Icon(Icons.campaign_rounded,
+                  color: theme.accentOnSurface, size: 22.0),
               Expanded(
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),

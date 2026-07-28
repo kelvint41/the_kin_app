@@ -1215,9 +1215,12 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                   _aiSubheading(theme, 'What owners did with it'),
                   if (engagementRecorded.isEmpty)
                     Text(
-                      stats.succeeded == 0
-                          ? 'Nothing generated yet, so nothing to act on.'
-                          : 'No responses recorded yet.',
+                      stats.engagementUnavailable
+                          ? 'Could not read the engagement counts - the rest '
+                              'of this panel is unaffected.'
+                          : stats.succeeded == 0
+                              ? 'Nothing generated yet, so nothing to act on.'
+                              : 'No responses recorded yet.',
                       style: theme.bodySmall.override(
                         font: GoogleFonts.plusJakartaSans(),
                         color: theme.secondaryText,
@@ -1260,7 +1263,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           value.toString(),
           style: theme.displaySmall.override(
             font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-            color: highlight ? theme.primary : theme.primaryText,
+            // accentOnSurface, not `primary`. primary is the dark brand
+            // green, which on this card's dark surface renders the one
+            // number the panel exists to draw attention to as almost
+            // invisible - the same mistake the nav bar's tab colours were
+            // fixed for. accentOnSurface is the gold that stays legible as
+            // a foreground in both themes.
+            color: highlight ? theme.accentOnSurface : theme.primaryText,
             letterSpacing: 0.0,
             fontWeight: FontWeight.bold,
           ),
@@ -1421,7 +1430,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             style: theme.labelSmall.override(
                               font: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.bold),
-                              color: theme.primary,
+                              color: theme.accentOnSurface,
                               letterSpacing: 0.0,
                               fontWeight: FontWeight.bold,
                             ),
