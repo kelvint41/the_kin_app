@@ -2,6 +2,8 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
 import '/components/metric_card3_widget.dart';
+import '/components/business_image_widget.dart';
+import '/components/image_upload_button.dart';
 import '/components/feedback_sheet_widget.dart';
 import '/components/promo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -300,14 +302,44 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   child: Stack(
                     alignment: AlignmentDirectional(0.0, 0.0),
                     children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.asset(
-                          'assets/images/kin_logo.png',
-                          width: 120.0,
-                          height: 120.0,
-                          fit: BoxFit.contain,
-                        ),
+                      // The page's own spec called for "a prominent circular
+                      // profile photo" and it was the KIN logo asset for
+                      // everyone - users.photo_url was only ever populated by
+                      // Google sign-in, and nothing in the app could set it,
+                      // so anyone who signed up with an email had no picture
+                      // and no way to add one.
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(999.0),
+                            child: SizedBox(
+                              width: 104.0,
+                              height: 104.0,
+                              child: BusinessImage(
+                                imageUrl: currentUserPhoto,
+                                width: 104.0,
+                                height: 104.0,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 10.0, 0.0, 0.0),
+                            child: ImageUploadButton(
+                              label: currentUserPhoto.isEmpty
+                                  ? 'Add your photo'
+                                  : 'Change photo',
+                              onUploaded: (url) async {
+                                final ref = currentUserReference;
+                                if (ref == null) return;
+                                await ref.update({'photo_url': url});
+                                if (mounted) safeSetState(() {});
+                              },
+                            ),
+                          ),
+                        ],
                       ),
                       // Previously a bare Icon with no gesture handler, so
                       // the arrow was decorative and the only way off the

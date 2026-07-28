@@ -2,6 +2,8 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/gemini/gemini.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
+import '/components/business_image_widget.dart';
+import '/components/image_upload_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -149,10 +151,16 @@ class _BusinessProfileOwnerWidgetState
                     height: 280.0,
                     child: Stack(
                       children: [
+                        // Was a hardcoded Unsplash URL, so every owner opened
+                        // their own business page and saw the same photograph
+                        // of somewhere else - and their real hero_image, if
+                        // they had somehow set one, was never shown. Falls
+                        // back to the KIN logo until they upload.
                         ClipRRect(
                           borderRadius: BorderRadius.circular(0.0),
-                          child: Image.network(
-                            'https://images.unsplash.com/photo-1662228665279-1d8e8f7484ca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTYyMDF8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Nzc1Mjk1OTN8&ixlib=rb-4.1.0&q=80&w=1080',
+                          child: BusinessImage(
+                            imageUrl: businessProfileOwnerBusinessesRecord
+                                .heroImage,
                             width: double.infinity,
                             height: 280.0,
                             fit: BoxFit.cover,
@@ -163,10 +171,34 @@ class _BusinessProfileOwnerWidgetState
                           height: 280.0,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Colors.transparent, Color(0xCC000000)],
+                              colors: [Color(0x66000000), Color(0xE6000000)],
                               stops: [0.0, 1.0],
                               begin: AlignmentDirectional(0.0, -1.0),
                               end: AlignmentDirectional(0, 1.0),
+                            ),
+                          ),
+                        ),
+                        // The only way to set a hero image anywhere in the
+                        // app. Owner-only by placement: this page is already
+                        // gated on owning the business.
+                        Align(
+                          alignment: AlignmentDirectional(1.0, -1.0),
+                          child: SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  0.0, 8.0, 16.0, 0.0),
+                              child: ImageUploadButton(
+                                label: businessProfileOwnerBusinessesRecord
+                                        .heroImage.isEmpty
+                                    ? 'Add cover photo'
+                                    : 'Change cover',
+                                onUploaded: (url) async {
+                                  await businessProfileOwnerBusinessesRecord
+                                      .reference
+                                      .update({'hero_image': url});
+                                },
+                              ),
                             ),
                           ),
                         ),
