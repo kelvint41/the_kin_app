@@ -166,7 +166,10 @@ class _KindexScoreBadgeState extends State<KindexScoreBadge>
             'KINDEX Score',
             style: theme.labelMedium.override(
               font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-              color: theme.secondaryText,
+              // Fixed light, not secondaryText. This badge sits on the hero
+              // scrim, which is dark in both themes, so a token that flips
+              // to near-black in light mode disappeared against it.
+              color: Colors.white70,
               letterSpacing: 0.0,
             ),
           ),

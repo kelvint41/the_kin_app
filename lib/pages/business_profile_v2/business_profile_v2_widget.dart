@@ -237,7 +237,12 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           height: 280.0,
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
-                              colors: [Colors.transparent, Color(0xCC000000)],
+                              // Was [transparent, 0xCC000000] - only the bottom darkened, so
+                              // the white title sat on the light top half of
+                              // the image in light mode and vanished. The scrim
+                              // now covers the whole hero, because the text on
+                              // it is white in both themes.
+                              colors: [Color(0x66000000), Color(0xE6000000)],
                               stops: [0.0, 1.0],
                               begin: AlignmentDirectional(0.0, -1.0),
                               end: AlignmentDirectional(0, 1.0),
@@ -485,14 +490,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             ),
                           ),
                         ),
-                        Container(
-                          width: 100.0,
-                          height: 100.0,
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context)
-                                .secondaryBackground,
-                          ),
-                        ),
+                        // Removed: a 100x100 Container filled with
+                        // secondaryBackground, sitting in this Stack with no
+                        // Positioned or Align around it. A Stack defaults its
+                        // unpositioned children to the top-left corner, so it
+                        // painted a blank square over the hero image - white
+                        // in light mode, grey in dark - across the start of
+                        // the business name. Empty FlutterFlow scaffolding
+                        // that was never given a purpose.
                       ],
                     ),
                   ),
@@ -654,8 +659,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         0.0, 0.0, 0.0, 0.0),
                                     iconColor:
                                         FlutterFlowTheme.of(context).primary,
+                                    // accent1, the brand gold, in both
+                                    // themes. This was secondaryText - a
+                                    // *text* token used as a fill, which is
+                                    // gold in dark mode and near-black in
+                                    // light, so these buttons rendered dark
+                                    // green on black and were unreadable.
                                     color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                        .accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .override(
@@ -673,19 +684,12 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .fontStyle,
-                                      shadows: [
-                                        Shadow(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          offset: Offset(2.0, 2.0),
-                                          blurRadius: 2.0,
-                                        )
-                                      ],
+
                                     ),
                                     elevation: 0.0,
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
+                                          .accent1,
                                       width: 1.5,
                                     ),
                                     borderRadius: BorderRadius.circular(12.0),
@@ -767,7 +771,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       iconColor:
                                           FlutterFlowTheme.of(context).primary,
                                       color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
+                                          .accent1,
                                       textStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .override(
@@ -783,7 +787,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       elevation: 0.0,
                                       borderSide: BorderSide(
                                         color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
+                                            .accent1,
                                         width: 1.5,
                                       ),
                                       borderRadius:
@@ -822,8 +826,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         0.0, 0.0, 0.0, 0.0),
                                     iconColor:
                                         FlutterFlowTheme.of(context).primary,
+                                    // accent1, the brand gold, in both
+                                    // themes. This was secondaryText - a
+                                    // *text* token used as a fill, which is
+                                    // gold in dark mode and near-black in
+                                    // light, so these buttons rendered dark
+                                    // green on black and were unreadable.
                                     color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                        .accent1,
                                     textStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .override(
@@ -840,19 +850,12 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .fontStyle,
-                                      shadows: [
-                                        Shadow(
-                                          color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
-                                          offset: Offset(2.0, 2.0),
-                                          blurRadius: 2.0,
-                                        )
-                                      ],
+
                                     ),
                                     elevation: 0.0,
                                     borderSide: BorderSide(
                                       color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
+                                          .accent1,
                                       width: 1.5,
                                     ),
                                     borderRadius: BorderRadius.circular(12.0),
@@ -907,7 +910,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       iconColor:
                                           FlutterFlowTheme.of(context).primary,
                                       color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
+                                          .accent1,
                                       textStyle: FlutterFlowTheme.of(context)
                                           .titleSmall
                                           .override(
@@ -938,7 +941,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       elevation: 0.0,
                                       borderSide: BorderSide(
                                         color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
+                                            .accent1,
                                         width: 1.5,
                                       ),
                                       borderRadius: BorderRadius.circular(12.0),
