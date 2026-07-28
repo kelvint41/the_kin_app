@@ -734,19 +734,54 @@ class KinServices {
     }
   }
 
-  /// Whether [userRef]'s owner has accepted the Exchange code of conduct.
+  /// The Exchange terms version currently in force.
+  ///
+  /// Kept in Firestore rather than as a constant in this file so revising
+  /// the terms is a single write instead of an app release. `firestore.rules`
+  /// reads this same document when a post is created, so an older app build
+  /// is held to exactly the same bar as a current one - which would not be
+  /// true if each build carried its own hardcoded version string.
+  ///
+  /// Returns null if the document is missing or unreadable. Callers treat
+  /// that as "cannot establish the current terms" and fail open on *reading*
+  /// while the rule continues to fail closed on *posting*.
+  static Future<String?> currentExchangeTermsVersion() async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('legal_config')
+          .doc('exchange_terms')
+          .get();
+      final version = snap.data()?['current_version'];
+      return version is String && version.isNotEmpty ? version : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Whether [uid] has accepted the Exchange terms *as they stand now*.
   ///
   /// Acceptance lives in `exchange_profiles`, keyed by uid so
-  /// firestore.rules can check it in a single get() when a post is created.
-  /// The client check here is a UX affordance only - the rule is what
-  /// actually enforces it.
+  /// firestore.rules can check it with a get() when a post is created. The
+  /// client check here is a UX affordance only - the rule is what actually
+  /// enforces it.
+  ///
+  /// A profile that agreed to a superseded version counts as not accepted,
+  /// so a terms revision re-prompts rather than silently letting someone
+  /// post under terms they never saw.
   static Future<bool> hasAcceptedExchangeConduct(String uid) async {
     try {
       final snap = await FirebaseFirestore.instance
           .collection('exchange_profiles')
           .doc(uid)
           .get();
-      return snap.exists && snap.data()?['agreed_to_conduct'] == true;
+      if (!snap.exists || snap.data()?['agreed_to_conduct'] != true) {
+        return false;
+      }
+      final required = await currentExchangeTermsVersion();
+      // No version on file means nothing to enforce against - don't lock
+      // people out on a misconfigured config doc.
+      if (required == null) return true;
+      return snap.data()?['terms_version'] == required;
     } catch (_) {
       // Treat an unreadable profile as "not accepted" - the worst case is
       // the user is asked to accept again, whereas assuming acceptance
@@ -755,15 +790,21 @@ class KinServices {
     }
   }
 
-  /// Records acceptance of the Exchange code of conduct.
+  /// Records acceptance of the Exchange terms.
   ///
   /// Doc ID is the uid, matching the rule in firestore.rules. Uses set with
   /// merge so re-accepting is harmless and never clobbers display_name.
+  ///
+  /// Stamps the version accepted and the time it happened, so a later terms
+  /// revision can tell who agreed to what - `agreed_to_conduct: true` alone
+  /// records that someone agreed to *something*, which is not much use if
+  /// the terms have since changed.
   static Future<ServiceResult<void>> acceptExchangeConduct({
     required String uid,
     String? displayName,
   }) async {
     try {
+      final version = await currentExchangeTermsVersion();
       await FirebaseFirestore.instance
           .collection('exchange_profiles')
           .doc(uid)
@@ -771,6 +812,8 @@ class KinServices {
         'user_ref': FirebaseFirestore.instance.collection('users').doc(uid),
         'display_name': displayName ?? '',
         'agreed_to_conduct': true,
+        if (version != null) 'terms_version': version,
+        'accepted_at': FieldValue.serverTimestamp(),
         'created_at': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
       return const ServiceResult.success();

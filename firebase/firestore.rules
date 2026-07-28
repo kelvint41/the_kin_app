@@ -108,6 +108,19 @@ service cloud.firestore {
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
         && exists(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid))
         && get(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid)).data.agreed_to_conduct == true
+        // The accepted terms must be the ones currently in force. Without
+        // this, `agreed_to_conduct: true` only records that someone agreed
+        // to *something* - a revision would leave everyone posting under
+        // terms they never saw. Bumping legal_config/exchange_terms
+        // .current_version re-prompts every user on their next post.
+        //
+        // The version is read from Firestore rather than hardcoded here so
+        // that older app builds are held to the same bar as current ones,
+        // and a revision is one write rather than a rules deploy plus an
+        // app release. Fails closed if the config doc is missing.
+        && exists(/databases/$(database)/documents/legal_config/exchange_terms)
+        && get(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid)).data.terms_version
+           == get(/databases/$(database)/documents/legal_config/exchange_terms).data.current_version
         && request.resource.data.post_text is string
         && request.resource.data.post_text.size() > 0
         && request.resource.data.post_text.size() <= 2000;
@@ -154,6 +167,17 @@ service cloud.firestore {
     match /analytics_daily/{document} {
       allow create: if true;
       allow read: if true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    // The terms version currently in force, read by the exchange_posts rule
+    // above and by the client when it decides whether to re-prompt. Written
+    // only with the Admin SDK - a client that could bump this could waive
+    // the requirement for itself.
+    match /legal_config/{document} {
+      allow create: if false;
+      allow read: if request.auth != null;
       allow write: if false;
       allow delete: if false;
     }

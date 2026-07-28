@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/old_designs/premium_story/premium_story_widget.dart';
+import '/index.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -53,6 +54,101 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     if (mounted && accepted) setState(() => _acceptedConduct = true);
   }
 
+  /// A standing notice for anyone who hasn't accepted the terms yet.
+  ///
+  /// Reading the feed is deliberately not blocked - the liability that
+  /// matters here attaches to posting, and gating the feed would mean
+  /// nobody could see what the Exchange is before agreeing to join it. What
+  /// this fixes is the timing: the terms used to appear only at the moment
+  /// someone tried to post, which is the worst time to meet them. Tapping
+  /// through accepts on the spot, so the first post isn't interrupted.
+  ///
+  /// Renders nothing once accepted, so it never nags.
+  Widget _buildTermsBanner() {
+    if (_acceptedConduct || currentUserUid.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(
+          theme.designToken.spacing.lg, 0.0, theme.designToken.spacing.lg, 12.0),
+      child: Container(
+        padding: const EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+          border: Border.all(color: theme.accent1.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.gavel_rounded, size: 20.0,
+                color: theme.accentOnSurface),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Browse freely. To post, agree to the Terms.',
+                    style: theme.bodyMedium.override(
+                      color: theme.primaryText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Keep it respectful: no harassment, no spam, no false '
+                    'claims about a business.',
+                    style: theme.bodySmall
+                        .override(color: theme.secondaryText),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          final ok = await _ensureConductAccepted();
+                          if (ok && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Thanks - you can post in the Exchange now.'),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          'Review & agree',
+                          style: theme.bodyMedium.override(
+                            color: theme.accentOnSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20.0),
+                      InkWell(
+                        onTap: () => context
+                            .pushNamed(TermsOfServicePageWidget.routeName),
+                        child: Text(
+                          'Terms of Service',
+                          style: theme.bodyMedium.override(
+                            color: theme.secondaryText,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   /// Prompts for the code of conduct if it has not been accepted yet.
   ///
   /// Returns true when the user may post. Posting without this would simply
@@ -69,12 +165,35 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
         backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
         title: Text('Before you post',
             style: FlutterFlowTheme.of(context).headlineSmall),
-        content: Text(
-          'The Exchange is for supporting local businesses and the people '
-          'behind them.\n\nKeep it respectful: no harassment, no spam, no '
-          'false claims about a business. You are responsible for what you '
-          'post, and you can delete your own posts at any time.',
-          style: FlutterFlowTheme.of(context).bodyMedium,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'The Exchange is for supporting local businesses and the people '
+              'behind them.\n\nKeep it respectful: no harassment, no spam, no '
+              'false claims about a business. You are responsible for what you '
+              'post, and you can delete your own posts at any time.',
+              style: FlutterFlowTheme.of(context).bodyMedium,
+            ),
+            const SizedBox(height: 16.0),
+            // The summary above is a plain-language précis, not the
+            // agreement itself. Agreeing here is agreeing to the Terms, so
+            // they have to be reachable from the point of consent rather
+            // than living on an unlinked page.
+            InkWell(
+              onTap: () => context.pushNamed(
+                  TermsOfServicePageWidget.routeName),
+              child: Text(
+                'Read the full Terms of Service',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -86,7 +205,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: Text('I agree',
+            child: Text('I agree to the Terms',
                 style: FlutterFlowTheme.of(context).bodyMedium.override(
                       color: FlutterFlowTheme.of(context).secondaryText,
                       fontWeight: FontWeight.bold,
@@ -434,6 +553,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                               ),
                             ),
                           ),
+                          _buildTermsBanner(),
                           KindexSpotlightWidget(),
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
