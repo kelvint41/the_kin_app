@@ -112,8 +112,10 @@ service cloud.firestore {
     }
 
     match /agency_queue/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
@@ -183,16 +185,28 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Every page view, map tap and call tap, with the user_ref and city
+    // attached - i.e. an individual browsing history per account. `read: if
+    // true` made all of it world-readable with no sign-in at all, and
+    // `create: if true` let anyone write to it. This is the Executive
+    // Dashboard's funnel data, so it belongs to the admin; hiding the
+    // dashboard button while leaving its source collection open to the
+    // internet protected nothing.
     match /activity_logs/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // Aggregate analytics - admin-only for the same reason.
     match /analytics_daily/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
@@ -252,7 +266,15 @@ service cloud.firestore {
     // Reads stay open so the app can show a user's own check-in state.
     match /uservisits/{document} {
       allow create: if false;
-      allow read: if true;
+      // Was world-readable so the app could show a user their own check-in
+      // state - which it can still do, while no longer showing everyone
+      // else's. These are GPS-verified visits: where a named account
+      // physically went, and when.
+      allow read: if request.auth != null
+        && (resource.data.user_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid)
+            || get(/databases/$(database)/documents/users/$(request.auth.uid))
+               .data.is_admin == true);
       allow write: if false;
       allow delete: if false;
     }

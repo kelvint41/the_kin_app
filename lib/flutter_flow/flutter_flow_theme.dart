@@ -167,7 +167,13 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color primary = const Color(0xFF0B3D2E);
   late Color secondary = const Color(0xFF8F7032);
   late Color tertiary = const Color(0xFF827358);
-  late Color alternate = const Color(0xFF3D3D3D);
+  // Warm light grey, not the 0xFF3D3D3D borrowed from dark mode. That
+  // value sits at 10.86:1 on a white card - a near-black hairline - so
+  // every bordered container read as a hard outline drawn on glare-white
+  // rather than as a raised surface. Borders do not need text contrast;
+  // the fill difference below is what separates a card now, and this only
+  // has to define its edge.
+  late Color alternate = const Color(0xFFD9D1C2);
   // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
   // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
   // failing WCAG AA at every text size since this is the default color
@@ -176,7 +182,19 @@ class LightModeTheme extends FlutterFlowTheme {
   // elsewhere, while staying legible against a near-white background.
   late Color primaryText = const Color(0xFF7D5F16);
   late Color secondaryText = const Color(0xFF14181B);
-  late Color primaryBackground = const Color(0xFFFCFCFC);
+  // Light mode had no elevation ramp at all: the page was 0xFFFCFCFC and
+  // cards were pure white, which is 1.03:1 - indistinguishable. Every
+  // surface melted into one sheet of white and the only thing separating
+  // anything was the near-black border above, which is why the whole mode
+  // read as bright and unreadable while dark mode (0xFF121212 page against
+  // 0xFF242424 cards) read fine.
+  //
+  // This is a warm off-white rather than a neutral grey, because the brand
+  // is gold and green: a cool grey ground turns the gold slightly sickly.
+  // It measures 1.17:1 against the white cards - the usual ratio for light
+  // elevation - and holds 5.11:1 for primaryText, 15.28:1 for
+  // secondaryText and 10.44:1 for the dark green, so nothing loses AA.
+  late Color primaryBackground = const Color(0xFFF1EDE4);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
   late Color accent1 = const Color(0xFFD4AF37);
   // Same deepened gold as primaryText above, and for the same reason: the
@@ -194,9 +212,9 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color error = const Color(0xFFBA1A1A);
   late Color info = const Color(0xFFFFFFFF);
 
-  late Color divider = const Color(0xFF3D3D3D);
+  late Color divider = const Color(0xFFE4DDCF);
   late Color hint = const Color(0xFF827358);
-  late Color outline = const Color(0xFF3D3D3D);
+  late Color outline = const Color(0xFFC9C1B2);
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
   late Color onError = const Color(0xFFFFFFFF);
