@@ -17,6 +17,7 @@ import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -387,46 +388,15 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
                                       0.0, 10.0, 0.0, 0.0),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'KINDEX Score',
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .override(
-                                              color: Colors.white70,
-                                            ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsetsDirectional.fromSTEB(
-                                            6.0, 0.0, 0.0, 0.0),
-                                        child: Text(
+                                  child: Align(
+                                    alignment: AlignmentDirectional(-1.0, 0.0),
+                                    child: KindexScoreBadge(
+                                      score: businessProfileV2BusinessesRecord
+                                          .kindexScore,
+                                      velocity:
                                           businessProfileV2BusinessesRecord
-                                              .kindexScore
-                                              .round()
-                                              .toString(),
-                                          style: FlutterFlowTheme.of(context)
-                                              .headlineSmall
-                                              .override(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            EdgeInsetsDirectional.fromSTEB(
-                                                6.0, 0.0, 0.0, 0.0),
-                                        child: KindexTrendIndicator(
-                                          velocity:
-                                              businessProfileV2BusinessesRecord
-                                                  .kindexVelocity,
-                                        ),
-                                      ),
-                                    ],
+                                              .kindexVelocity,
+                                    ),
                                   ),
                                 ),
                               if (businessProfileV2BusinessesRecord
@@ -743,8 +713,32 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       0.0, 0.0, 8.0, 0.0),
                                   child: FFButtonWidget(
                                     onPressed: () async {
-                                      await launchURL(
-                                          'tel:${businessProfileV2BusinessesRecord.phoneNumber}');
+                                      final number =
+                                          businessProfileV2BusinessesRecord
+                                              .phoneNumber;
+                                      // launchURL throws when nothing can
+                                      // handle the scheme, and `tel:` has no
+                                      // handler on the iOS Simulator, an
+                                      // iPad without cellular, or a desktop
+                                      // build. Unhandled, that made the
+                                      // button look dead on exactly the
+                                      // device it gets tested on. Falling
+                                      // back to the number on the clipboard
+                                      // means the tap is never wasted.
+                                      try {
+                                        await launchURL('tel:$number');
+                                      } catch (_) {
+                                        await Clipboard.setData(
+                                            ClipboardData(text: number));
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(SnackBar(
+                                            content: Text(
+                                                "This device can't place calls. "
+                                                "$number copied instead."),
+                                          ));
+                                        }
+                                      }
                                       await ActivityLogsRecord.collection
                                           .doc()
                                           .set(createActivityLogsRecordData(

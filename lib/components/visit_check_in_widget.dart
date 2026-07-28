@@ -105,18 +105,27 @@ class _VisitCheckInWidgetState extends State<VisitCheckInWidget> {
       );
     }
 
+    // No horizontal padding of its own any more. This sat inside the review
+    // panel, which now has its own 20px padding, so the check-in button was
+    // inset a further 16 on each side - the one control in the panel that
+    // didn't share an edge with the rest, which is what read as
+    // "off-centred".
     return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(16.0, 8.0, 16.0, 8.0),
+      padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FFButtonWidget(
             onPressed: _checking ? null : _checkIn,
             text: _checking ? 'Checking...' : "I'm Here - Check In",
             icon: const Icon(Icons.location_on_outlined, size: 18.0),
             options: FFButtonOptions(
-              height: 40.0,
+              // Matches Submit Review below it. It was 40 against that
+              // button's 48, so the two ends of the same task were
+              // different sizes.
+              width: double.infinity,
+              height: 48.0,
               padding:
                   const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
               iconPadding:

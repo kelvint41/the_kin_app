@@ -1,5 +1,6 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// The green-up / red-down / flat marker that sits beside a KINDEX score.
 ///
@@ -68,6 +69,125 @@ class KindexTrendIndicator extends StatelessWidget {
     return Semantics(
       label: label,
       child: Icon(icon, color: color, size: size),
+    );
+  }
+}
+
+/// The KINDEX score itself, with a slow pulse behind it.
+///
+/// The score is the app's core trust signal and it read as ordinary body
+/// text next to its own label. This gives it a soft halo that breathes -
+/// enough to draw the eye on arrival without becoming a flashing element
+/// someone has to sit next to.
+///
+/// Deliberately a two-second ease rather than a flash: rapidly flashing
+/// content is an accessibility hazard, and this sits on a profile people
+/// read rather than glance at. It also stops after a few cycles - a badge
+/// that pulses forever stops meaning anything and just costs battery.
+class KindexScoreBadge extends StatefulWidget {
+  const KindexScoreBadge({
+    super.key,
+    required this.score,
+    required this.velocity,
+  });
+
+  final double score;
+  final int velocity;
+
+  @override
+  State<KindexScoreBadge> createState() => _KindexScoreBadgeState();
+}
+
+class _KindexScoreBadgeState extends State<KindexScoreBadge>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  static const _cycles = 3;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    );
+    _runPulses();
+  }
+
+  Future<void> _runPulses() async {
+    for (var i = 0; i < _cycles; i++) {
+      if (!mounted) return;
+      await _controller.forward(from: 0.0);
+      if (!mounted) return;
+      await _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final gold = theme.accentOnSurface;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = Curves.easeInOut.transform(_controller.value);
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999.0),
+            color: gold.withValues(alpha: 0.06 + 0.10 * t),
+            border: Border.all(
+              color: gold.withValues(alpha: 0.25 + 0.45 * t),
+              width: 1.0,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: gold.withValues(alpha: 0.28 * t),
+                blurRadius: 14.0 * t,
+                spreadRadius: 1.0 * t,
+              ),
+            ],
+          ),
+          child: child,
+        );
+      },
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'KINDEX Score',
+            style: theme.labelMedium.override(
+              font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              color: theme.secondaryText,
+              letterSpacing: 0.0,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(8.0, 0.0, 0.0, 0.0),
+            child: Text(
+              widget.score.round().toString(),
+              style: theme.headlineSmall.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                color: theme.accentOnSurface,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(6.0, 0.0, 0.0, 0.0),
+            child: KindexTrendIndicator(velocity: widget.velocity),
+          ),
+        ],
+      ),
     );
   }
 }
