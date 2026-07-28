@@ -33,6 +33,140 @@ function isEntitled(subscriptionTier) {
   return ENTITLED_TIERS.has(subscriptionTier);
 }
 
+// Monthly generation caps per tier. Before this existed, an entitled
+// business had unlimited Gemini calls: the `marketing_generations_used`
+// field had been on the businesses schema all along but nothing ever read
+// or wrote it, so one owner holding down Regenerate was unmetered spend
+// against a thinking model (~4x more thought tokens than output tokens).
+//
+// Elite Growth gets a high-but-finite cap rather than the `null` (truly
+// unlimited) that _powerHourLimitsByTier gives its top tier. Power Hour
+// unlimited costs nothing per use; this does. 150/month is far above any
+// plausible real usage - roughly five posts a day, every day - so it
+// behaves as unlimited for an honest owner while still bounding a runaway
+// loop or a compromised account.
+//
+// Overridable per-deployment from Firestore (see readLimits) so these can
+// be retuned without a redeploy, the same reasoning as
+// kindex_config/scoring_dynamics.
+const DEFAULT_MONTHLY_LIMITS = {
+  "Pro Growth": 30,
+  "Elite Growth": 150,
+};
+const LIMITS_CONFIG_DOC = { collection: "ai_config", doc: "generation_limits" };
+
+// Deliberately uncached, unlike getScoringDynamics' 5-minute cache. That
+// job touches every business in one run; this is one read on a
+// user-initiated action, so a stale cap is a worse trade than the read.
+async function readLimits(db) {
+  try {
+    const snap = await db.collection(LIMITS_CONFIG_DOC.collection).doc(LIMITS_CONFIG_DOC.doc).get();
+    const data = snap.exists ? snap.data() : null;
+    if (!data || typeof data !== "object") return DEFAULT_MONTHLY_LIMITS;
+    const merged = { ...DEFAULT_MONTHLY_LIMITS };
+    for (const tier of Object.keys(DEFAULT_MONTHLY_LIMITS)) {
+      const v = data[tier];
+      // null is meaningful here - it means "no cap for this tier" - so it
+      // has to survive, while junk values fall back to the default.
+      if (v === null || (typeof v === "number" && Number.isFinite(v) && v >= 0)) {
+        merged[tier] = v;
+      }
+    }
+    return merged;
+  } catch (_) {
+    // A missing or unreadable config must not take the feature down; the
+    // code defaults are the safe answer.
+    return DEFAULT_MONTHLY_LIMITS;
+  }
+}
+
+// "YYYY-MM" in the same timezone the nightly Kindex jobs use, so a
+// "monthly" quota rolls over when the owner's month does rather than at
+// UTC midnight mid-evening. Built from formatToParts rather than a locale
+// string so the format can't drift with the runtime's ICU data.
+function monthKey(ms) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "2-digit",
+  }).formatToParts(new Date(ms));
+  const year = parts.find((p) => p.type === "year").value;
+  const month = parts.find((p) => p.type === "month").value;
+  return `${year}-${month}`;
+}
+
+// Claims one generation against this month's allowance, atomically.
+//
+// Reserves *before* the Gemini call rather than counting after it. Counting
+// after would leave a race in which two concurrent taps both pass the check
+// and both spend, which defeats the point of having a cap. The cost of
+// reserving up front is that a generation which then fails has to be
+// refunded - see refundGeneration - but a refund is a cheap write on a rare
+// path, whereas an unmetered spend is the thing being prevented.
+async function reserveGeneration(db, businessRef, tier, nowMs, limits) {
+  const limit = Object.prototype.hasOwnProperty.call(limits, tier)
+    ? limits[tier]
+    : DEFAULT_MONTHLY_LIMITS[tier];
+  if (limit === null || limit === undefined) {
+    return { reserved: true, limit: null, used: null };
+  }
+  const key = monthKey(nowMs);
+  return db.runTransaction(async (tx) => {
+    const snap = await tx.get(businessRef);
+    const data = snap.data() || {};
+    // A stored month that isn't this one means the previous month's tally
+    // is stale - treat it as zero instead of carrying it forward. This is
+    // why the month is stored alongside the count: without it there is no
+    // way to tell "0 used this month" from "never reset".
+    const sameMonth = data.marketing_generations_month === key;
+    const used = sameMonth && typeof data.marketing_generations_used === "number"
+      ? data.marketing_generations_used
+      : 0;
+    if (used >= limit) {
+      return { reserved: false, limit, used };
+    }
+    tx.set(
+      businessRef,
+      { marketing_generations_month: key, marketing_generations_used: used + 1 },
+      { merge: true },
+    );
+    return { reserved: true, limit, used: used + 1 };
+  });
+}
+
+// Gives the reservation back when the generation failed, so our own outage
+// doesn't eat the owner's allowance. Best-effort and guarded on the month
+// still matching: if the clock has since rolled over, the counter it would
+// decrement belongs to a different month and must be left alone.
+async function refundGeneration(db, businessRef, nowMs) {
+  try {
+    const key = monthKey(nowMs);
+    await db.runTransaction(async (tx) => {
+      const snap = await tx.get(businessRef);
+      const data = snap.data() || {};
+      if (data.marketing_generations_month !== key) return;
+      const used = typeof data.marketing_generations_used === "number"
+        ? data.marketing_generations_used
+        : 0;
+      if (used <= 0) return;
+      tx.set(businessRef, { marketing_generations_used: used - 1 }, { merge: true });
+    });
+  } catch (_) {
+    // Swallowed deliberately: the generation already failed and the client
+    // is about to be told so. Turning a refund failure into a second error
+    // would replace a clear message with a confusing one.
+  }
+}
+
+function quotaMessage(tier, limit) {
+  if (tier === "Pro Growth") {
+    return `You've used all ${limit} AI marketing generations for this month on Pro Growth. `
+      + "Upgrade to Elite Growth for more, or try again next month.";
+  }
+  return `You've used all ${limit} AI marketing generations for this month. `
+    + "They reset at the start of next month.";
+}
+
 const RESPONSE_SCHEMA = {
   type: SchemaType.OBJECT,
   properties: {
@@ -56,6 +190,13 @@ const RESPONSE_SCHEMA = {
   },
   required: ["caption", "hashtags", "cta", "image_concept"],
 };
+
+// Bump whenever buildPrompt's wording changes. Stored on every generation
+// log next to the composed prompt, so a later analysis can tell "this
+// business prefers shorter captions" apart from "we reworded the prompt and
+// the output changed" - two explanations that are indistinguishable if all
+// you have is the output.
+const PROMPT_VERSION = 1;
 
 function buildPrompt({ businessName, category, description, theme }) {
   return [
@@ -138,6 +279,35 @@ exports.generateMarketingContent = onCall(
       theme,
     });
 
+    // Quota is claimed after entitlement and before the model call, so an
+    // exhausted allowance costs nothing. Rejections are logged the same way
+    // not-entitled ones are, so hitting the cap is visible in the data
+    // rather than looking like silence.
+    const limits = await readLimits(db);
+    const quota = await reserveGeneration(
+      db,
+      businessSnap.ref,
+      business.subscription_tier,
+      startedAt,
+      limits,
+    );
+    if (!quota.reserved) {
+      await logCall(db, {
+        businessRef: businessSnap.ref,
+        userRef: db.doc(`users/${request.auth.uid}`),
+        status: "rejected_quota_exceeded",
+        subscriptionTier: business.subscription_tier,
+        latencyMs: Date.now() - startedAt,
+        theme,
+        generationsUsed: quota.used,
+        generationsLimit: quota.limit,
+      });
+      throw new HttpsError(
+        "resource-exhausted",
+        quotaMessage(business.subscription_tier, quota.limit),
+      );
+    }
+
     let result;
     let status = "success";
     let errorMessage = null;
@@ -170,6 +340,10 @@ exports.generateMarketingContent = onCall(
     } catch (e) {
       status = "error";
       errorMessage = String(e && e.message ? e.message : e);
+      // The reservation was claimed before the call; give it back, since
+      // this failure is ours and not something the owner should pay for out
+      // of their monthly allowance.
+      await refundGeneration(db, businessSnap.ref, startedAt);
     }
 
     const latencyMs = Date.now() - startedAt;
@@ -193,6 +367,9 @@ exports.generateMarketingContent = onCall(
         category: business.category || null,
         description: business.description || null,
       },
+      prompt,
+      generationsUsed: quota.used,
+      generationsLimit: quota.limit,
     });
 
     if (status === "error") {
@@ -205,7 +382,20 @@ exports.generateMarketingContent = onCall(
 
 async function logCall(
   db,
-  { businessRef, userRef, status, subscriptionTier, latencyMs, theme, error, generatedOutput, contextUsed },
+  {
+    businessRef,
+    userRef,
+    status,
+    subscriptionTier,
+    latencyMs,
+    theme,
+    error,
+    generatedOutput,
+    contextUsed,
+    prompt,
+    generationsUsed,
+    generationsLimit,
+  },
 ) {
   const ref = db.collection("ai_generation_logs").doc();
   await ref.set({
@@ -235,7 +425,22 @@ async function logCall(
         }
       : null,
     context_used: contextUsed || null,
+    // The exact string sent to the model, not just the inputs it was built
+    // from. buildPrompt is deterministic, so a prompt was technically
+    // reconstructible from theme + context_used - but only for as long as
+    // buildPrompt itself never changed. The moment the template is reworded,
+    // every older log becomes unreplayable, and "this business prefers
+    // shorter captions" stops being distinguishable from "we changed the
+    // instructions". Null on a rejection, where no prompt was composed.
+    prompt: prompt || null,
+    prompt_version: prompt ? PROMPT_VERSION : null,
     model: GEMINI_MODEL,
+    // Quota state at the moment of the call: what this generation consumed
+    // and what the ceiling was. Recorded on rejections too, so hitting the
+    // cap is visible as data instead of looking like the owner stopped
+    // using the feature. Null limit means the tier is uncapped.
+    generations_used: typeof generationsUsed === "number" ? generationsUsed : null,
+    generations_limit: typeof generationsLimit === "number" ? generationsLimit : null,
     created_at: admin.firestore.FieldValue.serverTimestamp(),
   });
   return ref;

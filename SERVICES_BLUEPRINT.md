@@ -663,6 +663,44 @@ occasionally malformed free text. Includes the business's name, category,
 and description from Firestore, plus an optional caller-supplied `theme`
 (e.g. "weekend brunch special").
 
+**Generation quota**: monthly per-tier caps, enforced server-side in the
+same function as entitlement. `DEFAULT_MONTHLY_LIMITS` gives Pro Growth 30
+and Elite Growth 150, overridable per-deployment from
+`ai_config/generation_limits` (per-tier keys; an explicit `null` means
+uncapped, junk values fall back to the code default, and a missing or
+unreadable config never takes the feature down). Deliberately uncached,
+unlike `getScoringDynamics`' 5-minute cache - this is one read on a
+user-initiated action, not a sweep over every business, so a stale cap is
+the worse trade.
+
+Before this existed, an entitled business had unlimited Gemini calls:
+`marketing_generations_used` had been on the businesses schema all along
+but nothing read or wrote it, so an owner holding down Regenerate was
+unmetered spend against a thinking model. Elite Growth gets a
+high-but-finite cap rather than the `null` that `_powerHourLimitsByTier`
+gives its top tier - Power Hour unlimited costs nothing per use, this
+does; 150/month is far above plausible real usage while still bounding a
+runaway loop or a compromised account.
+
+The count is claimed *before* the model call, not after it. Counting after
+leaves a race where two concurrent taps both pass the check and both
+spend, which defeats the cap; the price is that a failed generation is
+refunded (`refundGeneration`), a cheap write on a rare path. Our own
+outage never eats the owner's allowance. The refund is guarded on the
+stored month still matching, so a rollover mid-flight can't decrement the
+wrong month's tally.
+
+Usage is stored as `marketing_generations_used` plus
+`marketing_generations_month` ("YYYY-MM" in `America/Chicago`, matching the
+nightly Kindex jobs' timezone). The month is stored alongside the count
+because without it there is no way to distinguish "0 used this month" from
+"never reset" - a stored month that isn't the current one is treated as
+zero rather than carried forward. Built via `Intl.formatToParts` rather
+than a locale string so the format can't drift with the runtime's ICU
+data. Exhaustion throws `resource-exhausted` with a tier-specific upgrade
+message, surfaced verbatim by `KinServices.generateMarketingContent`'s
+existing `FirebaseFunctionsException` path.
+
 **Model**: pinned via a single `GEMINI_MODEL` constant used both for the
 API call and the `model` field on every generation log - previously written
 out twice, so a model change made the logs claim a model that was never
@@ -689,7 +727,21 @@ caption, CTA and image concept over a cosmetic difference, surfacing a bare
 **Logging** (`ai_generation_logs` collection, Admin-SDK-write-only,
 `allow read, write: if false` in rules - no client path touches it
 directly):
-- Every call logs `status` (`success`/`error`/`rejected_not_entitled`),
+- Every call also logs `prompt` - the exact string sent to the model - plus
+  `prompt_version`, bumped whenever `buildPrompt`'s wording changes. The
+  prompt was technically reconstructible from `theme` + `context_used`,
+  since `buildPrompt` is deterministic, but only for as long as
+  `buildPrompt` itself never changed. Once the template is reworded, older
+  logs become unreplayable and "this business prefers shorter captions"
+  stops being distinguishable from "we changed the instructions" - two
+  explanations that look identical if all you kept was the output. Both are
+  null on a rejection, where no prompt was composed.
+- `generations_used` and `generations_limit` record the quota state at the
+  moment of the call, on rejections too, so hitting the cap reads as data
+  rather than as an owner quietly abandoning the feature. A null limit means
+  the tier is uncapped.
+- Every call logs `status`
+  (`success`/`error`/`rejected_not_entitled`/`rejected_quota_exceeded`),
   `latency_ms` (wall-clock time around the Gemini call), `subscription_tier`,
   and `theme` - this is the AI latency + system load data. Rejected
   (not-entitled) attempts are logged too, not just successes, so upgrade-prompt
