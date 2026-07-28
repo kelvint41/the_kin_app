@@ -252,7 +252,7 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
                         borderRadius: BorderRadius.circular(8.0),
                         border: Border.all(
                           color: _selectedDurationMinutes == minutes
-                              ? FlutterFlowTheme.of(context).primaryText
+                              ? const Color(0xFFD4AF37)
                               : FlutterFlowTheme.of(context).alternate,
                           width: 1.0,
                         ),
@@ -263,7 +263,7 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
                         style: FlutterFlowTheme.of(context)
                             .labelMedium
                             .override(
-                              color: FlutterFlowTheme.of(context).primaryText,
+                              color: const Color(0xFFD4AF37),
                             ),
                       ),
                     ),
@@ -280,8 +280,15 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
             width: double.infinity,
             height: 44.0,
             color: FlutterFlowTheme.of(context).primary,
+            // // The brand gold as a literal, not primaryText. These sit on a fixed dark
+            // surface (theme.primary, the deep green, and a hardcoded 0xFF1E1E1E chip)
+            // which does not change with the theme - so a *text* token that inverts
+            // between modes is the wrong tool. When light-mode primaryText became a
+            // near-black for body legibility, every one of these labels turned
+            // near-black on dark green and disappeared. 0xFFD4AF37 reads on this
+            // surface in both modes, which is the whole reason the app pairs them.
             textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: const Color(0xFFD4AF37),
                 ),
             elevation: 0.0,
             borderRadius: BorderRadius.circular(8.0),

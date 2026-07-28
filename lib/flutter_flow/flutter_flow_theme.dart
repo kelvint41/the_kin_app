@@ -174,13 +174,20 @@ class LightModeTheme extends FlutterFlowTheme {
   // the fill difference below is what separates a card now, and this only
   // has to define its edge.
   late Color alternate = const Color(0xFFD9D1C2);
-  // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
-  // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
-  // failing WCAG AA at every text size since this is the default color
-  // for nearly all typography styles. This shade holds the same ~5.8:1
-  // contrast ratio the app already relies on for gold-on-dark-green
-  // elsewhere, while staying legible against a near-white background.
-  late Color primaryText = const Color(0xFF7D5F16);
+  // Warm near-black, not gold. This token is the default colour for
+  // nearly all typography, so making it the brand gold meant essentially
+  // every word in light mode was gold - technically AA at 5.11:1, and
+  // still the reason the whole mode read as washed out and low contrast.
+  // Gold is an accent; an accent applied to everything stops being one.
+  //
+  // 14.01:1 on the page and 16.36:1 on cards, against 5.11/5.97 before.
+  // Warm rather than neutral black so it sits with the gold and green
+  // rather than against them.
+  //
+  // The gold has not gone anywhere - accentOnSurface below is the same
+  // 0xFF7D5F16 this used to be, and is what headings, links and emphasis
+  // should use. The difference is that they now have to ask for it.
+  late Color primaryText = const Color(0xFF241F17);
   late Color secondaryText = const Color(0xFF14181B);
   // Light mode had no elevation ramp at all: the page was 0xFFFCFCFC and
   // cards were pure white, which is 1.03:1 - indistinguishable. Every

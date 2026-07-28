@@ -49,6 +49,7 @@ class _DurationChip2WidgetState extends State<DurationChip2Widget> {
     return Container(
       height: 56.0,
       decoration: BoxDecoration(
+        // The brand gold as a literal, not primaryText. These sit on a fixed dark
         color: Color(0xFF1E1E1E),
         borderRadius: BorderRadius.circular(14.0),
         shape: BoxShape.rectangle,
@@ -58,9 +59,9 @@ class _DurationChip2WidgetState extends State<DurationChip2Widget> {
               widget!.active,
               true,
             )
-                ? FlutterFlowTheme.of(context).primaryText
+                ? const Color(0xFFD4AF37)
                 : FlutterFlowTheme.of(context).alternate,
-            FlutterFlowTheme.of(context).primaryText,
+            const Color(0xFFD4AF37),
           ),
           width: 1.0,
         ),
