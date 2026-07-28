@@ -489,8 +489,18 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                     return;
                   }
 
+                  // An existing owner who came in through the business path
+                  // should land on business setup, not the map - otherwise
+                  // logging in silently abandons what they set out to do.
+                  // Same signupType handoff the sign-up page uses, cleared
+                  // on the way out so it can't leak into a later session.
+                  final wasBusiness = FFAppState().signupType == 'business';
+                  FFAppState().signupType = '';
                   context.goNamedAuth(
-                      GoogleMapPageWidget.routeName, context.mounted);
+                      wasBusiness
+                          ? BusinessSetupPageWidget.routeName
+                          : GoogleMapPageWidget.routeName,
+                      context.mounted);
                 },
                 // Was 'Welcome Back!', a duplicate of the page heading. A
                 // submit control should name its action.

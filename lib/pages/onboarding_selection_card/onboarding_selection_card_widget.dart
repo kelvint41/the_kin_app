@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/animated_kin_logo_widget.dart';
 import '/components/marquee_ticker_widget.dart';
@@ -325,8 +326,24 @@ class _OnboardingSelectionCardWidgetState
                                       FFAppState().signupType = 'business';
                                       safeSetState(() {});
 
-                                      context.pushNamed(
-                                          BusinessSetupPageWidget.routeName);
+                                      // Business setup registers against the
+                                      // signed-in user - registerBusiness
+                                      // fails outright without one. Sending a
+                                      // signed-out visitor straight there
+                                      // meant filling the whole form (name,
+                                      // category, address picker, phone,
+                                      // description) only to be told to sign
+                                      // in on submit, with all of it lost and
+                                      // no route to an account from that
+                                      // screen. Account first, then setup.
+                                      //
+                                      // signupType is what carries the intent
+                                      // across: it was already being set here
+                                      // and on the customer button, and read
+                                      // nowhere.
+                                      context.pushNamed(loggedIn
+                                          ? BusinessSetupPageWidget.routeName
+                                          : CustomersignupPageWidget.routeName);
                                     },
                                     child: Container(
                                       height: 55.0,

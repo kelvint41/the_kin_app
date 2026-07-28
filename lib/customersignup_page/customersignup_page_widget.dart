@@ -585,8 +585,18 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                                   _model.nameFieldTextController.text.trim(),
                             ));
 
+                        // This page is the only one in the app that creates
+                        // an account, so the business path routes through it
+                        // too. signupType says which door they came in by;
+                        // clear it on the way out so a later visit that
+                        // skips onboarding doesn't inherit a stale intent.
+                        final wasBusiness =
+                            FFAppState().signupType == 'business';
+                        FFAppState().signupType = '';
                         context.pushNamedAuth(
-                            CustomerProfilePageWidget.routeName,
+                            wasBusiness
+                                ? BusinessSetupPageWidget.routeName
+                                : CustomerProfilePageWidget.routeName,
                             context.mounted);
                       },
                       text: 'Join Community',

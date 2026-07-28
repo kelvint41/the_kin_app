@@ -140,8 +140,96 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
     );
   }
 
+  /// Shown instead of the form when nobody is signed in. Offers the account
+  /// step rather than just refusing, and stamps signupType so that account
+  /// creation returns here instead of dropping them on the customer profile.
+  Widget _buildAccountRequiredState(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: theme.primaryBackground,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.storefront_rounded,
+                    size: 48.0, color: theme.accentOnSurface),
+                SizedBox(height: theme.designToken.spacing.md),
+                Text(
+                  'Create your account first',
+                  textAlign: TextAlign.center,
+                  style: theme.headlineSmall.override(
+                    color: theme.primaryText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                Text(
+                  'Your business is registered to your account, so we need '
+                  "that first. It only takes a moment, and you'll come "
+                  'straight back here.',
+                  textAlign: TextAlign.center,
+                  style: theme.bodyMedium.override(color: theme.secondaryText),
+                ),
+                SizedBox(height: theme.designToken.spacing.lg),
+                FFButtonWidget(
+                  onPressed: () {
+                    FFAppState().signupType = 'business';
+                    context.pushNamed(CustomersignupPageWidget.routeName);
+                  },
+                  text: 'Create Account',
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 48.0,
+                    color: theme.primary,
+                    textStyle: theme.titleSmall.override(color: Colors.white),
+                    elevation: 0.0,
+                    borderRadius:
+                        BorderRadius.circular(theme.designToken.radius.sm),
+                  ),
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                InkWell(
+                  onTap: () {
+                    FFAppState().signupType = 'business';
+                    context.pushNamed(SignInPageWidget.routeName);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12.0, horizontal: 16.0),
+                    child: Text(
+                      'Already have an account? Log in',
+                      style: theme.bodyMedium.override(
+                        color: theme.accentOnSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // registerBusiness needs a signed-in owner and refuses without one, so
+    // an unauthenticated visitor could previously fill in every field here
+    // and only discover that on submit - by which point the form was gone.
+    // The onboarding button now routes to sign-up first, but this page is
+    // also reachable directly and by deep link, so the guard lives here as
+    // well rather than only at the one entry point that happens to be
+    // fixed.
+    if (!loggedIn) {
+      return _buildAccountRequiredState(context);
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
