@@ -385,31 +385,50 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             ),
                           ),
                         ),
-                        Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context
-                                  .pushNamed(CommunityPrestigeWidget.routeName);
-                            },
-                            child: wrapWithModel(
-                              model: _model.launchActionModel3,
-                              updateCallback: () => safeSetState(() {}),
-                              child: LaunchActionWidget(
-                                icon: Icon(
-                                  Icons.rate_review_rounded,
-                                  color: Color(0xFFFFD700),
-                                  size: 28.0,
+                        // Was a third card pointing at CommunityPrestigeWidget
+                        // - the v2/v3 rewards mockup, which reads nothing from
+                        // Firestore. This was its third entry point, after the
+                        // hamburger menu and the bottom nav's Loyalty tab.
+                        //
+                        // In its place, the admin route to the Executive
+                        // Dashboard. That page already existed and already
+                        // self-guards on isAdmin, but its only link lived deep
+                        // inside Owner Profile - which returns early for
+                        // anyone who doesn't own a business, so an admin
+                        // without one could not reach the dashboard at all,
+                        // and an admin with one had to scroll past Get
+                        // Support to find it. This puts it one tap from the
+                        // profile, and renders for nobody else.
+                        if (currentUserDocument?.isAdmin == true)
+                          Expanded(
+                            flex: 1,
+                            child: InkWell(
+                              splashColor: Colors.transparent,
+                              focusColor: Colors.transparent,
+                              hoverColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                              onTap: () async {
+                                context.pushNamed(
+                                    ExecutiveDashboardWidget.routeName);
+                              },
+                              child: wrapWithModel(
+                                model: _model.launchActionModel3,
+                                updateCallback: () => safeSetState(() {}),
+                                child: LaunchActionWidget(
+                                  icon: Icon(
+                                    Icons.insights_rounded,
+                                    // Themed rather than the hardcoded
+                                    // 0xFFFFD700 the other two cards use, so
+                                    // it stays legible in light mode.
+                                    color: FlutterFlowTheme.of(context)
+                                        .accentOnSurface,
+                                    size: 28.0,
+                                  ),
+                                  label: 'Executive Dashboard',
                                 ),
-                                label: 'Community Prestige',
                               ),
                             ),
                           ),
-                        ),
                       ].divide(SizedBox(width: 16.0)),
                     ),
                   ].divide(SizedBox(height: 16.0)),

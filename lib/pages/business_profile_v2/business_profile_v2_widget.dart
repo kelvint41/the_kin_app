@@ -1549,6 +1549,19 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           mainAxisSize: MainAxisSize.max,
                           children: [],
                         ),
+                        // The whole review panel is hidden for the owner
+                        // viewing their own profile, not just the check-in
+                        // inside it. Check-in was already gated; Submit
+                        // Review was not, so an owner still saw a rating bar
+                        // and a review box on their own business. The server
+                        // discards those - the nightly recompute drops owner
+                        // reviews outright - so the form was offering an
+                        // action that silently went nowhere. Gating the
+                        // container also avoids leaving a rating widget with
+                        // no submit behind it.
+                        if (widget.businessDocument != null &&
+                            businessProfileV2BusinessesRecord.ownerRef !=
+                                currentUserReference)
                         Container(
                           width: double.infinity,
                           // No fixed height: the review controls (button 40 +
@@ -1563,22 +1576,16 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Hidden for the owner viewing their own
-                              // profile: an owner checking in to their own
-                              // business would make their own review count
-                              // toward their own score, which is the
-                              // self-farming case the verified-visit rule
-                              // exists to prevent. This is only the first
-                              // of three gates - recordVerifiedVisit
-                              // refuses owner check-ins, and the nightly
-                              // recompute drops owner reviews outright -
-                              // since a UI check alone is bypassable.
-                              if (widget.businessDocument != null &&
-                                  businessProfileV2BusinessesRecord.ownerRef !=
-                                      currentUserReference)
-                                VisitCheckInWidget(
-                                  businessRef: widget.businessDocument!,
-                                ),
+                              // The owner gate now lives on the container
+                              // above, covering the review controls too. It
+                              // is still only the first of three:
+                              // recordVerifiedVisit refuses owner check-ins
+                              // and the nightly recompute drops owner
+                              // reviews, since a UI check alone is
+                              // bypassable.
+                              VisitCheckInWidget(
+                                businessRef: widget.businessDocument!,
+                              ),
                               FFButtonWidget(
                                 onPressed: () async {
                                   final businessRef = widget!.businessDocument;
