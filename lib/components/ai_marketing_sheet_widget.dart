@@ -127,7 +127,15 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
           theme.designToken.spacing.lg,
           theme.designToken.spacing.md,
           theme.designToken.spacing.lg,
+          // viewInsets covers the keyboard, but not the home indicator, so
+          // the action row sat flush against the bottom of the screen - on a
+          // device with a gesture bar the buttons ended up in the swipe-up
+          // area, and the error line rendered below the fold entirely, which
+          // made a failed generation look like a dead button. padding.bottom
+          // is the safe-area inset; adding it clears the indicator without
+          // hardcoding a device-specific number.
           MediaQuery.of(context).viewInsets.bottom +
+              MediaQuery.of(context).padding.bottom +
               theme.designToken.spacing.lg,
         ),
         child: Column(

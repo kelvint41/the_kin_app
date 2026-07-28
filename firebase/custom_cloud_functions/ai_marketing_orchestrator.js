@@ -178,6 +178,15 @@ const RESPONSE_SCHEMA = {
       type: SchemaType.ARRAY,
       items: { type: SchemaType.STRING },
       description: "Exactly 3 relevant hashtags, each starting with #, no spaces.",
+      // Bounds, not just a description. The description alone asked for
+      // exactly 3 and gemini-3.6-flash ignored it: the first two real
+      // in-app generations each came back with a single hashtag, and an A/B
+      // run over the actual prompt gave [1, 3, 3] unbounded versus
+      // [3, 3, 3] with these two lines. A one-hashtag post is materially
+      // weaker for the owner, so the count is now enforced by the schema
+      // rather than requested politely in prose.
+      minItems: 3,
+      maxItems: 3,
     },
     cta: {
       type: SchemaType.STRING,
@@ -333,6 +342,11 @@ exports.generateMarketingContent = onCall(
       // returned 5 in testing even though the prompt and schema both ask for
       // exactly 3 - so the strict check now fails open on a cosmetic
       // difference. Take the first 3 and keep the post.
+      //
+      // RESPONSE_SCHEMA now pins minItems/maxItems to 3, so the slice should
+      // be a no-op in practice. It stays as a backstop: the bound is enforced
+      // by the API, not by us, and a future schema or config change
+      // shouldn't be able to leak a 10-hashtag caption to an owner.
       if (!Array.isArray(result.hashtags) || result.hashtags.length === 0) {
         throw new Error(`Model returned no hashtags (got ${JSON.stringify(result.hashtags)}).`);
       }

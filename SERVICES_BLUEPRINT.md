@@ -715,14 +715,23 @@ cost per generation than 1.5-flash (in testing, ~4x more thought tokens
 than output tokens); the 30s client and 60s function timeouts both have
 ample headroom.
 
-**Hashtag tolerance**: only a missing or empty `hashtags` array is treated
-as a failure; anything longer is sliced to the first 3. The prompt and
-schema both ask for exactly 3, but `gemini-3.6-flash` returned 5 in
-testing, and the previous strict `length !== 3` check - calibrated against
-the now-retired 1.5-flash - would have thrown away a perfectly good
-caption, CTA and image concept over a cosmetic difference, surfacing a bare
-"INTERNAL" to the owner. The sliced array is what gets logged, so
-`generated_output.hashtags` always matches what the owner actually saw.
+**Hashtag count** is enforced by the schema (`minItems`/`maxItems` of 3),
+not by prose. The `description` alone asked for exactly 3 and
+`gemini-3.6-flash` ignored it - the first two real in-app generations each
+returned a single hashtag, and an A/B run over the actual prompt produced
+`[1, 3, 3]` unbounded against `[3, 3, 3]` bounded. A one-hashtag post is
+materially weaker for the owner, so the count is a constraint now.
+
+Handling stays tolerant on top of that: only a missing or empty array is a
+failure, and anything longer is sliced to the first 3. The previous strict
+`length !== 3` check - calibrated against the now-retired 1.5-flash - would
+have thrown away a good caption, CTA and image concept over a cosmetic
+difference and shown the owner a bare "INTERNAL"; it did exactly that risk
+on the very first successful generation, which returned 1. With bounds in
+place the slice should be a no-op, and stays only as a backstop, since the
+bound is enforced by the API rather than by us. The sliced array is what
+gets logged, so `generated_output.hashtags` always matches what the owner
+actually saw.
 
 **Logging** (`ai_generation_logs` collection, Admin-SDK-write-only,
 `allow read, write: if false` in rules - no client path touches it
