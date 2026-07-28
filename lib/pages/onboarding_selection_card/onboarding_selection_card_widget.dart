@@ -376,7 +376,17 @@ class _OnboardingSelectionCardWidgetState
                                       context.pushNamed(
                                           SignInPageWidget.routeName);
                                     },
-                                    child: Text(
+                                    // The InkWell wrapped the Text directly,
+                                    // so the tap target was exactly the glyph
+                                    // bounds - about 20pt tall, well under
+                                    // the 44pt minimum, and easy to miss on
+                                    // the one control that returning users
+                                    // need. Padding inside the InkWell grows
+                                    // the target; outside it would not.
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 16.0),
+                                      child: Text(
                                       'Already have an account?',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
@@ -403,6 +413,7 @@ class _OnboardingSelectionCardWidgetState
                                                     .bodyMedium
                                                     .fontStyle,
                                           ),
+                                    ),
                                     ),
                                   ),
                                 ].divide(SizedBox(height: 32.0)),

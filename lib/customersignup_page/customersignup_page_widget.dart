@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/form_validation.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -118,8 +119,11 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                                   size: 24.0,
                                 ),
                                 onPressed: () async {
-                                  context.pushNamed(
-                                      OnboardingSelectionCardWidget.routeName);
+                                  // Matches business_setup_page and
+                                  // business_sign_up, which already pop.
+                                  // Pushing onboarding instead grew the
+                                  // stack on every back tap.
+                                  context.safePop();
                                 },
                               ),
                               Column(
@@ -531,11 +535,30 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
+                        // minPasswordLength matches Firebase's own minimum,
+                        // so a short password is caught here rather than
+                        // coming back as a server error after the round
+                        // trip. Without this guard an empty form created
+                        // nothing and reported a password fault on a form
+                        // whose name and email were also blank.
+                        final problem = authFormError(
+                          name: _model.nameFieldTextController.text,
+                          email: _model.emailFieldTextController.text,
+                          password: _model.passwordFieldTextController.text,
+                          minPasswordLength: 6,
+                        );
+                        if (problem != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(problem)),
+                          );
+                          return;
+                        }
+
                         GoRouter.of(context).prepareAuthEvent();
 
                         final user = await authManager.createAccountWithEmail(
                           context,
-                          _model.emailFieldTextController.text,
+                          _model.emailFieldTextController.text.trim(),
                           _model.passwordFieldTextController.text,
                         );
                         if (user == null) {
@@ -545,8 +568,13 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                         await UsersRecord.collection
                             .doc(user.uid)
                             .update(createUsersRecordData(
-                              email: _model.emailFieldTextController.text,
-                              displayName: _model.nameFieldTextController.text,
+                              // Trimmed to match what was sent to Firebase
+                              // Auth, so the users doc and the auth record
+                              // can't disagree by a stray space.
+                              email:
+                                  _model.emailFieldTextController.text.trim(),
+                              displayName:
+                                  _model.nameFieldTextController.text.trim(),
                             ));
 
                         context.pushNamedAuth(

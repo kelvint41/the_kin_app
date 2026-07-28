@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/form_validation.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -125,8 +126,15 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                         size: 24.0,
                       ),
                       onPressed: () async {
-                        context
-                            .pushNamed(OnboardingSelectionCardWidget.routeName);
+                        // safePop rather than pushing onboarding: pushing
+                        // grew the stack on every back tap, so repeatedly
+                        // moving between here and onboarding left an
+                        // unbounded history behind the user. safePop also
+                        // covers the case this page is the only route -
+                        // arriving here from sign-out replaces the stack -
+                        // by going to '/', which renders onboarding while
+                        // logged out.
+                        context.safePop();
                       },
                     ),
                   ),
@@ -452,11 +460,24 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
               FFButtonWidget(
                 onPressed: () async {
+                  // Checked before prepareAuthEvent so an empty form never
+                  // starts an auth event it can't finish.
+                  final problem = authFormError(
+                    email: _model.emailFieldTextController.text,
+                    password: _model.passwordFieldTextController.text,
+                  );
+                  if (problem != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(problem)),
+                    );
+                    return;
+                  }
+
                   GoRouter.of(context).prepareAuthEvent();
 
                   final user = await authManager.signInWithEmail(
                     context,
-                    _model.emailFieldTextController.text,
+                    _model.emailFieldTextController.text.trim(),
                     _model.passwordFieldTextController.text,
                   );
                   if (user == null) {
