@@ -291,6 +291,42 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
                   ),
                 ),
               ),
+            // Pay-over-time, flagged as coming. Deliberately worded as
+            // information rather than an offer, and no card details are
+            // taken anywhere on this page: a build is a real-world service
+            // delivered outside the app, so it is not an in-app purchase -
+            // but that only holds while the transaction itself stays
+            // outside. Klarna and Afterpay both ride on a Stripe Checkout
+            // link, which is where this will point.
+            Container(
+              padding: const EdgeInsets.all(14.0),
+              decoration: BoxDecoration(
+                color: theme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: theme.alternate),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.schedule_rounded,
+                      color: theme.accentOnSurface, size: 20.0),
+                  Expanded(
+                    child: Padding(
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+                      child: Text(
+                        'Pay over time with Klarna or Afterpay - coming when '
+                        'the studio opens. Nothing is charged today.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
               child: FFButtonWidget(
