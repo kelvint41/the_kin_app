@@ -50,9 +50,35 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // In-app feedback: bugs, feature requests and general comments, told
+    // apart by feedback_type. Create was previously unvalidated - any
+    // signed-in client could write a document of any shape and any size
+    // into this collection - and read was closed to everyone including
+    // admins, so nothing submitted could ever be looked at. Both were the
+    // reason the collection sat empty and unwired.
     match /bug_reports/{document} {
-      allow create: if request.auth != null;
-      allow read: if false;
+      allow create: if request.auth != null
+        // Pins authorship to the caller. tester_name is a free-text label
+        // and can say anything; this is the field follow-up relies on.
+        && request.resource.data.user_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.feedback_type in
+           ['Bug', 'Feature request', 'General feedback']
+        && request.resource.data.issue_description is string
+        && request.resource.data.issue_description.size() > 0
+        // Same ceiling as an Exchange post. Long enough for a real
+        // report, bounded so one client can't write a document-sized
+        // blob into a collection only admins read.
+        && request.resource.data.issue_description.size() <= 2000
+        && request.resource.data.page_where_it_happened is string
+        && request.resource.data.page_where_it_happened.size() <= 120;
+
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+
+      // Immutable once submitted: an edit path would let a submitter
+      // rewrite a report after it had been read and acted on.
       allow write: if false;
       allow delete: if false;
     }

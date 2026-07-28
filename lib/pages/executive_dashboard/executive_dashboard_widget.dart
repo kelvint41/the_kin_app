@@ -1057,6 +1057,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             ].divide(SizedBox(height: 16.0)),
                           ),
                           _aiMarketingSection(context),
+                          _feedbackSection(context),
                         ].divide(SizedBox(height: 24.0)),
                       ),
                     ),
@@ -1321,4 +1322,139 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           letterSpacing: 0.0,
         ),
       );
+
+  /// What users have sent in from the app, newest first.
+  ///
+  /// Bounded to 20 by the query rather than aggregated server-side like
+  /// the AI panel: this reads the documents themselves because the text is
+  /// the whole point, and unlike ai_generation_logs there is nothing here
+  /// the admin reading it shouldn't see. The limit is what keeps it from
+  /// growing into the same unbounded read.
+  Widget _feedbackSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Feedback & Requests',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          padding: EdgeInsets.all(20.0),
+          child: StreamBuilder<List<BugReportsRecord>>(
+            stream: queryBugReportsRecord(
+              queryBuilder: (q) => q.orderBy('timestamp', descending: true),
+              limit: 20,
+            ),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final reports = snapshot.data!;
+              if (reports.isEmpty) {
+                return _aiNote(
+                  theme,
+                  'Nothing submitted yet. The prompt sits at the bottom of '
+                  'the profile page.',
+                );
+              }
+
+              final counts = <String, int>{};
+              for (final r in reports) {
+                final type =
+                    r.feedbackType.isEmpty ? 'Unspecified' : r.feedbackType;
+                counts[type] = (counts[type] ?? 0) + 1;
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    counts.entries
+                        .map((e) => '${e.value} ${e.key.toLowerCase()}')
+                        .join(' · '),
+                    style: theme.bodySmall.override(
+                      font: GoogleFonts.plusJakartaSans(),
+                      color: theme.secondaryText,
+                      letterSpacing: 0.0,
+                    ),
+                  ),
+                  for (final report in reports)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            [
+                              report.feedbackType.isEmpty
+                                  ? 'Unspecified'
+                                  : report.feedbackType,
+                              if (report.pageWhereItHappened.isNotEmpty)
+                                report.pageWhereItHappened,
+                              if (report.timestamp != null)
+                                dateTimeFormat(
+                                    "relative", report.timestamp!),
+                            ].join(' · '),
+                            style: theme.labelSmall.override(
+                              font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold),
+                              color: theme.primary,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
+                            child: Text(
+                              report.issueDescription,
+                              style: theme.bodyMedium.override(
+                                font: GoogleFonts.plusJakartaSans(),
+                                letterSpacing: 0.0,
+                              ),
+                            ),
+                          ),
+                          if (report.testerName.isNotEmpty)
+                            Text(
+                              '— ${report.testerName}',
+                              style: theme.bodySmall.override(
+                                font: GoogleFonts.plusJakartaSans(),
+                                color: theme.secondaryText,
+                                letterSpacing: 0.0,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
+    );
+  }
 }

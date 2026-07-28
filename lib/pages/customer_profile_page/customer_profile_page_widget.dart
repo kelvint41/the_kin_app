@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
 import '/components/metric_card3_widget.dart';
+import '/components/feedback_sheet_widget.dart';
 import '/components/promo_card_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -705,6 +706,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   ),
                 ),
               ),
+              _feedbackPrompt(context),
               Container(
                 height: 40.0,
               ),
@@ -715,6 +717,73 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         // back arrow above was decorative, so the only way out was the
         // system back-swipe gesture.
         bottomNavigationBar: KinBottomNav2Widget(),
+      ),
+    );
+  }
+
+  /// Entry point to [FeedbackSheetWidget].
+  ///
+  /// Sits at the foot of the profile rather than in the Engagement
+  /// Launchpad at the top. The launchpad is for things people came here to
+  /// do; feedback is what they reach for once something has already
+  /// annoyed them, and a prompt at the end of a scroll catches that
+  /// without competing with the actions above it.
+  Widget _feedbackPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) =>
+              FeedbackSheetWidget(originPage: 'CustomerProfilePage'),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.campaign_rounded, color: theme.primary, size: 22.0),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Something off, or an idea?',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Tell us - it goes straight to the team.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.secondaryText, size: 20.0),
+            ],
+          ),
+        ),
       ),
     );
   }

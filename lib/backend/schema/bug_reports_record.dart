@@ -41,12 +41,24 @@ class BugReportsRecord extends FirestoreRecord {
   String get feedbackType => _feedbackType ?? '';
   bool hasFeedbackType() => _feedbackType != null;
 
+  // "user_ref" field.
+  //
+  // Added by hand. `tester_name` is free text the submitter types, which
+  // is fine for a label and useless for following up - two people called
+  // "Kel" are indistinguishable, and a blank one is anonymous. The rule
+  // pins this to the caller's own uid, so it's the field that actually
+  // identifies who asked for something.
+  DocumentReference? _userRef;
+  DocumentReference? get userRef => _userRef;
+  bool hasUserRef() => _userRef != null;
+
   void _initializeFields() {
     _testerName = snapshotData['tester_name'] as String?;
     _issueDescription = snapshotData['issue_description'] as String?;
     _pageWhereItHappened = snapshotData['page_where_it_happened'] as String?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
     _feedbackType = snapshotData['feedback_type'] as String?;
+    _userRef = snapshotData['user_ref'] as DocumentReference?;
   }
 
   static CollectionReference get collection =>
@@ -89,6 +101,7 @@ Map<String, dynamic> createBugReportsRecordData({
   String? pageWhereItHappened,
   DateTime? timestamp,
   String? feedbackType,
+  DocumentReference? userRef,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -97,6 +110,7 @@ Map<String, dynamic> createBugReportsRecordData({
       'page_where_it_happened': pageWhereItHappened,
       'timestamp': timestamp,
       'feedback_type': feedbackType,
+      'user_ref': userRef,
     }.withoutNulls,
   );
 
@@ -112,7 +126,8 @@ class BugReportsRecordDocumentEquality implements Equality<BugReportsRecord> {
         e1?.issueDescription == e2?.issueDescription &&
         e1?.pageWhereItHappened == e2?.pageWhereItHappened &&
         e1?.timestamp == e2?.timestamp &&
-        e1?.feedbackType == e2?.feedbackType;
+        e1?.feedbackType == e2?.feedbackType &&
+        e1?.userRef == e2?.userRef;
   }
 
   @override
@@ -121,7 +136,8 @@ class BugReportsRecordDocumentEquality implements Equality<BugReportsRecord> {
         e?.issueDescription,
         e?.pageWhereItHappened,
         e?.timestamp,
-        e?.feedbackType
+        e?.feedbackType,
+        e?.userRef
       ]);
 
   @override
