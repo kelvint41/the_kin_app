@@ -5,6 +5,7 @@ import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/review_item_widget.dart';
+import '/components/business_image_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -181,14 +182,26 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   children: [
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
-                      child: CachedNetworkImage(
-                        fadeInDuration: Duration(milliseconds: 0),
-                        fadeOutDuration: Duration(milliseconds: 0),
-                        imageUrl:
-                            'https://dimg.dreamflow.cloud/v1/image/luxury%20business%20storefront',
-                        height: 280.0,
-                        fit: BoxFit.cover,
-                        alignment: Alignment(0.0, 0.0),
+                      // Was a hardcoded dimg.dreamflow.cloud placeholder -
+                      // a stock "luxury business storefront" every owner saw
+                      // instead of their own. hero_image was never read here.
+                      //
+                      // Its own StreamBuilder because this page already opens
+                      // one per card rather than sharing a single record;
+                      // matching that is a smaller change than restructuring
+                      // the page, though the duplication is worth removing.
+                      child: StreamBuilder<BusinessesRecord>(
+                        stream: BusinessesRecord.getDocument(
+                            currentUserDocument!.ownedBusiness!),
+                        builder: (context, snapshot) {
+                          final hero = snapshot.data?.heroImage;
+                          return BusinessImage(
+                            imageUrl: hero,
+                            width: double.infinity,
+                            height: 280.0,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
                     Align(
@@ -197,10 +210,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.transparent,
+                              // Was transparent at the top, so the white
+                              // heading sat on whatever the hero happened to
+                              // be - and with the KIN logo fallback that is a
+                              // pale gold, which the text disappeared into.
                               FlutterFlowTheme.of(context)
                                   .primary
-                                  .withAlpha(153),
+                                  .withAlpha(102),
+                              FlutterFlowTheme.of(context)
+                                  .primary
+                                  .withAlpha(197),
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 0.7, 1.0],
@@ -223,8 +242,21 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     AuthUserStreamWidget(
-                                      builder: (context) => Text(
-                                        currentUserDisplayName,
+                                      // Was currentUserDisplayName - the
+                                      // owner's own name, sitting above the
+                                      // business's category and above the
+                                      // business's score, views and reviews.
+                                      // Everything else on this page is about
+                                      // the business, so the heading is too.
+                                      builder: (context) => StreamBuilder<
+                                          BusinessesRecord>(
+                                        stream: BusinessesRecord.getDocument(
+                                            currentUserDocument!
+                                                .ownedBusiness!),
+                                        builder: (context, nameSnapshot) =>
+                                            Text(
+                                        nameSnapshot.data?.businessName ??
+                                            currentUserDisplayName,
                                         style: FlutterFlowTheme.of(context)
                                             .headlineMedium
                                             .override(
@@ -244,6 +276,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                       .fontStyle,
                                               lineHeight: 1.4,
                                             ),
+                                      ),
                                       ),
                                     ),
                                     Icon(
@@ -702,14 +735,32 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                 barRadius: Radius.circular(4.0),
                                 padding: EdgeInsets.zero,
                               ),
-                              Row(
+                              StreamBuilder<BusinessesRecord>(
+                                stream: BusinessesRecord.getDocument(
+                                    currentUserDocument!.ownedBusiness!),
+                                builder: (context, kindexSnapshot) {
+                                  final biz = kindexSnapshot.data;
+                                  return Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '642',
+                                    // Was the literal '642', sitting directly
+                                    // under the real score in the card above -
+                                    // 850 for this business. Two different
+                                    // numbers for the same thing on one
+                                    // screen, one of them invented.
+                                    //
+                                    // Its own stream rather than a field
+                                    // cached from a sibling builder: that
+                                    // cache was null on the first frame, so
+                                    // the score rendered '--' and the ceiling
+                                    // fell back to the standard 750.
+                                    biz == null
+                                        ? '--'
+                                        : biz.kindexScore.round().toString(),
                                     style: FlutterFlowTheme.of(context)
                                         .bodyLarge
                                         .override(
@@ -732,7 +783,14 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         ),
                                   ),
                                   Text(
-                                    '750 Max',
+                                    // The ceiling is tier-dependent, not 750
+                                    // flat: business_kindex_nightly.js clamps
+                                    // to STANDARD_MAXIMUM_SCORE 750 or
+                                    // PREMIUM_MAXIMUM_SCORE 900 depending on
+                                    // is_premium. A premium business scoring
+                                    // 850 was being shown against a 750
+                                    // maximum it had already passed.
+                                    '${(biz?.isPremium ?? false) ? 900 : 750} Max',
                                     style: FlutterFlowTheme.of(context)
                                         .labelMedium
                                         .override(
@@ -761,6 +819,8 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         ),
                                   ),
                                 ],
+                                  );
+                                },
                               ),
                               Text(
                                 'Your score updates automatically based on customer reviews and community activity.',
