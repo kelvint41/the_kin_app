@@ -93,7 +93,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  print('KinBottomNav2Widget: Directory tab tapped');
+                  print('KinBottomNav2Widget: Home tab tapped');
                   context.pushNamed(CustomerProfilePageWidget.routeName);
                 },
                 child: Column(
@@ -107,7 +107,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                       size: 24.0,
                     ),
                     Text(
-                      'Directory',
+                      'Home',
                       style: FlutterFlowTheme.of(context).labelSmall.override(
                             font: GoogleFonts.playfairDisplay(
                               fontWeight: FontWeight.bold,
@@ -136,7 +136,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  print('KinBottomNav2Widget: Map tab tapped');
+                  print('KinBottomNav2Widget: Directory tab tapped');
                   context.pushNamed(GoogleMapPageWidget.routeName);
                 },
                 child: Column(
@@ -150,7 +150,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                       size: 24.0,
                     ),
                     Text(
-                      'Map',
+                      'Directory',
                       style: FlutterFlowTheme.of(context).labelSmall.override(
                             font: GoogleFonts.playfairDisplay(
                               fontWeight: FontWeight.bold,
@@ -228,7 +228,24 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   print('KinBottomNav2Widget: Loyalty tab tapped');
-                  context.pushNamed(CommunityPrestigeWidget.routeName);
+                  // Was CommunityPrestige, which reads nothing from
+                  // Firestore - its tier, rank and point totals are
+                  // literals, so every account saw the same invented
+                  // standing. The map page's menu had already dropped it
+                  // from v1 for that reason, which left this tab as its
+                  // last entry point. The real figures - support streak,
+                  // reviews written, Kindex score - are the Personal
+                  // Milestones block on CustomerProfilePage, so the tab
+                  // opens there, scrolled past the launchpad to them.
+                  context.pushNamed(
+                    CustomerProfilePageWidget.routeName,
+                    queryParameters: {
+                      'scrollToMilestones': serializeParam(
+                        true,
+                        ParamType.bool,
+                      ),
+                    }.withoutNulls,
+                  );
                 },
                 child: Column(
                   mainAxisSize: MainAxisSize.min,

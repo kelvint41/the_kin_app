@@ -48,9 +48,17 @@ export 'google_map_page_model.dart';
 ///
 /// Backend Query for the business list:
 /// - Collection: businesses
-/// - Filter: is_black_owned is equal to true (priority)
-/// - Order By: is_priority_pinned descending, kindex_score descending,
-/// business_location nearest to current user location
+/// - No filter, no order, no limit - the whole collection, fetched once
+///   per visit (see `GoogleMapPageModel.businesses`).
+///
+/// This block used to describe an `is_black_owned == true` filter and an
+/// `is_priority_pinned desc, kindex_score desc` ordering. Neither was ever
+/// implemented, and the filter should not be: `is_black_owned` is set as a
+/// per-file blanket constant by the import scripts rather than per
+/// business, and is currently true on 17 of 500 documents. Switching it on
+/// would empty the map rather than prioritise it. Ordering is applied
+/// client-side after the fetch (category chips for the pins,
+/// `premiumCarouselBusinesses` for the carousel).
 ///
 /// Make all navigation buttons and menu items fully functional with proper
 /// Navigate To actions.
@@ -534,8 +542,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
-    return StreamBuilder<List<BusinessesRecord>>(
-      stream: queryBusinessesRecord(),
+    return FutureBuilder<List<BusinessesRecord>>(
+      future: _model.businesses(),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {

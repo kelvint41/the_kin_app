@@ -99,9 +99,19 @@ class CustomerProfilePageWidget extends StatefulWidget {
   const CustomerProfilePageWidget({
     super.key,
     this.businessRef,
+    this.scrollToMilestones = false,
   });
 
   final DocumentReference? businessRef;
+
+  /// Opens the page scrolled to "Personal Milestones" instead of the top.
+  ///
+  /// Set by the bottom nav's Loyalty tab. Loyalty has no page of its own -
+  /// the streak, review count and Kindex score on this page are the whole
+  /// of it - so rather than send that tab to CommunityPrestige, which
+  /// renders invented figures and reads nothing from Firestore, it lands
+  /// here on the real ones.
+  final bool scrollToMilestones;
 
   static String routeName = 'CustomerProfilePage';
   static String routePath = '/customerProfilePage';
@@ -121,12 +131,41 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
   late final Future<_MilestoneStats> _statsFuture;
   late final Future<List<_PromoView>> _promosFuture;
 
+  /// Anchors the "Personal Milestones" block for [_scrollToMilestones].
+  final _milestonesKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => CustomerProfilePageModel());
     _statsFuture = _loadStats();
     _promosFuture = _loadPromos();
+
+    if (widget.scrollToMilestones) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToMilestones();
+      });
+    }
+  }
+
+  /// Brings the milestones block into view once the first frame has laid
+  /// the page out.
+  ///
+  /// Guarded on `mounted` and on the key having a context: the user can
+  /// leave before the frame lands, and the block sits below a FutureBuilder
+  /// whose loading state is shorter than this page but not guaranteed to
+  /// be, so the anchor may not be attached yet. Either way, failing to
+  /// scroll just leaves the page at the top, which is the old behaviour.
+  void _scrollToMilestones() {
+    if (!mounted) return;
+    final anchor = _milestonesKey.currentContext;
+    if (anchor == null) return;
+    Scrollable.ensureVisible(
+      anchor,
+      duration: Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+      alignment: 0.0,
+    );
   }
 
   /// Reads the signed-in user's activity, reviews and Kindex score.
@@ -435,6 +474,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                 ),
               ),
               Column(
+                key: _milestonesKey,
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,

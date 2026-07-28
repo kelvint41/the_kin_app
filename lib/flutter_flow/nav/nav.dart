@@ -270,6 +270,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               isList: false,
               collectionNamePath: ['businesses'],
             ),
+            scrollToMilestones: params.getParam(
+                  'scrollToMilestones',
+                  ParamType.bool,
+                ) ??
+                false,
           ),
         ),
         FFRoute(

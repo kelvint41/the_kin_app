@@ -92,11 +92,11 @@ class _NearbyFeedWidgetState extends State<NearbyFeedWidget> {
         top: true,
         child: !_model.locationResolved
             ? _centeredSpinner()
-            : StreamBuilder<List<BusinessesRecord>>(
-                // Same unfiltered stream the map page uses - Firestore can't
+            : FutureBuilder<List<BusinessesRecord>>(
+                // Same unfiltered read the map page does - Firestore can't
                 // range-query a GeoPoint on both axes, and these documents
                 // carry no geohash, so proximity is computed client-side.
-                stream: queryBusinessesRecord(),
+                future: _model.businesses(),
                 builder: (context, businessSnapshot) {
                   if (!businessSnapshot.hasData) return _centeredSpinner();
 
