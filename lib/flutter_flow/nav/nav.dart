@@ -135,16 +135,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: KINVIPFinalWidget.routeName,
-          path: KINVIPFinalWidget.routePath,
-          builder: (context, params) => KINVIPFinalWidget(),
-        ),
-        FFRoute(
-          name: BusinessSignUpWidget.routeName,
-          path: BusinessSignUpWidget.routePath,
-          builder: (context, params) => BusinessSignUpWidget(),
-        ),
-        FFRoute(
           name: PrivacyPolicyPageWidget.routeName,
           path: PrivacyPolicyPageWidget.routePath,
           builder: (context, params) => PrivacyPolicyPageWidget(),
@@ -231,21 +221,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => MerchantSuccessScreenWidget(),
         ),
         FFRoute(
-          name: ProfessionalLandingPageWidget.routeName,
-          path: ProfessionalLandingPageWidget.routePath,
-          builder: (context, params) => ProfessionalLandingPageWidget(),
-        ),
-        FFRoute(
-          name: AppBuilder1Widget.routeName,
-          path: AppBuilder1Widget.routePath,
-          builder: (context, params) => AppBuilder1Widget(),
-        ),
-        FFRoute(
-          name: FullyFunctionalPremiumPageWidget.routeName,
-          path: FullyFunctionalPremiumPageWidget.routePath,
-          builder: (context, params) => FullyFunctionalPremiumPageWidget(),
-        ),
-        FFRoute(
           name: BusinessSetupPageWidget.routeName,
           path: BusinessSetupPageWidget.routePath,
           builder: (context, params) => BusinessSetupPageWidget(),
@@ -293,19 +268,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => SignInPageWidget(),
         ),
         FFRoute(
-          name: CleanPremiumDarkPageWidget.routeName,
-          path: CleanPremiumDarkPageWidget.routePath,
-          builder: (context, params) => CleanPremiumDarkPageWidget(),
-        ),
-        FFRoute(
           name: CustomersignupPageWidget.routeName,
           path: CustomersignupPageWidget.routePath,
           builder: (context, params) => CustomersignupPageWidget(),
-        ),
-        FFRoute(
-          name: MobileSignUpPageWidget.routeName,
-          path: MobileSignUpPageWidget.routePath,
-          builder: (context, params) => MobileSignUpPageWidget(),
         ),
         FFRoute(
           name: MobileCalledPowerPageWidget.routeName,
