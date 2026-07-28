@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/components/animated_kin_logo_widget.dart';
 import '/components/marquee_ticker_widget.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -160,7 +161,15 @@ class _OnboardingSelectionCardWidgetState
           child: Scaffold(
             key: scaffoldKey,
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            body: Column(
+            // The ticker was the first thing in an unpadded Column, so it
+            // rendered underneath the status bar - the clock, battery and
+            // signal icons sat directly on top of the scrolling scores.
+            // SafeArea drops it clear of the notch. bottom: false because
+            // the buttons below already carry their own padding and would
+            // otherwise gain a second inset.
+            body: SafeArea(
+              bottom: false,
+              child: Column(
               children: [
                 MarqueeTickerWidget(
                   businessEntries: _businessKindexEntries,
@@ -183,15 +192,12 @@ class _OnboardingSelectionCardWidgetState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(
-                                      'assets/images/kin_logo.png',
-                                      width: 200.0,
-                                      height: 208.1,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                  // Was a static Image.asset at 200x208.1
+                                  // with BoxFit.cover, which cropped the
+                                  // mark slightly. AnimatedKinLogo uses
+                                  // BoxFit.contain inside a square box, so
+                                  // it also shows the whole logo.
+                                  const AnimatedKinLogo(size: 208.0),
                                   SizedBox(height: 32.0),
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -409,6 +415,7 @@ class _OnboardingSelectionCardWidgetState
                   ),
                 ),
               ],
+              ),
             ),
           ),
         );
