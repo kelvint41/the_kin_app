@@ -663,6 +663,29 @@ occasionally malformed free text. Includes the business's name, category,
 and description from Firestore, plus an optional caller-supplied `theme`
 (e.g. "weekend brunch special").
 
+**Model**: pinned via a single `GEMINI_MODEL` constant used both for the
+API call and the `model` field on every generation log - previously written
+out twice, so a model change made the logs claim a model that was never
+called. Currently `gemini-3.6-flash`. The original `gemini-1.5-flash` has
+been retired and now 404s ("not found for API version v1beta");
+`gemini-2.5-flash` is not a fallback either, returning "no longer available
+to new users" for this project's key. Deliberately pinned rather than using
+the floating `gemini-flash-latest` alias, so the model cannot change
+underneath a feature whose value depends on a stable per-business signal.
+Note this is a thinking model - expect materially higher latency and token
+cost per generation than 1.5-flash (in testing, ~4x more thought tokens
+than output tokens); the 30s client and 60s function timeouts both have
+ample headroom.
+
+**Hashtag tolerance**: only a missing or empty `hashtags` array is treated
+as a failure; anything longer is sliced to the first 3. The prompt and
+schema both ask for exactly 3, but `gemini-3.6-flash` returned 5 in
+testing, and the previous strict `length !== 3` check - calibrated against
+the now-retired 1.5-flash - would have thrown away a perfectly good
+caption, CTA and image concept over a cosmetic difference, surfacing a bare
+"INTERNAL" to the owner. The sliced array is what gets logged, so
+`generated_output.hashtags` always matches what the owner actually saw.
+
 **Logging** (`ai_generation_logs` collection, Admin-SDK-write-only,
 `allow read, write: if false` in rules - no client path touches it
 directly):

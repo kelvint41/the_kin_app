@@ -15,6 +15,20 @@ const geminiApiKey = defineSecret("GEMINI_API_KEY");
 // named that in this app.
 const ENTITLED_TIERS = new Set(["Pro Growth", "Elite Growth"]);
 
+// Single source of truth: this is both the model called and the model
+// recorded on every generation log. It used to be written out twice, so a
+// model change silently made the logs claim a model that was never called -
+// which matters here, because comparing output quality across models is
+// exactly what those logs are for.
+//
+// Was gemini-1.5-flash, which now 404s ("not found for API version
+// v1beta") - it has been retired. gemini-2.5-flash is not a usable
+// fallback either: it returns "no longer available to new users" for this
+// project's key. Pinned deliberately rather than using the floating
+// gemini-flash-latest alias, so the model can't change under a feature
+// whose whole purpose is a stable per-business learning signal.
+const GEMINI_MODEL = "gemini-3.6-flash";
+
 function isEntitled(subscriptionTier) {
   return ENTITLED_TIERS.has(subscriptionTier);
 }
@@ -130,7 +144,7 @@ exports.generateMarketingContent = onCall(
     try {
       const genAI = new GoogleGenerativeAI(geminiApiKey.value());
       const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: GEMINI_MODEL,
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: RESPONSE_SCHEMA,
@@ -139,9 +153,20 @@ exports.generateMarketingContent = onCall(
       const response = await model.generateContent(prompt);
       result = JSON.parse(response.response.text());
 
-      if (!Array.isArray(result.hashtags) || result.hashtags.length !== 3) {
-        throw new Error(`Model returned ${result.hashtags?.length ?? 0} hashtags, expected 3.`);
+      // Only a missing or empty array is a real failure - there is nothing
+      // to show the owner. Too many hashtags is not: the caption, CTA and
+      // image concept are all still good, and discarding them over one
+      // extra hashtag shows the owner a bare "INTERNAL" instead.
+      //
+      // This used to throw on anything other than exactly 3, calibrated
+      // against gemini-1.5-flash. That model is retired, and gemini-3.6-flash
+      // returned 5 in testing even though the prompt and schema both ask for
+      // exactly 3 - so the strict check now fails open on a cosmetic
+      // difference. Take the first 3 and keep the post.
+      if (!Array.isArray(result.hashtags) || result.hashtags.length === 0) {
+        throw new Error(`Model returned no hashtags (got ${JSON.stringify(result.hashtags)}).`);
       }
+      result.hashtags = result.hashtags.slice(0, 3);
     } catch (e) {
       status = "error";
       errorMessage = String(e && e.message ? e.message : e);
@@ -210,7 +235,7 @@ async function logCall(
         }
       : null,
     context_used: contextUsed || null,
-    model: "gemini-1.5-flash",
+    model: GEMINI_MODEL,
     created_at: admin.firestore.FieldValue.serverTimestamp(),
   });
   return ref;
