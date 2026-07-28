@@ -23,9 +23,24 @@ export 'merchant_pricing_suite_model.dart';
 
 // TODO: Replace with the real RevenueCat package identifiers once the
 // corresponding products are configured in the RevenueCat dashboard.
-const _kFoundingLocalPackageId = 'founding_local_monthly';
-const _kProGrowthPackageId = 'pro_growth_monthly';
-const _kEliteGrowthPackageId = 'elite_growth_monthly';
+//
+// Note the app currently initialises RevenueCat with the literal
+// "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN" for BOTH platforms (see main.dart),
+// which is not a real SDK key - real ones start appl_ and goog_ and differ
+// per platform. Until those are set, getOfferings returns nothing,
+// purchasePackage finds no package, and every upgrade button does nothing
+// on a real device as well as in the Simulator.
+const _kFoundingLocalMonthly = 'founding_local_monthly';
+const _kProGrowthMonthly = 'pro_growth_monthly';
+const _kEliteGrowthMonthly = 'elite_growth_monthly';
+
+// Annual equivalents. These need creating as separate products in App Store
+// Connect and Google Play and attaching to the same RevenueCat offering -
+// the stores treat monthly and annual as distinct products, not as one
+// product billed differently.
+const _kFoundingLocalYearly = 'founding_local_yearly';
+const _kProGrowthYearly = 'pro_growth_yearly';
+const _kEliteGrowthYearly = 'elite_growth_yearly';
 
 /// Create a high-fidelity mobile pricing subscription page for a premium
 /// local discovery app.
@@ -120,6 +135,77 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Monthly or annual. Community is unaffected - it is free, so there is
+  /// nothing to bill either way, and it keeps no toggle.
+  bool _yearly = false;
+
+  String _packageFor(String monthly, String yearly) =>
+      _yearly ? yearly : monthly;
+
+  /// The store's own localised price for the selected billing period,
+  /// falling back to the literal when offerings have not loaded.
+  String _priceFor(String monthly, String yearly, String fallbackMonthly,
+          String fallbackYearly) =>
+      revenue_cat.storePriceFor(_packageFor(monthly, yearly)) ??
+      (_yearly ? fallbackYearly : fallbackMonthly);
+
+  /// Monthly / Yearly switch.
+  ///
+  /// Annual billing is the one payment option that genuinely can be added
+  /// here. Klarna and Afterpay cannot: a subscription unlocking in-app
+  /// features is a digital good, so Apple requires IAP and Google requires
+  /// Play Billing, and neither accepts an external BNPL provider. That is
+  /// policy rather than a technical gap. BNPL belongs on App Studio, which
+  /// is a real-world service delivered outside the app.
+  Widget _billingToggle(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    Widget option(String label, bool yearly) {
+      final selected = _yearly == yearly;
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999.0),
+          onTap: () => safeSetState(() => _yearly = yearly),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            decoration: BoxDecoration(
+              color: selected ? theme.accent1 : Colors.transparent,
+              borderRadius: BorderRadius.circular(999.0),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: theme.labelMedium.override(
+                font: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w600),
+                color: selected ? theme.primary : theme.secondaryText,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 20),
+      child: Container(
+        padding: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(999.0),
+          border: Border.all(color: theme.alternate),
+        ),
+        child: Row(
+          children: [
+            option('Monthly', false),
+            option('Yearly', true),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -312,6 +398,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                             ],
                           ),
                         ),
+                        _billingToggle(context),
                         Padding(
                           padding: EdgeInsets.all(24.0),
                           child: Column(
@@ -388,7 +475,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _kFoundingLocalPackageId,
+                                    packageId: _packageFor(_kFoundingLocalMonthly, _kFoundingLocalYearly),
                                     tierName: 'Founding Local',
                                     isPremium: true,
                                   );
@@ -420,7 +507,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: false,
                                     title: 'Founding Local',
                                     badgeLabel: 'Founding Member Tier',
-                                    price: revenue_cat.storePriceFor(_kFoundingLocalPackageId) ?? '\$19',
+                                    price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$19', '\$190'),
                                     f1: 'Verified Founding Member trust badge',
                                     f2: 'Up to 5 gallery photos on profile',
                                     f3: 'Basic profile analytics (views & trends)',
@@ -483,7 +570,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         final result = await KinServices
                                             .upgradeBusinessTier(
                                           businessRef: businessRef,
-                                          packageId: _kProGrowthPackageId,
+                                          packageId: _packageFor(_kProGrowthMonthly, _kProGrowthYearly),
                                           tierName: 'Pro Growth',
                                           isPremium: true,
                                         );
@@ -517,7 +604,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           isElite: false,
                                           title: 'Pro Growth',
                                           badgeLabel: 'Standard Business',
-                                          price: revenue_cat.storePriceFor(_kProGrowthPackageId) ?? '\$29',
+                                          price: _priceFor(_kProGrowthMonthly, _kProGrowthYearly, '\$29', '\$290'),
                                           f1: 'Standard interactive map placement in San Antonio',
                                           f2: 'Clutter-free promotion updates on \'The Exchange\'',
                                           f3: 'Premium performance analytics dashboard',
@@ -543,7 +630,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _kEliteGrowthPackageId,
+                                    packageId: _packageFor(_kEliteGrowthMonthly, _kEliteGrowthYearly),
                                     tierName: 'Elite Growth',
                                     isPremium: true,
                                     isPriorityPinned: true,
@@ -577,7 +664,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: true,
                                     title: 'Elite Growth',
                                     badgeLabel: 'Ultimate Exposure',
-                                    price: revenue_cat.storePriceFor(_kEliteGrowthPackageId) ?? '\$59',
+                                    price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$59', '\$590'),
                                     f1: 'Augmented Reality Camera Placement (3D Pins)',
                                     f2: 'Interactive KINDEX dynamic ticker badge',
                                     f3: 'Geo-Fenced Flash Beacons (3-block radius)',

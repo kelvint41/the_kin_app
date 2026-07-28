@@ -84,21 +84,26 @@ class _TierCardWidgetState extends State<TierCardWidget>
   }
 
   Widget _buildBeacon(BuildContext context) {
-    final isFree = widget!.beaconText == 'Free';
+    // One colour for every beacon. They used to be theme.success for the
+    // "Free" card and the brand gold for the "Upgrade" ones - two different
+    // colours for the same element, and `success` is a dark forest green in
+    // light mode against a mint in dark, so the Free badge also changed
+    // identity between themes while the others did not.
+    //
+    // Gold in both, with black text: it is the badge colour used everywhere
+    // else in the app and it holds on the light card and the dark elite card
+    // alike.
+    const beacon = Color(0xFFD4AF37);
     return FadeTransition(
       opacity: _beaconOpacity,
       child: Container(
         padding: EdgeInsetsDirectional.fromSTEB(10.0, 5.0, 10.0, 5.0),
         decoration: BoxDecoration(
-          color:
-              isFree ? FlutterFlowTheme.of(context).success : Color(0xFFD4AF37),
+          color: beacon,
           borderRadius: BorderRadius.circular(9999.0),
           boxShadow: [
             BoxShadow(
-              color: (isFree
-                      ? FlutterFlowTheme.of(context).success
-                      : Color(0xFFD4AF37))
-                  .withOpacity(0.6),
+              color: beacon.withOpacity(0.6),
               blurRadius: 8.0,
               spreadRadius: 1.0,
             ),
@@ -290,8 +295,12 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ))
                               Container(
                                 decoration: BoxDecoration(
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  // Was primaryText - a text token used as a
+                                  // pill fill, so this badge changed colour
+                                  // with the body copy rather than staying a
+                                  // badge. Brand gold with black text is the
+                                  // pairing used everywhere else.
+                                  color: const Color(0xFFD4AF37),
                                   borderRadius: BorderRadius.circular(9999.0),
                                   shape: BoxShape.rectangle,
                                 ),
