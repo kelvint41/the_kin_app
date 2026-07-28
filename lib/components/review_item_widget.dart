@@ -127,7 +127,12 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                                           .bodyMedium
                                           .fontStyle,
                                     ),
-                                    color: Colors.white,
+                                    // Was Colors.white. These rows sit
+                                    // directly on the page background, which
+                                    // is near-white in light mode, so the
+                                    // reviewer's name was invisible.
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     letterSpacing: 0.0,
                                     fontWeight: FontWeight.bold,
                                     fontStyle: FlutterFlowTheme.of(context)
@@ -152,7 +157,11 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                                           .labelSmall
                                           .fontStyle,
                                     ),
-                                    color: Color(0xFF999999),
+                                    // Was a fixed mid-grey chosen against a
+                                    // dark background; on cream it is barely
+                                    // above the page itself.
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
                                     letterSpacing: 0.0,
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .labelSmall
@@ -213,7 +222,14 @@ class _ReviewItemWidgetState extends State<ReviewItemWidget> {
                                           .bodySmall
                                           .fontStyle,
                                     ),
-                                    color: Color(0xFFCCCCCC),
+                                    // The review text itself, previously a
+                                    // fixed 0xFFCCCCCC - a very light grey
+                                    // picked for a dark card. On the cream
+                                    // page it sat almost on top of the
+                                    // background, which is what made the
+                                    // reviews unreadable.
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
                                     letterSpacing: 0.0,
                                     fontWeight: FlutterFlowTheme.of(context)
                                         .bodySmall

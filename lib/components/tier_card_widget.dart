@@ -171,17 +171,31 @@ class _TierCardWidgetState extends State<TierCardWidget>
                           shape: BoxShape.rectangle,
                         ),
                       ),
-                    if (widget!.beaconText != null)
-                      PositionedDirectional(
-                        top: -8.0,
-                        start: -8.0,
-                        child: _buildBeacon(context),
-                      ),
+                    // The badge used to be PositionedDirectional(top: -8,
+                    // start: -8) - anchored outside the card's own bounds at
+                    // the top-left, which put it directly on top of the tier
+                    // name. "Upgrade" sat across "Founding Local" and "Free"
+                    // across "Community".
+                    //
+                    // It now sits in the layout above the title rather than
+                    // floating over it, so it can never collide no matter how
+                    // long a tier name gets, and it is aligned to the start so
+                    // it reads as a label for the card rather than a sticker
+                    // on the corner.
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (widget!.beaconText != null)
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 12.0),
+                            child: Align(
+                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              child: _buildBeacon(context),
+                            ),
+                          ),
                         Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,

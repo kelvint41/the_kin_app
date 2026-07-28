@@ -987,9 +987,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                              FlutterFlowTheme.of(context).primary
+                            // Was [secondaryBackground, primary]: in light mode that
+                              // runs white to dark green, so this card's text
+                              // was legible at one end and invisible at the
+                              // other. Two stops of the same green instead -
+                              // it is the premium tier card and reads as one
+                              // dark surface in both themes, which also means
+                              // its contents can assume a dark background.
+                              colors: [
+                              FlutterFlowTheme.of(context).primary,
+                              const Color(0xFF06251B)
                             ],
                             stops: [0.0, 1.0],
                             begin: AlignmentDirectional(1.0, 1.0),
@@ -1114,8 +1121,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .fontStyle,
                                                 ),
                                                 color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                    const Color(0xFFD4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1162,8 +1168,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .fontStyle,
                                                 ),
                                                 color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                    const Color(0xFFD4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1263,10 +1268,15 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           child: wrapWithModel(
                             model: _model.actionBtnModel1,
                             updateCallback: () => safeSetState(() {}),
+                            // Icon colour is the brand gold, not primaryText. These sit on a
+                            // circle hardcoded to 0xFF242424 on a dark green
+                            // bar - a surface that does not follow the theme -
+                            // so a text token that inverts turned all five
+                            // icons near-black on near-black.
                             child: ActionBtnWidget(
                               icon: Icon(
                                 Icons.edit_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
+                                color: const Color(0xFFD4AF37),
                                 size: 24.0,
                               ),
                               label: 'Setup',
@@ -1294,8 +1304,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               child: ActionBtnWidget(
                                 icon: Icon(
                                   Icons.share_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: const Color(0xFFD4AF37),
                                   size: 24.0,
                                 ),
                                 label: 'Promote',
@@ -1325,7 +1334,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             child: ActionBtnWidget(
                               icon: Icon(
                                 Icons.visibility_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
+                                color: const Color(0xFFD4AF37),
                                 size: 24.0,
                               ),
                               label: 'Preview',
@@ -1338,7 +1347,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           child: ActionBtnWidget(
                             icon: Icon(
                               Icons.headset_mic_rounded,
-                              color: FlutterFlowTheme.of(context).primaryText,
+                              color: const Color(0xFFD4AF37),
                               size: 24.0,
                             ),
                             label: 'Get Support',
@@ -1360,8 +1369,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               child: ActionBtnWidget(
                                 icon: Icon(
                                   Icons.dashboard_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: const Color(0xFFD4AF37),
                                   size: 24.0,
                                 ),
                                 label: 'Dashboard',
