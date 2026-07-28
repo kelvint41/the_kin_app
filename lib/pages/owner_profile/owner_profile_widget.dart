@@ -6,6 +6,7 @@ import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/kindex_gauge.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -693,7 +694,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Your K-Index Score',
+                      'Your Kindex Score',
                       style: FlutterFlowTheme.of(context).titleSmall.override(
                             font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
@@ -723,102 +724,37 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              LinearPercentIndicator(
-                                percent: 0.85,
-                                lineHeight: 8.0,
-                                animation: true,
-                                animateFromLastPercent: true,
-                                progressColor:
-                                    FlutterFlowTheme.of(context).primaryText,
-                                backgroundColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                barRadius: Radius.circular(4.0),
-                                padding: EdgeInsets.zero,
-                              ),
+                              // Replaces a LinearPercentIndicator whose
+                              // percent was the literal 0.85 - the same bar
+                              // for every business - sitting above a score
+                              // and ceiling that are now real. One stream
+                              // feeds all three.
                               StreamBuilder<BusinessesRecord>(
                                 stream: BusinessesRecord.getDocument(
                                     currentUserDocument!.ownedBusiness!),
                                 builder: (context, kindexSnapshot) {
                                   final biz = kindexSnapshot.data;
-                                  return Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    // Was the literal '642', sitting directly
-                                    // under the real score in the card above -
-                                    // 850 for this business. Two different
-                                    // numbers for the same thing on one
-                                    // screen, one of them invented.
-                                    //
-                                    // Its own stream rather than a field
-                                    // cached from a sibling builder: that
-                                    // cache was null on the first frame, so
-                                    // the score rendered '--' and the ceiling
-                                    // fell back to the standard 750.
-                                    biz == null
-                                        ? '--'
-                                        : biz.kindexScore.round().toString(),
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyLarge
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyLarge
-                                                    .fontStyle,
+                                  if (biz == null) {
+                                    return SizedBox(
+                                      height: 200.0,
+                                      child: Center(
+                                        child: SizedBox(
+                                          width: 30.0,
+                                          height: 30.0,
+                                          child: CircularProgressIndicator(
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                              FlutterFlowTheme.of(context)
+                                                  .accentOnSurface,
+                                            ),
                                           ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyLarge
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
                                         ),
-                                  ),
-                                  Text(
-                                    // The ceiling is tier-dependent, not 750
-                                    // flat: business_kindex_nightly.js clamps
-                                    // to STANDARD_MAXIMUM_SCORE 750 or
-                                    // PREMIUM_MAXIMUM_SCORE 900 depending on
-                                    // is_premium. A premium business scoring
-                                    // 850 was being shown against a 750
-                                    // maximum it had already passed.
-                                    '${(biz?.isPremium ?? false) ? 900 : 750} Max',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                          color:
-                                              FlutterFlowTheme.of(context).hint,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  ),
-                                ],
+                                      ),
+                                    );
+                                  }
+                                  return KindexGauge(
+                                    score: biz.kindexScore,
+                                    maxScore: biz.isPremium ? 900 : 750,
                                   );
                                 },
                               ),
