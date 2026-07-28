@@ -92,7 +92,12 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Padding(
+        // Without this the back button sat level with the status-bar clock.
+        // bottom: false - the page's own 32pt padding already clears that
+        // edge, and a second inset would push the content up.
+        body: SafeArea(
+          bottom: false,
+          child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Column(
             mainAxisSize: MainAxisSize.max,
@@ -487,7 +492,9 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                   context.goNamedAuth(
                       GoogleMapPageWidget.routeName, context.mounted);
                 },
-                text: 'Welcome Back!',
+                // Was 'Welcome Back!', a duplicate of the page heading. A
+                // submit control should name its action.
+                text: 'Log In',
                 options: FFButtonOptions(
                   height: 40.0,
                   padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
@@ -593,6 +600,7 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
             ].divide(SizedBox(height: 32.0)),
           ),
+        ),
         ),
       ),
     );

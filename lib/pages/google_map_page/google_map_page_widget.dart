@@ -37,7 +37,7 @@ export 'google_map_page_model.dart';
 /// Bottom Sheet with navigation options:
 ///   - The Exchange
 ///   - My Business / Profile
-///   - Community Feed
+///   - (Community Feed removed for v1 - see the menu builder below)
 ///   - Power Hour Blast
 ///
 /// Bottom Navigation Bar with 4 items:
@@ -115,14 +115,17 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     super.dispose();
   }
 
-  /// The hamburger menu's bottom sheet, per this page's own doc comment
-  /// (top of this file): The Exchange / My Business / Community Feed /
-  /// Power Hour Blast. The Exchange requires a real businessRef (its
-  /// constructor force-unwraps it), so it's the only item gated on
-  /// actually owning a business - the other three self-guard internally
-  /// (OwnerProfileWidget and MobileCalledPowerPageWidget already show
-  /// their own "set up your business" empty state; CommunityPrestigeWidget
-  /// takes no business context at all).
+  /// The hamburger menu's bottom sheet: The Exchange / My Business /
+  /// Power Hour Blast. The Exchange requires a real businessRef, so it's
+  /// the only item gated on actually owning a business - the other two
+  /// self-guard internally (OwnerProfileWidget and
+  /// MobileCalledPowerPageWidget already show their own "set up your
+  /// business" empty state).
+  ///
+  /// Community Feed used to sit between them, pointing at
+  /// CommunityPrestigeWidget - a v2/v3 rewards concept that reads nothing
+  /// from Firestore. Removed from v1; the page and route remain for that
+  /// later work.
   void _showMainMenu(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     showModalBottomSheet(
@@ -191,15 +194,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                       context.pushNamed(OwnerProfileWidget.routeName);
                     },
                   ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.groups_rounded, color: theme.primaryText),
-                    title: Text('Community Feed', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(CommunityPrestigeWidget.routeName);
-                    },
-                  ),
+                  // 'Community Feed' pointed at CommunityPrestigeWidget,
+                  // which is a v2/v3 rewards concept: it reads nothing from
+                  // Firestore and renders hardcoded businesses and scores
+                  // ('Avenue Bistro', 'Urban Greens' 912). Shipping a main
+                  // menu entry to a mockup makes the whole app look like a
+                  // demo. The page and its route are left in place for that
+                  // later work; only the v1 entry point is removed.
                   ListTile(
                     leading: Icon(Icons.bolt_rounded, color: theme.primaryText),
                     title: Text('Power Hour Blast', style: theme.bodyLarge),

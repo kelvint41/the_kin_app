@@ -154,6 +154,26 @@ void _maybeForceThemeMode() {
   }
 }
 
+/// Snackbars are how every failure in this app reaches the user - validation
+/// messages, service errors, the AI quota notice - and they were rendering
+/// with Material's stock colours: a near-white bar with black text against a
+/// near-black app. Pulling the surface out of the app's own palette makes an
+/// error look like it belongs to the product rather than like a system
+/// dialog that escaped.
+///
+/// Built from an explicit theme instance rather than FlutterFlowTheme.of()
+/// because this runs while constructing ThemeData, before there is a context
+/// whose brightness could be read.
+SnackBarThemeData _snackBarTheme(FlutterFlowTheme theme) => SnackBarThemeData(
+      backgroundColor: theme.secondaryBackground,
+      contentTextStyle: TextStyle(color: theme.primaryText),
+      actionTextColor: theme.accentOnSurface,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+      ),
+    );
+
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
@@ -240,10 +260,12 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: false,
+        snackBarTheme: _snackBarTheme(LightModeTheme()),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: false,
+        snackBarTheme: _snackBarTheme(DarkModeTheme()),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

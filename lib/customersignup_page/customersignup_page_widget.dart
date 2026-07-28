@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/form_validation.dart';
 import 'dart:ui';
 import '/index.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -87,7 +88,14 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Stack(
+        // The header row sat in an unpadded Stack, so the back chevron
+        // crowded the status-bar clock and the KIN logo rendered on top of
+        // the battery indicator. Same class of bug as the onboarding
+        // ticker. bottom: false because the page's own 24pt bottom padding
+        // already covers that edge and SafeArea would add a second inset.
+        body: SafeArea(
+          bottom: false,
+          child: Stack(
           children: [
             Align(
               alignment: AlignmentDirectional(0.0, 0.0),
@@ -612,6 +620,77 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                         borderRadius: BorderRadius.circular(8.0),
                       ),
                     ),
+                    // The page collected an email and a password and then
+                    // created a real account without ever showing what the
+                    // person was agreeing to, on an app that ships both a
+                    // Terms and a Privacy Policy page. The Exchange already
+                    // gates posting behind its own explicit terms
+                    // acceptance; this is the account-level equivalent, and
+                    // it is the only place a new customer meets either
+                    // document.
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                        style: FlutterFlowTheme.of(context)
+                            .bodySmall
+                            .override(color: FlutterFlowTheme.of(context).hint),
+                        children: [
+                          const TextSpan(
+                              text: 'By joining you agree to our '),
+                          TextSpan(
+                            text: 'Terms of Service',
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context)
+                                  .accentOnSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => context.pushNamed(
+                                  TermsOfServicePageWidget.routeName),
+                          ),
+                          const TextSpan(text: ' and '),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: TextStyle(
+                              color: FlutterFlowTheme.of(context)
+                                  .accentOnSurface,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () => context.pushNamed(
+                                  PrivacyPolicyPageWidget.routeName),
+                          ),
+                          const TextSpan(text: '.'),
+                        ],
+                      ),
+                    ),
+                    // The sign-in page links here; the reverse link was
+                    // missing, so a returning user who landed on sign-up had
+                    // to go back twice to reach it. Padding inside the
+                    // InkWell for a 44pt target, as on the onboarding card.
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () => context.pushNamed(
+                          SignInPageWidget.routeName),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.0, horizontal: 16.0),
+                        child: Text(
+                          'Already have an account? Log in',
+                          textAlign: TextAlign.center,
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                color: FlutterFlowTheme.of(context)
+                                    .accentOnSurface,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                    ),
                   ].divide(SizedBox(height: 24.0)),
                 ),
               ),
@@ -632,6 +711,7 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
