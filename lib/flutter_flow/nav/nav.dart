@@ -235,6 +235,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: ExecutiveDashboardWidget.routePath,
           builder: (context, params) => ExecutiveDashboardWidget(),
         ),
+        // requireAuth deliberately omitted (defaults false): the App Studio
+        // offer is open to people who do not have a KIN account, which is
+        // most of the small businesses who might want one built.
+        FFRoute(
+          name: AppStudioPageWidget.routeName,
+          path: AppStudioPageWidget.routePath,
+          builder: (context, params) => AppStudioPageWidget(),
+        ),
         FFRoute(
           name: CustomerProfilePageWidget.routeName,
           path: CustomerProfilePageWidget.routePath,

@@ -54,6 +54,35 @@ class AgencyQueueRecord extends FirestoreRecord {
   // "assigned_editor" field.
   String? _assignedEditor;
   String get assignedEditor => _assignedEditor ?? '';
+
+  // Intake fields, added by hand. The collection was schema'd as a
+  // delivery pipeline - status, step, target date, assigned editor - with
+  // no way for a request to enter it. These are that front door.
+
+  // "contact_name" field.
+  String? _contactName;
+  String get contactName => _contactName ?? '';
+
+  // "contact_email" field.
+  String? _contactEmail;
+  String get contactEmail => _contactEmail ?? '';
+
+  // "brief" field. What the requester wants built, in their words.
+  String? _brief;
+  String get brief => _brief ?? '';
+
+  // "budget_band" field.
+  String? _budgetBand;
+  String get budgetBand => _budgetBand ?? '';
+
+  // "user_ref" field. Null for a signed-out visitor, which is deliberate -
+  // this offer is open to people who are not on the app at all.
+  DocumentReference? _userRef;
+  DocumentReference? get userRef => _userRef;
+
+  // "submitted_at" field.
+  DateTime? _submittedAt;
+  DateTime? get submittedAt => _submittedAt;
   bool hasAssignedEditor() => _assignedEditor != null;
 
   void _initializeFields() {
@@ -65,6 +94,12 @@ class AgencyQueueRecord extends FirestoreRecord {
     _currentStep = castToType<int>(snapshotData['current_step']);
     _targetDeliveryDate = snapshotData['target_delivery_date'] as DateTime?;
     _assignedEditor = snapshotData['assigned_editor'] as String?;
+    _contactName = snapshotData['contact_name'] as String?;
+    _contactEmail = snapshotData['contact_email'] as String?;
+    _brief = snapshotData['brief'] as String?;
+    _budgetBand = snapshotData['budget_band'] as String?;
+    _userRef = snapshotData['user_ref'] as DocumentReference?;
+    _submittedAt = snapshotData['submitted_at'] as DateTime?;
   }
 
   static CollectionReference get collection =>
@@ -110,6 +145,12 @@ Map<String, dynamic> createAgencyQueueRecordData({
   int? currentStep,
   DateTime? targetDeliveryDate,
   String? assignedEditor,
+  String? contactName,
+  String? contactEmail,
+  String? brief,
+  String? budgetBand,
+  DocumentReference? userRef,
+  DateTime? submittedAt,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -121,6 +162,12 @@ Map<String, dynamic> createAgencyQueueRecordData({
       'current_step': currentStep,
       'target_delivery_date': targetDeliveryDate,
       'assigned_editor': assignedEditor,
+      'contact_name': contactName,
+      'contact_email': contactEmail,
+      'brief': brief,
+      'budget_band': budgetBand,
+      'user_ref': userRef,
+      'submitted_at': submittedAt,
     }.withoutNulls,
   );
 

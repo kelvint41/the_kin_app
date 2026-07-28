@@ -742,6 +742,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   ),
                 ),
               ),
+              _appStudioPrompt(context),
               _feedbackPrompt(context),
               Container(
                 height: 40.0,
@@ -753,6 +754,66 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         // back arrow above was decorative, so the only way out was the
         // system back-swipe gesture.
         bottomNavigationBar: KinBottomNav2Widget(),
+      ),
+    );
+  }
+
+  /// Entry point to the App Studio waitlist.
+  ///
+  /// Offered to customers, not just owners: someone browsing the directory
+  /// may well run a business that isn't listed here, and they are exactly
+  /// the person this offer is for.
+  Widget _appStudioPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => context.pushNamed(AppStudioPageWidget.routeName),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.auto_awesome_mosaic_rounded,
+                  color: theme.accentOnSurface, size: 22.0),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Need an app for your business?',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'KIN App Studio - coming soon. Join the list.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.secondaryText, size: 20.0),
+            ],
+          ),
+        ),
       ),
     );
   }

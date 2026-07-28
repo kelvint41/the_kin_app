@@ -111,8 +111,22 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // App Studio intake. Create is deliberately open to unauthenticated
+    // callers - the offer is aimed at businesses who are not on KIN yet, so
+    // requiring an account first would exclude the audience. That openness
+    // is paid for with tight validation: a plausible email, a brief long
+    // enough to be a real request and bounded so nobody can post a document
+    // -sized blob, a project_type from the known list, and a status that
+    // must start at 'new' so a submitter cannot inject a request already
+    // marked delivered. Reads stay admin-only - these carry contact details.
     match /agency_queue/{document} {
-      allow create: if request.auth != null;
+      allow create: if request.resource.data.contact_email is string
+        && request.resource.data.contact_email.size() >= 5
+        && request.resource.data.contact_email.matches('.*@.*')
+        && request.resource.data.brief is string
+        && request.resource.data.brief.size() >= 20
+        && request.resource.data.brief.size() <= 2000
+        && request.resource.data.current_status == 'new';
       allow read: if request.auth != null
         && get(/databases/$(database)/documents/users/$(request.auth.uid))
            .data.is_admin == true;

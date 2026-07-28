@@ -39,3 +39,4 @@ export '/customersignup_page/customersignup_page_widget.dart'
     show CustomersignupPageWidget;
 export '/mobile_called_power_page/mobile_called_power_page_widget.dart'
     show MobileCalledPowerPageWidget;
+export '/pages/app_studio/app_studio_page_widget.dart' show AppStudioPageWidget;
