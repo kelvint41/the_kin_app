@@ -23,6 +23,48 @@ class ServiceResult<T> {
   bool get isSuccess => error == null;
 }
 
+/// Aggregated AI Marketing usage, for the Executive Dashboard (see
+/// [KinServices.getAiMarketingStats]).
+///
+/// Counts only - the underlying `ai_generation_logs` documents hold the
+/// generated captions and the prompts behind them, and never leave the
+/// server.
+class AiMarketingStats {
+  const AiMarketingStats({
+    required this.total,
+    required this.byStatus,
+    required this.byTier,
+    required this.byEngagement,
+    required this.unrecognisedStatus,
+  });
+
+  final int total;
+
+  /// Keyed by the orchestrator's own status values: `success`,
+  /// `rejected_not_entitled`, `rejected_quota_exceeded`, `error`.
+  final Map<String, int> byStatus;
+
+  /// Requests per `subscription_tier` at the time of the request. The
+  /// unentitled tiers matter most here - a Community-tier request is an
+  /// owner who wanted this and couldn't buy it.
+  final Map<String, int> byTier;
+
+  /// What owners did with the suggestions: `used`, `edited`,
+  /// `regenerated`, `dismissed`.
+  final Map<String, int> byEngagement;
+
+  /// Logs whose status the server didn't recognise. Non-zero means the
+  /// orchestrator has grown a status the stats function doesn't know
+  /// about, so the breakdown under-reports and should be trusted less
+  /// than [total].
+  final int unrecognisedStatus;
+
+  int get succeeded => byStatus['success'] ?? 0;
+  int get turnedAwayUnentitled => byStatus['rejected_not_entitled'] ?? 0;
+  int get turnedAwayOverQuota => byStatus['rejected_quota_exceeded'] ?? 0;
+  int get errored => byStatus['error'] ?? 0;
+}
+
 /// Result of a GPS-verified check-in (see
 /// [KinServices.checkInToBusiness]).
 class VisitCheckIn {
@@ -954,6 +996,43 @@ class KinServices {
   /// has to own that ordering.
   ///
   /// Used by: the map page's hamburger menu -> Sign Out.
+  /// Aggregated AI Marketing usage for the Executive Dashboard.
+  ///
+  /// The counting happens server-side: `ai_generation_logs` is `read:
+  /// false` in firestore.rules because it stores generated captions and
+  /// prompts, and it grows one document per generation, so a client-side
+  /// tally would both over-share and re-read the whole collection on every
+  /// dashboard open. The callable re-checks `is_admin` itself rather than
+  /// trusting the page's redirect, which guards a screen and not an
+  /// endpoint.
+  /// Used by: Executive Dashboard -> AI Marketing.
+  static Future<ServiceResult<AiMarketingStats>> getAiMarketingStats() async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('getAiMarketingStats')
+          .call<Map<String, dynamic>>();
+      final data = result.data;
+      Map<String, int> counts(String key) => {
+            for (final entry
+                in (data[key] as Map? ?? const {}).entries.cast<MapEntry>())
+              entry.key as String: (entry.value as num).toInt(),
+          };
+      return ServiceResult.success(AiMarketingStats(
+        total: (data['total'] as num).toInt(),
+        byStatus: counts('byStatus'),
+        byTier: counts('byTier'),
+        byEngagement: counts('byEngagement'),
+        unrecognisedStatus: (data['unrecognisedStatus'] as num?)?.toInt() ?? 0,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not load AI marketing stats.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not load AI marketing stats.');
+    }
+  }
+
   static Future<ServiceResult<void>> signOut() async {
     try {
       await revenue_cat.login(null);

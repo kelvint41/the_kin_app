@@ -10,6 +10,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/services/kin_services.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -69,6 +70,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _confirmedAdmin = false;
+
+  /// Memoized so the aggregation callable is hit once per visit rather than
+  /// on every rebuild of this page.
+  Future<ServiceResult<AiMarketingStats>>? _aiStatsFuture;
 
   @override
   void initState() {
@@ -1051,6 +1056,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                               ),
                             ].divide(SizedBox(height: 16.0)),
                           ),
+                          _aiMarketingSection(context),
                         ].divide(SizedBox(height: 24.0)),
                       ),
                     ),
@@ -1063,4 +1069,256 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
       },
     );
   }
+
+  /// AI Marketing usage, from `ai_generation_logs` via the
+  /// getAiMarketingStats callable.
+  ///
+  /// The headline figure is deliberately "turned away", not "generated".
+  /// Successful generations measure how much the entitled businesses use
+  /// what they already pay for; rejections measure owners who wanted this
+  /// and could not buy it, which is the number that prices the tier.
+  Widget _aiMarketingSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    // Memoized here rather than started in initState: the callable rejects
+    // non-admins, and admin isn't confirmed until the post-frame check has
+    // run. Assigning during build is safe because it's a cache fill, not a
+    // setState.
+    _aiStatsFuture ??= KinServices.getAiMarketingStats();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'AI Marketing',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          padding: EdgeInsets.all(20.0),
+          child: FutureBuilder<ServiceResult<AiMarketingStats>>(
+            future: _aiStatsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final result = snapshot.data!;
+              if (!result.isSuccess) {
+                // Named rather than swallowed. The most likely cause is
+                // that getAiMarketingStats hasn't been deployed yet, and
+                // an empty panel would read as "no usage" - the opposite
+                // of the truth.
+                return _aiNote(
+                  theme,
+                  result.error ?? 'Could not load AI marketing stats.',
+                );
+              }
+              final stats = result.data!;
+
+              if (stats.total == 0) {
+                return _aiNote(
+                  theme,
+                  'No AI marketing requests yet. Two businesses are '
+                  'entitled (Elite Growth); generating a post from Owner '
+                  'Profile → AI Marketing will show up here.',
+                );
+              }
+
+              final tiersWithRequests = stats.byTier.entries
+                  .where((e) => e.value > 0)
+                  .toList()
+                ..sort((a, b) => b.value.compareTo(a.value));
+              final engagementRecorded = stats.byEngagement.entries
+                  .where((e) => e.value > 0)
+                  .toList()
+                ..sort((a, b) => b.value.compareTo(a.value));
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _aiStat(theme, 'Requests', stats.total),
+                      ),
+                      Expanded(
+                        child: _aiStat(theme, 'Generated', stats.succeeded),
+                      ),
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Turned away',
+                          stats.turnedAwayUnentitled,
+                          highlight: stats.turnedAwayUnentitled > 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (stats.turnedAwayUnentitled > 0)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
+                      child: Text(
+                        '${stats.turnedAwayUnentitled} '
+                        '${stats.turnedAwayUnentitled == 1 ? "owner" : "owners"} '
+                        'asked for AI marketing on a tier that does not '
+                        'include it.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                  if (stats.turnedAwayOverQuota > 0 || stats.errored > 0)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 8, 0, 0),
+                      child: Text(
+                        [
+                          if (stats.turnedAwayOverQuota > 0)
+                            '${stats.turnedAwayOverQuota} hit the monthly cap',
+                          if (stats.errored > 0)
+                            '${stats.errored} failed',
+                        ].join(' · '),
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                  if (tiersWithRequests.isNotEmpty) ...[
+                    _aiSubheading(theme, 'By tier'),
+                    for (final entry in tiersWithRequests)
+                      _aiRow(theme, entry.key, entry.value),
+                  ],
+                  _aiSubheading(theme, 'What owners did with it'),
+                  if (engagementRecorded.isEmpty)
+                    Text(
+                      stats.succeeded == 0
+                          ? 'Nothing generated yet, so nothing to act on.'
+                          : 'No responses recorded yet.',
+                      style: theme.bodySmall.override(
+                        font: GoogleFonts.plusJakartaSans(),
+                        color: theme.secondaryText,
+                        letterSpacing: 0.0,
+                      ),
+                    )
+                  else
+                    for (final entry in engagementRecorded)
+                      _aiRow(theme, entry.key, entry.value),
+                  if (stats.unrecognisedStatus > 0)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 12, 0, 0),
+                      child: Text(
+                        '${stats.unrecognisedStatus} request(s) have a status '
+                        'this dashboard does not recognise - the breakdown '
+                        'above under-reports.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.error,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
+    );
+  }
+
+  Widget _aiStat(FlutterFlowTheme theme, String label, int value,
+      {bool highlight = false}) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          value.toString(),
+          style: theme.displaySmall.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            color: highlight ? theme.primary : theme.primaryText,
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.bodySmall.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _aiSubheading(FlutterFlowTheme theme, String text) => Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 8),
+        child: Text(
+          text,
+          style: theme.labelMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      );
+
+  Widget _aiRow(FlutterFlowTheme theme, String label, int value) => Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              label,
+              style: theme.bodyMedium.override(
+                font: GoogleFonts.plusJakartaSans(),
+                letterSpacing: 0.0,
+              ),
+            ),
+            Text(
+              value.toString(),
+              style: theme.bodyMedium.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _aiNote(FlutterFlowTheme theme, String text) => Text(
+        text,
+        style: theme.bodySmall.override(
+          font: GoogleFonts.plusJakartaSans(),
+          color: theme.secondaryText,
+          letterSpacing: 0.0,
+        ),
+      );
 }
