@@ -308,23 +308,33 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     // signed-in user owns, and show an empty state when there is none.
     final businessRef =
         widget.businessRef ?? currentUserDocument?.ownedBusiness;
-    if (businessRef == null) {
-      return _buildNoBusinessState(context);
-    }
 
-    return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(businessRef),
+    // No business is now an ordinary state, not a wall. The Exchange is a
+    // place anyone can be - a customer who owns nothing gets the same feed
+    // and the same composer as an owner. Previously this returned
+    // _buildNoBusinessState and the entire page was unreachable for them,
+    // which is most of the people the Exchange is meant to be for.
+    return StreamBuilder<BusinessesRecord?>(
+      stream: businessRef == null
+          ? Stream<BusinessesRecord?>.value(null)
+          : BusinessesRecord.getDocument(businessRef)
+              .map<BusinessesRecord?>((r) => r)
+              .handleError((_) {}),
       builder: (context, snapshot) {
         // A reference can outlive the document it points at - the businesses
         // collection was re-imported at least once, which left several
         // users.owned_business refs pointing at deleted docs. fromSnapshot
         // throws on a non-existent document, so without this the page sat on
         // the spinner forever instead of ever resolving.
-        if (snapshot.hasError) {
-          return _buildNoBusinessState(context);
-        }
-        // Customize what your widget looks like when it's loading.
-        if (!snapshot.hasData) {
+        // A dangling business ref is no longer a dead end either - the feed
+        // is global, so a broken owned_business just means no business tag.
+        // Fall through with a null record rather than replacing the page.
+        //
+        // Waiting is checked by connectionState, not hasData. `hasData` is
+        // false when the value *is* null, so once no-business became a legal
+        // state this guard held the page on its spinner forever for exactly
+        // the users the global feed was opened up for.
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Center(
@@ -341,10 +351,10 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
           );
         }
 
-        final theExchangeBusinessesRecord = snapshot.data!;
+        final theExchangeBusinessesRecord = snapshot.data;
         final isVerifiedBusinessOwner = currentUserReference != null &&
-            theExchangeBusinessesRecord.ownerRef == currentUserReference &&
-            theExchangeBusinessesRecord.isVerified;
+            theExchangeBusinessesRecord?.ownerRef == currentUserReference &&
+            (theExchangeBusinessesRecord?.isVerified ?? false);
         _model.postTextController ??= TextEditingController();
         _model.postTextFieldFocusNode ??= FocusNode();
         _model.feedComposerController ??= TextEditingController();
@@ -493,7 +503,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                 currentUserReference,
                                                             businessRef:
                                                                 theExchangeBusinessesRecord
-                                                                    .reference,
+                                                                    ?.reference,
                                                             postText: postText,
                                                             timestamp:
                                                                 getCurrentTimestamp,
@@ -510,7 +520,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                       currentUserReference,
                                                                   businessRef:
                                                                       theExchangeBusinessesRecord
-                                                                          .reference,
+                                                                          ?.reference,
                                                                   targetRef:
                                                                       exchangePostsRecordReference,
                                                                   eventType:
@@ -572,14 +582,24 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                     .designToken
                                     .spacing
                                     .md),
+                            // The global feed. This used to filter on
+                            // business_ref == the business being viewed,
+                            // which made the Exchange one business's wall
+                            // rather than a place: 8 posts existed and the
+                            // page read "No posts yet" because they belonged
+                            // to other businesses. A post's business_ref is
+                            // now a tag on the post, not the thing that
+                            // decides whether you can see it.
+                            //
+                            // Ordered newest-first and bounded - an
+                            // unbounded feed re-reads every post ever
+                            // written on each open.
                             child: StreamBuilder<List<ExchangePostsRecord>>(
                               stream: queryExchangePostsRecord(
                                 queryBuilder: (exchangePostsRecord) =>
-                                    exchangePostsRecord.where(
-                                  'business_ref',
-                                  isEqualTo:
-                                      theExchangeBusinessesRecord.reference,
-                                ),
+                                    exchangePostsRecord.orderBy('timestamp',
+                                        descending: true),
+                                limit: 50,
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
@@ -665,8 +685,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                               'Keyt40_${columnExchangePostsRecord.reference.id}'),
                                           postRecord: columnExchangePostsRecord,
                                           businessRef:
-                                              theExchangeBusinessesRecord
-                                                  .reference,
+                                              columnExchangePostsRecord
+                                                  .businessRef,
                                           authorDisplayName:
                                               feedItemUsersRecord.displayName,
                                           authorPhotoUrl:
@@ -1084,7 +1104,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             userRef: currentUserReference,
                                             businessRef:
                                                 theExchangeBusinessesRecord
-                                                    .reference,
+                                                    ?.reference,
                                             postText: composerText,
                                             timestamp: getCurrentTimestamp,
                                             likesCount: 0,
@@ -1099,7 +1119,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                   userRef: currentUserReference,
                                                   businessRef:
                                                       theExchangeBusinessesRecord
-                                                          .reference,
+                                                          ?.reference,
                                                   targetRef:
                                                       exchangePostsRecordReference,
                                                   eventType: 'post',

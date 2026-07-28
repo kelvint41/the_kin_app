@@ -15,6 +15,7 @@ import 'schema/marketing_requests_record.dart';
 import 'schema/orders_record.dart';
 import 'schema/agency_queue_record.dart';
 import 'schema/exchange_posts_record.dart';
+import 'schema/exchange_profiles_record.dart';
 import 'schema/activity_logs_record.dart';
 import 'schema/analytics_daily_record.dart';
 import 'schema/legal_metadata_record.dart';
@@ -56,6 +57,7 @@ export 'schema/reviews_record.dart';
 export 'schema/user_engagement_events_record.dart';
 export 'schema/kindex_scores_record.dart';
 export 'schema/signup_feed_record.dart';
+export 'schema/exchange_profiles_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -89,6 +91,44 @@ Future<List<BusinessesRecord>> queryBusinessesRecordOnce({
     queryCollectionOnce(
       BusinessesRecord.collection,
       BusinessesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+
+/// Functions to query ExchangeProfilesRecords (as a Stream and as a Future).
+Future<int> queryExchangeProfilesRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      ExchangeProfilesRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<ExchangeProfilesRecord>> queryExchangeProfilesRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      ExchangeProfilesRecord.collection,
+      ExchangeProfilesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<ExchangeProfilesRecord>> queryExchangeProfilesRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      ExchangeProfilesRecord.collection,
+      ExchangeProfilesRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

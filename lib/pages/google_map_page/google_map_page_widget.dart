@@ -171,16 +171,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     title: Text('The Exchange', style: theme.bodyLarge),
                     onTap: () {
                       Navigator.pop(sheetContext);
+                      // No longer gated on owning a business. The Exchange
+                      // is a global feed that anyone can read and post to,
+                      // so requiring a business here turned the menu item
+                      // into a no-op with a snackbar for every customer -
+                      // most of the people it exists for. A null ref just
+                      // means posts carry no business tag.
                       final businessRef = currentUserDocument?.ownedBusiness;
-                      if (businessRef == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Set up your business to access The Exchange.'),
-                          ),
-                        );
-                        return;
-                      }
                       context.pushNamed(
                         TheExchangeWidget.routeName,
                         queryParameters: {
