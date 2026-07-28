@@ -34,23 +34,26 @@ export 'business_profile_v2_model.dart';
 // data migration. If is_delivery_eligible ever gets a real writer (e.g. a
 // toggle next to the delivery URL fields in business_setup_page), that
 // would be the more precise long-term signal to switch to.
-bool _isFoodServiceBusiness(String category) {
-  final normalized = category.toLowerCase();
-  const foodKeywords = [
-    'restaurant',
-    'food',
-    'cafe',
-    'café',
-    'bakery',
-    'bbq',
-    'barbecue',
-    'coffee',
-    'catering',
-    'grill',
-    'grocery',
-  ];
-  return foodKeywords.any(normalized.contains);
-}
+/// Whether the Order sheet has anywhere to send the user.
+///
+/// This replaces a keyword match on `category` ('restaurant', 'bbq',
+/// 'cafe', ...). Category answered "does this business plausibly sell
+/// food", which is not the question: the sheet's three buttons launch
+/// `doordash_url`, `ubereats_url` and `grubhub_url`, so a business that
+/// sells food but gave us no delivery link still got an Order button, a
+/// sheet, and three buttons that called launchURL('') and did nothing.
+/// Every one of the 500 businesses currently has all three URLs empty, so
+/// that was every food business in the directory.
+///
+/// Note this is deliberately not `is_delivery_eligible` either. That flag
+/// is set on 10 businesses and says the business delivers somehow - by its
+/// own driver, by phone order, however. It earns the "Offers delivery"
+/// line on the profile. It does not mean we hold a link we can open, and
+/// only a link we can open should produce a button.
+bool _hasOrderingLinks(BusinessesRecord business) =>
+    business.doordashUrl.isNotEmpty ||
+    business.ubereatsUrl.isNotEmpty ||
+    business.grubhubUrl.isNotEmpty;
 
 /// "Create a professional business profile page for a directory.
 ///
@@ -94,6 +97,55 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Instagram / Facebook / TikTok / LinkedIn, when the business has them.
+  ///
+  /// All four URLs have been on the businesses schema all along and were
+  /// rendered nowhere, so a business that gave us its Instagram had no way
+  /// to send anyone there. Renders nothing when none are set, rather than a
+  /// row of greyed-out icons implying the business is absent from
+  /// platforms it may simply not have told us about.
+  Widget _socialLinks(BuildContext context, BusinessesRecord business) {
+    final links = <(IconData, String, String)>[
+      (Icons.camera_alt_rounded, 'Instagram', business.instagramUrl),
+      (Icons.facebook_rounded, 'Facebook', business.facebookUrl),
+      (Icons.music_note_rounded, 'TikTok', business.tiktokUrl),
+      (Icons.business_center_rounded, 'LinkedIn', business.linkedinUrl),
+    ].where((l) => l.$3.isNotEmpty).toList();
+
+    if (links.isEmpty) return SizedBox.shrink();
+
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final (icon, label, url) in links)
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 12.0, 0.0),
+              child: Semantics(
+                button: true,
+                label: label,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12.0),
+                  onTap: () async => launchURL(url),
+                  child: Container(
+                    width: 44.0,
+                    height: 44.0,
+                    decoration: BoxDecoration(
+                      color: theme.accent1,
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(icon, color: theme.primary, size: 22.0),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -814,8 +866,8 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             ),
-                            if (_isFoodServiceBusiness(
-                                businessProfileV2BusinessesRecord.category))
+                            if (_hasOrderingLinks(
+                                businessProfileV2BusinessesRecord))
                               Expanded(
                                 child: Padding(
                                   padding: EdgeInsetsDirectional.fromSTEB(
@@ -1442,28 +1494,35 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                             businessProfileV2BusinessesRecord
                                                 .website);
                                       },
+                                      // The tap was already wired; nothing
+                                      // said so. Rendered in the same
+                                      // secondaryText as the inert 'Website'
+                                      // label above it, with no underline
+                                      // and no link colour, it read as a
+                                      // caption. Same treatment as any other
+                                      // link, plus the raw scheme trimmed -
+                                      // 'http://www.' is noise the user
+                                      // neither needs nor can act on.
                                       child: Text(
                                         businessProfileV2BusinessesRecord
-                                            .website,
+                                            .website
+                                            .replaceFirst(
+                                                RegExp(r'^https?://'), '')
+                                            .replaceFirst('www.', '')
+                                            .replaceFirst(RegExp(r'/$'), ''),
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
                                               font: GoogleFonts.plusJakartaSans(
                                                 fontWeight: FontWeight.w500,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
                                               ),
                                               color:
                                                   FlutterFlowTheme.of(context)
-                                                      .secondaryText,
+                                                      .accentOnSurface,
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.w500,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMedium
-                                                      .fontStyle,
+                                              decoration:
+                                                  TextDecoration.underline,
                                             ),
                                       ),
                                     ),
@@ -1471,6 +1530,49 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             ].divide(SizedBox(width: 16.0)),
+                          ),
+                        _socialLinks(
+                            context, businessProfileV2BusinessesRecord),
+                        // Information, not an action. There is no delivery
+                        // integration in the app: DeliveryButtonComponent
+                        // was never referenced by any page, DeliveryStatus
+                        // has a route nothing links to, and all 500
+                        // businesses have empty doordash/ubereats/grubhub
+                        // URLs. A button would promise an order flow that
+                        // does not exist; this only repeats what the
+                        // business told us.
+                        if (businessProfileV2BusinessesRecord
+                            .isDeliveryEligible)
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 4.0, 0.0, 0.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.delivery_dining_rounded,
+                                  color: FlutterFlowTheme.of(context)
+                                      .accentOnSurface,
+                                  size: 20.0,
+                                ),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      8.0, 0.0, 0.0, 0.0),
+                                  child: Text(
+                                    'Offers delivery',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font:
+                                              GoogleFonts.plusJakartaSans(),
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         if (businessProfileV2BusinessesRecord
                             .description.isNotEmpty) ...[
@@ -1585,14 +1687,41 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                     itemBuilder: (context, galleryItemIndex) {
                                       final galleryItemItem =
                                           galleryItem[galleryItemIndex];
+                                      // Was Image.network with a hardcoded
+                                      // picsum.photos URL, so every business
+                                      // showed the same two stock photographs
+                                      // of somewhere else - the loop read the
+                                      // real photo_gallery entry into
+                                      // galleryItemItem and then ignored it.
                                       return ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(8.0),
                                         child: Image.network(
-                                          'https://picsum.photos/seed/726/600',
+                                          galleryItemItem,
                                           width: 200.0,
                                           height: 200.0,
                                           fit: BoxFit.cover,
+                                          // A gallery URL that 404s or points
+                                          // at a dead host shouldn't paint a
+                                          // grey exception box across the
+                                          // profile.
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  Container(
+                                            width: 200.0,
+                                            height: 200.0,
+                                            color:
+                                                FlutterFlowTheme.of(context)
+                                                    .secondaryBackground,
+                                            alignment: Alignment.center,
+                                            child: Icon(
+                                              Icons.image_not_supported_rounded,
+                                              color: FlutterFlowTheme.of(
+                                                      context)
+                                                  .secondaryText,
+                                              size: 28.0,
+                                            ),
+                                          ),
                                         ),
                                       );
                                     },
@@ -1602,25 +1731,16 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             ].divide(SizedBox(height: 12.0)),
                           ),
                         ],
+                        // A 1px divider. It was also given a 200x200 stock
+                        // photo as its child, which a 1px-high box clipped
+                        // to invisibility - so it downloaded an image on
+                        // every profile open and drew none of it.
                         Container(
                           width: double.infinity,
                           height: 1.0,
                           decoration: BoxDecoration(
                             color: FlutterFlowTheme.of(context).alternate,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8.0),
-                            child: Image.network(
-                              'https://picsum.photos/seed/391/600',
-                              width: 200.0,
-                              height: 200.0,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [],
                         ),
                         // The whole review panel is hidden for the owner
                         // viewing their own profile, not just the check-in

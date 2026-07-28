@@ -7,6 +7,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/old_designs/premium_story/premium_story_widget.dart';
+import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
 import '/index.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -352,6 +353,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
         return Scaffold(
           key: scaffoldKey,
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          // The Exchange had no app bar, no back control and no nav bar, so
+          // once you were here the only way out was the system back-swipe -
+          // and on a tab that is pushed rather than popped, that isn't
+          // obvious. Same dead end, and the same fix, as
+          // CustomerProfilePage.
+          bottomNavigationBar: KinBottomNav2Widget(),
           body: SafeArea(
             child: Stack(
               children: [
@@ -531,18 +538,13 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             safeSetState(() {});
                                           },
                                         ),
-                                      FlutterFlowIconButton(
-                                        buttonSize: 42.0,
-                                        icon: Icon(
-                                          Icons.forum_outlined,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          size: 26.0,
-                                        ),
-                                        onPressed: () {
-                                          print('IconButton pressed ...');
-                                        },
-                                      ),
+                                      // Removed: a forum icon, on the forum
+                                      // page, painted in the dark brand
+                                      // green against a dark background so
+                                      // it was barely visible, wired to
+                                      // `print('IconButton pressed ...')`.
+                                      // It pointed at nothing and did
+                                      // nothing.
                                     ].divide(SizedBox(
                                         width: FlutterFlowTheme.of(context)
                                             .designToken

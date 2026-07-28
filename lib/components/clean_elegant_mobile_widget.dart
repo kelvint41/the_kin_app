@@ -118,6 +118,12 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.doordashUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
@@ -181,6 +187,12 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                       ),
                     ),
                   ),
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.ubereatsUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
@@ -244,6 +256,12 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                       ),
                     ),
                   ),
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.grubhubUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
