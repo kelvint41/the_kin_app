@@ -84,6 +84,35 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Guards against logging the same view twice.
+  ///
+  /// This page rebuilds on every snapshot tick of its business document, so
+  /// logging from build would write a row per rebuild rather than per visit.
+  bool _loggedView = false;
+
+  /// One `profile_view` per visit, attributed to the business.
+  ///
+  /// No event of this kind existed. activity_logs recorded page views only
+  /// for GoogleMapPage, so the most basic question an owner has - how many
+  /// people looked at my business - had no data behind it at all.
+  ///
+  /// Best-effort and unawaited by the caller: a failed analytics write must
+  /// never stop a profile rendering.
+  void _logProfileView(BusinessesRecord business) {
+    if (_loggedView) return;
+    _loggedView = true;
+    ActivityLogsRecord.collection.doc().set(createActivityLogsRecordData(
+          eventType: 'profile_view',
+          userRef: currentUserReference,
+          businessRef: business.reference,
+          city: business.city,
+          category: business.category,
+          pageName: 'BusinessProfileV2',
+          sessionId: FFAppState().sessionId,
+          timestamp: getCurrentTimestamp,
+        ));
+  }
+
   @override
   void initState() {
     super.initState();
@@ -175,6 +204,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
         }
 
         final businessProfileV2BusinessesRecord = snapshot.data!;
+        _logProfileView(businessProfileV2BusinessesRecord);
 
         return GestureDetector(
           onTap: () {
@@ -633,6 +663,16 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         .set(createActivityLogsRecordData(
                                           eventType: 'map_tap',
                                           userRef: currentUserReference,
+                                          // activity_logs has carried a
+                                          // business_ref field all along and
+                                          // nothing ever set it, so a tap
+                                          // recorded that *someone* wanted
+                                          // directions somewhere without
+                                          // recording where. An owner could
+                                          // never be shown their own numbers.
+                                          businessRef:
+                                              businessProfileV2BusinessesRecord
+                                                  .reference,
                                           // Was hardcoded to 'San Antonio',
                                           // which mislabelled every map_tap
                                           // outside it. The directory now
@@ -748,6 +788,9 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                           .set(createActivityLogsRecordData(
                                             eventType: 'call_tap',
                                             userRef: currentUserReference,
+                                            businessRef:
+                                                businessProfileV2BusinessesRecord
+                                                    .reference,
                                             city:
                                                 businessProfileV2BusinessesRecord
                                                     .city,
