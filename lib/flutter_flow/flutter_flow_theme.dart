@@ -48,6 +48,19 @@ abstract class FlutterFlowTheme {
   late Color primaryBackground;
   late Color secondaryBackground;
   late Color accent1;
+  // The accent gold in its *foreground* role - text, icons and borders drawn
+  // directly on primaryBackground or secondaryBackground.
+  //
+  // accent1 can't serve both roles. It is the brand gold used as a fill
+  // (the 44x44 gold tiles on the profile pages carry a `primary` dark-green
+  // icon, which needs the bright gold to stay legible - 5.80:1 against
+  // #D4AF37, but only 2.05:1 against a deepened one). Meanwhile the same
+  // bright gold as text on a near-white light-mode background is 2.10:1,
+  // which fails WCAG AA at every size.
+  //
+  // Naming follows the existing onPrimary/onSecondary/onError convention:
+  // the accent colour for use *on* a surface, as opposed to as one.
+  late Color accentOnSurface;
   late Color accent2;
   late Color accent3;
   late Color accent4;
@@ -166,6 +179,13 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color primaryBackground = const Color(0xFFFCFCFC);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
   late Color accent1 = const Color(0xFFD4AF37);
+  // Same deepened gold as primaryText above, and for the same reason: the
+  // brand gold as a foreground on this near-white background is 2.10:1.
+  // This holds 5.81:1 on primaryBackground and 5.97:1 on
+  // secondaryBackground, passing AA for body text. accent1 itself stays
+  // bright, because as a fill it is what makes the dark-green icons on top
+  // of it legible.
+  late Color accentOnSurface = const Color(0xFF7D5F16);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xCCFFFFFF);
@@ -369,6 +389,11 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color primaryBackground = const Color(0xFF121212);
   late Color secondaryBackground = const Color(0xFF242424);
   late Color accent1 = const Color(0xFFD4AF37);
+  // Unchanged from accent1 in dark mode - the brand gold is already 8.91:1
+  // on primaryBackground and 7.38:1 on cards here, so there was never a
+  // problem to solve on this side. The token exists so call sites can state
+  // their intent once and get the right value in both modes.
+  late Color accentOnSurface = const Color(0xFFD4AF37);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xB2262D34);

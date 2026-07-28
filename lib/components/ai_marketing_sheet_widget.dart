@@ -345,7 +345,7 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
                 color: theme.secondaryBackground,
                 textStyle: theme.bodyMedium.override(color: theme.primaryText),
                 elevation: 0.0,
-                borderSide: BorderSide(color: theme.accent1),
+                borderSide: BorderSide(color: theme.accentOnSurface),
                 borderRadius:
                     BorderRadius.circular(theme.designToken.radius.sm),
               ),
