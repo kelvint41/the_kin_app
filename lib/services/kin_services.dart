@@ -856,15 +856,25 @@ class KinServices {
     }
   }
 
-  /// Records what the owner did with an AI suggestion (used it, asked for
-  /// another, or dismissed it) - the "user engagement with suggested
-  /// posts" side of the AI analytics, separate from generation latency.
+  /// Records what the owner did with an AI suggestion (used it as written,
+  /// used it after editing, asked for another, or dismissed it) - the
+  /// "user engagement with suggested posts" side of the AI analytics,
+  /// separate from generation latency.
+  ///
+  /// [finalCaption] carries the owner's rewritten caption when [action] is
+  /// `edited`. The generated original is already stored on the parent
+  /// generation log, so the pair is what makes the edit legible - what the
+  /// model wrote next to what the owner actually wanted. That gap is the
+  /// strongest available signal about a business's real voice, and it only
+  /// exists if it's captured at the moment of editing.
+  ///
   /// Best-effort: a logging failure shouldn't block the owner from
   /// continuing to use the suggestion.
   /// Used by: Owner Profile -> AI Marketing suggestion card actions.
   static Future<void> logAiSuggestionEngagement({
     required String generationLogId,
     required String action,
+    String? finalCaption,
   }) async {
     try {
       await FirebaseFunctions.instance
@@ -872,6 +882,8 @@ class KinServices {
           .call<void>({
         'generationLogId': generationLogId,
         'action': action,
+        if (finalCaption != null && finalCaption.isNotEmpty)
+          'finalCaption': finalCaption,
       });
     } catch (_) {
       // Best-effort - see doc comment above.

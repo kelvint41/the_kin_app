@@ -671,13 +671,38 @@ directly):
   and `theme` - this is the AI latency + system load data. Rejected
   (not-entitled) attempts are logged too, not just successes, so upgrade-prompt
   friction is visible in the data.
+- Successful calls also log `generated_output` (the `caption`, `hashtags`,
+  `cta`, and `image_concept` that were actually returned) and `context_used`
+  (a snapshot of the `business_name`, `category`, and `description` the
+  prompt was built from). Both are `null` on error and rejection. This is
+  the content side of the log, as opposed to the health side: the client
+  copies the caption to the clipboard and retains nothing, so without this
+  the engagement subcollection can record that a suggestion was dismissed
+  but not what it said. `context_used` is stored alongside it because the
+  business doc is mutable - a caption can't be judged later against a
+  description that has since been rewritten. Neither field is
+  reconstructable after the fact, which is why they're written on every
+  generation rather than added once there's a consumer for them.
 - A subcollection (`ai_generation_logs/{id}/engagement`) records what the
-  owner did with each suggestion - `used`/`regenerated`/`dismissed`, via
-  the separate `logAiSuggestionEngagement` callable
+  owner did with each suggestion - `used`/`edited`/`regenerated`/`dismissed`,
+  via the separate `logAiSuggestionEngagement` callable
   (`KinServices.logAiSuggestionEngagement`, called from
   `ai_marketing_sheet_widget.dart`'s three action buttons) - this is the
   "user engagement with suggested posts" metric, tracked independently of
   whether generation itself succeeded.
+- `edited` is recorded instead of `used` when the owner changed the caption
+  before using it, and carries `final_caption` (the owner's text, capped at
+  5000 chars server-side). Both actions mean the owner posted something;
+  only `edited` says the model didn't get there by itself. Paired with
+  `generated_output.caption` on the parent doc, this is the closest thing
+  available to a direct statement of what a given business actually wants
+  its voice to sound like - which is why the caption is editable in the
+  sheet at all rather than copy-only. A copy-only flow pushes the rewrite
+  into Instagram, where it's invisible and unrecoverable.
+- The diff itself is not computed or stored - the original and final text
+  are both retained and the diff is derived at analysis time, since any
+  diff representation chosen now would likely be the wrong granularity for
+  whatever consumes it later.
 - "Overall system load" beyond the per-call latency log: Cloud Functions
   already emit invocation count/concurrency/duration to Cloud Monitoring
   automatically, no extra code needed - visible in the Firebase console's
@@ -690,7 +715,13 @@ button ("AI Marketing") added to Business Profile V2's existing "Manage
 Your Business" row (owner-only, same gating as the other three buttons
 there). Shows the theme input, a Generate button, and - once generated -
 the result plus Use This (copies to clipboard) / Regenerate / Dismiss,
-each logging the corresponding engagement action.
+each logging the corresponding engagement action. The caption renders as
+an editable field (borderless, so it still reads as content rather than a
+form) seeded from each generation, including regenerates - stale text
+left over from a previous suggestion would otherwise be logged as an edit
+of content it didn't come from. Use This copies whatever is in that field,
+so editing and using is one action rather than two. Hashtags, CTA, and
+image concept remain read-only.
 
 **Not yet wired**: image generation itself (the "image concept" is a text
 description for the owner to shoot themselves, not a generated image) and

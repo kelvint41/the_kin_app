@@ -30,6 +30,8 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
     _model = createModel(context, () => AiMarketingSheetModel());
     _model.themeController ??= TextEditingController();
     _model.themeFocusNode ??= FocusNode();
+    _model.captionController ??= TextEditingController();
+    _model.captionFocusNode ??= FocusNode();
   }
 
   @override
@@ -52,6 +54,11 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
       _loading = false;
       if (result.isSuccess) {
         _content = result.data;
+        // Reseed the editable caption for every generation, including a
+        // regenerate - otherwise the previous suggestion's text (or the
+        // owner's edits to it) would linger over the new one and get
+        // logged as an edit of content it didn't come from.
+        _model.captionController?.text = result.data?.caption ?? '';
       } else {
         _error = result.error;
       }
@@ -72,13 +79,20 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
   void _useThis() {
     final content = _content;
     if (content == null) return;
+    final finalCaption = _model.captionController?.text ?? content.caption;
+    // Trimmed comparison so trailing whitespace alone doesn't get recorded
+    // as a meaningful rewrite, but the text is logged exactly as typed.
+    final wasEdited = finalCaption.trim() != content.caption.trim();
     KinServices.logAiSuggestionEngagement(
       generationLogId: content.generationLogId,
-      action: 'used',
+      action: wasEdited ? 'edited' : 'used',
+      // Only sent when it actually differs. The original is already on the
+      // parent log doc, so an unchanged caption would just store the same
+      // string twice, and the diff is derivable from the pair.
+      finalCaption: wasEdited ? finalCaption : null,
     );
     Clipboard.setData(ClipboardData(
-      text:
-          '${content.caption}\n\n${content.hashtags.join(' ')}\n\n${content.cta}',
+      text: '$finalCaption\n\n${content.hashtags.join(' ')}\n\n${content.cta}',
     ));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Copied — ready to paste into your post.')),
@@ -214,9 +228,29 @@ class _AiMarketingSheetWidgetState extends State<AiMarketingSheetWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                content.caption,
+              TextFormField(
+                controller: _model.captionController,
+                focusNode: _model.captionFocusNode,
+                maxLines: null,
+                keyboardType: TextInputType.multiline,
+                decoration: const InputDecoration(
+                  isDense: true,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                ),
                 style: theme.bodyMedium.override(color: theme.secondaryText),
+              ),
+              Row(
+                children: [
+                  Icon(Icons.edit_outlined, color: theme.hint, size: 12.0),
+                  SizedBox(width: theme.designToken.spacing.xs),
+                  Text(
+                    'Tap the caption to edit before using it',
+                    style: theme.labelSmall.override(color: theme.hint),
+                  ),
+                ],
               ),
               SizedBox(height: theme.designToken.spacing.sm),
               Wrap(

@@ -156,6 +156,18 @@ exports.generateMarketingContent = onCall(
       latencyMs,
       theme,
       error: errorMessage,
+      // Only a success has content to store; on error `result` is undefined.
+      generatedOutput: status === "success" ? result : null,
+      // Snapshot of the business fields the prompt actually saw. Without
+      // this, a stored caption can't be interpreted later - a weak caption
+      // from a thin business description reads identically to a weak
+      // caption from a good one, and the business doc will have been
+      // edited by then.
+      contextUsed: {
+        business_name: business.business_name || null,
+        category: business.category || null,
+        description: business.description || null,
+      },
     });
 
     if (status === "error") {
@@ -166,7 +178,10 @@ exports.generateMarketingContent = onCall(
   },
 );
 
-async function logCall(db, { businessRef, userRef, status, subscriptionTier, latencyMs, theme, error }) {
+async function logCall(
+  db,
+  { businessRef, userRef, status, subscriptionTier, latencyMs, theme, error, generatedOutput, contextUsed },
+) {
   const ref = db.collection("ai_generation_logs").doc();
   await ref.set({
     business_ref: businessRef,
@@ -176,30 +191,63 @@ async function logCall(db, { businessRef, userRef, status, subscriptionTier, lat
     latency_ms: latencyMs,
     theme: theme || null,
     error: error || null,
+    // The content itself, not just whether generating it worked. This is
+    // the only record of what was suggested - the client copies the
+    // caption to the clipboard and keeps nothing. Without it, the
+    // engagement subcollection says a suggestion was dismissed but never
+    // what was dismissed, which is unusable as a learning signal and
+    // can't be reconstructed after the fact.
+    //
+    // Fields are listed explicitly rather than spreading the model's
+    // response: Firestore rejects `undefined`, and a schema change or a
+    // malformed response shouldn't be able to write arbitrary keys here.
+    generated_output: generatedOutput
+      ? {
+          caption: generatedOutput.caption ?? null,
+          hashtags: generatedOutput.hashtags ?? null,
+          cta: generatedOutput.cta ?? null,
+          image_concept: generatedOutput.image_concept ?? null,
+        }
+      : null,
+    context_used: contextUsed || null,
     model: "gemini-1.5-flash",
     created_at: admin.firestore.FieldValue.serverTimestamp(),
   });
   return ref;
 }
 
-// Called by the client when the owner acts on a suggestion (uses it,
-// regenerates, or dismisses it) - separate from generation itself, so
-// "was this content actually useful" can be measured independently of
-// "did generation succeed".
+// Called by the client when the owner acts on a suggestion (uses it as
+// written, uses it after rewriting the caption, regenerates, or dismisses
+// it) - separate from generation itself, so "was this content actually
+// useful" can be measured independently of "did generation succeed".
+//
+// `edited` is deliberately distinct from `used`: both mean the owner
+// posted something, but only `edited` says the model didn't get there on
+// its own, and it arrives with the text the owner preferred.
 exports.logAiSuggestionEngagement = onCall(async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
-  const { generationLogId, action } = request.data || {};
-  const validActions = new Set(["used", "regenerated", "dismissed"]);
+  const { generationLogId, action, finalCaption } = request.data || {};
+  const validActions = new Set(["used", "edited", "regenerated", "dismissed"]);
   if (!generationLogId || !validActions.has(action)) {
     throw new HttpsError("invalid-argument", "generationLogId and a valid action are required.");
   }
+
+  // Bounded and type-checked: this is client-supplied text, and the
+  // caption field it comes from has no length limit of its own.
+  const editedCaption =
+    action === "edited" && typeof finalCaption === "string" ? finalCaption.slice(0, 5000) : null;
 
   const db = admin.firestore();
   await db.collection("ai_generation_logs").doc(generationLogId).collection("engagement").add({
     user_ref: db.doc(`users/${request.auth.uid}`),
     action,
+    // The generated original lives on the parent doc's `generated_output`,
+    // so the diff is derivable from the pair at analysis time. Storing the
+    // final text rather than a precomputed diff keeps the raw signal - any
+    // diff format chosen now would be the wrong one later.
+    final_caption: editedCaption,
     created_at: admin.firestore.FieldValue.serverTimestamp(),
   });
   return { ok: true };
