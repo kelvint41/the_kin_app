@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/kindex_trend_indicator.dart';
 import '/components/visit_check_in_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -340,7 +341,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Kindex',
+                                        'KINDEX Score',
                                         style: FlutterFlowTheme.of(context)
                                             .labelMedium
                                             .override(
@@ -363,30 +364,16 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                               ),
                                         ),
                                       ),
-                                      if (businessProfileV2BusinessesRecord
-                                              .kindexVelocity !=
-                                          0)
-                                        Padding(
-                                          padding:
-                                              EdgeInsetsDirectional.fromSTEB(
-                                                  4.0, 0.0, 0.0, 0.0),
-                                          child: Icon(
-                                            businessProfileV2BusinessesRecord
-                                                        .kindexVelocity >
-                                                    0
-                                                ? Icons.arrow_upward_rounded
-                                                : Icons.arrow_downward_rounded,
-                                            color:
-                                                businessProfileV2BusinessesRecord
-                                                            .kindexVelocity >
-                                                        0
-                                                    ? Color(0xFF2ECC71)
-                                                    : FlutterFlowTheme.of(
-                                                            context)
-                                                        .error,
-                                            size: 20.0,
-                                          ),
+                                      Padding(
+                                        padding:
+                                            EdgeInsetsDirectional.fromSTEB(
+                                                6.0, 0.0, 0.0, 0.0),
+                                        child: KindexTrendIndicator(
+                                          velocity:
+                                              businessProfileV2BusinessesRecord
+                                                  .kindexVelocity,
                                         ),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -418,34 +405,26 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             ],
                           ),
                         ),
+                        // The row had no SafeArea and zero top padding, so
+                        // both buttons sat directly under the status bar and
+                        // the notch, where iOS consumes the touches before
+                        // Flutter sees them - the same thing that made
+                        // GoogleMapPage's menu button look dead. They were
+                        // unreachable regardless of their handlers, and the
+                        // handlers were FlutterFlow's `print(...)` stubs
+                        // anyway, so nothing happened either way.
                         Align(
                           alignment: AlignmentDirectional(1.0, -1.0),
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                16.0, 0.0, 16.0, 16.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                FlutterFlowIconButton(
-                                  borderColor: Colors.transparent,
-                                  borderRadius: 20.0,
-                                  borderWidth: 0.0,
-                                  buttonSize: 40.0,
-                                  fillColor: Color(0x33FFFFFF),
-                                  icon: Icon(
-                                    Icons.favorite_border_rounded,
-                                    color: Colors.white,
-                                    size: 20.0,
-                                  ),
-                                  onPressed: () {
-                                    print('IconButton pressed ...');
-                                  },
-                                ),
-                                Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      8.0, 0.0, 8.0, 0.0),
-                                  child: FlutterFlowIconButton(
+                          child: SafeArea(
+                            bottom: false,
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 8.0, 16.0, 16.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  FlutterFlowIconButton(
                                     borderColor: Colors.transparent,
                                     borderRadius: 20.0,
                                     borderWidth: 0.0,
@@ -456,12 +435,31 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       color: Colors.white,
                                       size: 20.0,
                                     ),
-                                    onPressed: () {
-                                      print('IconButton pressed ...');
+                                    onPressed: () async {
+                                      final business =
+                                          businessProfileV2BusinessesRecord;
+                                      // sharePositionOrigin is required on
+                                      // iPad, where the share sheet is a
+                                      // popover that must be anchored to the
+                                      // control that opened it or UIKit
+                                      // throws.
+                                      final box = context.findRenderObject()
+                                          as RenderBox?;
+                                      await KinServices.shareApp(
+                                        text: business.website.isNotEmpty
+                                            ? '${business.businessName} on KIN - '
+                                                '${business.website}'
+                                            : '${business.businessName} on KIN',
+                                        sharePositionOrigin: box == null
+                                            ? null
+                                            : box.localToGlobal(Offset.zero) &
+                                                box.size,
+                                        businessRef: business.reference,
+                                      );
                                     },
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -673,6 +671,81 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             ),
+                            // Call. 479 of the 500 businesses carry a phone
+                            // number and there was no way to ring any of
+                            // them - for a directory of local services,
+                            // that is the single most likely thing a
+                            // customer wants to do. `call_tap` was already
+                            // an event type in activity_logs with one row
+                            // against it, logged from somewhere that no
+                            // longer exists.
+                            //
+                            // Hidden rather than disabled when there's no
+                            // number, so the row stays even-width for the
+                            // 21 businesses without one.
+                            if (businessProfileV2BusinessesRecord
+                                .phoneNumber.isNotEmpty)
+                              Expanded(
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 8.0, 0.0),
+                                  child: FFButtonWidget(
+                                    onPressed: () async {
+                                      await launchURL(
+                                          'tel:${businessProfileV2BusinessesRecord.phoneNumber}');
+                                      await ActivityLogsRecord.collection
+                                          .doc()
+                                          .set(createActivityLogsRecordData(
+                                            eventType: 'call_tap',
+                                            userRef: currentUserReference,
+                                            city:
+                                                businessProfileV2BusinessesRecord
+                                                    .city,
+                                            sessionId:
+                                                FFAppState().sessionId,
+                                            timestamp: getCurrentTimestamp,
+                                          ));
+                                    },
+                                    text: 'Call',
+                                    icon: Icon(
+                                      Icons.phone_rounded,
+                                      size: 18.0,
+                                    ),
+                                    options: FFButtonOptions(
+                                      height: 48.0,
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          6.0, 0.0, 6.0, 0.0),
+                                      iconPadding:
+                                          EdgeInsetsDirectional.fromSTEB(
+                                              0.0, 0.0, 0.0, 0.0),
+                                      iconColor:
+                                          FlutterFlowTheme.of(context).primary,
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      textStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            fontSize: 13.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                      elevation: 0.0,
+                                      borderSide: BorderSide(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                        width: 1.5,
+                                      ),
+                                      borderRadius:
+                                          BorderRadius.circular(12.0),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -1573,8 +1646,21 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                             color: FlutterFlowTheme.of(context)
                                 .secondaryBackground,
                           ),
+                          // The panel had no padding, so its controls ran to
+                          // the container edges.
+                          padding: EdgeInsets.all(20.0),
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            // stretch, not the default center. Centering laid
+                            // each control out at its own intrinsic width -
+                            // a 40px-tall button as wide as its label, a
+                            // 200px text box, a five-star row - so nothing
+                            // shared an edge and the whole panel read as
+                            // misaligned. Stretch gives the button and the
+                            // review box one common width; the rating bar is
+                            // centered explicitly below, since stretching a
+                            // row of stars would just spread them.
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               // The owner gate now lives on the container
                               // above, covering the review controls too. It
@@ -1586,57 +1672,32 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                               VisitCheckInWidget(
                                 businessRef: widget.businessDocument!,
                               ),
-                              FFButtonWidget(
-                                onPressed: () async {
-                                  final businessRef = widget!.businessDocument;
-                                  if (businessRef == null) {
-                                    return;
-                                  }
-                                  final result = await KinServices.submitReview(
-                                    businessRef: businessRef,
-                                    rating: _model.ratingBarValue ?? 0,
-                                    reviewText: _model.textController.text,
-                                  );
-                                  if (!result.isSuccess && mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(result.error!)),
-                                    );
-                                  }
-                                },
-                                text: 'Submit Review',
-                                options: FFButtonOptions(
-                                  height: 40.0,
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 0.0, 0.0),
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .titleMedium
+                              // Rate first, write second, submit last. The
+                              // button used to sit directly under the
+                              // check-in, above both the rating bar and the
+                              // review box, so the control that ends the task
+                              // came before the two that do it.
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 4.0, 0.0, 0.0),
+                                child: Text(
+                                  'Rate your visit',
+                                  style: FlutterFlowTheme.of(context)
+                                      .labelMedium
                                       .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .titleMedium
-                                                  .fontStyle,
-                                        ),
+                                        font: GoogleFonts.plusJakartaSans(),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
                                         letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .titleMedium
-                                            .fontStyle,
                                       ),
-                                  elevation: 0.0,
-                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
-                              RatingBar.builder(
+                              // Wrapped, because the Column stretches its
+                              // children and a stretched RatingBar spreads
+                              // its five stars across the full width.
+                              Align(
+                                alignment: AlignmentDirectional(-1.0, 0.0),
+                                child: RatingBar.builder(
                                 onRatingUpdate: (newValue) => safeSetState(
                                     () => _model.ratingBarValue = newValue),
                                 itemBuilder: (context, index) => Icon(
@@ -1648,11 +1709,15 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 unratedColor:
                                     FlutterFlowTheme.of(context).accent1,
                                 itemCount: 5,
-                                itemSize: 24.0,
+                                itemSize: 28.0,
                                 glowColor: FlutterFlowTheme.of(context).primary,
                               ),
+                              ),
                               Container(
-                                width: 200.0,
+                                // Was a hardcoded width: 200, which floated a
+                                // narrow box in the middle of a full-width
+                                // panel. Null lets the stretch above give it
+                                // the same width as the submit button.
                                 child: TextFormField(
                                   controller: _model.textController,
                                   focusNode: _model.textFieldFocusNode,
@@ -1684,7 +1749,11 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                   .labelMedium
                                                   .fontStyle,
                                         ),
-                                    hintText: 'StarRating',
+                                    // Was 'StarRating', a FlutterFlow
+                                    // placeholder left on the wrong field -
+                                    // this is the review body, and the star
+                                    // rating is the separate widget above it.
+                                    hintText: 'Write a review (optional)',
                                     hintStyle: FlutterFlowTheme.of(context)
                                         .labelMedium
                                         .override(
@@ -1768,6 +1837,56 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                   enableInteractiveSelection: true,
                                   validator: _model.textControllerValidator
                                       .asValidator(context),
+                                ),
+                              ),
+                              FFButtonWidget(
+                                onPressed: () async {
+                                  final businessRef = widget!.businessDocument;
+                                  if (businessRef == null) {
+                                    return;
+                                  }
+                                  final result = await KinServices.submitReview(
+                                    businessRef: businessRef,
+                                    rating: _model.ratingBarValue ?? 0,
+                                    reviewText: _model.textController.text,
+                                  );
+                                  if (!result.isSuccess && mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text(result.error!)),
+                                    );
+                                  }
+                                },
+                                text: 'Submit Review',
+                                options: FFButtonOptions(
+                                  height: 40.0,
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
+                                  iconPadding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 0.0),
+                                  color: FlutterFlowTheme.of(context).primary,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .titleMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .titleMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .titleMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleMedium
+                                            .fontStyle,
+                                      ),
+                                  elevation: 0.0,
+                                  borderRadius: BorderRadius.circular(8.0),
                                 ),
                               ),
                             ],

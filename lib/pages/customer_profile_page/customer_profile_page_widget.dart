@@ -578,12 +578,16 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                           size: 20.0,
                                         ),
                                         tint: Color(0xFFFFD700),
-                                        label: 'Impact Score',
+                                        label: 'KINDEX Score',
                                         value: stats == null
                                             ? '--'
                                             : impactScoreLabel(
                                                 stats.kindexScore),
                                         isTrendingUp: stats?.isTrendingUp,
+                                        // The one card here that has a
+                                        // direction; streak and milestones
+                                        // are counts.
+                                        showTrend: true,
                                       ),
                                     ),
                                   ].divide(SizedBox(width: 16.0)),

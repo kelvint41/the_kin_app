@@ -1,3 +1,4 @@
+import '/components/kindex_trend_indicator.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -16,6 +17,7 @@ class MetricCard3Widget extends StatefulWidget {
     String? label,
     String? value,
     this.isTrendingUp,
+    this.showTrend = false,
   })  : this.tint = tint ?? const Color(0xFFFF8C00),
         this.label = label ?? '7-Day Support Streak',
         this.value = value ?? '14 🔥';
@@ -25,10 +27,23 @@ class MetricCard3Widget extends StatefulWidget {
   final String label;
   final String value;
 
-  /// Direction arrow shown beside [value]. Null means no arrow at all -
-  /// "we do not know which way this is moving" is a real state and must not
-  /// render as flat or as an arbitrary direction.
+  /// Direction beside [value]: true up, false down, null not known.
   final bool? isTrendingUp;
+
+  /// Whether this metric has a direction at all.
+  ///
+  /// Opt-in, because this card also renders Support Streak and Milestones
+  /// Unlocked, which are counts with no trend concept - a marker on those
+  /// would be meaningless rather than merely unknown. Only the score cards
+  /// set it.
+  ///
+  /// The distinction this preserves: a card that opts out shows nothing,
+  /// while a card that opts in always shows something, falling back to the
+  /// flat marker when [isTrendingUp] is null. Previously null rendered
+  /// nothing, which made "we don't know yet" indistinguishable from "this
+  /// number doesn't move" - and since no customer has a KindexScores row
+  /// with a direction, that was every card, every time.
+  final bool showTrend;
 
   @override
   State<MetricCard3Widget> createState() => _MetricCard3WidgetState();
@@ -147,15 +162,20 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
                           ),
                     ),
                   ),
-                  if (widget!.isTrendingUp != null)
-                    Icon(
-                      widget!.isTrendingUp!
-                          ? Icons.arrow_upward_rounded
-                          : Icons.arrow_downward_rounded,
-                      color: widget!.isTrendingUp!
-                          ? const Color(0xFF2ECC71)
-                          : FlutterFlowTheme.of(context).error,
-                      size: 20.0,
+                  // Was gated on `isTrendingUp != null`, so a customer with
+                  // no KindexScores row saw a bare number with no trend
+                  // marker at all - which reads as "this score has no
+                  // trend" rather than "we don't know yet". The shared
+                  // indicator renders a flat marker for that case, and is
+                  // the same widget the business profile uses so both
+                  // sides of the app say it the same way.
+                  if (widget!.showTrend)
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(6.0, 0.0, 0.0, 0.0),
+                      child: KindexTrendIndicator.fromTrend(
+                        isTrendingUp: widget!.isTrendingUp,
+                      ),
                     ),
                 ],
               ),
