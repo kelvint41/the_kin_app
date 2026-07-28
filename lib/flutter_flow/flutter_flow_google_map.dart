@@ -80,6 +80,7 @@ class FlutterFlowGoogleMap extends StatefulWidget {
     this.allowZoom = true,
     this.showZoomControls = true,
     this.showLocation = true,
+    this.showLocationButton = true,
     this.showCompass = false,
     this.showMapToolbar = false,
     this.showTraffic = false,
@@ -104,6 +105,15 @@ class FlutterFlowGoogleMap extends StatefulWidget {
   final bool allowZoom;
   final bool showZoomControls;
   final bool showLocation;
+
+  /// Google's own "recentre on me" button, bottom-right.
+  ///
+  /// google_maps_flutter defaults this to true independently of
+  /// [showLocation], so a map with the location layer switched off still
+  /// draws the button - it just can't do anything when tapped. Set false
+  /// alongside `showLocation: false` rather than leaving a dead control on
+  /// screen.
+  final bool showLocationButton;
   final bool showCompass;
   final bool showMapToolbar;
   final bool showTraffic;
@@ -209,8 +219,13 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
         ),
         mapType: widget.mapType,
         zoomGesturesEnabled: widget.allowZoom,
+        // Android-only in google_maps_flutter - the iOS Google Maps SDK
+        // ships no built-in zoom buttons, so this flag silently does
+        // nothing there. A map that needs zoom controls on iOS has to draw
+        // its own and drive the camera (see GoogleMapPage's _zoomControls).
         zoomControlsEnabled: widget.showZoomControls,
         myLocationEnabled: widget.showLocation,
+        myLocationButtonEnabled: widget.showLocationButton,
         compassEnabled: widget.showCompass,
         mapToolbarEnabled: widget.showMapToolbar,
         trafficEnabled: widget.showTraffic,

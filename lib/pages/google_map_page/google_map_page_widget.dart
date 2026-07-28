@@ -381,6 +381,75 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     }).toList();
   }
 
+  /// Zoom in / zoom out, bottom-right.
+  ///
+  /// Drawn here rather than switching on `showZoomControls`, because that
+  /// maps to google_maps_flutter's `zoomControlsEnabled`, which is
+  /// Android-only - the iOS Google Maps SDK has no built-in zoom buttons,
+  /// so on this app's primary platform the flag does nothing at all. The
+  /// corner previously held Google's recentre button, enabled by default
+  /// with the location layer switched off behind it, so the one control in
+  /// reach did nothing when tapped.
+  ///
+  /// Zoom gestures still work and are unaffected; these are for the
+  /// one-handed case where a pinch isn't practical.
+  Widget _zoomControls(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    Future<void> zoomBy(double delta) async {
+      // The controller completes in GoogleMap.onMapCreated, which can land
+      // after the first frame - awaiting the future rather than reading it
+      // means an early tap queues instead of throwing.
+      final controller = await _model.mapGoogleMapsController.future;
+      await controller.animateCamera(CameraUpdate.zoomBy(delta));
+    }
+
+    Widget button(IconData icon, String semantic, double delta,
+            {required bool isTop}) =>
+        Semantics(
+          button: true,
+          label: semantic,
+          child: InkWell(
+            onTap: () => zoomBy(delta),
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(isTop ? 8.0 : 0.0),
+              bottom: Radius.circular(isTop ? 0.0 : 8.0),
+            ),
+            child: Container(
+              width: 44.0,
+              height: 44.0,
+              alignment: Alignment.center,
+              child: Icon(icon, color: theme.primaryText, size: 24.0),
+            ),
+          ),
+        );
+
+    return Align(
+      alignment: AlignmentDirectional(1.0, 0.35),
+      child: Padding(
+        padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 16.0, 0.0),
+        child: Container(
+          decoration: BoxDecoration(
+            // The same near-opaque white the menu button uses, so the two
+            // controls read as one set against a light map that the app's
+            // dark theme doesn't reach.
+            color: Color(0xE6FFFFFF),
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              button(Icons.add_rounded, 'Zoom in', 1.0, isTop: true),
+              Container(height: 1.0, width: 28.0, color: theme.alternate),
+              button(Icons.remove_rounded, 'Zoom out', -1.0, isTop: false),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Disambiguates a pin that stands for more than one business.
   void _showCoLocatedPicker(List<BusinessesRecord> businesses) {
     final theme = FlutterFlowTheme.of(context);
@@ -615,8 +684,16 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     initialZoom: 14.0,
                     allowInteraction: true,
                     allowZoom: true,
+                    // Stays false: it's Android-only, and this app's zoom
+                    // buttons are drawn by _zoomControls so both platforms
+                    // get the same control in the same place.
                     showZoomControls: false,
                     showLocation: false,
+                    // Was drawing Google's recentre button bottom-right by
+                    // default, with the location layer switched off behind
+                    // it - a button that did nothing, occupying exactly the
+                    // corner people reach for to zoom.
+                    showLocationButton: false,
                     showCompass: false,
                     showMapToolbar: false,
                     showTraffic: false,
@@ -632,6 +709,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     mapTakesGesturePreference: true,
                   ),
                 ),
+                _zoomControls(context),
                 Align(
                   alignment: AlignmentDirectional(0.0, -1.0),
                   child: Container(
