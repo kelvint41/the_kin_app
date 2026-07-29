@@ -247,37 +247,37 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
         Row(
           children: durations
               .map(
-                (minutes) => Padding(
-                  padding: EdgeInsetsDirectional.only(end: 8.0),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () =>
-                        setState(() => _selectedDurationMinutes = minutes),
-                    child: Container(
-                      height: 34.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: _selectedDurationMinutes == minutes
-                              ? const Color(0xFFD4AF37)
-                              : FlutterFlowTheme.of(context).alternate,
-                          width: 1.0,
+                (minutes) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () =>
+                          setState(() => _selectedDurationMinutes = minutes),
+                      child: Container(
+                        height: 34.0,
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context).primary,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: _selectedDurationMinutes == minutes
+                                ? const Color(0xFFD4AF37)
+                                : FlutterFlowTheme.of(context).alternate,
+                            width: 1.0,
+                          ),
                         ),
-                      ),
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        minutes < 60 ? '$minutes min' : '${minutes ~/ 60} hr',
-                        style: FlutterFlowTheme.of(context)
-                            .labelMedium
-                            .override(
-                              color: const Color(0xFFD4AF37),
-                            ),
+                        alignment: AlignmentDirectional(0.0, 0.0),
+                        child: Text(
+                          minutes < 60 ? '$minutes min' : '${minutes ~/ 60} hr',
+                          style: FlutterFlowTheme.of(context)
+                              .labelMedium
+                              .override(
+                                color: const Color(0xFFD4AF37),
+                              ),
+                        ),
                       ),
                     ),
                   ),
