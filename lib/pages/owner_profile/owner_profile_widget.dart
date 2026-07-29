@@ -6,7 +6,7 @@ import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
-import '/components/kindex_gauge.dart';
+import '/components/community_shoutout_carousel.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -694,7 +694,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Your Kindex Score',
+                      'Community Shoutouts',
                       style: FlutterFlowTheme.of(context).titleSmall.override(
                             font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
@@ -710,82 +710,8 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(24.0),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Replaces a LinearPercentIndicator whose
-                              // percent was the literal 0.85 - the same bar
-                              // for every business - sitting above a score
-                              // and ceiling that are now real. One stream
-                              // feeds all three.
-                              StreamBuilder<BusinessesRecord>(
-                                stream: BusinessesRecord.getDocument(
-                                    currentUserDocument!.ownedBusiness!),
-                                builder: (context, kindexSnapshot) {
-                                  final biz = kindexSnapshot.data;
-                                  if (biz == null) {
-                                    return SizedBox(
-                                      height: 200.0,
-                                      child: Center(
-                                        child: SizedBox(
-                                          width: 30.0,
-                                          height: 30.0,
-                                          child: CircularProgressIndicator(
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                              FlutterFlowTheme.of(context)
-                                                  .accentOnSurface,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  return KindexGauge(
-                                    score: biz.kindexScore,
-                                    maxScore: biz.isPremium ? 900 : 750,
-                                  );
-                                },
-                              ),
-                              Text(
-                                'Your score updates automatically based on customer reviews and community activity.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .override(
-                                      font: GoogleFonts.playfairDisplay(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context).hint,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontStyle,
-                                      lineHeight: 1.4,
-                                    ),
-                              ),
-                            ].divide(SizedBox(height: 16.0)),
-                          ),
-                        ),
-                      ),
+                    CommunityShoutoutCarousel(
+                      businessRef: currentUserDocument!.ownedBusiness!,
                     ),
                   ].divide(SizedBox(height: 16.0)),
                 ),
