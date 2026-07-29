@@ -38,3 +38,10 @@ exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngag
 // pure aggregation callable has no business loading.
 const aiMarketingStats = require("./ai_marketing_stats.js");
 exports.getAiMarketingStats = aiMarketingStats.getAiMarketingStats;
+
+const agencyQueueScheduling = require("./agency_queue_scheduling.js");
+exports.scheduleAgencyQueueTarget =
+  agencyQueueScheduling.scheduleAgencyQueueTarget;
+
+const signupFeedSync = require("./signup_feed_sync.js");
+exports.syncSignupFeed = signupFeedSync.syncSignupFeed;

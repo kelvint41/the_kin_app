@@ -378,7 +378,12 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                               safeSetState(() {}),
                                           child: KpiCardWidget(
                                             value: kpiCardCount.toString(),
-                                            label: 'Businesses Listed',
+                                            // Was just "Businesses Listed"
+                                            // with no indication the count
+                                            // is scoped to selectedCity -
+                                            // read as a global total when it
+                                            // wasn't one.
+                                            label: '$selectedCity Businesses',
                                           ),
                                         );
                                       },
@@ -708,7 +713,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                               ..sort((a, b) =>
                                                   b.value.compareTo(a.value));
                                             final shownCategories =
-                                                topCategories.take(6).toList();
+                                                topCategories.take(3).toList();
                                             final maxCount =
                                                 shownCategories.isEmpty
                                                     ? 1
@@ -728,8 +733,19 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                                       .primary,
                                                 ),
                                               ],
+                                              // Full category names ("Salon
+                                              // Meyerland - Natural and
+                                              // Relaxed...") were rendering
+                                              // at full length with no
+                                              // rotation, so adjacent labels
+                                              // overlapped into an unreadable
+                                              // smear. Dropped from 6 bars to
+                                              // 5 to give each label more
+                                              // width, and truncated to what
+                                              // actually fits.
                                               xLabels: shownCategories
-                                                  .map((e) => e.key)
+                                                  .map((e) => _truncateLabel(
+                                                      e.key, 6))
                                                   .toList(),
                                               chartStylingInfo:
                                                   ChartStylingInfo(
@@ -745,8 +761,14 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                                 showLabels: true,
                                                 labelTextStyle:
                                                     FlutterFlowTheme.of(context)
-                                                        .bodySmall,
-                                                reservedSize: 28.0,
+                                                        .bodySmall
+                                                        .override(
+                                                          font: GoogleFonts
+                                                              .plusJakartaSans(),
+                                                          fontSize: 9.5,
+                                                          letterSpacing: 0.0,
+                                                        ),
+                                                reservedSize: 34.0,
                                               ),
                                               yAxisLabelInfo: AxisLabelInfo(
                                                 reservedSize: 0.0,
@@ -905,6 +927,34 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                   limit: 5,
                                 ),
                                 builder: (context, snapshot) {
+                                  // This query filters on city and orders by
+                                  // interaction_count - a composite index
+                                  // Firestore didn't have. That made the
+                                  // stream error out on first read, which
+                                  // the old check for `!snapshot.hasData`
+                                  // never distinguished from "still
+                                  // loading", so this spun forever instead
+                                  // of surfacing the real problem.
+                                  if (snapshot.hasError) {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 12.0),
+                                      child: Text(
+                                        'Could not load top businesses '
+                                        '(missing index or query error).',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodySmall
+                                            .override(
+                                              font: GoogleFonts
+                                                  .plusJakartaSans(),
+                                              color: FlutterFlowTheme.of(
+                                                      context)
+                                                  .error,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    );
+                                  }
                                   // Customize what your widget looks like when it's loading.
                                   if (!snapshot.hasData) {
                                     return Center(
@@ -924,6 +974,35 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                   List<BusinessesRecord>
                                       listViewBusinessesRecordList =
                                       snapshot.data!;
+
+                                  // orderBy('interaction_count') silently
+                                  // excludes any business missing that
+                                  // field, same as the deliveries list
+                                  // below - so an empty result here isn't
+                                  // an error, it means no business in this
+                                  // city has recorded interactions yet.
+                                  // Worth a message instead of blank space,
+                                  // which reads as broken.
+                                  if (listViewBusinessesRecordList.isEmpty) {
+                                    return Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: 12.0),
+                                      child: Text(
+                                        'No businesses in $selectedCity '
+                                        'have recorded interactions yet.',
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodySmall
+                                            .override(
+                                              font: GoogleFonts
+                                                  .plusJakartaSans(),
+                                              color: FlutterFlowTheme.of(
+                                                      context)
+                                                  .secondaryText,
+                                              letterSpacing: 0.0,
+                                            ),
+                                      ),
+                                    );
+                                  }
 
                                   return ListView.separated(
                                     padding: EdgeInsets.zero,
@@ -1057,6 +1136,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             ].divide(SizedBox(height: 16.0)),
                           ),
                           _aiMarketingSection(context),
+                          _deliveriesSection(context),
                           _feedbackSection(context),
                         ].divide(SizedBox(height: 24.0)),
                       ),
@@ -1322,6 +1402,143 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           ],
         ),
       );
+
+  String _truncateLabel(String label, int maxChars) =>
+      label.length <= maxChars ? label : '${label.substring(0, maxChars)}…';
+
+  /// The self-contained deadline list decided on in place of a Google
+  /// Calendar sync: reads `target_delivery_date`, which
+  /// scheduleAgencyQueueTarget stamps automatically from the App Studio
+  /// pricing ladder's delivery windows. Firestore's orderBy silently
+  /// excludes documents missing the field, so Advanced-tier and
+  /// not-yet-leveled requests (which are deliberately never auto-scheduled)
+  /// drop out of this list on their own, with no extra filtering needed.
+  Widget _deliveriesSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Upcoming App Studio Deliveries',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          padding: EdgeInsets.all(20.0),
+          child: StreamBuilder<List<AgencyQueueRecord>>(
+            stream: queryAgencyQueueRecord(
+              queryBuilder: (q) => q.orderBy('target_delivery_date'),
+              limit: 8,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return _aiNote(
+                  theme,
+                  'Could not load upcoming deliveries (query error).',
+                );
+              }
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final requests = snapshot.data!;
+              if (requests.isEmpty) {
+                return _aiNote(
+                  theme,
+                  'Nothing scheduled. A target date appears here '
+                  'automatically once a request names a package - Single '
+                  'page through Professional. Advanced stays open-ended by '
+                  'design and won\'t show up here.',
+                );
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (final request in requests)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 14),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  request.businessName.isEmpty
+                                      ? request.contactName.isEmpty
+                                          ? 'Unnamed request'
+                                          : request.contactName
+                                      : request.businessName,
+                                  style: theme.bodyMedium.override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold),
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  [
+                                    if (request.tierLevel.isNotEmpty)
+                                      request.tierLevel,
+                                    request.currentStatus.isEmpty
+                                        ? 'new'
+                                        : request.currentStatus,
+                                  ].join(' · '),
+                                  style: theme.bodySmall.override(
+                                    font: GoogleFonts.plusJakartaSans(),
+                                    color: theme.secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            request.targetDeliveryDate == null
+                                ? '—'
+                                : dateTimeFormat(
+                                    'MMM d', request.targetDeliveryDate),
+                            style: theme.bodyMedium.override(
+                              font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold),
+                              color: theme.accentOnSurface,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
+    );
+  }
 
   Widget _aiNote(FlutterFlowTheme theme, String text) => Text(
         text,

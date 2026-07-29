@@ -51,6 +51,20 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
     'Included with my Elite Growth plan',
   ];
 
+  // Mirrors the App Studio pricing ladder. This drives the automatic
+  // target_delivery_date a Cloud Function stamps on the request - see
+  // scheduleAgencyQueueTarget - so the values here must match its
+  // DELIVERY_WINDOW_DAYS keys exactly.
+  static const _tierLevels = [
+    'Not sure yet',
+    'Single page',
+    'Business site',
+    'Site with booking',
+    'Essential',
+    'Professional',
+    'Advanced',
+  ];
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _businessController = TextEditingController();
@@ -58,6 +72,7 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
 
   String _type = _projectTypes.first;
   String _budget = _budgets.first;
+  String _tier = _tierLevels.first;
   bool _sending = false;
   bool _sent = false;
   String? _error;
@@ -107,6 +122,7 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
             contactEmail: email,
             businessName: _businessController.text.trim(),
             projectType: _type,
+            tierLevel: _tier,
             budgetBand: _budget,
             brief: brief,
             // The pipeline starts here; an admin moves it on from `new`.
@@ -275,10 +291,16 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
             _field(theme, 'Business name (optional)', _businessController),
             _dropdown(theme, 'What kind of app?', _projectTypes, _type,
                 (v) => setState(() => _type = v)),
+            _dropdown(theme, 'Which package?', _tierLevels, _tier,
+                (v) => setState(() => _tier = v)),
             _dropdown(theme, 'Budget', _budgets, _budget,
                 (v) => setState(() => _budget = v)),
             _field(theme, 'What should it do?', _briefController,
-                maxLines: 5, maxLength: 2000),
+                maxLines: 5,
+                maxLength: 2000,
+                helperText: 'Be as specific as you can - features, pages, '
+                    'who it\'s for, examples you like. More detail here '
+                    'means a faster, more accurate estimate.'),
             if (_error != null)
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
@@ -359,6 +381,7 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
     int maxLines = 1,
     int? maxLength,
     TextInputType? keyboard,
+    String? helperText,
   }) =>
       TextFormField(
         controller: controller,
@@ -372,7 +395,14 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
         ),
         decoration: InputDecoration(
           labelText: label,
+          helperText: helperText,
+          helperMaxLines: 3,
           labelStyle: theme.labelMedium.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+          ),
+          helperStyle: theme.bodySmall.override(
             font: GoogleFonts.plusJakartaSans(),
             color: theme.secondaryText,
             letterSpacing: 0.0,
