@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/gemini/gemini.dart';
+import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/components/business_image_widget.dart';
 import '/components/image_upload_button.dart';
@@ -893,7 +894,7 @@ class _BusinessProfileOwnerWidgetState
                                     hoverColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
-                                      await launchURL(
+                                      await KinServices.launchBusinessLink(
                                           businessProfileOwnerBusinessesRecord
                                               .website);
                                     },

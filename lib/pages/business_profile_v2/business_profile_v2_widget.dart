@@ -160,7 +160,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                 label: label,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(12.0),
-                  onTap: () async => launchURL(url),
+                  onTap: () async => KinServices.launchBusinessLink(url),
                   child: Container(
                     width: 44.0,
                     height: 44.0,
@@ -1530,7 +1530,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       hoverColor: Colors.transparent,
                                       highlightColor: Colors.transparent,
                                       onTap: () async {
-                                        await launchURL(
+                                        await KinServices.launchBusinessLink(
                                             businessProfileV2BusinessesRecord
                                                 .website);
                                       },

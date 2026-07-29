@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -130,7 +131,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.doordashUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.doordashUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -199,7 +200,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.ubereatsUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.ubereatsUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -268,7 +269,7 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.grubhubUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.grubhubUrl);
                     },
                     child: Container(
                       height: 56.0,

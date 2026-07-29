@@ -131,13 +131,13 @@ class MarketingContent {
 /// Power Hour caps for one subscription tier. See
 /// [KinServices.startPowerHour].
 class _PowerHourLimits {
-  const _PowerHourLimits({required this.durationCapMinutes, this.weeklyLimit});
+  const _PowerHourLimits({required this.durationCapMinutes, this.monthlyLimit});
 
   final int durationCapMinutes;
 
-  /// Max Power Hours per rolling 7-day window. Null means unlimited -
+  /// Max Power Hours per rolling 30-day window. Null means unlimited -
   /// skip the frequency check entirely.
-  final int? weeklyLimit;
+  final int? monthlyLimit;
 }
 
 /// Real subscription_tier values, as written by the live upgrade flow in
@@ -148,27 +148,27 @@ class _PowerHourLimits {
 /// through to [_defaultPowerHourLimits] rather than risk granting
 /// broader access than intended.
 const _powerHourLimitsByTier = <String, _PowerHourLimits>{
-  'Community': _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1),
-  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, weeklyLimit: 2),
-  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, weeklyLimit: 3),
-  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, weeklyLimit: null),
+  'Community': _PowerHourLimits(durationCapMinutes: 30, monthlyLimit: 1),
+  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, monthlyLimit: 2),
+  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, monthlyLimit: 4),
+  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, monthlyLimit: null),
 };
 const _defaultPowerHourLimits =
-    _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1);
+    _PowerHourLimits(durationCapMinutes: 30, monthlyLimit: 1);
 
 String _powerHourLimitMessage(String tier) {
   switch (tier) {
     case 'Community':
-      return "You've reached your weekly Power Hour limit. Upgrade to "
+      return "You've reached your monthly Power Hour limit. Upgrade to "
           'Founding Local or Pro Growth for more!';
     case 'Founding Local':
-      return "You've reached your weekly Power Hour limit for Founding "
+      return "You've reached your monthly Power Hour limit for Founding "
           'Local. Upgrade to Pro Growth for more!';
     case 'Pro Growth':
-      return "You've reached your weekly Power Hour limit for Pro Growth. "
+      return "You've reached your monthly Power Hour limit for Pro Growth. "
           'Upgrade to Elite Growth for unlimited Power Hours!';
     default:
-      return "You've reached your weekly Power Hour limit. Upgrade your "
+      return "You've reached your monthly Power Hour limit. Upgrade your "
           'plan for more!';
   }
 }
@@ -681,6 +681,39 @@ class KinServices {
     }
   }
 
+  /// Opens a business's own outbound link (website, DoorDash/UberEats/
+  /// Grubhub, social profile) with an explicit `utm_source=kin_app` /
+  /// `utm_medium=business_directory` pair merged into its query string, so
+  /// server logs on the business's end can attribute the click to KIN.
+  ///
+  /// This is plain UTM tagging, not link cloaking: the destination is
+  /// exactly the URL the business gave us, unobscured, just with our
+  /// attribution appended - the same thing any directory or marketplace
+  /// app does to outbound links.
+  ///
+  /// Existing query parameters are preserved (merged via
+  /// [Uri.queryParameters], then re-serialised through [Uri.replace] so the
+  /// result always has exactly one `?` and properly `&`-joined pairs,
+  /// however the business's stored URL was formatted). Non-http(s) URLs
+  /// (tel:, mailto:) and empty strings pass through unchanged - a UTM
+  /// parameter on a phone number is meaningless and would just break the
+  /// dialer.
+  /// Used by: Business Profile -> website/social/food-delivery links.
+  static Future<void> launchBusinessLink(String url) async {
+    if (url.isEmpty) return;
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.scheme.startsWith('http')) {
+      await launchURL(url);
+      return;
+    }
+    final attributedUri = uri.replace(queryParameters: {
+      ...uri.queryParameters,
+      'utm_source': 'kin_app',
+      'utm_medium': 'business_directory',
+    });
+    await launchURL(attributedUri.toString());
+  }
+
   /// Opens the native share sheet with [text], then records a
   /// `share_app` Kindex engagement event for the signed-in user - the
   /// event feeds the same processUserEngagementEvent pipeline as
@@ -715,8 +748,8 @@ class KinServices {
   }
 
   /// Starts a Power Hour flash-beacon promotion, gated by the business's
-  /// subscription_tier: [durationMinutes] is capped, and a rolling
-  /// 7-day usage count is checked against a per-tier weekly limit (see
+  /// subscription_tier: [durationMinutes] is capped, and a rolling 30-day
+  /// usage count is checked against a per-tier monthly limit (see
   /// _powerHourLimitsByTier). Fetches the business fresh rather than
   /// trusting the caller's possibly-stale cached data, since this is
   /// enforcing a real limit, not just display. checkAndExpireBeacons (a
@@ -736,10 +769,11 @@ class KinServices {
 
       final now = DateTime.now();
       final windowExpired = business.powerHourLastReset == null ||
-          now.difference(business.powerHourLastReset!).inDays >= 7;
+          now.difference(business.powerHourLastReset!).inDays >= 30;
       final currentUsage = windowExpired ? 0 : business.powerHourUsageCount;
 
-      if (limits.weeklyLimit != null && currentUsage >= limits.weeklyLimit!) {
+      if (limits.monthlyLimit != null &&
+          currentUsage >= limits.monthlyLimit!) {
         return ServiceResult.failure(
             _powerHourLimitMessage(business.subscriptionTier));
       }
