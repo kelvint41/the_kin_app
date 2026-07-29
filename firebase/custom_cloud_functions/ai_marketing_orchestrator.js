@@ -8,12 +8,19 @@ const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 // Set via: firebase functions:secrets:set GEMINI_API_KEY
 const geminiApiKey = defineSecret("GEMINI_API_KEY");
 
-// Tiers that qualify for AI Marketing Orchestrator access. Real
-// subscription_tier values as written by merchant_pricing_suite_widget.dart's
-// upgrade flow (see kin_services.dart's _powerHourLimitsByTier for the same
-// convention) - not a generic "Premium" string, since no tier is actually
-// named that in this app.
-const ENTITLED_TIERS = new Set(["Pro Growth", "Elite Growth"]);
+// Real subscription_tier values as written by
+// merchant_pricing_suite_widget.dart's upgrade flow (see kin_services.dart's
+// _powerHourLimitsByTier for the same convention) - not a generic "Premium"
+// string, since no tier is actually named that in this app.
+//
+// Entitlement used to be its own ENTITLED_TIERS set covering only Pro
+// Growth/Elite Growth, checked before the quota table was even consulted.
+// Community and Founding Local are now entitled too, at 1 and 2 generations
+// a month - deliberately equal to those tiers' Power Hour allowance in
+// kin_services.dart, so a free or entry business can only ever generate
+// content for the promotion it's actually about to run, not as a
+// general-purpose copywriter. Being "entitled" is now just "has a row in
+// DEFAULT_MONTHLY_LIMITS" - see isEntitled below.
 
 // Single source of truth: this is both the model called and the model
 // recorded on every generation log. It used to be written out twice, so a
@@ -30,7 +37,7 @@ const ENTITLED_TIERS = new Set(["Pro Growth", "Elite Growth"]);
 const GEMINI_MODEL = "gemini-3.6-flash";
 
 function isEntitled(subscriptionTier) {
-  return ENTITLED_TIERS.has(subscriptionTier);
+  return Object.prototype.hasOwnProperty.call(DEFAULT_MONTHLY_LIMITS, subscriptionTier);
 }
 
 // Monthly generation caps per tier. Before this existed, an entitled
@@ -46,10 +53,19 @@ function isEntitled(subscriptionTier) {
 // behaves as unlimited for an honest owner while still bounding a runaway
 // loop or a compromised account.
 //
+// Community and Founding Local are capped at 1 and 2 - exactly their
+// Power Hour monthly allowance (_powerHourLimitsByTier), not an
+// independent number. The two are meant to move together: a free or entry
+// business can write copy for the one promotion it's about to run, not
+// generate on demand the way Pro/Elite can. If Power Hour's allowance for
+// either tier changes, this should change with it.
+//
 // Overridable per-deployment from Firestore (see readLimits) so these can
 // be retuned without a redeploy, the same reasoning as
 // kindex_config/scoring_dynamics.
 const DEFAULT_MONTHLY_LIMITS = {
+  "Community": 1,
+  "Founding Local": 2,
   "Pro Growth": 30,
   "Elite Growth": 150,
 };
@@ -159,6 +175,14 @@ async function refundGeneration(db, businessRef, nowMs) {
 }
 
 function quotaMessage(tier, limit) {
+  if (tier === "Community") {
+    return "You've used this month's free AI-written promotion. Upgrade to Founding Local "
+      + "for 2 a month, or try again next month.";
+  }
+  if (tier === "Founding Local") {
+    return `You've used all ${limit} AI-written promotions for this month on Founding Local. `
+      + "Upgrade to Pro Growth for more, or try again next month.";
+  }
   if (tier === "Pro Growth") {
     return `You've used all ${limit} AI marketing generations for this month on Pro Growth. `
       + "Upgrade to Elite Growth for more, or try again next month.";
@@ -265,6 +289,13 @@ exports.generateMarketingContent = onCall(
     // Entitlement check happens here, server-side, before the AI is ever
     // invoked - the app only triggers the Gemini call if this returns
     // true. The client never sees or controls this decision.
+    //
+    // Every real subscription_tier is entitled now (see
+    // DEFAULT_MONTHLY_LIMITS), so this only fires for a business whose
+    // subscription_tier is missing, a typo, or an ad-hoc value set outside
+    // the normal upgrade flow - the same "don't risk granting broader
+    // access than intended" reasoning _powerHourLimitsByTier documents for
+    // its own default fallback.
     const entitled = isEntitled(business.subscription_tier);
     if (!entitled) {
       await logCall(db, {
@@ -276,7 +307,7 @@ exports.generateMarketingContent = onCall(
       });
       throw new HttpsError(
         "permission-denied",
-        "AI Marketing Orchestrator requires Pro Growth or Elite Growth. Upgrade to unlock.",
+        "AI Marketing isn't available for your current plan. Please contact support.",
       );
     }
 

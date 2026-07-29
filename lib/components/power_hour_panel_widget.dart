@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '/components/ai_marketing_sheet_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -114,6 +115,18 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(result.error!)));
     }
+  }
+
+  void _openAiMarketing() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => Padding(
+        padding: MediaQuery.viewInsetsOf(context),
+        child: AiMarketingSheetWidget(businessRef: widget.businessRef),
+      ),
+    );
   }
 
   Future<void> _confirmStop() async {
@@ -272,7 +285,28 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
               )
               .toList(),
         ),
-        SizedBox(height: 16.0),
+        SizedBox(height: 12.0),
+        FFButtonWidget(
+          onPressed: _openAiMarketing,
+          text: 'Get an AI post idea for this promotion',
+          icon: Icon(Icons.auto_awesome_rounded,
+              color: const Color(0xFFD4AF37), size: 16.0),
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 40.0,
+            color: Colors.transparent,
+            textStyle: FlutterFlowTheme.of(context).labelMedium.override(
+                  color: const Color(0xFFD4AF37),
+                ),
+            elevation: 0.0,
+            borderSide: BorderSide(
+              color: const Color(0xFFD4AF37).withAlpha(102),
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        SizedBox(height: 12.0),
         FFButtonWidget(
           onPressed: _isSubmitting ? null : _start,
           text: _isSubmitting ? 'Starting...' : 'Start Power Hour',

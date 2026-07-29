@@ -21,9 +21,10 @@ const admin = require("firebase-admin");
 // silently folded into a total nobody questions.
 const STATUSES = ["success", "rejected_not_entitled", "rejected_quota_exceeded", "error"];
 
-// Mirrors ENTITLED_TIERS plus the tiers that can only ever be rejected -
-// the rejected-by-tier split is the point of the panel, so the unentitled
-// tiers matter as much as the entitled ones.
+// Every real subscription_tier (see ai_marketing_orchestrator.js's
+// DEFAULT_MONTHLY_LIMITS) - all four are entitled now, but the split by
+// tier is still the point of the panel, since Community and Founding
+// Local sit on much tighter monthly caps than Pro/Elite.
 const TIERS = ["Community", "Founding Local", "Pro Growth", "Elite Growth"];
 
 // From logAiSuggestionEngagement's validActions.
