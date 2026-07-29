@@ -22,8 +22,11 @@ class TierCardWidget extends StatefulWidget {
     String? f3,
     String? f4,
     this.beaconText,
+    bool? isYearly,
+    this.yearlyTeaser,
   })  : this.isPro = isPro ?? false,
         this.isElite = isElite ?? false,
+        this.isYearly = isYearly ?? false,
         this.title = title ?? 'Community',
         this.badgeLabel = badgeLabel ?? 'Free Community Tier',
         this.price = price ?? '\$0',
@@ -34,6 +37,7 @@ class TierCardWidget extends StatefulWidget {
 
   final bool isPro;
   final bool isElite;
+  final bool isYearly;
   final String title;
   final String badgeLabel;
   final String price;
@@ -41,6 +45,12 @@ class TierCardWidget extends StatefulWidget {
   final String f2;
   final String f3;
   final String f4;
+
+  /// Cross-sell nudge shown under the price on the Monthly view (e.g. 'or
+  /// $190/yr - 2 months free'). Pass null to hide it - the caller only
+  /// supplies it when the Monthly tab is selected, since it would be
+  /// redundant once the card is already showing the yearly price.
+  final String? yearlyTeaser;
 
   /// Text shown on a small pulsing "beacon" badge at the card's top-left
   /// corner (e.g. 'Free' or 'Upgrade'). Null hides the beacon entirely.
@@ -365,7 +375,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                   ),
                             ),
                             Text(
-                              '/ Month',
+                              widget!.isYearly ? '/ Year' : '/ Month',
                               style: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .override(
@@ -391,6 +401,22 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ),
                           ].divide(SizedBox(width: 4.0)),
                         ),
+                        if (widget!.yearlyTeaser != null)
+                          Text(
+                            widget!.yearlyTeaser!,
+                            style: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: widget!.isElite
+                                      ? Color(0xFFD4AF37)
+                                      : FlutterFlowTheme.of(context).primary,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         Divider(
                           height: 16.0,
                           thickness: 1.0,

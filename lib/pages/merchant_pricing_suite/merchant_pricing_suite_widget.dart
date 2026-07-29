@@ -11,7 +11,6 @@ import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import 'dart:math';
 import 'dart:ui';
 import '/index.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -276,33 +275,26 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                           child: Stack(
                             alignment: AlignmentDirectional(-1.0, -1.0),
                             children: [
-                              ClipRRect(
-                                child: Container(
-                                  height: 280.0,
-                                  child: Opacity(
-                                    opacity: 0.4,
-                                    child: CachedNetworkImage(
-                                      fadeInDuration: Duration(milliseconds: 0),
-                                      fadeOutDuration:
-                                          Duration(milliseconds: 0),
-                                      imageUrl:
-                                          'https://dimg.dreamflow.cloud/v1/image/luxury%20dark%20abstract%20gold%20waves%20background',
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment(0.0, 0.0),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              // Was a CachedNetworkImage pointed at a
+                              // dreamflow.cloud AI-generated placeholder
+                              // ("luxury dark abstract gold waves") - a
+                              // scaffolding artifact never swapped for a
+                              // real asset, and prone to rendering as a
+                              // busy, uncontrolled speckle pattern (or
+                              // nothing at all if the request failed). A
+                              // plain brand gradient can't fail to load and
+                              // can't look like noise.
                               Container(
+                                height: 280.0,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     colors: [
-                                      Colors.transparent,
-                                      FlutterFlowTheme.of(context).primary
+                                      FlutterFlowTheme.of(context).primary,
+                                      const Color(0xFF06251B),
                                     ],
                                     stops: [0.0, 1.0],
-                                    begin: AlignmentDirectional(0.0, -1.0),
-                                    end: AlignmentDirectional(0, 1.0),
+                                    begin: AlignmentDirectional(1.0, -1.0),
+                                    end: AlignmentDirectional(-1.0, 1.0),
                                   ),
                                   shape: BoxShape.rectangle,
                                 ),
@@ -317,17 +309,18 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Stack(
-                                        children: [],
-                                      ),
                                       FlutterFlowIconButton(
                                         borderRadius: 8.0,
                                         buttonSize: 37.4,
                                         fillColor: Colors.transparent,
                                         icon: Icon(
                                           Icons.arrow_back_ios_new_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          // Fixed white, not a theme text
+                                          // token: this header is a fixed
+                                          // dark gradient in both themes, so
+                                          // a light-mode text colour here
+                                          // would go dark-on-dark.
+                                          color: Colors.white,
                                           size: 24.0,
                                         ),
                                         onPressed: () {
@@ -349,9 +342,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                                         .headlineLarge
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
+                                              color: Colors.white,
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.w800,
                                               fontStyle:
@@ -376,9 +367,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                                         .bodyMedium
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryText,
+                                              color: Colors.white70,
                                               letterSpacing: 0.0,
                                               fontWeight:
                                                   FlutterFlowTheme.of(context)
@@ -508,6 +497,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     title: 'Founding Local',
                                     badgeLabel: 'Founding Member Tier',
                                     price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$19', '\$190'),
+                                    isYearly: _yearly,
+                                    yearlyTeaser: _yearly ? null : 'or \$190/yr - 2 months free',
                                     f1: 'Verified Founding Member trust badge',
                                     f2: 'Up to 5 gallery photos on profile',
                                     f3: 'Basic profile analytics (views & trends)',
@@ -605,6 +596,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           title: 'Pro Growth',
                                           badgeLabel: 'Standard Business',
                                           price: _priceFor(_kProGrowthMonthly, _kProGrowthYearly, '\$29', '\$290'),
+                                          isYearly: _yearly,
+                                          yearlyTeaser: _yearly ? null : 'or \$290/yr - 2 months free',
                                           f1: 'Standard interactive map placement in San Antonio',
                                           f2: 'Clutter-free promotion updates on \'The Exchange\'',
                                           f3: 'Premium performance analytics dashboard',
@@ -664,8 +657,10 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: true,
                                     title: 'Elite Growth',
                                     badgeLabel: 'Ultimate Exposure',
-                                    price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$59', '\$590'),
-                                    f1: 'Augmented Reality Camera Placement (3D Pins)',
+                                    price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$99', '\$990'),
+                                    isYearly: _yearly,
+                                    yearlyTeaser: _yearly ? null : 'or \$990/yr - 2 months free',
+                                    f1: 'Boosted KINDEX Score baseline (850 vs. 500) and ceiling (900 vs. 750)',
                                     f2: 'Interactive KINDEX dynamic ticker badge',
                                     f3: 'Geo-Fenced Flash Beacons (3-block radius)',
                                     f4: 'Priority Glowing Visual Map Pinning',
@@ -722,7 +717,14 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         size: 12.0,
                                       ),
                                       Text(
-                                        'Secure encrypted checkout',
+                                        // Was 'Secure encrypted checkout' -
+                                        // there is no custom checkout to
+                                        // secure. Purchases go through
+                                        // Apple/Google IAP, so this says
+                                        // what actually happens instead of
+                                        // implying a payment system KIN
+                                        // built itself.
+                                        'Billed securely through the App Store',
                                         style: FlutterFlowTheme.of(context)
                                             .labelSmall
                                             .override(
@@ -752,6 +754,99 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                             ),
                                       ),
                                     ].divide(SizedBox(width: 4.0)),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        Text(
+                                          'By subscribing you agree to our ',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                        InkWell(
+                                          onTap: () => context.pushNamed(
+                                              TermsOfServicePageWidget
+                                                  .routeName),
+                                          child: Text(
+                                            'Terms of Service',
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                          ),
+                                        ),
+                                        Text(
+                                          ' and ',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                        InkWell(
+                                          onTap: () => context.pushNamed(
+                                              PrivacyPolicyPageWidget
+                                                  .routeName),
+                                          child: Text(
+                                            'Privacy Policy',
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                          ),
+                                        ),
+                                        Text(
+                                          '. Plans renew automatically until cancelled.',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ].divide(SizedBox(height: 4.0)),
                               ),
