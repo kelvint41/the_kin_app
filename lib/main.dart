@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'auth/firebase_auth/firebase_user_provider.dart';
 import 'auth/firebase_auth/auth_util.dart';
 
@@ -27,6 +29,7 @@ void main() async {
   usePathUrlStrategy();
 
   await initFirebase();
+  _maybeUseFirebaseEmulator();
 
   await FlutterFlowTheme.initialize();
 
@@ -50,6 +53,28 @@ void main() async {
     create: (context) => appState,
     child: MyApp(),
   ));
+}
+
+/// Points Firestore/Functions at the local Firebase Emulator Suite instead
+/// of production, for testing the Mystery Reward System end-to-end without
+/// touching real data. Off by default - only activates with:
+///
+///   flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+///
+/// Gated on kDebugMode for the same reason as the dev sign-in bypass below:
+/// the branch is dead code (eliminated by the compiler) in release/profile
+/// builds, so this can never point a real user's app at localhost.
+void _maybeUseFirebaseEmulator() {
+  const useEmulator =
+      bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: false);
+  if (!kDebugMode || !useEmulator) return;
+
+  final host = defaultTargetPlatform == TargetPlatform.android
+      ? '10.0.2.2' // Android emulator's alias for the host machine's localhost
+      : 'localhost';
+  FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+  FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+  debugPrint('Using Firebase Emulator Suite at $host (Firestore :8080, Functions :5001)');
 }
 
 /// Debug-only auto sign-in for local testing, so you don't have to log in

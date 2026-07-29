@@ -83,11 +83,45 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   /// (no filter).
   BusinessCategoryFilter _selectedCategory = kNearMeFilter;
 
+  /// The map's current visible region, used to bound the businesses query
+  /// to what's actually on screen (see GoogleMapPageModel.businessesForViewport).
+  /// Null until the map's first onCameraIdle fires, which happens once
+  /// automatically right after the map finishes its initial layout.
+  LatLngBounds? _viewportBounds;
+
   void _onCategoryTapped(BusinessCategoryFilter filter) {
     safeSetState(() {
       _selectedCategory =
           identical(_selectedCategory, filter) ? kNearMeFilter : filter;
     });
+  }
+
+  Future<void> _onCameraIdle(LatLng latLng) async {
+    _model.mapGoogleMapsCenter = latLng;
+    try {
+      final controller = await _model.mapGoogleMapsController.future
+          .timeout(const Duration(seconds: 5));
+      final bounds = await controller.getVisibleRegion()
+          .timeout(const Duration(seconds: 5));
+      if (!mounted) return;
+      safeSetState(() => _viewportBounds = bounds);
+    } catch (_) {
+      // Leave _viewportBounds as-is (possibly null) - build() falls back to
+      // an approximate box around the last known center rather than
+      // blocking the page on this.
+    }
+  }
+
+  /// A ~1 degree (roughly 100km) box around [center], used until the real
+  /// on-screen bounds are available from the map controller.
+  LatLngBounds _fallbackBounds(LatLng center) {
+    const delta = 0.5;
+    return LatLngBounds(
+      southwest: LatLng(center.latitude - delta, center.longitude - delta)
+          .toGoogleMaps(),
+      northeast: LatLng(center.latitude + delta, center.longitude + delta)
+          .toGoogleMaps(),
+    );
   }
 
   @override
@@ -608,8 +642,24 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   Widget build(BuildContext context) {
     context.watch<FFAppState>();
 
-    return FutureBuilder<List<BusinessesRecord>>(
-      future: _model.businesses(),
+    // Real bounds come from the map's onCameraIdle (see _onCameraIdle),
+    // which needs the map to have actually laid out and fired at least
+    // once - not guaranteed to have happened by first build, and on some
+    // devices/simulators can be slow or need a nudge from user interaction.
+    // Gating the whole page on that would mean a stuck spinner forever if
+    // it's late; falling back to an approximate box around the initial/last
+    // known center means the map and pins still render immediately, and
+    // get replaced by the precise viewport the moment the real callback
+    // does fire.
+    final bounds = _viewportBounds ?? _fallbackBounds(
+      _model.mapGoogleMapsCenter ?? LatLng(29.4241, -98.4936),
+    );
+
+    return FutureBuilder<List<List<BusinessesRecord>>>(
+      future: Future.wait([
+        _model.businessesForViewport(bounds),
+        _model.premiumBusinesses(),
+      ]),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -629,7 +679,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
           );
         }
         List<BusinessesRecord> googleMapPageBusinessesRecordList =
-            snapshot.data!;
+            snapshot.data![0];
 
         // Map pins honour the active category chip.
         final visibleBusinesses = applyCategoryFilter(
@@ -637,12 +687,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
           _selectedCategory,
         );
 
-        // The carousel deliberately does NOT honour the category chip:
-        // these are paid placements, so narrowing them by whatever the
-        // user is browsing would silently take away exposure a merchant
-        // bought. Eligibility is subscription status only.
+        // The carousel deliberately does NOT honour the category chip or
+        // the map viewport: these are paid placements, and narrowing them
+        // by whatever the user is browsing or has panned to would silently
+        // take away exposure a merchant bought. Eligibility is
+        // subscription status only - see GoogleMapPageModel.premiumBusinesses.
         final premiumBusinesses =
-            premiumCarouselBusinesses(googleMapPageBusinessesRecordList);
+            premiumCarouselBusinesses(snapshot.data![1]);
 
         return GestureDetector(
           onTap: () {
@@ -659,8 +710,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 Container(
                   child: FlutterFlowGoogleMap(
                     controller: _model.mapGoogleMapsController,
-                    onCameraIdle: (latLng) =>
-                        _model.mapGoogleMapsCenter = latLng,
+                    onCameraIdle: _onCameraIdle,
                     initialLocation: _model.mapGoogleMapsCenter ??=
                         LatLng(29.4241, -98.4936),
                     markers: _buildMarkers(visibleBusinesses),

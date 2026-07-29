@@ -14,26 +14,63 @@ import '/index.dart';
 class _Shoutout {
   _Shoutout.review(ReviewsRecord r)
       : isExchangePost = false,
+        isFeedEvent = false,
         text = r.reviewText.isNotEmpty ? r.reviewText : null,
         rating = r.rating,
         userRef = r.userRef,
         timestamp = r.timestamp,
-        likesCount = null;
+        likesCount = null,
+        feedUserName = null,
+        feedIcon = null;
 
   _Shoutout.exchangePost(ExchangePostsRecord p)
       : isExchangePost = true,
+        isFeedEvent = false,
         text = p.postText.isNotEmpty ? p.postText : null,
         rating = null,
         userRef = p.userRef,
         timestamp = p.timestamp,
-        likesCount = p.likesCount;
+        likesCount = p.likesCount,
+        feedUserName = null,
+        feedIcon = null;
+
+  // Global live-feed activity (discoveries, reward unlocks) from
+  // kin_feed_events - a separate collection from the analytics-only
+  // activity_logs, see kin_feed_events_record.dart.
+  _Shoutout.feedEvent(KinFeedEventsRecord e)
+      : isExchangePost = false,
+        isFeedEvent = true,
+        text = _feedEventText(e),
+        rating = null,
+        userRef = e.userRef,
+        timestamp = e.timestamp,
+        likesCount = null,
+        feedUserName = e.userName.isNotEmpty ? e.userName : null,
+        feedIcon = e.actionType == 'REWARD_UNLOCKED' ? '🎁' : '📍';
+
+  static String _feedEventText(KinFeedEventsRecord e) {
+    final business = e.businessName.isNotEmpty ? e.businessName : 'a business';
+    switch (e.actionType) {
+      case 'REWARD_UNLOCKED':
+        return 'Just unlocked a mystery reward!';
+      case 'NEW_DISCOVERY':
+        return 'Added $business to KINDEX.';
+      case 'KIN_QUEST_STAMP':
+        return 'Earned a KIN Quest stamp at $business.';
+      default:
+        return 'New activity at $business.';
+    }
+  }
 
   final bool isExchangePost;
+  final bool isFeedEvent;
   final String? text;
   final double? rating;
   final DocumentReference? userRef;
   final DateTime? timestamp;
   final int? likesCount;
+  final String? feedUserName;
+  final String? feedIcon;
 }
 
 /// A rotating carousel mixing a business's real reviews with recent posts
@@ -62,22 +99,59 @@ class _CommunityShoutoutCarouselState
 
   List<ReviewsRecord>? _reviews;
   List<ExchangePostsRecord>? _posts;
+  List<KinFeedEventsRecord>? _feedEvents;
   StreamSubscription<List<ReviewsRecord>>? _reviewsSub;
   StreamSubscription<List<ExchangePostsRecord>>? _postsSub;
+  StreamSubscription<List<KinFeedEventsRecord>>? _feedEventsSub;
+  Timer? _loadingTimeout;
 
   @override
   void initState() {
     super.initState();
+    // Belt-and-suspenders against a stream that never emits at all: the
+    // shared queryCollection() helper (backend.dart) swallows stream
+    // errors via `.snapshots().handleError(print)` with no fallback
+    // value, so a permission-denied query (e.g. rules not yet deployed
+    // for kin_feed_events) never reaches this widget's onError either -
+    // it just silently stops producing anything. Without this, the
+    // carousel would spin forever instead of settling into its empty
+    // state. Cleared as soon as real data/errors do land.
+    _loadingTimeout = Timer(const Duration(seconds: 6), () {
+      if (!mounted) return;
+      setState(() {
+        _reviews ??= const [];
+        _posts ??= const [];
+        _feedEvents ??= const [];
+      });
+    });
+    // onError falls back to an empty list rather than leaving the field
+    // null forever - a permission-denied (e.g. rules not yet deployed for
+    // a new collection) or transient stream error would otherwise strand
+    // the carousel on its loading spinner indefinitely instead of settling
+    // into the empty state.
     _reviewsSub = queryReviewsRecord(
       queryBuilder: (q) => q
           .where('business_ref', isEqualTo: widget.businessRef)
           .orderBy('timestamp', descending: true),
       limit: 6,
-    ).listen((data) => setState(() => _reviews = data));
+    ).listen(
+      (data) => setState(() => _reviews = data),
+      onError: (_) => setState(() => _reviews = const []),
+    );
     _postsSub = queryExchangePostsRecord(
       queryBuilder: (q) => q.orderBy('timestamp', descending: true),
       limit: 6,
-    ).listen((data) => setState(() => _posts = data));
+    ).listen(
+      (data) => setState(() => _posts = data),
+      onError: (_) => setState(() => _posts = const []),
+    );
+    _feedEventsSub = queryKinFeedEventsRecord(
+      queryBuilder: (q) => q.orderBy('timestamp', descending: true),
+      limit: 10,
+    ).listen(
+      (data) => setState(() => _feedEvents = data),
+      onError: (_) => setState(() => _feedEvents = const []),
+    );
   }
 
   void _startAutoAdvance() {
@@ -97,8 +171,10 @@ class _CommunityShoutoutCarouselState
   @override
   void dispose() {
     _autoAdvance?.cancel();
+    _loadingTimeout?.cancel();
     _reviewsSub?.cancel();
     _postsSub?.cancel();
+    _feedEventsSub?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -120,18 +196,20 @@ class _CommunityShoutoutCarouselState
     final theme = FlutterFlowTheme.of(context);
     const gold = Color(0xFFD4AF37);
 
-    if (_reviews == null || _posts == null) {
+    if (_reviews == null || _posts == null || _feedEvents == null) {
       return const SizedBox(
         height: 200.0,
         child: Center(child: CircularProgressIndicator()),
       );
     }
 
-    // Reviews about this business first, then Exchange posts interleaved
-    // in - so an owner sees their own feedback before the wider feed.
+    // Reviews about this business first, then Exchange posts, then global
+    // live-feed activity interleaved in - so an owner sees their own
+    // feedback before the wider feed.
     final shoutouts = <_Shoutout>[
       ..._reviews!.map(_Shoutout.review),
       ..._posts!.map(_Shoutout.exchangePost),
+      ..._feedEvents!.map(_Shoutout.feedEvent),
     ].where((s) => s.text != null || s.rating != null).toList();
 
     if (shoutouts.isEmpty) {
@@ -232,12 +310,16 @@ class _ShoutoutCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  shoutout.isExchangePost ? '💬' : '❝',
+                  shoutout.isFeedEvent
+                      ? (shoutout.feedIcon ?? '📍')
+                      : (shoutout.isExchangePost ? '💬' : '❝'),
                   style: const TextStyle(fontSize: 24.0),
                 ),
                 const SizedBox(width: 6.0),
                 Text(
-                  shoutout.isExchangePost ? 'On The Exchange' : 'A review',
+                  shoutout.isFeedEvent
+                      ? 'Community activity'
+                      : (shoutout.isExchangePost ? 'On The Exchange' : 'A review'),
                   style: theme.labelSmall.override(
                     font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
                     color: theme.secondaryText,
@@ -288,11 +370,11 @@ class _ShoutoutCard extends StatelessWidget {
             ),
             const SizedBox(height: 8.0),
             StreamBuilder<UsersRecord>(
-              stream: shoutout.userRef != null
+              stream: (shoutout.feedUserName == null && shoutout.userRef != null)
                   ? UsersRecord.getDocument(shoutout.userRef!)
                   : null,
               builder: (context, userSnapshot) {
-                final name = userSnapshot.data?.displayName;
+                final name = shoutout.feedUserName ?? userSnapshot.data?.displayName;
                 return Row(
                   children: [
                     Text(

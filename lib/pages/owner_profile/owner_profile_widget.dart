@@ -4,6 +4,8 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
+import '/components/mystery_reward_panel_widget.dart';
+import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
@@ -714,6 +716,51 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       businessRef: currentUserDocument!.ownedBusiness!,
                     ),
                   ].divide(SizedBox(height: 16.0)),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
+                child: StreamBuilder<BusinessesRecord>(
+                  stream: BusinessesRecord.getDocument(
+                      currentUserDocument!.ownedBusiness!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox.shrink();
+                    }
+                    return MysteryRewardPanelWidget(
+                      businessRef: snapshot.data!.reference,
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
+                child: FFButtonWidget(
+                  onPressed: () => showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (context) => Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: const AddBusinessDiscoveryDialog(),
+                    ),
+                  ),
+                  text: 'Add a Business',
+                  icon: const Icon(Icons.explore_rounded, size: 18.0),
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 44.0,
+                    color: Colors.transparent,
+                    textStyle: FlutterFlowTheme.of(context)
+                        .labelMedium
+                        .override(color: const Color(0xFFD4AF37)),
+                    elevation: 0.0,
+                    borderSide: BorderSide(
+                      color: const Color(0xFFD4AF37).withAlpha(102),
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
               ),
               Padding(

@@ -356,6 +356,14 @@ class BusinessesRecord extends FirestoreRecord {
   LatLng? get coordinates => _coordinates;
   bool hasCoordinates() => _coordinates != null;
 
+  // "businesses_discovered_count" field. Incremented by the
+  // submitBusinessDiscovery Cloud Function when this business's owner adds a
+  // new listing to the directory; watched by generateMysteryReward for the
+  // 5/15/30 milestone thresholds. Not written directly by the client.
+  int? _businessesDiscoveredCount;
+  int get businessesDiscoveredCount => _businessesDiscoveredCount ?? 0;
+  bool hasBusinessesDiscoveredCount() => _businessesDiscoveredCount != null;
+
   // "monthly_promo_count" field.
   int? _monthlyPromoCount;
   int get monthlyPromoCount => _monthlyPromoCount ?? 0;
@@ -456,6 +464,8 @@ class BusinessesRecord extends FirestoreRecord {
     _isRetail = snapshotData['is_retail'] as bool?;
     _arcAssetUrl = castToType<int>(snapshotData['arc_asset_url']);
     _coordinates = snapshotData['coordinates'] as LatLng?;
+    _businessesDiscoveredCount =
+        castToType<int>(snapshotData['businesses_discovered_count']);
     _monthlyPromoCount = castToType<int>(snapshotData['monthly_promo_count']);
     _monthlyPromoResetDate =
         snapshotData['monthly_promo_reset_date'] as DateTime?;
@@ -730,6 +740,7 @@ Map<String, dynamic> createBusinessesRecordData({
   bool? isRetail,
   int? arcAssetUrl,
   LatLng? coordinates,
+  int? businessesDiscoveredCount,
   int? monthlyPromoCount,
   DateTime? monthlyPromoResetDate,
   int? connectionCount,
@@ -799,6 +810,7 @@ Map<String, dynamic> createBusinessesRecordData({
       'is_retail': isRetail,
       'arc_asset_url': arcAssetUrl,
       'coordinates': coordinates,
+      'businesses_discovered_count': businessesDiscoveredCount,
       'monthly_promo_count': monthlyPromoCount,
       'monthly_promo_reset_date': monthlyPromoResetDate,
       'connection_count': connectionCount,
@@ -877,6 +889,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.isRetail == e2?.isRetail &&
         e1?.arcAssetUrl == e2?.arcAssetUrl &&
         e1?.coordinates == e2?.coordinates &&
+        e1?.businessesDiscoveredCount == e2?.businessesDiscoveredCount &&
         e1?.monthlyPromoCount == e2?.monthlyPromoCount &&
         e1?.monthlyPromoResetDate == e2?.monthlyPromoResetDate &&
         e1?.connectionCount == e2?.connectionCount &&
@@ -948,6 +961,7 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.isRetail,
         e?.arcAssetUrl,
         e?.coordinates,
+        e?.businessesDiscoveredCount,
         e?.monthlyPromoCount,
         e?.monthlyPromoResetDate,
         e?.connectionCount,

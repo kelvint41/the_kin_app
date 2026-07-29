@@ -417,6 +417,102 @@ class KinServices {
     }
   }
 
+  /// Submits a new business the signed-in owner found, via the
+  /// `submitBusinessDiscovery` callable. This is what advances
+  /// businesses_discovered_count toward the 5/15/30 mystery-reward
+  /// milestones (mystery_reward_engine.js).
+  static Future<ServiceResult<void>> submitBusinessDiscovery({
+    required String businessName,
+    required String address,
+    required String category,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'submitBusinessDiscovery',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        'address': address,
+        'category': category,
+      });
+      return const ServiceResult.success(null);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit that business. Please try again.');
+    }
+  }
+
+  /// Redeems an unlocked mystery reward via the `redeemReward` callable,
+  /// which validates ownership/expiry server-side and applies the tier or
+  /// beacon grant.
+  static Future<ServiceResult<String>> redeemReward({
+    required String rewardId,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'redeemReward',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'rewardId': rewardId});
+      final rewardType = result.data['rewardType'] as String? ?? '';
+      return ServiceResult.success(rewardType);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not redeem this reward.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not redeem this reward. Please try again.');
+    }
+  }
+
+  /// Sends post text to the `cleanUpPostText` callable for an optional,
+  /// opt-in AI grammar/spelling cleanup pass. Never called automatically -
+  /// only from an explicit "Clean up with AI" tap in the composer/editor.
+  static Future<ServiceResult<String>> cleanUpPostText({
+    required String postText,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'cleanUpPostText',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'postText': postText});
+      final cleanedText = result.data['cleanedText'] as String? ?? postText;
+      return ServiceResult.success(cleanedText);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not clean up this post.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not clean up this post. Please try again.');
+    }
+  }
+
+  /// Edits an Exchange post the signed-in user authored. Firestore rules
+  /// should restrict this write to the post's own user_ref - this method
+  /// doesn't re-check ownership client-side beyond what the UI already
+  /// gates, since rules are the actual enforcement boundary.
+  static Future<ServiceResult<void>> editExchangePost({
+    required DocumentReference postRef,
+    required String postText,
+  }) async {
+    try {
+      await postRef.update({
+        'post_text': postText,
+        'is_edited': true,
+        'edited_at': FieldValue.serverTimestamp(),
+      });
+      return const ServiceResult.success(null);
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your changes. Please try again.');
+    }
+  }
+
   /// Whether the signed-in user has a verified visit to this business
   /// inside the scoring window, which is what decides if their review
   /// counts toward the Kindex score.

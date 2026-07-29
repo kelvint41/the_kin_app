@@ -45,3 +45,13 @@ exports.scheduleAgencyQueueTarget =
 
 const signupFeedSync = require("./signup_feed_sync.js");
 exports.syncSignupFeed = signupFeedSync.syncSignupFeed;
+
+const businessDiscovery = require("./business_discovery.js");
+exports.submitBusinessDiscovery = businessDiscovery.submitBusinessDiscovery;
+
+const mysteryRewardEngine = require("./mystery_reward_engine.js");
+exports.generateMysteryReward = mysteryRewardEngine.generateMysteryReward;
+exports.redeemReward = mysteryRewardEngine.redeemReward;
+
+const exchangePostTools = require("./exchange_post_tools.js");
+exports.cleanUpPostText = exchangePostTools.cleanUpPostText;

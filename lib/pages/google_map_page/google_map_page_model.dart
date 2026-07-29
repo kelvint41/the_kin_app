@@ -6,6 +6,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/geohash_util.dart';
 import '/services/premium_placement.dart';
 import 'dart:ui';
 import '/index.dart';
@@ -29,36 +30,89 @@ class GoogleMapPageModel extends FlutterFlowModel<GoogleMapPageWidget> {
   /// the slot count.
   late final List<BusinessPreviewCardModel> premiumCardModels;
 
-  /// The directory, fetched once per visit to this page.
+  /// Map pins for the current viewport, fetched via a bounded geohash
+  /// range query rather than the whole `businesses` collection.
   ///
-  /// This was a `queryBusinessesRecord()` stream, which holds an open
-  /// snapshot listener over every document in `businesses` for as long as
-  /// the page is mounted. Nothing on this page needs that: the directory
-  /// is a bulk-imported dataset that changes when someone runs an import
-  /// script, not while a customer is panning the map, and none of what we
-  /// derive from it - pins, the premium carousel, the category filter -
-  /// would be meaningfully stale after a few minutes.
+  /// This used to be `queryBusinessesRecordOnce()` with no `where`/bounds -
+  /// an unbounded read of every document (500 at the time, all Texas; fine
+  /// then, not at national scale). Real bounding needs a geohash on each
+  /// document, since Firestore can't range-query a GeoPoint on both axes -
+  /// see backfill_business_geohashes.js for the migration that adds it.
+  /// Businesses written before that migration runs simply won't have a
+  /// `geohash` field and won't appear here until it does.
   ///
-  /// Memoized in the model rather than the widget so a rebuild (a
-  /// category chip tap, a camera idle) reuses the resolved list instead of
-  /// re-issuing the query, which is what a bare `FutureBuilder(future:
-  /// queryOnce())` in `build` would do.
-  ///
-  /// Note this is still an unbounded read of the whole collection - 500
-  /// documents today, all of them Texas. That is fine at this size and
-  /// will not be at national scale. Bounding it properly needs viewport
-  /// querying, and that needs a geohash on each document: Firestore cannot
-  /// range-query a GeoPoint on both axes, which is also why proximity in
-  /// NearbyFeed is computed client-side. Until those exist there is no
-  /// honest server-side bound - a bare `.limit()` would silently drop
-  /// businesses off the map with no way to tell which.
+  /// Memoized per-viewport (not per page-load) so panning the map re-queries,
+  /// but a rebuild that doesn't change the viewport (a category chip tap)
+  /// reuses the last result instead of re-issuing the query.
   Future<List<BusinessesRecord>>? _businesses;
+  LatLngBounds? _queriedBounds;
 
-  Future<List<BusinessesRecord>> businesses() =>
-      _businesses ??= queryBusinessesRecordOnce();
+  Future<List<BusinessesRecord>> businessesForViewport(
+    LatLngBounds bounds,
+  ) {
+    if (_businesses != null && _boundsRoughlyEqual(_queriedBounds, bounds)) {
+      return _businesses!;
+    }
+    _queriedBounds = bounds;
+    return _businesses = _queryViewport(bounds);
+  }
 
-  /// Drops the memoized copy so the next build refetches.
-  void refreshBusinesses() => _businesses = null;
+  /// Within ~1km, camera jitter (a sub-pixel drag, a rebuild with no real
+  /// pan) shouldn't trigger a re-query.
+  bool _boundsRoughlyEqual(LatLngBounds? a, LatLngBounds b) {
+    if (a == null) return false;
+    const eps = 0.01;
+    return (a.southwest.latitude - b.southwest.latitude).abs() < eps &&
+        (a.southwest.longitude - b.southwest.longitude).abs() < eps &&
+        (a.northeast.latitude - b.northeast.latitude).abs() < eps &&
+        (a.northeast.longitude - b.northeast.longitude).abs() < eps;
+  }
+
+  Future<List<BusinessesRecord>> _queryViewport(LatLngBounds bounds) async {
+    final prefixes = geohashPrefixesForBounds(
+      swLat: bounds.southwest.latitude,
+      swLng: bounds.southwest.longitude,
+      neLat: bounds.northeast.latitude,
+      neLng: bounds.northeast.longitude,
+    );
+    final results = await Future.wait(prefixes.map(
+      (prefix) => queryBusinessesRecordOnce(
+        queryBuilder: (q) => q
+            .where('geohash', isGreaterThanOrEqualTo: prefix)
+            .where('geohash', isLessThan: '$prefix~'),
+      ),
+    ));
+    final byPath = <String, BusinessesRecord>{};
+    for (final list in results) {
+      for (final b in list) {
+        byPath[b.reference.path] = b;
+      }
+    }
+    return byPath.values.toList();
+  }
+
+  /// Drops the memoized copy so the next build refetches even if the
+  /// viewport hasn't changed (e.g. after a manual refresh action).
+  void refreshBusinesses() {
+    _businesses = null;
+    _queriedBounds = null;
+  }
+
+  /// Businesses on a paid plan, for the premium carousel - a small targeted
+  /// query on `subscription_tier` (see kPaidSubscriptionTiers in
+  /// premium_placement.dart), independent of the map viewport: a merchant
+  /// who paid for placement shouldn't lose it just because the customer
+  /// panned away, so this deliberately isn't bounded by geohash like the
+  /// map pins are.
+  Future<List<BusinessesRecord>>? _premiumBusinesses;
+
+  Future<List<BusinessesRecord>> premiumBusinesses() =>
+      _premiumBusinesses ??= queryBusinessesRecordOnce(
+        queryBuilder: (q) => q.where(
+          'subscription_tier',
+          whereIn: kPaidSubscriptionTiers.toList(),
+        ),
+      );
 
   @override
   void initState(BuildContext context) {

@@ -28,6 +28,8 @@ import 'schema/reviews_record.dart';
 import 'schema/user_engagement_events_record.dart';
 import 'schema/kindex_scores_record.dart';
 import 'schema/signup_feed_record.dart';
+import 'schema/unlocked_rewards_record.dart';
+import 'schema/kin_feed_events_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -58,6 +60,10 @@ export 'schema/user_engagement_events_record.dart';
 export 'schema/kindex_scores_record.dart';
 export 'schema/signup_feed_record.dart';
 export 'schema/exchange_profiles_record.dart';
+export 'schema/unlocked_rewards_record.dart';
+export 'schema/kin_feed_events_record.dart';
+export 'schema/business_submissions_record.dart';
+export 'schema/system_counters_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -1055,6 +1061,80 @@ Stream<List<SignupFeedRecord>> querySignupFeedRecord({
     queryCollection(
       SignupFeedRecord.collection,
       SignupFeedRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query UnlockedRewardsRecords (as a Stream and as a Future).
+Future<int> queryUnlockedRewardsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      UnlockedRewardsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<UnlockedRewardsRecord>> queryUnlockedRewardsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      UnlockedRewardsRecord.collection,
+      UnlockedRewardsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<UnlockedRewardsRecord>> queryUnlockedRewardsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      UnlockedRewardsRecord.collection,
+      UnlockedRewardsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query KinFeedEventsRecords (as a Stream and as a Future).
+Future<int> queryKinFeedEventsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      KinFeedEventsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<KinFeedEventsRecord>> queryKinFeedEventsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      KinFeedEventsRecord.collection,
+      KinFeedEventsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<KinFeedEventsRecord>> queryKinFeedEventsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      KinFeedEventsRecord.collection,
+      KinFeedEventsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

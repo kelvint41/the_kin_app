@@ -87,6 +87,24 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "unlocked_rewards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "user_ref",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "is_redeemed",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date_won",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

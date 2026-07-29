@@ -174,7 +174,21 @@ service cloud.firestore {
       // behind it.
       allow delete: if request.auth != null
         && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
-      allow update: if false;
+      // Authors may edit their own post's text (e.g. to fix a typo, or
+      // apply the optional AI cleanup pass) - nothing else about the
+      // document. affectedKeys().hasOnly(...) is what actually enforces
+      // that: user_ref, business_ref, likes_count, timestamp, post_id and
+      // post_image are all locked once created, even though the earlier
+      // equality checks on user_ref would also catch a reassignment
+      // attempt on their own.
+      allow update: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.user_ref == resource.data.user_ref
+        && request.resource.data.post_text is string
+        && request.resource.data.post_text.size() > 0
+        && request.resource.data.post_text.size() <= 2000
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['post_text', 'is_edited', 'edited_at']);
     }
 
     // Code-of-conduct acceptance, keyed by uid so the exchange_posts rule
@@ -371,6 +385,43 @@ service cloud.firestore {
       match /engagement/{engagementDocument} {
         allow read, write: if false;
       }
+    }
+
+    // Global live feed for the Community Shoutouts carousel - public read,
+    // same as reviews/exchange_posts. Written only by
+    // submitBusinessDiscovery/generateMysteryReward (Cloud Functions,
+    // Admin SDK - bypasses rules), never directly by a client.
+    match /kin_feed_events/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Mystery reward vouchers. A user may read only their own - the promo
+    // code and tier this unlocks aren't other users' business. Written
+    // only by generateMysteryReward/redeemReward (Cloud Functions, Admin
+    // SDK); redemption specifically has to be server-side so is_redeemed
+    // and expiration_date can't be forged from the client.
+    match /unlocked_rewards/{document} {
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow write: if false;
+    }
+
+    // Audit trail for the "Add a Business" discovery flow - admin-only
+    // read, same reasoning as activity_logs/analytics_daily. Written only
+    // by submitBusinessDiscovery (Cloud Function, Admin SDK).
+    match /business_submissions/{document} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+    }
+
+    // Nationwide reward caps (e.g. the Elite Growth annual limit). No
+    // client needs this and it must not be readable/writable from one -
+    // the whole point is a count a client can't see or race against.
+    match /system_counters/{document} {
+      allow read, write: if false;
     }
   }
 }
