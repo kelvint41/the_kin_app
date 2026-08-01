@@ -24,6 +24,10 @@ class TierCardWidget extends StatefulWidget {
     this.beaconText,
     bool? isYearly,
     this.yearlyTeaser,
+    this.valueTag,
+    this.trialBannerText,
+    this.trialCtaLabel,
+    this.onStartTrial,
   })  : this.isPro = isPro ?? false,
         this.isElite = isElite ?? false,
         this.isYearly = isYearly ?? false,
@@ -55,6 +59,26 @@ class TierCardWidget extends StatefulWidget {
   /// Text shown on a small pulsing "beacon" badge at the card's top-left
   /// corner (e.g. 'Free' or 'Upgrade'). Null hides the beacon entirely.
   final String? beaconText;
+
+  /// One-line value pitch shown under the badge and above the price (e.g.
+  /// 'Get discovered.'). Null hides it entirely.
+  final String? valueTag;
+
+  /// Trial status line shown under the divider - either the countdown
+  /// ('6 days left in your trial') or a reminder message once the nightly
+  /// sweep has flagged one. Null hides it.
+  final String? trialBannerText;
+
+  /// Label for the trial button ('Start your 14-day trial', or the
+  /// reminder CTA 'Keep my Founding Local tier'). Null hides the button -
+  /// which is what happens once has_used_trial is true and the trial is
+  /// no longer active.
+  final String? trialCtaLabel;
+
+  /// Tapped when [trialCtaLabel] is shown. The card is wrapped in an
+  /// InkWell by its caller for the upgrade action, so this button stops
+  /// propagation itself rather than relying on the parent.
+  final Future<void> Function()? onStartTrial;
 
   @override
   State<TierCardWidget> createState() => _TierCardWidgetState();
@@ -297,6 +321,36 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                     ),
                                   ),
                                 ),
+                                if (widget!.valueTag != null)
+                                  Text(
+                                    widget!.valueTag!,
+                                    style: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelSmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelSmall
+                                                    .fontStyle,
+                                          ),
+                                          color: widget!.isElite
+                                              ? Color(0xFFD4AF37)
+                                              : FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .fontWeight,
+                                          fontStyle: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .fontStyle,
+                                          lineHeight: 1.4,
+                                        ),
+                                  ),
                               ].divide(SizedBox(height: 4.0)),
                             ),
                             if (valueOrDefault<bool>(
@@ -483,6 +537,9 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ),
                           ].divide(SizedBox(height: 8.0)),
                         ),
+                        if (widget!.trialBannerText != null ||
+                            widget!.trialCtaLabel != null)
+                          _buildTrialSection(context),
                       ].divide(SizedBox(height: 16.0)),
                     ),
                   ],
@@ -492,6 +549,56 @@ class _TierCardWidgetState extends State<TierCardWidget>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTrialSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final accent =
+        widget!.isElite ? const Color(0xFFD4AF37) : theme.primary;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Divider(
+          height: 8.0,
+          thickness: 1.0,
+          color: theme.alternate,
+        ),
+        if (widget!.trialBannerText != null)
+          Text(
+            widget!.trialBannerText!,
+            style: theme.bodySmall.override(
+              font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              color: accent,
+              letterSpacing: 0.0,
+              fontWeight: FontWeight.w600,
+              lineHeight: 1.4,
+            ),
+          ),
+        if (widget!.trialCtaLabel != null)
+          FFButtonWidget(
+            onPressed: widget!.onStartTrial == null
+                ? null
+                : () async => await widget!.onStartTrial!(),
+            text: widget!.trialCtaLabel!,
+            options: FFButtonOptions(
+              width: double.infinity,
+              height: 44.0,
+              color: accent,
+              textStyle: theme.titleSmall.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                // Black on gold/green in both themes - the fill is a fixed
+                // brand colour, so a theme text token would invert against it.
+                color: Colors.black,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+              ),
+              elevation: 0.0,
+              borderRadius: BorderRadius.circular(999.0),
+            ),
+          ),
+      ].divide(SizedBox(height: 10.0)),
     );
   }
 }

@@ -743,6 +743,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                 ),
               ),
               _appStudioPrompt(context),
+              _supportChatPrompt(context),
               _feedbackPrompt(context),
               Container(
                 height: 40.0,
@@ -753,7 +754,16 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         // Without this the Directory tab was a dead end: no nav bar, and the
         // back arrow above was decorative, so the only way out was the
         // system back-swipe gesture.
-        bottomNavigationBar: KinBottomNav2Widget(),
+        //
+        // This one widget serves both the Home and Loyalty tabs (Loyalty
+        // just scrolls it to Personal Milestones - see scrollToMilestones
+        // above), so which base tab the nav bar swaps out for Hunt depends
+        // on which one brought the user here.
+        bottomNavigationBar: KinBottomNav2Widget(
+          currentPage: widget.scrollToMilestones
+              ? KinNavPage.loyalty
+              : KinNavPage.home,
+        ),
       ),
     );
   }
@@ -799,6 +809,67 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                       ),
                       Text(
                         'KIN App Studio - coming soon. Join the list.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.secondaryText, size: 20.0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Entry point to [SupportChatWidget] - answers questions in-line rather
+  /// than the one-way "send it and wait" shape of [_feedbackPrompt] below.
+  /// Kept as a separate row rather than folded into that one: the two
+  /// write to different collections (support_chat_logs vs bug_reports) and
+  /// serve different intents (get an answer now vs. flag something for the
+  /// team to see later).
+  Widget _supportChatPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => context.pushNamed(SupportChatWidget.routeName),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.headset_mic_rounded,
+                  color: theme.accentOnSurface, size: 22.0),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Get Support',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Ask a question and get an answer right away.',
                         style: theme.bodySmall.override(
                           font: GoogleFonts.plusJakartaSans(),
                           color: theme.secondaryText,

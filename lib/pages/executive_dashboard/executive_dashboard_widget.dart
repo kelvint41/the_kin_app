@@ -75,6 +75,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// on every rebuild of this page.
   Future<ServiceResult<AiMarketingStats>>? _aiStatsFuture;
 
+  /// Same memoization as [_aiStatsFuture], for the Support Chat panel.
+  Future<ServiceResult<SupportChatStats>>? _supportChatStatsFuture;
+
   @override
   void initState() {
     super.initState();
@@ -168,6 +171,22 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
             appBar: AppBar(
               backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
               automaticallyImplyLeading: false,
+              // Was suppressed with no replacement - an admin landing here
+              // (only reachable from the map hamburger menu) had no way
+              // back except the OS swipe gesture. This page is always
+              // pushed on top of something, so a real back button belongs
+              // here, not just the bottom nav below.
+              leading: FlutterFlowIconButton(
+                borderRadius: 8.0,
+                buttonSize: 40.0,
+                fillColor: Colors.transparent,
+                icon: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 20.0,
+                ),
+                onPressed: () => context.safePop(),
+              ),
               title: Text(
                 'Executive Dashboard',
                 style: FlutterFlowTheme.of(context).titleLarge.override(
@@ -747,6 +766,29 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                                   .map((e) => _truncateLabel(
                                                       e.key, 6))
                                                   .toList(),
+                                              // Neither had an explicit
+                                              // value before, so fl_chart
+                                              // fell back to an 8px bar
+                                              // width with BarChartAlignment
+                                              // .center and no group
+                                              // spacing - with only 2-3
+                                              // groups that clustered every
+                                              // bar (and the label under it)
+                                              // into a thin column near the
+                                              // chart's left/center instead
+                                              // of spreading across the
+                                              // available width, which is
+                                              // what smeared the labels
+                                              // together. spaceAround plus a
+                                              // real bar width fixes both.
+                                              barWidth: 32.0,
+                                              barBorderRadius:
+                                                  const BorderRadius.only(
+                                                topLeft: Radius.circular(6.0),
+                                                topRight: Radius.circular(6.0),
+                                              ),
+                                              alignment:
+                                                  BarChartAlignment.spaceAround,
                                               chartStylingInfo:
                                                   ChartStylingInfo(
                                                 backgroundColor:
@@ -890,6 +932,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                               ),
                             ),
                           ),
+                          _foundingLocalTrialCard(context),
                           Column(
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -1136,8 +1179,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             ].divide(SizedBox(height: 16.0)),
                           ),
                           _aiMarketingSection(context),
+                          _powerHourSection(context),
                           _deliveriesSection(context),
                           _feedbackSection(context),
+                          _supportChatSection(context),
                         ].divide(SizedBox(height: 24.0)),
                       ),
                     ),
@@ -1145,6 +1190,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                 ],
               ),
             ),
+            bottomNavigationBar: const KinBottomNav2Widget(),
           ),
         );
       },
@@ -1333,6 +1379,126 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
     );
   }
 
+  /// Power Hour usage, read directly from `businesses` (has_flash_beacon /
+  /// power_hour_usage_count) rather than an event log - unlike AI Marketing
+  /// and Support Chat, startPowerHour is a plain client-side Firestore
+  /// update (KinServices.startPowerHour), not a Cloud Function, so there is
+  /// no server-aggregated log to call into. This mirrors Category
+  /// Breakdown's approach just above: read the same city-scoped
+  /// BusinessesRecord stream the rest of the page already uses and
+  /// aggregate client-side.
+  ///
+  /// power_hour_usage_count resets every 30 days per business (see
+  /// startPowerHour), not on a shared calendar month, so "this cycle" is a
+  /// rough per-business window, not a single aligned period - good enough
+  /// for a usage signal, not for month-over-month comparison.
+  Widget _powerHourSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final selectedCity = _model.dropdownValue ?? 'San Antonio';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Power Hour',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          padding: EdgeInsets.all(20.0),
+          child: StreamBuilder<List<BusinessesRecord>>(
+            stream: queryBusinessesRecord(
+              queryBuilder: (businessesRecord) => businessesRecord.where(
+                'city',
+                isEqualTo: selectedCity,
+              ),
+            ),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final businesses = snapshot.data!;
+              final liveNow =
+                  businesses.where((b) => b.hasFlashBeacon).toList();
+              final usedThisCycle =
+                  businesses.where((b) => b.powerHourUsageCount > 0).toList();
+              final totalStarts = usedThisCycle.fold<int>(
+                  0, (sum, b) => sum + b.powerHourUsageCount);
+
+              if (usedThisCycle.isEmpty && liveNow.isEmpty) {
+                return _aiNote(
+                  theme,
+                  'No Power Hour activity yet in $selectedCity. Owners start '
+                  'one from Owner Profile.',
+                );
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Live now',
+                          liveNow.length,
+                          highlight: liveNow.isNotEmpty,
+                        ),
+                      ),
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Businesses using it',
+                          usedThisCycle.length,
+                        ),
+                      ),
+                      Expanded(
+                        child: _aiStat(theme, 'Starts this cycle', totalStarts),
+                      ),
+                    ],
+                  ),
+                  if (liveNow.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
+                      child: Text(
+                        liveNow.map((b) => b.businessName).join(', '),
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
+    );
+  }
+
   Widget _aiStat(FlutterFlowTheme theme, String label, int value,
       {bool highlight = false}) {
     return Column(
@@ -1405,6 +1571,120 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
 
   String _truncateLabel(String label, int maxChars) =>
       label.length <= maxChars ? label : '${label.substring(0, maxChars)}…';
+
+  /// Funnel for the 14-day Founding Local trial (see
+  /// firebase/custom_cloud_functions/founding_local_trial.js).
+  ///
+  /// Counts, not a rate, for the same reason the activity panel shows a
+  /// null conversion rate off zero page views: with a handful of trials
+  /// in flight a percentage reads as signal when it is noise. `Converted`
+  /// vs `Expired` is the number that actually answers "is the trial
+  /// earning subscriptions", and both are readable directly off
+  /// trial_status.
+  ///
+  /// Deliberately not scoped to selectedCity, unlike the panels above -
+  /// the trial is a product-wide experiment, not a market-level metric,
+  /// and splitting it by city at this volume would leave every bucket at
+  /// zero or one.
+  Widget _foundingLocalTrialCard(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    const statuses = <String, String>{
+      'active': 'In Trial',
+      'converted': 'Converted',
+      'expired': 'Expired',
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.secondaryBackground,
+        borderRadius: BorderRadius.circular(24.0),
+        border: Border.all(color: theme.alternate, width: 1.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Founding Local Trials',
+              style: theme.titleMedium.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+                lineHeight: 1.4,
+              ),
+            ),
+            Text(
+              '14-day free trial, no card required. Unconverted trials drop to '
+              'Community on day 14 — never charged.',
+              style: theme.bodySmall.override(
+                font: GoogleFonts.plusJakartaSans(),
+                color: theme.secondaryText,
+                letterSpacing: 0.0,
+                lineHeight: 1.4,
+              ),
+            ),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: statuses.entries
+                    .map((entry) => FutureBuilder<int>(
+                          future: queryBusinessesRecordCount(
+                            queryBuilder: (businessesRecord) => businessesRecord
+                                .where('trial_status', isEqualTo: entry.key),
+                          ),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return Center(
+                                child: SizedBox(
+                                  width: 50.0,
+                                  height: 50.0,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      theme.primary,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
+                            return KpiCardWidget(
+                              value: snapshot.data!.toString(),
+                              label: entry.value,
+                            );
+                          },
+                        ))
+                    .toList()
+                    .divide(SizedBox(width: 16.0)),
+              ),
+            ),
+            // Everything that has ever started a trial, whatever state it
+            // ended in. The three buckets above should sum to this - a gap
+            // means a business was written into a trial_status the sweep
+            // doesn't recognise.
+            FutureBuilder<int>(
+              future: queryBusinessesRecordCount(
+                queryBuilder: (businessesRecord) =>
+                    businessesRecord.where('has_used_trial', isEqualTo: true),
+              ),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return SizedBox.shrink();
+                return Text(
+                  '${snapshot.data} business(es) have used their one trial.',
+                  style: theme.bodySmall.override(
+                    font: GoogleFonts.plusJakartaSans(),
+                    color: theme.secondaryText,
+                    letterSpacing: 0.0,
+                  ),
+                );
+              },
+            ),
+          ].divide(SizedBox(height: 12.0)),
+        ),
+      ),
+    );
+  }
 
   /// The self-contained deadline list decided on in place of a Google
   /// Calendar sync: reads `target_delivery_date`, which
@@ -1670,6 +1950,147 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                 font: GoogleFonts.plusJakartaSans(),
                                 color: theme.secondaryText,
                                 letterSpacing: 0.0,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
+    );
+  }
+
+  /// In-app support chat usage, from `support_chat_logs` via the
+  /// getSupportChatStats callable - see support_chat.js.
+  ///
+  /// This is also where a "suggestion" left in the chat surfaces: unlike
+  /// [_feedbackSection] above (a structured, user-picked type), category
+  /// here is the model's classification of a free-form message, so
+  /// `suggestion`/`bug_report` counts are read as a rough signal, not a
+  /// precise count the way [_feedbackSection]'s counts are.
+  Widget _supportChatSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    _supportChatStatsFuture ??= KinServices.getSupportChatStats();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Support Chat',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          padding: EdgeInsets.all(20.0),
+          child: FutureBuilder<ServiceResult<SupportChatStats>>(
+            future: _supportChatStatsFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final result = snapshot.data!;
+              if (!result.isSuccess) {
+                return _aiNote(
+                  theme,
+                  result.error ?? 'Could not load support chat stats.',
+                );
+              }
+              final stats = result.data!;
+
+              if (stats.total == 0) {
+                return _aiNote(
+                  theme,
+                  'No support chat messages yet. It\'s reachable from Get '
+                  'Support on both the customer and owner profile pages.',
+                );
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _aiStat(theme, 'Messages', stats.total),
+                      ),
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Questions',
+                          stats.questions,
+                        ),
+                      ),
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Bugs',
+                          stats.bugReports,
+                          highlight: stats.bugReports > 0,
+                        ),
+                      ),
+                      Expanded(
+                        child: _aiStat(
+                          theme,
+                          'Suggestions',
+                          stats.suggestions,
+                          highlight: stats.suggestions > 0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (stats.recent.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0, 16, 0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Recent',
+                            style: theme.labelSmall.override(
+                              font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold),
+                              color: theme.secondaryText,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          for (final entry in stats.recent)
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  0, 10, 0, 0),
+                              child: Text(
+                                entry.summary == null
+                                    ? '(${entry.category})'
+                                    : '${entry.summary} (${entry.category})',
+                                style: theme.bodySmall.override(
+                                  font: GoogleFonts.plusJakartaSans(),
+                                  letterSpacing: 0.0,
+                                ),
                               ),
                             ),
                         ],

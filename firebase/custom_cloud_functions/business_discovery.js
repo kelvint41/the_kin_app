@@ -5,7 +5,46 @@ if (!admin.apps.length) {
 }
 // See mystery_reward_engine.js for why this uses the modular import
 // instead of admin.firestore.FieldValue.
-const { FieldValue } = require("firebase-admin/firestore");
+const { FieldValue, GeoPoint } = require("firebase-admin/firestore");
+const { haversineMeters, isValidCoord } = require("./visit_verification.js")
+  ._internals;
+
+/// Radius within which a submitted business is treated as a duplicate of an
+/// existing listing or pending submission. Wider than the visit-verification
+/// check-in radii (20-100m) on purpose - this is catching "someone re-adding
+/// the same storefront", not confirming a precise GPS fix, and a submitter's
+/// phone fix while wandering a strip mall can drift more than a stationary
+/// check-in would.
+const DUPLICATE_RADIUS_METERS = 200;
+
+function normalizeName(name) {
+  return name.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+/// True if `candidateName`/`candidateCoords` looks like the same business as
+/// any doc in `snapshot` (read from either `businesses` or
+/// `business_submissions`, both of which store `business_name` and either
+/// `business_location` or a bare lat/lng under `latitude`/`longitude`).
+function findsDuplicate(snapshot, candidateName, candidateCoords) {
+  const normalizedCandidate = normalizeName(candidateName);
+  for (const doc of snapshot.docs) {
+    const data = doc.data();
+    const existingName = data.business_name;
+    if (typeof existingName !== "string") continue;
+    if (normalizeName(existingName) !== normalizedCandidate) continue;
+    if (!candidateCoords) return true;
+
+    const loc = data.business_location;
+    const coords = loc && typeof loc.latitude === "number"
+      ? { lat: loc.latitude, lng: loc.longitude }
+      : null;
+    if (!coords) return true; // same name, no location to disprove it
+    if (haversineMeters(candidateCoords, coords) <= DUPLICATE_RADIUS_METERS) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Lets a business owner submit a new listing they've found to the
@@ -80,3 +119,203 @@ exports.submitBusinessDiscovery = onCall(async (request) => {
 
   return { success: true };
 });
+
+/**
+ * Lets any signed-in customer submit a business they've encountered while
+ * out of their usual KIN Quest radius (see selectNearby/kNearbyFeedRadiusKm
+ * in lib/services/nearby_feed.dart) so it can eventually be checked into.
+ *
+ * Deliberately separate from submitBusinessDiscovery above rather than a
+ * shared branch: that callable is gated on owning a business and drives the
+ * owner mystery-reward counter, neither of which applies to a traveling
+ * customer. This one only queues a business_submissions row for manual
+ * review - there is no auto-promotion into the `businesses` collection, so
+ * a submitted business is not immediately check-in-able. It still needs
+ * duplicate-detection precisely because it has no owner-side gate keeping
+ * casual re-submission of an already-listed business in check.
+ */
+exports.submitCustomerBusinessDiscovery = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+
+  const { businessName, address, category, latitude, longitude } =
+    request.data || {};
+  if (typeof businessName !== "string" || !businessName.trim()) {
+    throw new HttpsError("invalid-argument", "businessName is required.");
+  }
+  if (typeof address !== "string" || !address.trim()) {
+    throw new HttpsError("invalid-argument", "address is required.");
+  }
+  if (typeof category !== "string" || !category.trim()) {
+    throw new HttpsError("invalid-argument", "category is required.");
+  }
+
+  const hasCoords = isValidCoord(latitude, longitude);
+  const candidateCoords = hasCoords ? { lat: latitude, lng: longitude } : null;
+  const trimmedName = businessName.trim();
+
+  const db = admin.firestore();
+  const userRef = db.collection("users").doc(uid);
+
+  const [businessesSnap, submissionsSnap] = await Promise.all([
+    db.collection("businesses").select("business_name", "business_location").get(),
+    db.collection("business_submissions")
+      .select("business_name", "business_location")
+      .get(),
+  ]);
+
+  if (
+    findsDuplicate(businessesSnap, trimmedName, candidateCoords) ||
+    findsDuplicate(submissionsSnap, trimmedName, candidateCoords)
+  ) {
+    throw new HttpsError(
+      "already-exists",
+      "That business already looks like it's in KIN, or already submitted.",
+    );
+  }
+
+  await db.collection("business_submissions").add({
+    submitted_by_user_ref: userRef,
+    source: "customer_quest",
+    business_name: trimmedName,
+    address: address.trim(),
+    category: category.trim(),
+    business_location: candidateCoords
+      ? new GeoPoint(candidateCoords.lat, candidateCoords.lng)
+      : null,
+    created_at: FieldValue.serverTimestamp(),
+  });
+
+  await db.collection("kin_feed_events").add({
+    user_ref: userRef,
+    action_type: "NEW_DISCOVERY",
+    business_name: trimmedName,
+    timestamp: FieldValue.serverTimestamp(),
+  });
+
+  return { success: true };
+});
+
+/**
+ * Looks for a pending customer-submitted discovery (see
+ * submitCustomerBusinessDiscovery above) that matches the business name (and
+ * address, once geocoded) an owner is entering during business setup - the
+ * "someone already found your business on KIN Quest" moment.
+ *
+ * Read-only and deliberately thin on what it returns: the caller isn't
+ * necessarily the business's owner yet (the business doc doesn't exist until
+ * they finish setup), so this only echoes back business-shaped fields
+ * (name/address/category/location) an owner would already know about their
+ * own business. It never returns submitted_by_user_ref - the whole point is
+ * that the owner learns their business was found, not who found it.
+ */
+exports.findMatchingBusinessSubmission = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+
+  const { businessName, latitude, longitude } = request.data || {};
+  if (typeof businessName !== "string" || !businessName.trim()) {
+    throw new HttpsError("invalid-argument", "businessName is required.");
+  }
+
+  const hasCoords = isValidCoord(latitude, longitude);
+  const candidateCoords = hasCoords ? { lat: latitude, lng: longitude } : null;
+  const normalizedCandidate = normalizeName(businessName);
+
+  const db = admin.firestore();
+  const snap = await db.collection("business_submissions").get();
+
+  for (const doc of snap.docs) {
+    const data = doc.data();
+    if (data.resolved === true) continue;
+    if (typeof data.business_name !== "string") continue;
+    if (normalizeName(data.business_name) !== normalizedCandidate) continue;
+
+    const loc = data.business_location;
+    const coords = loc && typeof loc.latitude === "number"
+      ? { lat: loc.latitude, lng: loc.longitude }
+      : null;
+    // Same as findsDuplicate: no coords on one side to disprove a name
+    // match still counts, since that's the common case for an early
+    // submission made before the owner has geocoded an address.
+    if (
+      candidateCoords &&
+      coords &&
+      haversineMeters(candidateCoords, coords) > DUPLICATE_RADIUS_METERS
+    ) {
+      continue;
+    }
+
+    return {
+      matched: true,
+      submissionId: doc.id,
+      businessName: data.business_name,
+      address: data.address || "",
+      category: data.category || "",
+      latitude: coords ? coords.lat : null,
+      longitude: coords ? coords.lng : null,
+    };
+  }
+
+  return { matched: false };
+});
+
+/**
+ * Marks a business_submissions row as resolved once the owner it matched has
+ * confirmed the claim and finished registering their business - see
+ * findMatchingBusinessSubmission. Keeps the submission document (rather than
+ * deleting it) as an audit trail of what got claimed and by which business,
+ * same reasoning as the rest of business_submissions being an admin-only
+ * audit collection.
+ */
+exports.resolveBusinessSubmission = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+
+  const { submissionId, businessRefPath } = request.data || {};
+  if (typeof submissionId !== "string" || !submissionId.trim()) {
+    throw new HttpsError("invalid-argument", "submissionId is required.");
+  }
+  if (
+    typeof businessRefPath !== "string" ||
+    !businessRefPath.startsWith("businesses/")
+  ) {
+    throw new HttpsError(
+      "invalid-argument",
+      "A valid businessRefPath is required.",
+    );
+  }
+
+  const db = admin.firestore();
+  const businessRef = db.doc(businessRefPath);
+  const businessSnap = await businessRef.get();
+  // Only the owner of the business being claimed against can resolve the
+  // submission it matched - otherwise anyone signed in could mark arbitrary
+  // submissions resolved.
+  if (
+    !businessSnap.exists ||
+    !businessSnap.data().owner_ref ||
+    businessSnap.data().owner_ref.id !== uid
+  ) {
+    throw new HttpsError(
+      "permission-denied",
+      "You can only resolve a submission against a business you own.",
+    );
+  }
+
+  await db.collection("business_submissions").doc(submissionId).update({
+    resolved: true,
+    resolved_business_ref: businessRef,
+    resolved_at: FieldValue.serverTimestamp(),
+  });
+
+  return { success: true };
+});
+
+exports._internals = { findsDuplicate, normalizeName };

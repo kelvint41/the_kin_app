@@ -91,6 +91,24 @@ class UsersRecord extends FirestoreRecord {
   bool get isAdmin => _isAdmin ?? false;
   bool hasIsAdmin() => _isAdmin != null;
 
+  // "scavenger_points" field. Cumulative points from verified check-ins,
+  // scaled by each business's points_multiplier (Standard/Rare/Hidden Gem).
+  // Server-authoritative - only recordVerifiedVisit
+  // (firebase/custom_cloud_functions/visit_verification.js) increments
+  // this, on a genuinely new visit, never on a deduped repeat check-in.
+  int? _scavengerPoints;
+  int get scavengerPoints => _scavengerPoints ?? 0;
+  bool hasScavengerPoints() => _scavengerPoints != null;
+
+  // "kin_quest_terms_accepted_at" field. Set client-side the first time
+  // this user taps "I Agree & Start" on the KIN Quest intro/consent
+  // screen (kin_quest_widget.dart). Presence alone gates re-showing that
+  // screen on future visits - null means "never accepted, or accepted on
+  // a version before this field existed", both of which should show it.
+  DateTime? _kinQuestTermsAcceptedAt;
+  DateTime? get kinQuestTermsAcceptedAt => _kinQuestTermsAcceptedAt;
+  bool hasKinQuestTermsAcceptedAt() => _kinQuestTermsAcceptedAt != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -107,6 +125,9 @@ class UsersRecord extends FirestoreRecord {
     _lastLogin = snapshotData['last_login'] as DateTime?;
     _arToursCompleted = castToType<int>(snapshotData['ar_tours_completed']);
     _isAdmin = snapshotData['is_admin'] as bool?;
+    _scavengerPoints = castToType<int>(snapshotData['scavenger_points']);
+    _kinQuestTermsAcceptedAt =
+        snapshotData['kin_quest_terms_accepted_at'] as DateTime?;
   }
 
   static CollectionReference get collection =>
@@ -158,6 +179,8 @@ Map<String, dynamic> createUsersRecordData({
   DateTime? lastLogin,
   int? arToursCompleted,
   bool? isAdmin,
+  int? scavengerPoints,
+  DateTime? kinQuestTermsAcceptedAt,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -176,6 +199,8 @@ Map<String, dynamic> createUsersRecordData({
       'last_login': lastLogin,
       'ar_tours_completed': arToursCompleted,
       'is_admin': isAdmin,
+      'scavenger_points': scavengerPoints,
+      'kin_quest_terms_accepted_at': kinQuestTermsAcceptedAt,
     }.withoutNulls,
   );
 
@@ -201,7 +226,9 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.isActive == e2?.isActive &&
         e1?.lastLogin == e2?.lastLogin &&
         e1?.arToursCompleted == e2?.arToursCompleted &&
-        e1?.isAdmin == e2?.isAdmin;
+        e1?.isAdmin == e2?.isAdmin &&
+        e1?.scavengerPoints == e2?.scavengerPoints &&
+        e1?.kinQuestTermsAcceptedAt == e2?.kinQuestTermsAcceptedAt;
   }
 
   @override
@@ -220,7 +247,9 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.isActive,
         e?.lastLogin,
         e?.arToursCompleted,
-        e?.isAdmin
+        e?.isAdmin,
+        e?.scavengerPoints,
+        e?.kinQuestTermsAcceptedAt
       ]);
 
   @override

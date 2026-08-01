@@ -100,6 +100,66 @@ test("businessCoords: treats flat 0,0 as absent rather than null island", () => 
   assert.equal(businessCoords({ latitude: 0, longitude: 0 }), null);
 });
 
+// --- Rarity/points/active-window pure helpers ---------------------------
+
+const {
+  isRareTier,
+  effectiveRadiusMeters,
+  isWithinActiveWindow,
+  pointsForCheckIn,
+  RARE_RADIUS_METERS,
+  BASE_CHECKIN_POINTS,
+} = visitVerification._internals;
+
+test("isRareTier: Rare and Hidden Gem are rare, Standard and unset are not", () => {
+  assert.equal(isRareTier({ rarity_tier: "Rare" }), true);
+  assert.equal(isRareTier({ rarity_tier: "Hidden Gem" }), true);
+  assert.equal(isRareTier({ rarity_tier: "Standard" }), false);
+  assert.equal(isRareTier({}), false);
+});
+
+test("effectiveRadiusMeters: rare tiers get the tight radius regardless of config", () => {
+  assert.equal(effectiveRadiusMeters({ rarity_tier: "Rare" }, 500), RARE_RADIUS_METERS);
+  assert.equal(
+    effectiveRadiusMeters({ rarity_tier: "Hidden Gem" }, 500),
+    RARE_RADIUS_METERS,
+  );
+  assert.equal(effectiveRadiusMeters({ rarity_tier: "Standard" }, 500), 500);
+  assert.equal(effectiveRadiusMeters({}, 100), 100);
+});
+
+test("pointsForCheckIn: multiplies the base by the business's points_multiplier", () => {
+  assert.equal(pointsForCheckIn({}), BASE_CHECKIN_POINTS);
+  assert.equal(pointsForCheckIn({ points_multiplier: 3 }), BASE_CHECKIN_POINTS * 3);
+  assert.equal(pointsForCheckIn({ points_multiplier: 5 }), BASE_CHECKIN_POINTS * 5);
+  // Bad/absent multiplier falls back to 1x rather than 0x or NaN.
+  assert.equal(pointsForCheckIn({ points_multiplier: -1 }), BASE_CHECKIN_POINTS);
+  assert.equal(pointsForCheckIn({ points_multiplier: "3" }), BASE_CHECKIN_POINTS);
+});
+
+test("isWithinActiveWindow: no published window means always active", () => {
+  assert.equal(isWithinActiveWindow({}, Date.now(), "America/Chicago"), true);
+});
+
+test("isWithinActiveWindow: a normal same-day window", () => {
+  // 2026-08-15T16:00:00 America/Chicago (CDT, UTC-5) = 11:00 local = 660 min.
+  const noon = Date.parse("2026-08-15T16:00:00Z");
+  const biz = { active_hours_start: 11 * 60, active_hours_end: 14 * 60 };
+  assert.equal(isWithinActiveWindow(biz, noon, "America/Chicago"), true);
+  const evening = Date.parse("2026-08-15T23:00:00Z"); // 18:00 local
+  assert.equal(isWithinActiveWindow(biz, evening, "America/Chicago"), false);
+});
+
+test("isWithinActiveWindow: a window that wraps past midnight", () => {
+  const biz = { active_hours_start: 22 * 60, active_hours_end: 2 * 60 };
+  const lateNight = Date.parse("2026-08-16T04:30:00Z"); // 23:30 local, Aug 15
+  assert.equal(isWithinActiveWindow(biz, lateNight, "America/Chicago"), true);
+  const earlyMorning = Date.parse("2026-08-16T06:30:00Z"); // 01:30 local
+  assert.equal(isWithinActiveWindow(biz, earlyMorning, "America/Chicago"), true);
+  const midday = Date.parse("2026-08-16T18:00:00Z"); // 13:00 local
+  assert.equal(isWithinActiveWindow(biz, midday, "America/Chicago"), false);
+});
+
 test("businessCoords: returns null when nothing usable is on file", () => {
   assert.equal(businessCoords({}), null);
   assert.equal(businessCoords({ business_location: null }), null);
@@ -129,10 +189,19 @@ beforeEach(async () => {
     clear("businesses"),
     clear("uservisits"),
     clear("kindex_config"),
+    clear("users"),
   ]);
 });
 
-async function seedBusiness({ coords = BIZ, owner, shape = "geopoint" } = {}) {
+async function seedBusiness({
+  coords = BIZ,
+  owner,
+  shape = "geopoint",
+  rarityTier,
+  pointsMultiplier,
+  activeHoursStart,
+  activeHoursEnd,
+} = {}) {
   const ref = db.collection("businesses").doc(uniq("biz"));
   const location =
     coords === null
@@ -143,6 +212,10 @@ async function seedBusiness({ coords = BIZ, owner, shape = "geopoint" } = {}) {
   await ref.set({
     ...location,
     ...(owner ? { owner_ref: db.collection("users").doc(owner) } : {}),
+    ...(rarityTier ? { rarity_tier: rarityTier } : {}),
+    ...(pointsMultiplier === undefined ? {} : { points_multiplier: pointsMultiplier }),
+    ...(activeHoursStart === undefined ? {} : { active_hours_start: activeHoursStart }),
+    ...(activeHoursEnd === undefined ? {} : { active_hours_end: activeHoursEnd }),
   });
   return ref;
 }
@@ -392,6 +465,197 @@ test("handler: a visit older than the dedup window does not suppress a new one",
   assert.equal(second.alreadyCheckedIn, false);
   assert.notEqual(second.visitId, first.visitId);
   assert.equal((await db.collection("uservisits").get()).size, 2);
+  // A real repeat visit still gets recorded (still Kindex-eligible), but the
+  // one-time-per-business points cap means it's worth nothing.
+  assert.equal(second.pointsAwarded, 0);
+});
+
+test("handler: points are a one-time-per-business bonus, not per-visit", async () => {
+  const biz = await seedBusiness();
+  const args = {
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  };
+
+  const first = await call(recordVerifiedVisit, args);
+  await db
+    .collection("uservisits")
+    .doc(first.visitId)
+    .update({
+      visit_timestamp: admin.firestore.Timestamp.fromMillis(
+        Date.now() - 2 * 60 * 60 * 1000,
+      ),
+    });
+  const second = await call(recordVerifiedVisit, args);
+
+  assert.equal(first.pointsAwarded, BASE_CHECKIN_POINTS);
+  assert.equal(second.pointsAwarded, 0);
+  assert.equal(second.totalPoints, BASE_CHECKIN_POINTS);
+
+  const userSnap = await db.collection("users").doc("customer_1").get();
+  assert.equal(userSnap.data().scavenger_points, BASE_CHECKIN_POINTS);
+});
+
+test("handler: the per-business points cap doesn't block earning points at a different business", async () => {
+  const bizA = await seedBusiness();
+  const bizB = await seedBusiness();
+  const args = (biz) => ({
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  });
+
+  const first = await call(recordVerifiedVisit, args(bizA));
+  const second = await call(recordVerifiedVisit, args(bizB));
+
+  assert.equal(first.pointsAwarded, BASE_CHECKIN_POINTS);
+  assert.equal(second.pointsAwarded, BASE_CHECKIN_POINTS);
+  assert.equal(second.totalPoints, BASE_CHECKIN_POINTS * 2);
+});
+
+// ~44m out (NEARBY) is inside the 100m default but outside a Rare tier's
+// tightened 20m geofence.
+test("handler: a Rare business uses the tight 20m geofence, not the configured default", async () => {
+  const biz = await seedBusiness({ rarityTier: "Rare" });
+  await rejectsWith("out-of-range", () =>
+    call(recordVerifiedVisit, {
+      uid: "customer_1",
+      businessRefPath: biz.path,
+      lat: NEARBY.lat,
+      lng: NEARBY.lng,
+    }),
+  );
+  assert.equal((await db.collection("uservisits").get()).size, 0);
+});
+
+test("handler: a Hidden Gem business also uses the tight 20m geofence", async () => {
+  const biz = await seedBusiness({ rarityTier: "Hidden Gem" });
+  await rejectsWith("out-of-range", () =>
+    call(recordVerifiedVisit, {
+      uid: "customer_1",
+      businessRefPath: biz.path,
+      lat: NEARBY.lat,
+      lng: NEARBY.lng,
+    }),
+  );
+});
+
+test("handler: within a Rare business's tight geofence, check-in succeeds", async () => {
+  // ~11m out - inside 20m.
+  const closeIn = { lat: BIZ.lat + 0.0001, lng: BIZ.lng };
+  const biz = await seedBusiness({ rarityTier: "Rare", pointsMultiplier: 3 });
+  const res = await call(recordVerifiedVisit, {
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: closeIn.lat,
+    lng: closeIn.lng,
+  });
+  assert.equal(res.alreadyCheckedIn, false);
+  assert.equal(res.rarityTier, "Rare");
+});
+
+test("handler: a Standard check-in awards base points to the caller's user doc", async () => {
+  const biz = await seedBusiness();
+  const res = await call(recordVerifiedVisit, {
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  });
+  assert.equal(res.pointsAwarded, BASE_CHECKIN_POINTS);
+  assert.equal(res.totalPoints, BASE_CHECKIN_POINTS);
+  const userSnap = await db.collection("users").doc("customer_1").get();
+  assert.equal(userSnap.data().scavenger_points, BASE_CHECKIN_POINTS);
+});
+
+test("handler: a Rare check-in awards 3x points, and points accumulate across visits", async () => {
+  const rare = await seedBusiness({ rarityTier: "Rare", pointsMultiplier: 3 });
+  const closeIn = { lat: BIZ.lat + 0.0001, lng: BIZ.lng };
+  const first = await call(recordVerifiedVisit, {
+    uid: "customer_1",
+    businessRefPath: rare.path,
+    lat: closeIn.lat,
+    lng: closeIn.lng,
+  });
+  assert.equal(first.pointsAwarded, BASE_CHECKIN_POINTS * 3);
+
+  const standard = await seedBusiness();
+  const second = await call(recordVerifiedVisit, {
+    uid: "customer_1",
+    businessRefPath: standard.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  });
+  assert.equal(second.pointsAwarded, BASE_CHECKIN_POINTS);
+  assert.equal(second.totalPoints, BASE_CHECKIN_POINTS * 3 + BASE_CHECKIN_POINTS);
+});
+
+test("handler: a deduped repeat check-in awards zero additional points", async () => {
+  const biz = await seedBusiness();
+  const args = {
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  };
+  const first = await call(recordVerifiedVisit, args);
+  const second = await call(recordVerifiedVisit, args);
+  assert.equal(second.alreadyCheckedIn, true);
+  assert.equal(second.pointsAwarded, 0);
+  const userSnap = await db.collection("users").doc("customer_1").get();
+  assert.equal(userSnap.data().scavenger_points, first.pointsAwarded);
+});
+
+// Windows are built relative to the real current time (America/Chicago),
+// since the handler reads Date.now() internally rather than accepting an
+// injected clock - this keeps the test correct no matter when it runs.
+function chicagoMinutesNow() {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+  const hour = Number(parts.find((p) => p.type === "hour").value);
+  const minute = Number(parts.find((p) => p.type === "minute").value);
+  return hour * 60 + minute;
+}
+
+test("handler: check-in is rejected outside a published active window", async () => {
+  const nowMin = chicagoMinutesNow();
+  // A 1-hour window starting 2 hours from now - guaranteed not to include
+  // the current moment.
+  const biz = await seedBusiness({
+    activeHoursStart: (nowMin + 120) % 1440,
+    activeHoursEnd: (nowMin + 180) % 1440,
+  });
+  await rejectsWith("failed-precondition", () =>
+    call(recordVerifiedVisit, {
+      uid: "customer_1",
+      businessRefPath: biz.path,
+      lat: NEARBY.lat,
+      lng: NEARBY.lng,
+    }),
+  );
+  assert.equal((await db.collection("uservisits").get()).size, 0);
+});
+
+test("handler: check-in succeeds inside a published active window", async () => {
+  const nowMin = chicagoMinutesNow();
+  const biz = await seedBusiness({
+    activeHoursStart: (nowMin - 30 + 1440) % 1440,
+    activeHoursEnd: (nowMin + 30) % 1440,
+  });
+  const res = await call(recordVerifiedVisit, {
+    uid: "customer_1",
+    businessRefPath: biz.path,
+    lat: NEARBY.lat,
+    lng: NEARBY.lng,
+  });
+  assert.equal(res.alreadyCheckedIn, false);
 });
 
 test("config: a tightened radius from Firestore is honoured", async () => {

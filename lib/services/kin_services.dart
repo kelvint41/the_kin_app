@@ -70,6 +70,78 @@ class AiMarketingStats {
   int get errored => byStatus['error'] ?? 0;
 }
 
+/// One classified, summarized entry from the support chat log, for the
+/// Executive Dashboard's recent-themes list - never the raw message text or
+/// who sent it, see [KinServices.getSupportChatStats].
+class SupportChatRecentEntry {
+  const SupportChatRecentEntry({
+    required this.category,
+    this.summary,
+    this.createdAt,
+  });
+
+  final String category;
+  final String? summary;
+  final DateTime? createdAt;
+}
+
+/// Aggregated counts from `support_chat_logs` (see
+/// [KinServices.getSupportChatStats]) - counts and short summaries only,
+/// same reasoning as [AiMarketingStats].
+class SupportChatStats {
+  const SupportChatStats({
+    required this.total,
+    required this.byCategory,
+    required this.unrecognisedCategory,
+    required this.recent,
+  });
+
+  final int total;
+
+  /// Keyed by the classifier's categories: `question`, `bug_report`,
+  /// `suggestion`, `praise`, `other`.
+  final Map<String, int> byCategory;
+
+  final int unrecognisedCategory;
+  final List<SupportChatRecentEntry> recent;
+
+  int get questions => byCategory['question'] ?? 0;
+  int get bugReports => byCategory['bug_report'] ?? 0;
+  int get suggestions => byCategory['suggestion'] ?? 0;
+  int get praise => byCategory['praise'] ?? 0;
+}
+
+/// One turn in a support chat exchange - kept client-side only, as recent
+/// context sent with the next message (see
+/// [KinServices.sendSupportChatMessage]). Never persisted locally between
+/// app sessions.
+class SupportChatTurn {
+  const SupportChatTurn({required this.role, required this.text});
+
+  /// 'user' or 'assistant'.
+  final String role;
+  final String text;
+
+  Map<String, String> toJson() => {'role': role, 'text': text};
+}
+
+/// A pending customer-submitted KIN Quest discovery that matches a
+/// business name an owner is entering during setup - see
+/// [KinServices.findMatchingBusinessSubmission].
+class MatchedBusinessSubmission {
+  const MatchedBusinessSubmission({
+    required this.submissionId,
+    required this.businessName,
+    required this.address,
+    required this.category,
+  });
+
+  final String submissionId;
+  final String businessName;
+  final String address;
+  final String category;
+}
+
 /// Result of a GPS-verified check-in (see
 /// [KinServices.checkInToBusiness]).
 class VisitCheckIn {
@@ -77,6 +149,9 @@ class VisitCheckIn {
     required this.visitId,
     required this.alreadyCheckedIn,
     required this.distanceMeters,
+    this.rarityTier = 'Standard',
+    this.pointsAwarded = 0,
+    this.totalPoints,
   });
 
   final String visitId;
@@ -86,6 +161,19 @@ class VisitCheckIn {
   final bool alreadyCheckedIn;
 
   final int distanceMeters;
+
+  /// The business's rarity_tier at check-in time - 'Standard', 'Rare', or
+  /// 'Hidden Gem'. Used by the Scavenger Hunt page to show the right
+  /// celebration for what was just found.
+  final String rarityTier;
+
+  /// Scavenger points this check-in was worth. Zero for a deduped repeat
+  /// check-in - see [alreadyCheckedIn].
+  final int pointsAwarded;
+
+  /// The caller's scavenger point total after this check-in. Null on the
+  /// deduped path (the server doesn't recompute it there).
+  final int? totalPoints;
 }
 
 /// A single row of display data for the Kindex ticker (see
@@ -408,6 +496,9 @@ class KinServices {
         visitId: data['visitId'] as String,
         alreadyCheckedIn: data['alreadyCheckedIn'] as bool? ?? false,
         distanceMeters: (data['distanceMeters'] as num?)?.toInt() ?? 0,
+        rarityTier: data['rarityTier'] as String? ?? 'Standard',
+        pointsAwarded: (data['pointsAwarded'] as num?)?.toInt() ?? 0,
+        totalPoints: (data['totalPoints'] as num?)?.toInt(),
       ));
     } on FirebaseFunctionsException catch (e) {
       return ServiceResult.failure(e.message ?? 'Could not check you in.');
@@ -443,6 +534,109 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not submit that business. Please try again.');
+    }
+  }
+
+  /// Submits a business a *customer* found while traveling outside their
+  /// usual KIN Quest radius, via the `submitCustomerBusinessDiscovery`
+  /// callable. Unlike [submitBusinessDiscovery], this has no owned-business
+  /// gate and captures the device's current coordinates as the business's
+  /// starting `business_location` - the callable rejects it outright if it
+  /// looks like a duplicate of something already in the directory or
+  /// already submitted. It only queues a `business_submissions` row for
+  /// review; it does not make the business check-in-able immediately.
+  static Future<ServiceResult<void>> submitTravelerBusinessDiscovery({
+    required String businessName,
+    required String address,
+    required String category,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'submitCustomerBusinessDiscovery',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        'address': address,
+        'category': category,
+        'latitude': latitude,
+        'longitude': longitude,
+      });
+      return const ServiceResult.success(null);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit that business. Please try again.');
+    }
+  }
+
+  /// Looks up whether a customer already submitted this business as a KIN
+  /// Quest discovery while an owner is filling out business setup - see
+  /// `findMatchingBusinessSubmission` (business_discovery.js). Deliberately
+  /// never surfaces who submitted it, only business-shaped fields the owner
+  /// would already know.
+  static Future<ServiceResult<MatchedBusinessSubmission?>>
+      findMatchingBusinessSubmission({
+    required String businessName,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'findMatchingBusinessSubmission',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 20)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+      });
+      final data = result.data;
+      if (data['matched'] != true) {
+        return const ServiceResult.success(null);
+      }
+      return ServiceResult.success(MatchedBusinessSubmission(
+        submissionId: data['submissionId'] as String,
+        businessName: data['businessName'] as String? ?? '',
+        address: data['address'] as String? ?? '',
+        category: data['category'] as String? ?? '',
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not check for a matching submission.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not check for a matching submission.');
+    }
+  }
+
+  /// Marks a matched submission as claimed once the owner it matched has
+  /// finished registering their business - see [findMatchingBusinessSubmission].
+  /// Best-effort: a failure here shouldn't block business registration,
+  /// which has already completed by the time this is called, so callers
+  /// should ignore [ServiceResult.failure] rather than surface it.
+  static Future<ServiceResult<void>> resolveBusinessSubmission({
+    required String submissionId,
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'resolveBusinessSubmission',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 20)),
+      )
+          .call<Map<String, dynamic>>({
+        'submissionId': submissionId,
+        'businessRefPath': businessRef.path,
+      });
+      return const ServiceResult.success(null);
+    } catch (_) {
+      return const ServiceResult.failure('Could not resolve the submission.');
     }
   }
 
@@ -752,10 +946,47 @@ class KinServices {
         isPremium: isPremium,
         isPriorityPinned: isPriorityPinned,
         hasFlashBeacon: hasFlashBeacon,
+        // A paid purchase ends any trial in progress: 'converted' stops the
+        // nightly sweep (founding_local_trial.js) from ever downgrading this
+        // business at day 14, and clears the reminder banner. has_used_trial
+        // is deliberately not touched - it stays true forever.
+        trialStatus: 'converted',
+        trialReminderStage: '',
       ));
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your subscription.');
+    }
+  }
+
+  /// Starts the one-per-business 14-day Founding Local trial via the
+  /// `startFoundingLocalTrial` callable, which validates ownership and the
+  /// has_used_trial guard server-side (both trivially bypassable if left to
+  /// the client) and grants the same entitlement fields a real Founding
+  /// Local purchase would. No payment method is involved.
+  /// Used by: Merchant Pricing Suite -> Founding Local card trial CTA.
+  static Future<ServiceResult<DateTime>> startFoundingLocalTrial({
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'startFoundingLocalTrial',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'businessRef': businessRef.id});
+      final endsAtMillis = result.data['trialEndsAtMillis'] as int?;
+      if (endsAtMillis == null) {
+        return const ServiceResult.failure(
+            'Could not start your trial. Please try again.');
+      }
+      return ServiceResult.success(
+          DateTime.fromMillisecondsSinceEpoch(endsAtMillis));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not start your trial.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not start your trial. Please try again.');
     }
   }
 
@@ -770,6 +1001,12 @@ class KinServices {
         isPremium: false,
         isPriorityPinned: false,
         hasFlashBeacon: false,
+        // Choosing the free tier during a trial ends it early, by the same
+        // rules as expiry - the entitlement is already being dropped here,
+        // so leaving trial_status 'active' would just leave the nightly
+        // sweep to re-downgrade an already-downgraded business.
+        trialStatus: 'expired',
+        trialReminderStage: '',
       ));
       return const ServiceResult.success();
     } catch (_) {
@@ -1166,6 +1403,79 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not load AI marketing stats.');
+    }
+  }
+
+  /// Sends one message in the in-app support chat via the
+  /// `sendSupportChatMessage` callable and returns the assistant's reply.
+  /// [history] is recent prior turns from this session only, used purely as
+  /// prompt context - the server is the source of truth for what actually
+  /// gets logged.
+  static Future<ServiceResult<SupportChatTurn>> sendSupportChatMessage({
+    required String message,
+    String? conversationId,
+    List<SupportChatTurn> history = const [],
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'sendSupportChatMessage',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'message': message,
+        if (conversationId != null) 'conversationId': conversationId,
+        'history': history.map((t) => t.toJson()).toList(),
+      });
+      final reply = result.data['reply'] as String? ?? '';
+      return ServiceResult.success(
+          SupportChatTurn(role: 'assistant', text: reply));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not get a response right now.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not get a response right now. Please try again.');
+    }
+  }
+
+  /// Admin-only aggregation of `support_chat_logs` for the Executive
+  /// Dashboard - see `getSupportChatStats` (support_chat_stats.js).
+  static Future<ServiceResult<SupportChatStats>> getSupportChatStats() async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('getSupportChatStats')
+          .call<Map<String, dynamic>>();
+      final data = result.data;
+      final byCategory = {
+        for (final entry
+            in (data['byCategory'] as Map? ?? const {}).entries.cast<MapEntry>())
+          entry.key as String: (entry.value as num).toInt(),
+      };
+      final recent = (data['recent'] as List? ?? const [])
+          .cast<Map>()
+          .map((r) => SupportChatRecentEntry(
+                category: r['category'] as String? ?? 'other',
+                summary: r['summary'] as String?,
+                createdAt: r['createdAt'] != null
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                        (r['createdAt'] as num).toInt())
+                    : null,
+              ))
+          .toList();
+      return ServiceResult.success(SupportChatStats(
+        total: (data['total'] as num).toInt(),
+        byCategory: byCategory,
+        unrecognisedCategory:
+            (data['unrecognisedCategory'] as num?)?.toInt() ?? 0,
+        recent: recent,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not load support chat stats.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not load support chat stats.');
     }
   }
 

@@ -9,6 +9,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/business_category_filter.dart';
 import '/services/kin_services.dart';
 import '/services/premium_placement.dart';
+import '/services/seasonal_theme.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -157,17 +158,20 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     super.dispose();
   }
 
-  /// The hamburger menu's bottom sheet: The Exchange / My Business /
-  /// Power Hour Blast. The Exchange requires a real businessRef, so it's
-  /// the only item gated on actually owning a business - the other two
-  /// self-guard internally (OwnerProfileWidget and
-  /// MobileCalledPowerPageWidget already show their own "set up your
+  /// The hamburger menu's bottom sheet: The Exchange / My Business / The
+  /// KIN Quest. The Exchange requires a real businessRef, so it's the only
+  /// item gated on actually owning a business - My Business self-guards
+  /// internally (OwnerProfileWidget already shows its own "set up your
   /// business" empty state).
   ///
   /// Community Feed used to sit between them, pointing at
-  /// CommunityPrestigeWidget - a v2/v3 rewards concept that reads nothing
-  /// from Firestore. Removed from v1; the page and route remain for that
-  /// later work.
+  /// CommunityPrestigeWidget - a v2/v3 rewards concept that read nothing
+  /// from Firestore and rendered hardcoded businesses/scores. Deleted
+  /// outright rather than left for later work, since nothing else pointed
+  /// at it once this entry was removed. Power Hour Blast also used to sit
+  /// here - removed because this menu is reachable by customers, and
+  /// starting a Power Hour is owner-only; see PowerHourPanelWidget on
+  /// Owner Profile instead.
   void _showMainMenu(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     showModalBottomSheet(
@@ -233,19 +237,26 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                       context.pushNamed(OwnerProfileWidget.routeName);
                     },
                   ),
-                  // 'Community Feed' pointed at CommunityPrestigeWidget,
-                  // which is a v2/v3 rewards concept: it reads nothing from
-                  // Firestore and renders hardcoded businesses and scores
-                  // ('Avenue Bistro', 'Urban Greens' 912). Shipping a main
-                  // menu entry to a mockup makes the whole app look like a
-                  // demo. The page and its route are left in place for that
-                  // later work; only the v1 entry point is removed.
+                  // 'Community Feed' used to point at CommunityPrestigeWidget,
+                  // a v2/v3 rewards concept that read nothing from Firestore
+                  // and rendered hardcoded businesses and scores ('Avenue
+                  // Bistro', 'Urban Greens' 912). Shipping a main menu entry
+                  // to a mockup made the whole app look like a demo, so both
+                  // the entry point and the page itself have been removed.
+                  //
+                  // 'Power Hour Blast' also removed from here - this menu is
+                  // reachable by every signed-in user, customers included,
+                  // but starting a Power Hour is an owner-only action. That
+                  // control already lives on Owner Profile (PowerHourPanelWidget)
+                  // and needs no separate entry point; the full-page flow this
+                  // used to open (MobileCalledPowerPageWidget) was a broken,
+                  // redundant duplicate and has been retired.
                   ListTile(
-                    leading: Icon(Icons.bolt_rounded, color: theme.primaryText),
-                    title: Text('Power Hour Blast', style: theme.bodyLarge),
+                    leading: Icon(Icons.explore_rounded, color: theme.primaryText),
+                    title: Text('The KIN Quest', style: theme.bodyLarge),
                     onTap: () {
                       Navigator.pop(sheetContext);
-                      context.pushNamed(MobileCalledPowerPageWidget.routeName);
+                      context.pushNamed(KinQuestWidget.routeName);
                     },
                   ),
                   Divider(
@@ -727,7 +738,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                     // every pin, not one per marker.
                     markerColor: GoogleMarkerColor.orange,
                     mapType: MapType.normal,
-                    style: GoogleMapStyle.standard,
+                    style: currentSeasonalTheme().mapStyle,
                     initialZoom: 14.0,
                     allowInteraction: true,
                     allowZoom: true,
@@ -979,7 +990,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                   ),
               ],
             ),
-            bottomNavigationBar: KinBottomNav2Widget(),
+            bottomNavigationBar:
+                KinBottomNav2Widget(currentPage: KinNavPage.directory),
           ),
         );
       },

@@ -143,6 +143,76 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
   String _packageFor(String monthly, String yearly) =>
       _yearly ? yearly : monthly;
 
+  /// Guards against a double-tap firing two startFoundingLocalTrial calls
+  /// before the first round-trip lands. The callable itself is the real
+  /// guard (has_used_trial is checked in a transaction) - this just stops
+  /// the second tap from surfacing a confusing "already used" error.
+  bool _startingTrial = false;
+
+  /// Whole days remaining before [endsAt], floored at zero.
+  int _trialDaysLeft(DateTime endsAt) {
+    final remaining = endsAt.difference(DateTime.now()).inDays;
+    return remaining < 0 ? 0 : remaining;
+  }
+
+  /// The status line under the Founding Local feature list while a trial
+  /// is running. Mirrors the in-app reminder copy that the nightly sweep
+  /// (founding_local_trial.js) stages via trial_reminder_stage.
+  String? _trialBannerText(BusinessesRecord business) {
+    if (business.trialStatus != 'active') return null;
+    switch (business.trialReminderStage) {
+      case 'day10':
+        return "You've got 3 days left on your Founding Local trial. Right now "
+            'you have your Verified Founding Member badge, 5 gallery photos, '
+            'and basic analytics live on your profile. Keep them going for '
+            '\$19/mo — cancel anytime.';
+      case 'day13':
+        return 'Your trial ends tomorrow. After that, your profile drops back '
+            'to the free Community tier — no trust badge, limited photos, no '
+            'analytics. Lock in Founding Local now for \$19/mo, or you\'ll '
+            'automatically move to the free tier with no charge.';
+      default:
+        final endsAt = business.trialEndAt;
+        if (endsAt == null) return null;
+        final days = _trialDaysLeft(endsAt);
+        return days == 1
+            ? '1 day left in your trial'
+            : '$days days left in your trial';
+    }
+  }
+
+  /// Trial button label, or null to hide the button entirely.
+  ///
+  /// Three states: never trialed (offer it), mid-trial (convert to paid),
+  /// and used-up (nothing - the card's own upgrade tap is the only path
+  /// left, so a second trial can never be started from the UI).
+  String? _trialCtaLabel(BusinessesRecord business) {
+    if (business.trialStatus == 'active') {
+      return 'Keep my Founding Local tier';
+    }
+    if (business.hasUsedTrial) return null;
+    return 'Start your 14-day trial';
+  }
+
+  Future<void> _startTrial(DocumentReference businessRef) async {
+    if (_startingTrial) return;
+    safeSetState(() => _startingTrial = true);
+    try {
+      final result =
+          await KinServices.startFoundingLocalTrial(businessRef: businessRef);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.isSuccess
+              ? 'Your 14-day Founding Local trial has started.'
+              : result.error!),
+        ),
+      );
+    } finally {
+      if (mounted) safeSetState(() => _startingTrial = false);
+    }
+  }
+
   /// The store's own localised price for the selected billing period,
   /// falling back to the literal when offerings have not loaded.
   String _priceFor(String monthly, String yearly, String fallbackMonthly,
@@ -271,7 +341,18 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Container(
-                          height: 280.0,
+                          // Was a fixed height: 280.0 on both this Container
+                          // and the gradient behind it. That's a fine
+                          // estimate for the collapsed two-line headline +
+                          // two-line subtitle at default text scale, but at
+                          // larger system font sizes (Dynamic Type / display
+                          // scaling) the same four lines render taller than
+                          // 280px and get clipped - the debug overlay showed
+                          // this as "BOTTOM OVERFLOWED BY 62 PIXELS" eating
+                          // into "& Impact Plan". Sizing to content (via the
+                          // Stack's Positioned.fill gradient below, rather
+                          // than a magic-number height) means the header
+                          // simply grows with the text instead of clipping it.
                           child: Stack(
                             alignment: AlignmentDirectional(-1.0, -1.0),
                             children: [
@@ -284,19 +365,20 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                               // nothing at all if the request failed). A
                               // plain brand gradient can't fail to load and
                               // can't look like noise.
-                              Container(
-                                height: 280.0,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      FlutterFlowTheme.of(context).primary,
-                                      const Color(0xFF06251B),
-                                    ],
-                                    stops: [0.0, 1.0],
-                                    begin: AlignmentDirectional(1.0, -1.0),
-                                    end: AlignmentDirectional(-1.0, 1.0),
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        FlutterFlowTheme.of(context).primary,
+                                        const Color(0xFF06251B),
+                                      ],
+                                      stops: [0.0, 1.0],
+                                      begin: AlignmentDirectional(1.0, -1.0),
+                                      end: AlignmentDirectional(-1.0, 1.0),
+                                    ),
+                                    shape: BoxShape.rectangle,
                                   ),
-                                  shape: BoxShape.rectangle,
                                 ),
                               ),
                               Align(
@@ -424,9 +506,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -450,6 +532,67 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   ),
                                 ),
                               ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 8.0, 0.0, 16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Choose your growth level.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .titleMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .titleMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    Text(
+                                      'Every tier gets you on the map. Higher tiers get you seen first.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontStyle,
+                                            lineHeight: 1.4,
+                                          ),
+                                    ),
+                                  ].divide(SizedBox(height: 4.0)),
+                                ),
+                              ),
                               InkWell(
                                 splashColor: Colors.transparent,
                                 focusColor: Colors.transparent,
@@ -461,6 +604,25 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   if (businessRef == null) {
                                     return;
                                   }
+
+                                  // Trial-eligible: the card's whole tap
+                                  // area starts the trial rather than a
+                                  // purchase, same as tapping the button
+                                  // inside it - two InkWells stacked on the
+                                  // same tap don't reliably give the inner
+                                  // one exclusive priority in Flutter, so
+                                  // this has to branch the same way the
+                                  // button does rather than relying on the
+                                  // button "winning".
+                                  if (merchantPricingSuiteBusinessesRecord
+                                              .trialStatus !=
+                                          'active' &&
+                                      !merchantPricingSuiteBusinessesRecord
+                                          .hasUsedTrial) {
+                                    await _startTrial(businessRef);
+                                    return;
+                                  }
+
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
@@ -479,9 +641,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -496,6 +658,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: false,
                                     title: 'Founding Local',
                                     badgeLabel: 'Founding Member Tier',
+                                    valueTag: 'Get discovered.',
                                     price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$19', '\$190'),
                                     isYearly: _yearly,
                                     yearlyTeaser: _yearly ? null : 'or \$190/yr - 2 months free',
@@ -504,6 +667,31 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     f3: 'Basic profile analytics (views & trends)',
                                     f4: 'Post 1 promotion per month on The Exchange',
                                     beaconText: 'Upgrade',
+                                    // Founding Local is the only trial-
+                                    // eligible tier in this pass - Pro
+                                    // Growth and Elite Growth deliberately
+                                    // pass none of these.
+                                    trialBannerText: _trialBannerText(
+                                        merchantPricingSuiteBusinessesRecord),
+                                    trialCtaLabel: _trialCtaLabel(
+                                        merchantPricingSuiteBusinessesRecord),
+                                    onStartTrial: merchantPricingSuiteBusinessesRecord
+                                                .trialStatus ==
+                                            'active'
+                                        // Mid-trial the CTA converts to a
+                                        // real paid plan, which is the same
+                                        // purchase the card tap already does.
+                                        ? () async => await KinServices
+                                            .upgradeBusinessTier(
+                                              businessRef: businessRef,
+                                              packageId: _packageFor(
+                                                  _kFoundingLocalMonthly,
+                                                  _kFoundingLocalYearly),
+                                              tierName: 'Founding Local',
+                                              isPremium: true,
+                                            )
+                                        : () async =>
+                                            await _startTrial(businessRef),
                                   ),
                                 ),
                               ),
@@ -577,9 +765,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         }
 
                                         context.pushNamed(
-                                          BusinessProfileOwnerWidget.routeName,
+                                          BusinessProfileV2Widget.routeName,
                                           queryParameters: {
-                                            'businessRef': serializeParam(
+                                            'businessDocument': serializeParam(
                                               businessRef,
                                               ParamType.DocumentReference,
                                             ),
@@ -595,6 +783,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           isElite: false,
                                           title: 'Pro Growth',
                                           badgeLabel: 'Standard Business',
+                                          valueTag: 'Get chosen — before your competitors.',
                                           price: _priceFor(_kProGrowthMonthly, _kProGrowthYearly, '\$29', '\$290'),
                                           isYearly: _yearly,
                                           yearlyTeaser: _yearly ? null : 'or \$290/yr - 2 months free',
@@ -640,9 +829,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -657,6 +846,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: true,
                                     title: 'Elite Growth',
                                     badgeLabel: 'Ultimate Exposure',
+                                    valueTag: 'Get first, get boosted, get seen everywhere.',
                                     price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$99', '\$990'),
                                     isYearly: _yearly,
                                     yearlyTeaser: _yearly ? null : 'or \$990/yr - 2 months free',

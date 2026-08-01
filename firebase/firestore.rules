@@ -6,12 +6,39 @@ service cloud.firestore {
       // the business_kindex_engine Cloud Function via the Admin SDK,
       // which bypasses these rules) - blocked here on both create and
       // update so an owner can't set/inflate their own score directly.
+      //
+      // has_used_trial and the trial timestamps are frozen for the same
+      // reason, and it matters more here: without this an owner could
+      // write has_used_trial:false straight from the client and restart
+      // the 14-day Founding Local trial forever. Only
+      // startFoundingLocalTrial and the processFoundingLocalTrials sweep
+      // (both Admin SDK, both bypass these rules) may set them.
+      //
+      // trial_status/trial_reminder_stage are deliberately NOT frozen on
+      // update: upgradeBusinessTier and downgradeToCommunity are client
+      // writes that legitimately move a trial to 'converted'/'expired'.
+      // Forging 'active' buys nothing on its own - the entitlement is
+      // subscription_tier/is_premium, and the day-14 sweep reads
+      // trial_start_at, which is frozen (a forged 'active' with no start
+      // timestamp is skipped by the sweep's malformed-doc guard).
+      //
+      // subscription_tier/is_premium are likewise NOT frozen: the paid
+      // upgrade path is a client write, so freezing them would break
+      // every real purchase. They stay exactly as writable as before.
       allow create: if request.auth != null
         && !('kindex_score' in request.resource.data)
-        && !('kindex_velocity' in request.resource.data);
+        && !('kindex_velocity' in request.resource.data)
+        && !('has_used_trial' in request.resource.data)
+        && !('trial_status' in request.resource.data)
+        && !('trial_start_at' in request.resource.data)
+        && !('trial_end_at' in request.resource.data);
       allow read: if true;
       allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['kindex_score', 'kindex_velocity']);
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'kindex_score', 'kindex_velocity',
+          'has_used_trial', 'trial_start_at', 'trial_end_at',
+          'trial_reminder_day10_sent_at', 'trial_reminder_day13_sent_at'
+        ]);
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
@@ -385,6 +412,17 @@ service cloud.firestore {
       match /engagement/{engagementDocument} {
         allow read, write: if false;
       }
+    }
+
+    // Written only by sendSupportChatMessage (Cloud Function, Admin SDK).
+    // This is also the suggestions/comments intake mechanism - a
+    // "suggestion" is just a message classified that way, not a separate
+    // form - so it gets the same deny-all-client-access treatment as
+    // ai_generation_logs: it holds raw user message text, and the
+    // Executive Dashboard only ever needs the server-aggregated counts from
+    // getSupportChatStats, not the collection itself.
+    match /support_chat_logs/{document} {
+      allow read, write: if false;
     }
 
     // Global live feed for the Community Shoutouts carousel - public read,

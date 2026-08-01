@@ -1,0 +1,278 @@
+import '/flutter_flow/flutter_flow_icon_button.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/services/kin_services.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:uuid/uuid.dart';
+import 'support_chat_model.dart';
+export 'support_chat_model.dart';
+
+/// In-app support chat: answers questions about how KIN works and doubles
+/// as the suggestions/comments intake mechanism - every message is
+/// classified and logged server-side (see sendSupportChatMessage /
+/// support_chat.js), whether it turns out to be a question, a bug report,
+/// or a suggestion. There's no separate feedback form; a "suggestion" here
+/// is just a message the model tagged that way, so it lands in the same
+/// place an admin already reviews (see [SupportChatStats] on the Executive
+/// Dashboard) instead of a second, disconnected inbox.
+///
+/// Reachable from Owner Profile's "Get Support" action and Customer
+/// Profile's support row - see those pages for the entry points.
+class SupportChatWidget extends StatefulWidget {
+  const SupportChatWidget({super.key});
+
+  static String routeName = 'SupportChat';
+  static String routePath = '/supportChat';
+
+  @override
+  State<SupportChatWidget> createState() => _SupportChatWidgetState();
+}
+
+class _SupportChatWidgetState extends State<SupportChatWidget> {
+  late SupportChatModel _model;
+  final _inputController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  // Client-generated, threads this session's exchanges together in
+  // support_chat_logs without identifying anything about the device -
+  // purely a grouping key.
+  final _conversationId = const Uuid().v4();
+
+  final List<SupportChatTurn> _turns = [];
+  bool _sending = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _model = createModel(context, () => SupportChatModel());
+  }
+
+  @override
+  void dispose() {
+    _model.dispose();
+    _inputController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final text = _inputController.text.trim();
+    if (text.isEmpty || _sending) return;
+
+    safeSetState(() {
+      _turns.add(SupportChatTurn(role: 'user', text: text));
+      _inputController.clear();
+      _sending = true;
+      _error = null;
+    });
+    _scrollToEnd();
+
+    final result = await KinServices.sendSupportChatMessage(
+      message: text,
+      conversationId: _conversationId,
+      // Prior turns only - the message just added isn't context for
+      // itself.
+      history: _turns.sublist(0, _turns.length - 1),
+    );
+
+    if (!mounted) return;
+    safeSetState(() {
+      _sending = false;
+      if (result.isSuccess) {
+        _turns.add(result.data!);
+      } else {
+        _error = result.error;
+      }
+    });
+    _scrollToEnd();
+  }
+
+  void _scrollToEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.primaryBackground,
+      appBar: AppBar(
+        backgroundColor: theme.primaryBackground,
+        automaticallyImplyLeading: false,
+        leading: FlutterFlowIconButton(
+          borderRadius: 8.0,
+          buttonSize: 40.0,
+          fillColor: Colors.transparent,
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: theme.primaryText, size: 20.0),
+          onPressed: () => context.safePop(),
+        ),
+        title: Text(
+          'Get Support',
+          style: theme.headlineMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            color: theme.primaryText,
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: false,
+        elevation: 0.0,
+      ),
+      body: SafeArea(
+        top: true,
+        child: Column(
+          children: [
+            Expanded(
+              child: _turns.isEmpty
+                  ? _emptyState(theme)
+                  : ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.all(16.0),
+                      itemCount: _turns.length + (_sending ? 1 : 0),
+                      itemBuilder: (context, i) {
+                        if (i >= _turns.length) return _typingBubble(theme);
+                        return _bubble(theme, _turns[i]);
+                      },
+                    ),
+            ),
+            if (_error != null)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _error!,
+                    style: theme.bodySmall.override(color: theme.error),
+                  ),
+                ),
+              ),
+            _inputBar(theme),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _emptyState(FlutterFlowTheme theme) => Center(
+        child: Padding(
+          padding: EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.headset_mic_rounded, size: 40.0, color: theme.primary),
+              SizedBox(height: 12.0),
+              Text(
+                'Ask a question, report a problem, or leave a suggestion',
+                textAlign: TextAlign.center,
+                style: theme.bodyMedium.override(
+                  color: theme.secondaryText,
+                  lineHeight: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+
+  Widget _bubble(FlutterFlowTheme theme, SupportChatTurn turn) {
+    final isUser = turn.role == 'user';
+    return Align(
+      alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 10.0),
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width * 0.78),
+        padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+        decoration: BoxDecoration(
+          color: isUser ? theme.primary : theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Text(
+          turn.text,
+          style: theme.bodyMedium.override(
+            color: isUser ? Colors.black : theme.primaryText,
+            lineHeight: 1.4,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _typingBubble(FlutterFlowTheme theme) => Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          margin: EdgeInsets.only(bottom: 10.0),
+          padding: EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          child: SizedBox(
+            width: 16.0,
+            height: 16.0,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.0,
+              valueColor: AlwaysStoppedAnimation<Color>(theme.secondaryText),
+            ),
+          ),
+        ),
+      );
+
+  Widget _inputBar(FlutterFlowTheme theme) => Padding(
+        padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0,
+            MediaQuery.of(context).padding.bottom + 12.0),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _inputController,
+                minLines: 1,
+                maxLines: 4,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => _send(),
+                decoration: InputDecoration(
+                  hintText: 'Type a message...',
+                  hintStyle: theme.bodySmall.override(color: theme.hint),
+                  filled: true,
+                  fillColor: theme.secondaryBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(999.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                ),
+                style: theme.bodyMedium.override(color: theme.primaryText),
+              ),
+            ),
+            SizedBox(width: 8.0),
+            InkWell(
+              onTap: _sending ? null : _send,
+              borderRadius: BorderRadius.circular(999.0),
+              child: Container(
+                width: 44.0,
+                height: 44.0,
+                decoration: BoxDecoration(
+                  color: _sending ? theme.alternate : theme.primary,
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Icon(Icons.arrow_upward_rounded,
+                    color: Colors.black, size: 20.0),
+              ),
+            ),
+          ],
+        ),
+      );
+}

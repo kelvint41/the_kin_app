@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/place.dart';
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import '/index.dart';
@@ -76,6 +77,12 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Timer? _matchDebounce;
+  MatchedBusinessSubmission? _matchedSubmission;
+  bool _matchDismissed = false;
+  bool _matchAccepted = false;
+  bool _checkingForMatch = false;
+
   @override
   void initState() {
     super.initState();
@@ -84,9 +91,121 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
 
   @override
   void dispose() {
+    _matchDebounce?.cancel();
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Debounced check against pending KIN Quest discoveries (see
+  /// KinServices.findMatchingBusinessSubmission) every time the business
+  /// name changes - the "someone already found your business" moment.
+  /// Resets any previous match/dismissal, since a changed name means a
+  /// stale match no longer applies.
+  void _onBusinessNameChanged(String name) {
+    _matchDebounce?.cancel();
+    if (_matchAccepted) return; // Already claimed one - don't re-check.
+    safeSetState(() {
+      _matchedSubmission = null;
+      _matchDismissed = false;
+    });
+    final trimmed = name.trim();
+    if (trimmed.length < 3) return;
+    _matchDebounce = Timer(const Duration(milliseconds: 600), () async {
+      if (!mounted) return;
+      safeSetState(() => _checkingForMatch = true);
+      final place = _model.placePickerValue;
+      final result = await KinServices.findMatchingBusinessSubmission(
+        businessName: trimmed,
+        latitude: place.latLng?.latitude,
+        longitude: place.latLng?.longitude,
+      );
+      if (!mounted) return;
+      safeSetState(() {
+        _checkingForMatch = false;
+        if (result.isSuccess) _matchedSubmission = result.data;
+      });
+    });
+  }
+
+  void _useMatchedSubmission() {
+    if (_matchedSubmission == null) return;
+    // There's no free-text address field here to prefill - location comes
+    // from FlutterFlowPlacePicker below, which still requires the owner to
+    // pick a real geocoded place. Accepting just remembers the match (shown
+    // as a hint) and queues it to be marked resolved once registration
+    // succeeds - see _matchDismissed/[resolveBusinessSubmission].
+    safeSetState(() => _matchAccepted = true);
+  }
+
+  Widget _matchedSubmissionBanner(FlutterFlowTheme theme) {
+    final match = _matchedSubmission;
+    if (match == null || _matchDismissed) return const SizedBox.shrink();
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: theme.primary,
+        borderRadius: BorderRadius.circular(14.0),
+        border: Border.all(color: theme.accentOnSurface, width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.travel_explore_rounded,
+                  color: theme.accentOnSurface, size: 20.0),
+              SizedBox(width: 8.0),
+              Expanded(
+                child: Text(
+                  'Someone already found your business on KIN Quest!',
+                  style: theme.bodyMedium.override(
+                    color: theme.primaryText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.0),
+          Text(
+            _matchAccepted
+                ? "We'll link that discovery to your business once you "
+                    'register.'
+                : 'They noted this address: "${match.address}". Want to '
+                    'claim that discovery? (Still pick your exact location '
+                    'below.)',
+            style: theme.bodySmall.override(color: theme.secondaryText),
+          ),
+          if (!_matchAccepted) ...[
+            SizedBox(height: 10.0),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => safeSetState(() => _matchDismissed = true),
+                  child: Text('Not Mine',
+                      style: theme.bodySmall.override(color: theme.secondaryText)),
+                ),
+                SizedBox(width: 8.0),
+                FFButtonWidget(
+                  onPressed: _useMatchedSubmission,
+                  text: 'Use This',
+                  options: FFButtonOptions(
+                    height: 36.0,
+                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    color: theme.accentOnSurface,
+                    textStyle: theme.bodySmall.override(color: Colors.white),
+                    elevation: 0.0,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _buildSetupTextField({
@@ -96,6 +215,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
@@ -105,6 +225,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
       obscureText: false,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      onChanged: onChanged,
       decoration: InputDecoration(
         isDense: true,
         labelText: labelText,
@@ -334,6 +455,8 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            _matchedSubmissionBanner(
+                                FlutterFlowTheme.of(context)),
                             Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 16.0),
@@ -345,6 +468,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                     FocusNode(),
                                 labelText: 'Business Name',
                                 hintText: 'Enter your business name',
+                                onChanged: _onBusinessNameChanged,
                               ),
                             ),
                             FlutterFlowDropDown<String>(
@@ -1293,6 +1417,17 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                             );
                           }
                           return;
+                        }
+
+                        // Best-effort: the business is already registered at
+                        // this point, so a failure here shouldn't block the
+                        // owner - it just means the submission stays
+                        // unresolved for admin review to catch later.
+                        if (_matchAccepted && _matchedSubmission != null) {
+                          unawaited(KinServices.resolveBusinessSubmission(
+                            submissionId: _matchedSubmission!.submissionId,
+                            businessRef: result.data!,
+                          ));
                         }
 
                         context.pushNamed(OwnerProfileWidget.routeName);

@@ -7,8 +7,24 @@ import 'package:google_fonts/google_fonts.dart';
 import 'kin_bottom_nav2_model.dart';
 export 'kin_bottom_nav2_model.dart';
 
+/// Which page currently embeds the bar, so it can avoid showing a button
+/// for the screen already on screen. `other` covers every page that isn't
+/// one of the four base tabs (Owner Profile, Executive Dashboard, The
+/// Exchange, Community Prestige) - on those, all four base tabs show
+/// normally, same as before this existed.
+enum KinNavPage { home, directory, feed, loyalty, quest, other }
+
 class KinBottomNav2Widget extends StatefulWidget {
-  const KinBottomNav2Widget({super.key});
+  const KinBottomNav2Widget({super.key, this.currentPage = KinNavPage.other});
+
+  /// The page this bar is embedded on. Whichever of the four base tabs
+  /// (Home/Directory/Feed/Loyalty) matches this is replaced by The KIN
+  /// Quest tab instead of linking back to the page already showing - the
+  /// bar always shows exactly four buttons, never a redundant one.
+  /// `KinNavPage.quest` and `KinNavPage.other` don't match any of the
+  /// four, so all four show unchanged in both cases: there's no "Quest"
+  /// slot to begin with when you're already on the Quest page.
+  final KinNavPage currentPage;
 
   @override
   State<KinBottomNav2Widget> createState() => _KinBottomNav2WidgetState();
@@ -61,15 +77,116 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           ? _navGoldDark
           : FlutterFlowTheme.of(context).primaryText;
 
-  /// Previously Directory/Feed/Loyalty were `secondaryText` (gold-ish in
-  /// dark mode, near-black 0xFF14181B in light mode) while Map alone was
-  /// `primary`, the dark green - so the row read as three-plus-one in dark
-  /// mode and lost its labels entirely in light mode. Note that Map's
-  /// green was the only active-tab signal, and it was hardcoded here
-  /// rather than derived from the current route, so it stayed on Map no
-  /// matter which page embedded this bar. Unifying the colour removes a
-  /// signal that was wrong more often than right; there is now no visual
-  /// active state.
+  /// One tab's definition: icon, label, and what tapping it does. Kept as
+  /// plain data so [_tabFor] can pick between a slot's normal definition
+  /// and the Quest swap-in without duplicating the Column/Icon/Text tree.
+  Widget _buildTab(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      flex: 1,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, color: _navGold(context), size: 24.0),
+            Text(
+              label,
+              style: FlutterFlowTheme.of(context).labelSmall.override(
+                    font: GoogleFonts.playfairDisplay(
+                      fontWeight: FontWeight.bold,
+                      fontStyle:
+                          FlutterFlowTheme.of(context).labelSmall.fontStyle,
+                    ),
+                    color: _navGold(context),
+                    fontSize: 10.0,
+                    letterSpacing: 0.0,
+                    fontWeight: FontWeight.bold,
+                    fontStyle:
+                        FlutterFlowTheme.of(context).labelSmall.fontStyle,
+                    lineHeight: 1.2,
+                  ),
+            ),
+          ].divide(SizedBox(
+              height: FlutterFlowTheme.of(context).designToken.spacing.xs)),
+        ),
+      ),
+    );
+  }
+
+  Widget _questTab(BuildContext context) => _buildTab(
+        context,
+        icon: Icons.explore_rounded,
+        label: 'Quest',
+        onTap: () => context.pushNamed(KinQuestWidget.routeName),
+      );
+
+  /// The tab for [slot], or the Quest tab if [slot] is the page this bar
+  /// is currently embedded on.
+  Widget _tabFor(BuildContext context, KinNavPage slot) {
+    if (widget.currentPage == slot) return _questTab(context);
+
+    switch (slot) {
+      case KinNavPage.home:
+        return _buildTab(
+          context,
+          icon: Icons.home_rounded,
+          label: 'Home',
+          onTap: () =>
+              context.pushNamed(CustomerProfilePageWidget.routeName),
+        );
+      case KinNavPage.directory:
+        return _buildTab(
+          context,
+          icon: Icons.map_rounded,
+          label: 'Directory',
+          onTap: () => context.pushNamed(GoogleMapPageWidget.routeName),
+        );
+      case KinNavPage.feed:
+        return _buildTab(
+          context,
+          icon: Icons.forum_rounded,
+          label: 'Feed',
+          // Previously this opened TheExchange with whatever business
+          // `queryBusinessesRecordOnce(limit: 1)` happened to return - one
+          // arbitrary business's wall out of 600+, which is why the Feed
+          // always looked empty. NearbyFeed aggregates the walls of the
+          // businesses closest to the user instead.
+          onTap: () => context.pushNamed(NearbyFeedWidget.routeName),
+        );
+      case KinNavPage.loyalty:
+        return _buildTab(
+          context,
+          icon: Icons.workspace_premium_rounded,
+          label: 'Loyalty',
+          // Was CommunityPrestige, which reads nothing from Firestore - its
+          // tier, rank and point totals are literals, so every account saw
+          // the same invented standing. The real figures - support streak,
+          // reviews written, Kindex score - are the Personal Milestones
+          // block on CustomerProfilePage, so this opens there, scrolled
+          // past the launchpad to them.
+          onTap: () => context.pushNamed(
+            CustomerProfilePageWidget.routeName,
+            queryParameters: {
+              'scrollToMilestones': serializeParam(true, ParamType.bool),
+            }.withoutNulls,
+          ),
+        );
+      case KinNavPage.quest:
+      case KinNavPage.other:
+        // Unreachable: _tabFor is only ever called with the four base
+        // slots below.
+        throw StateError('$slot is not a base nav slot');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -88,200 +205,10 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(
-              flex: 1,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  print('KinBottomNav2Widget: Home tab tapped');
-                  context.pushNamed(CustomerProfilePageWidget.routeName);
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.home_rounded,
-                      color: _navGold(context),
-                      size: 24.0,
-                    ),
-                    Text(
-                      'Home',
-                      style: FlutterFlowTheme.of(context).labelSmall.override(
-                            font: GoogleFonts.playfairDisplay(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .fontStyle,
-                            ),
-                            color: _navGold(context),
-                            fontSize: 10.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelSmall
-                                .fontStyle,
-                            lineHeight: 1.2,
-                          ),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  print('KinBottomNav2Widget: Directory tab tapped');
-                  context.pushNamed(GoogleMapPageWidget.routeName);
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.map_rounded,
-                      color: _navGold(context),
-                      size: 24.0,
-                    ),
-                    Text(
-                      'Directory',
-                      style: FlutterFlowTheme.of(context).labelSmall.override(
-                            font: GoogleFonts.playfairDisplay(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .fontStyle,
-                            ),
-                            color: _navGold(context),
-                            fontSize: 10.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelSmall
-                                .fontStyle,
-                            lineHeight: 1.2,
-                          ),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () async {
-                  // Previously this opened TheExchange with whatever business
-                  // `queryBusinessesRecordOnce(limit: 1)` happened to return -
-                  // one arbitrary business's wall out of 600+, which is why
-                  // the Feed always looked empty. NearbyFeed aggregates the
-                  // walls of the businesses closest to the user instead.
-                  print('KinBottomNav2Widget: Feed tab tapped');
-                  context.pushNamed(NearbyFeedWidget.routeName);
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.forum_rounded,
-                      color: _navGold(context),
-                      size: 24.0,
-                    ),
-                    Text(
-                      'Feed',
-                      style: FlutterFlowTheme.of(context).labelSmall.override(
-                            font: GoogleFonts.playfairDisplay(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .fontStyle,
-                            ),
-                            color: _navGold(context),
-                            fontSize: 10.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelSmall
-                                .fontStyle,
-                            lineHeight: 1.2,
-                          ),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
-                ),
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {
-                  print('KinBottomNav2Widget: Loyalty tab tapped');
-                  // Was CommunityPrestige, which reads nothing from
-                  // Firestore - its tier, rank and point totals are
-                  // literals, so every account saw the same invented
-                  // standing. The map page's menu had already dropped it
-                  // from v1 for that reason, which left this tab as its
-                  // last entry point. The real figures - support streak,
-                  // reviews written, Kindex score - are the Personal
-                  // Milestones block on CustomerProfilePage, so the tab
-                  // opens there, scrolled past the launchpad to them.
-                  context.pushNamed(
-                    CustomerProfilePageWidget.routeName,
-                    queryParameters: {
-                      'scrollToMilestones': serializeParam(
-                        true,
-                        ParamType.bool,
-                      ),
-                    }.withoutNulls,
-                  );
-                },
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.workspace_premium_rounded,
-                      color: _navGold(context),
-                      size: 24.0,
-                    ),
-                    Text(
-                      'Loyalty',
-                      style: FlutterFlowTheme.of(context).labelSmall.override(
-                            font: GoogleFonts.playfairDisplay(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .fontStyle,
-                            ),
-                            color: _navGold(context),
-                            fontSize: 10.0,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .labelSmall
-                                .fontStyle,
-                            lineHeight: 1.2,
-                          ),
-                    ),
-                  ].divide(SizedBox(
-                      height:
-                          FlutterFlowTheme.of(context).designToken.spacing.xs)),
-                ),
-              ),
-            ),
+            _tabFor(context, KinNavPage.home),
+            _tabFor(context, KinNavPage.directory),
+            _tabFor(context, KinNavPage.feed),
+            _tabFor(context, KinNavPage.loyalty),
           ],
         ),
       ),

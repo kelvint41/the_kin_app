@@ -9,6 +9,7 @@ import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
+import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -124,6 +125,26 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       return Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        // No AppBar on this page normally (the hero header below draws its
+        // own back button over the business image), but this early-return
+        // branch skips that header entirely, which left this exact state -
+        // no owned business yet - with no way back at all.
+        appBar: AppBar(
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          automaticallyImplyLeading: false,
+          leading: FlutterFlowIconButton(
+            borderRadius: 8.0,
+            buttonSize: 40.0,
+            fillColor: Colors.transparent,
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 20.0,
+            ),
+            onPressed: () => context.safePop(),
+          ),
+          elevation: 0.0,
+        ),
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24.0),
@@ -160,6 +181,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
             ),
           ),
         ),
+        bottomNavigationBar: const KinBottomNav2Widget(),
       );
     }
 
@@ -183,6 +205,29 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                 child: Stack(
                   alignment: AlignmentDirectional(-1.0, -1.0),
                   children: [
+                    // This page has no AppBar - the hero image fills that
+                    // role visually - so it never had a back button either.
+                    // Reached from the map hamburger menu's "My Business /
+                    // Profile" and pushed (not replaced), so there was
+                    // always a screen to return to; there just wasn't a
+                    // button for it.
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: FlutterFlowIconButton(
+                          borderRadius: 8.0,
+                          buttonSize: 37.4,
+                          fillColor:
+                              FlutterFlowTheme.of(context).primaryBackground,
+                          icon: Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 20.0,
+                          ),
+                          onPressed: () => context.safePop(),
+                        ),
+                      ),
+                    ),
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
                       // Was a hardcoded dimg.dreamflow.cloud placeholder -
@@ -538,37 +583,38 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         final metricCardBusinessesRecord =
                                             snapshot.data!;
 
-                                        return InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () async {
-                                            context.pushNamed(
-                                                CommunityPrestigeWidget
-                                                    .routeName);
-                                          },
-                                          child: wrapWithModel(
-                                            model: _model.metricCardModel2,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: MetricCard4Widget(
-                                              icon: Icon(
-                                                Icons.trending_up_rounded,
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                size: 20.0,
-                                              ),
-                                              value: formatNumber(
-                                                metricCardBusinessesRecord
-                                                    .kindexScore,
-                                                formatType: FormatType.decimal,
-                                                decimalType:
-                                                    DecimalType.periodDecimal,
-                                              ),
-                                              label: 'KINDEX Score',
+                                        // Was wrapped in an InkWell that
+                                        // pushed to CommunityPrestigeWidget -
+                                        // a v2/v3 rewards mockup that reads
+                                        // nothing from Firestore and renders
+                                        // hardcoded businesses/scores. Tapping
+                                        // an owner's real Kindex score sent
+                                        // them to fake data about someone
+                                        // else's business. Removed rather
+                                        // than repointed - no real "Kindex
+                                        // score details" destination exists
+                                        // yet, and the sibling Check-Ins card
+                                        // below is plain display too.
+                                        return wrapWithModel(
+                                          model: _model.metricCardModel2,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard4Widget(
+                                            icon: Icon(
+                                              Icons.trending_up_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
                                             ),
+                                            value: formatNumber(
+                                              metricCardBusinessesRecord
+                                                  .kindexScore,
+                                              formatType: FormatType.decimal,
+                                              decimalType:
+                                                  DecimalType.periodDecimal,
+                                            ),
+                                            label: 'KINDEX Score',
                                           ),
                                         );
                                       },
@@ -1292,9 +1338,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           highlightColor: Colors.transparent,
                           onTap: () async {
                             context.pushNamed(
-                              BusinessProfileOwnerWidget.routeName,
+                              BusinessProfileV2Widget.routeName,
                               queryParameters: {
-                                'businessRef': serializeParam(
+                                'businessDocument': serializeParam(
                                   currentUserDocument?.ownedBusiness,
                                   ParamType.DocumentReference,
                                 ),
@@ -1314,16 +1360,24 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             ),
                           ),
                         ),
-                        wrapWithModel(
-                          model: _model.actionBtnModel4,
-                          updateCallback: () => safeSetState(() {}),
-                          child: ActionBtnWidget(
-                            icon: Icon(
-                              Icons.headset_mic_rounded,
-                              color: const Color(0xFFD4AF37),
-                              size: 24.0,
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () =>
+                              context.pushNamed(SupportChatWidget.routeName),
+                          child: wrapWithModel(
+                            model: _model.actionBtnModel4,
+                            updateCallback: () => safeSetState(() {}),
+                            child: ActionBtnWidget(
+                              icon: Icon(
+                                Icons.headset_mic_rounded,
+                                color: const Color(0xFFD4AF37),
+                                size: 24.0,
+                              ),
+                              label: 'Get Support',
                             ),
-                            label: 'Get Support',
                           ),
                         ),
                         if (currentUserDocument?.isAdmin == true)
@@ -1357,6 +1411,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
             ],
           ),
         ),
+        bottomNavigationBar: const KinBottomNav2Widget(),
       ),
     );
   }

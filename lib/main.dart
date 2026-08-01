@@ -36,9 +36,25 @@ void main() async {
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
 
+  // Real keys come from RevenueCat's dashboard (Project settings > API keys)
+  // once the founding_local/pro_growth/elite_growth products exist in App
+  // Store Connect and Google Play Console and are attached to a RevenueCat
+  // offering. Pass them at build time so they never get checked into source:
+  //   flutter build ... --dart-define=REVENUECAT_APPLE_KEY=appl_xxx
+  //                      --dart-define=REVENUECAT_GOOGLE_KEY=goog_xxx
+  // Falls back to the literal test key, which has no real offering behind
+  // it, so purchasePackage finds nothing and every upgrade button no-ops.
+  const appStoreKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_KEY',
+    defaultValue: 'test_nlIQSnnGvtvhLZnWwgHRKoDnhsN',
+  );
+  const playStoreKey = String.fromEnvironment(
+    'REVENUECAT_GOOGLE_KEY',
+    defaultValue: 'test_nlIQSnnGvtvhLZnWwgHRKoDnhsN',
+  );
   await revenue_cat.initialize(
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
+    appStoreKey,
+    playStoreKey,
     loadDataAfterLaunch: true,
   );
 

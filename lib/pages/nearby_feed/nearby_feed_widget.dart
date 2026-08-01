@@ -1,7 +1,9 @@
 import '/backend/backend.dart';
 import '/components/exchange_feed_item_widget.dart';
+import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
 import '/services/nearby_feed.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -74,6 +76,21 @@ class _NearbyFeedWidgetState extends State<NearbyFeedWidget> {
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         automaticallyImplyLeading: false,
+        // Was suppressed with no replacement - this page is reached from
+        // the bottom nav's Feed tab, which pushes rather than replaces the
+        // route, so there was no way back to whatever screen was open
+        // before it except the OS swipe gesture.
+        leading: FlutterFlowIconButton(
+          borderRadius: 8.0,
+          buttonSize: 40.0,
+          fillColor: Colors.transparent,
+          icon: Icon(
+            Icons.arrow_back_ios_new_rounded,
+            color: FlutterFlowTheme.of(context).primaryText,
+            size: 20.0,
+          ),
+          onPressed: () => context.safePop(),
+        ),
         title: Text(
           'Nearby',
           style: FlutterFlowTheme.of(context).headlineMedium.override(
@@ -173,6 +190,8 @@ class _NearbyFeedWidgetState extends State<NearbyFeedWidget> {
                 },
               ),
       ),
+      bottomNavigationBar:
+          const KinBottomNav2Widget(currentPage: KinNavPage.feed),
     );
   }
 

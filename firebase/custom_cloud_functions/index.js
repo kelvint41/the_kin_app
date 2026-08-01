@@ -48,6 +48,12 @@ exports.syncSignupFeed = signupFeedSync.syncSignupFeed;
 
 const businessDiscovery = require("./business_discovery.js");
 exports.submitBusinessDiscovery = businessDiscovery.submitBusinessDiscovery;
+exports.submitCustomerBusinessDiscovery =
+  businessDiscovery.submitCustomerBusinessDiscovery;
+exports.findMatchingBusinessSubmission =
+  businessDiscovery.findMatchingBusinessSubmission;
+exports.resolveBusinessSubmission =
+  businessDiscovery.resolveBusinessSubmission;
 
 const mysteryRewardEngine = require("./mystery_reward_engine.js");
 exports.generateMysteryReward = mysteryRewardEngine.generateMysteryReward;
@@ -55,3 +61,14 @@ exports.redeemReward = mysteryRewardEngine.redeemReward;
 
 const exchangePostTools = require("./exchange_post_tools.js");
 exports.cleanUpPostText = exchangePostTools.cleanUpPostText;
+
+const foundingLocalTrial = require("./founding_local_trial.js");
+exports.startFoundingLocalTrial = foundingLocalTrial.startFoundingLocalTrial;
+exports.processFoundingLocalTrials =
+  foundingLocalTrial.processFoundingLocalTrials;
+
+const supportChat = require("./support_chat.js");
+exports.sendSupportChatMessage = supportChat.sendSupportChatMessage;
+
+const supportChatStats = require("./support_chat_stats.js");
+exports.getSupportChatStats = supportChatStats.getSupportChatStats;

@@ -161,6 +161,70 @@ class BusinessesRecord extends FirestoreRecord {
   String get subscriptionTier => _subscriptionTier ?? '';
   bool hasSubscriptionTier() => _subscriptionTier != null;
 
+  // "rarity_tier" field. One of Standard/Rare/Hidden Gem. Missing/empty
+  // reads as Standard - most businesses are never explicitly tagged.
+  // Drives both The KIN Quest page's glow/diamond treatment and the
+  // tighter check-in geofence for Rare/Hidden Gem spots (see
+  // firebase/custom_cloud_functions/visit_verification.js).
+  String? _rarityTier;
+  String get rarityTier =>
+      _rarityTier == null || _rarityTier!.isEmpty ? 'Standard' : _rarityTier!;
+  bool hasRarityTier() => _rarityTier != null;
+
+  // "points_multiplier" field. Quest-point award multiplier for a
+  // verified check-in at this business - 1 for Standard, 3 for Rare, 5 for
+  // Hidden Gem by convention (see visit_verification.js's
+  // BASE_CHECKIN_POINTS), but stored per-business so an individual spot
+  // can be tuned without a client release.
+  double? _pointsMultiplier;
+  double get pointsMultiplier => _pointsMultiplier ?? 1.0;
+  bool hasPointsMultiplier() => _pointsMultiplier != null;
+
+  // "active_hours_start" / "active_hours_end" fields. Minutes since
+  // midnight, business-local time. For mobile spots (food trucks) that are
+  // only physically present part of the day - null on either means "no
+  // published window", which the check-in flow treats as always active,
+  // same as every fixed storefront today.
+  int? _activeHoursStart;
+  int? get activeHoursStart => _activeHoursStart;
+  bool hasActiveHoursStart() => _activeHoursStart != null;
+
+  int? _activeHoursEnd;
+  int? get activeHoursEnd => _activeHoursEnd;
+  bool hasActiveHoursEnd() => _activeHoursEnd != null;
+
+  // "trial_status" field. One of not_started/active/expired/converted.
+  // Missing/empty reads as not_started - a business that has never
+  // touched the trial flow. Set by startFoundingLocalTrial and the
+  // processFoundingLocalTrials nightly sweep (see
+  // firebase/custom_cloud_functions/founding_local_trial.js).
+  String? _trialStatus;
+  String get trialStatus => _trialStatus ?? '';
+  bool hasTrialStatus() => _trialStatus != null;
+
+  // "trial_start_at" field.
+  DateTime? _trialStartAt;
+  DateTime? get trialStartAt => _trialStartAt;
+  bool hasTrialStartAt() => _trialStartAt != null;
+
+  // "trial_end_at" field.
+  DateTime? _trialEndAt;
+  DateTime? get trialEndAt => _trialEndAt;
+  bool hasTrialEndAt() => _trialEndAt != null;
+
+  // "has_used_trial" field. Permanent once true - the one-trial-per-
+  // -business guard. Never reset by unclaiming/reclaiming the business.
+  bool? _hasUsedTrial;
+  bool get hasUsedTrial => _hasUsedTrial ?? false;
+  bool hasHasUsedTrial() => _hasUsedTrial != null;
+
+  // "trial_reminder_stage" field. '' (or missing) / 'day10' / 'day13' -
+  // which in-app trial reminder banner, if any, the owner profile should
+  // currently show. Cleared back to '' on conversion or expiry.
+  String? _trialReminderStage;
+  String get trialReminderStage => _trialReminderStage ?? '';
+  bool hasTrialReminderStage() => _trialReminderStage != null;
+
   // "has_flash_beacon" field.
   bool? _hasFlashBeacon;
   bool get hasFlashBeacon => _hasFlashBeacon ?? false;
@@ -177,6 +241,20 @@ class BusinessesRecord extends FirestoreRecord {
   int? _flashBeaconDurationMinutes;
   int get flashBeaconDurationMinutes => _flashBeaconDurationMinutes ?? 0;
   bool hasFlashBeaconDurationMinutes() => _flashBeaconDurationMinutes != null;
+
+  // "flash_beacon_message" field. The owner's own blast message for the
+  // active Power Hour ('20% off all orders for the next hour'). Set by
+  // startPowerHour, cleared alongside has_flash_beacon on expiry/early end.
+  String? _flashBeaconMessage;
+  String get flashBeaconMessage => _flashBeaconMessage ?? '';
+  bool hasFlashBeaconMessage() => _flashBeaconMessage != null;
+
+  // "flash_beacon_image_url" field. Optional flyer/promo image for the
+  // active Power Hour, already uploaded to Storage by the time
+  // startPowerHour is called.
+  String? _flashBeaconImageUrl;
+  String get flashBeaconImageUrl => _flashBeaconImageUrl ?? '';
+  bool hasFlashBeaconImageUrl() => _flashBeaconImageUrl != null;
 
   // "power_hour_usage_count" field. Count of Power Hours started within
   // the current rolling 7-day window (see power_hour_last_reset).
@@ -421,11 +499,22 @@ class BusinessesRecord extends FirestoreRecord {
     _arAssetUrl = snapshotData['ar_asset_url'] as String?;
     _isArEnabled = snapshotData['is_ar_enabled'] as bool?;
     _subscriptionTier = snapshotData['subscription_tier'] as String?;
+    _rarityTier = snapshotData['rarity_tier'] as String?;
+    _pointsMultiplier = castToType<double>(snapshotData['points_multiplier']);
+    _activeHoursStart = castToType<int>(snapshotData['active_hours_start']);
+    _activeHoursEnd = castToType<int>(snapshotData['active_hours_end']);
+    _trialStatus = snapshotData['trial_status'] as String?;
+    _trialStartAt = snapshotData['trial_start_at'] as DateTime?;
+    _trialEndAt = snapshotData['trial_end_at'] as DateTime?;
+    _hasUsedTrial = snapshotData['has_used_trial'] as bool?;
+    _trialReminderStage = snapshotData['trial_reminder_stage'] as String?;
     _hasFlashBeacon = snapshotData['has_flash_beacon'] as bool?;
     _flashBeaconExpiresAt =
         snapshotData['flash_beacon_expires_at'] as DateTime?;
     _flashBeaconDurationMinutes =
         castToType<int>(snapshotData['flash_beacon_duration_minutes']);
+    _flashBeaconMessage = snapshotData['flash_beacon_message'] as String?;
+    _flashBeaconImageUrl = snapshotData['flash_beacon_image_url'] as String?;
     _powerHourUsageCount =
         castToType<int>(snapshotData['power_hour_usage_count']);
     _powerHourLastReset = snapshotData['power_hour_last_reset'] as DateTime?;
@@ -702,9 +791,20 @@ Map<String, dynamic> createBusinessesRecordData({
   String? arAssetUrl,
   bool? isArEnabled,
   String? subscriptionTier,
+  String? rarityTier,
+  double? pointsMultiplier,
+  int? activeHoursStart,
+  int? activeHoursEnd,
+  String? trialStatus,
+  DateTime? trialStartAt,
+  DateTime? trialEndAt,
+  bool? hasUsedTrial,
+  String? trialReminderStage,
   bool? hasFlashBeacon,
   DateTime? flashBeaconExpiresAt,
   int? flashBeaconDurationMinutes,
+  String? flashBeaconMessage,
+  String? flashBeaconImageUrl,
   int? powerHourUsageCount,
   DateTime? powerHourLastReset,
   bool? isPriorityPinned,
@@ -772,9 +872,20 @@ Map<String, dynamic> createBusinessesRecordData({
       'ar_asset_url': arAssetUrl,
       'is_ar_enabled': isArEnabled,
       'subscription_tier': subscriptionTier,
+      'rarity_tier': rarityTier,
+      'points_multiplier': pointsMultiplier,
+      'active_hours_start': activeHoursStart,
+      'active_hours_end': activeHoursEnd,
+      'trial_status': trialStatus,
+      'trial_start_at': trialStartAt,
+      'trial_end_at': trialEndAt,
+      'has_used_trial': hasUsedTrial,
+      'trial_reminder_stage': trialReminderStage,
       'has_flash_beacon': hasFlashBeacon,
       'flash_beacon_expires_at': flashBeaconExpiresAt,
       'flash_beacon_duration_minutes': flashBeaconDurationMinutes,
+      'flash_beacon_message': flashBeaconMessage,
+      'flash_beacon_image_url': flashBeaconImageUrl,
       'power_hour_usage_count': powerHourUsageCount,
       'power_hour_last_reset': powerHourLastReset,
       'is_priority_pinned': isPriorityPinned,
@@ -851,9 +962,20 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.arAssetUrl == e2?.arAssetUrl &&
         e1?.isArEnabled == e2?.isArEnabled &&
         e1?.subscriptionTier == e2?.subscriptionTier &&
+        e1?.rarityTier == e2?.rarityTier &&
+        e1?.pointsMultiplier == e2?.pointsMultiplier &&
+        e1?.activeHoursStart == e2?.activeHoursStart &&
+        e1?.activeHoursEnd == e2?.activeHoursEnd &&
+        e1?.trialStatus == e2?.trialStatus &&
+        e1?.trialStartAt == e2?.trialStartAt &&
+        e1?.trialEndAt == e2?.trialEndAt &&
+        e1?.hasUsedTrial == e2?.hasUsedTrial &&
+        e1?.trialReminderStage == e2?.trialReminderStage &&
         e1?.hasFlashBeacon == e2?.hasFlashBeacon &&
         e1?.flashBeaconExpiresAt == e2?.flashBeaconExpiresAt &&
         e1?.flashBeaconDurationMinutes == e2?.flashBeaconDurationMinutes &&
+        e1?.flashBeaconMessage == e2?.flashBeaconMessage &&
+        e1?.flashBeaconImageUrl == e2?.flashBeaconImageUrl &&
         e1?.powerHourUsageCount == e2?.powerHourUsageCount &&
         e1?.powerHourLastReset == e2?.powerHourLastReset &&
         e1?.isPriorityPinned == e2?.isPriorityPinned &&
@@ -923,9 +1045,20 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e?.arAssetUrl,
         e?.isArEnabled,
         e?.subscriptionTier,
+        e?.rarityTier,
+        e?.pointsMultiplier,
+        e?.activeHoursStart,
+        e?.activeHoursEnd,
+        e?.trialStatus,
+        e?.trialStartAt,
+        e?.trialEndAt,
+        e?.hasUsedTrial,
+        e?.trialReminderStage,
         e?.hasFlashBeacon,
         e?.flashBeaconExpiresAt,
         e?.flashBeaconDurationMinutes,
+        e?.flashBeaconMessage,
+        e?.flashBeaconImageUrl,
         e?.powerHourUsageCount,
         e?.powerHourLastReset,
         e?.isPriorityPinned,

@@ -165,21 +165,34 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => NearbyFeedWidget(),
         ),
         FFRoute(
+          // Check-in requires a signed-in uid (recordVerifiedVisit), same
+          // as NearbyFeed.
+          name: KinQuestWidget.routeName,
+          path: KinQuestWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KinQuestWidget(),
+        ),
+        FFRoute(
+          // Reachable only from within KinQuestWidget, but registered as
+          // its own route (not a mode toggle) so the two lists stay
+          // independently navigable and back/deep-link behavior is normal.
+          name: KinQuestSearchWidget.routeName,
+          path: KinQuestSearchWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KinQuestSearchWidget(),
+        ),
+        FFRoute(
+          // Requires auth like every other user-generated-content path -
+          // sendSupportChatMessage rejects an unauthenticated caller anyway.
+          name: SupportChatWidget.routeName,
+          path: SupportChatWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => SupportChatWidget(),
+        ),
+        FFRoute(
           name: ClaimBusinessWidget.routeName,
           path: ClaimBusinessWidget.routePath,
           builder: (context, params) => ClaimBusinessWidget(
-            businessRef: params.getParam(
-              'businessRef',
-              ParamType.DocumentReference,
-              isList: false,
-              collectionNamePath: ['businesses'],
-            ),
-          ),
-        ),
-        FFRoute(
-          name: BusinessProfileOwnerWidget.routeName,
-          path: BusinessProfileOwnerWidget.routePath,
-          builder: (context, params) => BusinessProfileOwnerWidget(
             businessRef: params.getParam(
               'businessRef',
               ParamType.DocumentReference,
@@ -266,11 +279,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => OwnerProfileWidget(),
         ),
         FFRoute(
-          name: CommunityPrestigeWidget.routeName,
-          path: CommunityPrestigeWidget.routePath,
-          builder: (context, params) => CommunityPrestigeWidget(),
-        ),
-        FFRoute(
           name: SignInPageWidget.routeName,
           path: SignInPageWidget.routePath,
           builder: (context, params) => SignInPageWidget(),
@@ -280,11 +288,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: CustomersignupPageWidget.routePath,
           builder: (context, params) => CustomersignupPageWidget(),
         ),
-        FFRoute(
-          name: MobileCalledPowerPageWidget.routeName,
-          path: MobileCalledPowerPageWidget.routePath,
-          builder: (context, params) => MobileCalledPowerPageWidget(),
-        )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 
