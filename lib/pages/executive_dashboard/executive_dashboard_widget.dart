@@ -98,6 +98,14 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// Same memoization as [_aiStatsFuture], for the KIN Quest finds map.
   Future<List<_BusinessFindPin>>? _heatmapFuture;
 
+  /// Created once for the widget's lifetime, like GoogleMapPageModel's
+  /// mapGoogleMapsController - a fresh Completer built inline in build()
+  /// on every rebuild (this section rebuilds whenever the FutureBuilder
+  /// above it does) thrashed the underlying platform view and threw a
+  /// storm of 'semantics.parentDataDirty' assertions that froze scrolling
+  /// on this page.
+  final _findsMapController = Completer<GoogleMapController>();
+
   @override
   void initState() {
     super.initState();
@@ -1826,7 +1834,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                 );
               }
               return FlutterFlowGoogleMap(
-                controller: Completer<GoogleMapController>(),
+                controller: _findsMapController,
                 // Geographic center of the contiguous US, zoomed to show
                 // the whole country - the pins concentrate wherever the
                 // business directory actually has coverage today and will
