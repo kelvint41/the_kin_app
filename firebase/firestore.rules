@@ -2,16 +2,64 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /businesses/{document} {
-      allow create: if request.auth != null;
+      // kindex_score/kindex_velocity are system-managed (written only by
+      // the business_kindex_engine Cloud Function via the Admin SDK,
+      // which bypasses these rules) - blocked here on both create and
+      // update so an owner can't set/inflate their own score directly.
+      //
+      // has_used_trial and the trial timestamps are frozen for the same
+      // reason, and it matters more here: without this an owner could
+      // write has_used_trial:false straight from the client and restart
+      // the 14-day Founding Local trial forever. Only
+      // startFoundingLocalTrial and the processFoundingLocalTrials sweep
+      // (both Admin SDK, both bypass these rules) may set them.
+      //
+      // trial_status/trial_reminder_stage are deliberately NOT frozen on
+      // update: upgradeBusinessTier and downgradeToCommunity are client
+      // writes that legitimately move a trial to 'converted'/'expired'.
+      // Forging 'active' buys nothing on its own - the entitlement is
+      // subscription_tier/is_premium, and the day-14 sweep reads
+      // trial_start_at, which is frozen (a forged 'active' with no start
+      // timestamp is skipped by the sweep's malformed-doc guard).
+      //
+      // subscription_tier/is_premium are likewise NOT frozen: the paid
+      // upgrade path is a client write, so freezing them would break
+      // every real purchase. They stay exactly as writable as before.
+      allow create: if request.auth != null
+        && !('kindex_score' in request.resource.data)
+        && !('kindex_velocity' in request.resource.data)
+        && !('has_used_trial' in request.resource.data)
+        && !('trial_status' in request.resource.data)
+        && !('trial_start_at' in request.resource.data)
+        && !('trial_end_at' in request.resource.data);
       allow read: if true;
-      allow write: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'kindex_score', 'kindex_velocity',
+          'has_used_trial', 'trial_start_at', 'trial_end_at',
+          'trial_reminder_day10_sent_at', 'trial_reminder_day13_sent_at'
+        ]);
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
+    // `is_admin` is the only thing gating the Executive Dashboard and the
+    // signup_feed read rule below, and both of those read it straight off
+    // this doc. A blanket `allow write` therefore meant any signed-in user
+    // could set is_admin on themselves and grant themselves admin - so it's
+    // frozen here on both create and update, the same way kindex_score is
+    // frozen on businesses above. It is now writable only via the Admin SDK,
+    // which bypasses these rules.
+    //
+    // Every client write to this collection passes named fields only
+    // (email / display_name / owned_business) through createUsersRecordData,
+    // whose map is `.withoutNulls`, so is_admin is simply absent from them
+    // and neither clause below rejects a legitimate write.
     match /users/{document} {
-      allow create: if request.auth.uid == document;
+      allow create: if request.auth.uid == document
+        && !('is_admin' in request.resource.data);
       allow read: if request.auth.uid == document;
-      allow write: if request.auth.uid == document;
+      allow update: if request.auth.uid == document
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['is_admin']);
       allow delete: if request.auth.uid == document;
     }
 
@@ -29,9 +77,35 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // In-app feedback: bugs, feature requests and general comments, told
+    // apart by feedback_type. Create was previously unvalidated - any
+    // signed-in client could write a document of any shape and any size
+    // into this collection - and read was closed to everyone including
+    // admins, so nothing submitted could ever be looked at. Both were the
+    // reason the collection sat empty and unwired.
     match /bug_reports/{document} {
-      allow create: if request.auth != null;
-      allow read: if false;
+      allow create: if request.auth != null
+        // Pins authorship to the caller. tester_name is a free-text label
+        // and can say anything; this is the field follow-up relies on.
+        && request.resource.data.user_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.feedback_type in
+           ['Bug', 'Feature request', 'General feedback']
+        && request.resource.data.issue_description is string
+        && request.resource.data.issue_description.size() > 0
+        // Same ceiling as an Exchange post. Long enough for a real
+        // report, bounded so one client can't write a document-sized
+        // blob into a collection only admins read.
+        && request.resource.data.issue_description.size() <= 2000
+        && request.resource.data.page_where_it_happened is string
+        && request.resource.data.page_where_it_happened.size() <= 120;
+
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+
+      // Immutable once submitted: an edit path would let a submitter
+      // rewrite a report after it had been read and acted on.
       allow write: if false;
       allow delete: if false;
     }
@@ -64,33 +138,141 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // App Studio intake. Create is deliberately open to unauthenticated
+    // callers - the offer is aimed at businesses who are not on KIN yet, so
+    // requiring an account first would exclude the audience. That openness
+    // is paid for with tight validation: a plausible email, a brief long
+    // enough to be a real request and bounded so nobody can post a document
+    // -sized blob, a project_type from the known list, and a status that
+    // must start at 'new' so a submitter cannot inject a request already
+    // marked delivered. Reads stay admin-only - these carry contact details.
     match /agency_queue/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.resource.data.contact_email is string
+        && request.resource.data.contact_email.size() >= 5
+        && request.resource.data.contact_email.matches('.*@.*')
+        && request.resource.data.brief is string
+        && request.resource.data.brief.size() >= 20
+        && request.resource.data.brief.size() <= 2000
+        && request.resource.data.current_status == 'new';
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // The Exchange is a per-business wall that both customers and owners
+    // post to. Posting used to require owning the business AND that business
+    // being is_verified, which made it unpostable by anyone: no business has
+    // an owner yet, and the composer's text field was hidden client-side on
+    // the same condition.
+    //
+    // Posting now requires a signed-in user who has accepted the code of
+    // conduct (an exchange_profiles doc keyed by their uid with
+    // agreed_to_conduct == true). Ownership is no longer required to post -
+    // it only determines the "Owner" badge, which is derived at read time
+    // from the business's owner_ref rather than trusted from the post.
     match /exchange_posts/{document} {
       allow create: if request.auth != null
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
-        && get(request.resource.data.business_ref).data.is_verified == true;
+        && exists(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid)).data.agreed_to_conduct == true
+        // The accepted terms must be the ones currently in force. Without
+        // this, `agreed_to_conduct: true` only records that someone agreed
+        // to *something* - a revision would leave everyone posting under
+        // terms they never saw. Bumping legal_config/exchange_terms
+        // .current_version re-prompts every user on their next post.
+        //
+        // The version is read from Firestore rather than hardcoded here so
+        // that older app builds are held to the same bar as current ones,
+        // and a revision is one write rather than a rules deploy plus an
+        // app release. Fails closed if the config doc is missing.
+        && exists(/databases/$(database)/documents/legal_config/exchange_terms)
+        && get(/databases/$(database)/documents/exchange_profiles/$(request.auth.uid)).data.terms_version
+           == get(/databases/$(database)/documents/legal_config/exchange_terms).data.current_version
+        && request.resource.data.post_text is string
+        && request.resource.data.post_text.size() > 0
+        && request.resource.data.post_text.size() <= 2000;
       allow read: if true;
-      allow write: if false;
+      // Authors may remove their own post. Taking down someone else's is
+      // deliberately not possible from a client - that runs server-side with
+      // the Admin SDK (firebase/scripts/moderate_exchange.js), the same
+      // pattern as approve_claim.js, so a takedown always has an operator
+      // behind it.
+      allow delete: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      // Authors may edit their own post's text (e.g. to fix a typo, or
+      // apply the optional AI cleanup pass) - nothing else about the
+      // document. affectedKeys().hasOnly(...) is what actually enforces
+      // that: user_ref, business_ref, likes_count, timestamp, post_id and
+      // post_image are all locked once created, even though the earlier
+      // equality checks on user_ref would also catch a reassignment
+      // attempt on their own.
+      allow update: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.user_ref == resource.data.user_ref
+        && request.resource.data.post_text is string
+        && request.resource.data.post_text.size() > 0
+        && request.resource.data.post_text.size() <= 2000
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['post_text', 'is_edited', 'edited_at']);
+    }
+
+    // Code-of-conduct acceptance, keyed by uid so the exchange_posts rule
+    // above can look it up in one get(). A user may only ever write their
+    // own, and acceptance is public-read so a post can show its author.
+    match /exchange_profiles/{document} {
+      allow create: if request.auth != null && request.auth.uid == document;
+      allow read: if true;
+      allow update: if request.auth != null && request.auth.uid == document;
       allow delete: if false;
     }
 
+    // Reports of posts. Anyone signed in may file one against a post that is
+    // not their own; nobody can read them back from a client, since the
+    // reporter's identity is not something other users should be able to
+    // enumerate. Operators read them with the Admin SDK.
+    match /exchange_post_reports/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.reporter_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow read: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Every page view, map tap and call tap, with the user_ref and city
+    // attached - i.e. an individual browsing history per account. `read: if
+    // true` made all of it world-readable with no sign-in at all, and
+    // `create: if true` let anyone write to it. This is the Executive
+    // Dashboard's funnel data, so it belongs to the admin; hiding the
+    // dashboard button while leaving its source collection open to the
+    // internet protected nothing.
     match /activity_logs/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }
 
+    // Aggregate analytics - admin-only for the same reason.
     match /analytics_daily/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if request.auth != null;
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    // The terms version currently in force, read by the exchange_posts rule
+    // above and by the client when it decides whether to re-prompt. Written
+    // only with the Admin SDK - a client that could bump this could waive
+    // the requirement for itself.
+    match /legal_config/{document} {
+      allow create: if false;
+      allow read: if request.auth != null;
       allow write: if false;
       allow delete: if false;
     }
@@ -130,22 +312,65 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Visits gate whether a review counts toward kindex_score, so a client
+    // must never be able to assert one. This was previously
+    // `allow create: if true` - any caller, even unauthenticated, could
+    // POST a visit document and make their reviews count. All writes now
+    // go through the recordVerifiedVisit callable, which does the radius
+    // check server-side and writes via the Admin SDK (bypassing rules).
+    // Reads stay open so the app can show a user's own check-in state.
     match /uservisits/{document} {
-      allow create: if true;
-      allow read: if true;
+      allow create: if false;
+      // Was world-readable so the app could show a user their own check-in
+      // state - which it can still do, while no longer showing everyone
+      // else's. These are GPS-verified visits: where a named account
+      // physically went, and when.
+      //
+      // Also readable by the business's own owner (KIN Quest check-in
+      // analytics on Owner Profile/the hamburger menu) - a business owner
+      // seeing who checked in at their own storefront is the same kind of
+      // disclosure any in-person loyalty program already makes, and it's
+      // scoped to their own business_ref only, never another owner's.
+      allow read: if request.auth != null
+        && (resource.data.user_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid)
+            || get(/databases/$(database)/documents/users/$(request.auth.uid))
+               .data.is_admin == true
+            || get(resource.data.business_ref).data.owner_ref
+               == /databases/$(database)/documents/users/$(request.auth.uid));
       allow write: if false;
       allow delete: if false;
     }
 
+    // Reviews use a composite id, {businessId}_{userId}, so a customer has
+    // one review document per business and re-submitting edits it in place
+    // rather than stacking duplicates.
     match /reviews/{document} {
       allow create: if request.auth != null
         && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
         && request.resource.data.business_ref is path
         && request.resource.data.rating is number
         && request.resource.data.rating >= 1
-        && request.resource.data.rating <= 5;
+        && request.resource.data.rating <= 5
+        && request.resource.data.edit_count == 0;
       allow read: if true;
-      allow write: if false;
+
+      // Owners may edit their own review, capped at 2 edits purely as an
+      // anti-spam measure - score manipulation is handled by the nightly
+      // recompute (verified visits + highest-per-customer), not by this
+      // cap. The identity fields are frozen so an edit can't reassign a
+      // review to another user or business, and edit_count must advance by
+      // exactly one so the cap can't be sidestepped.
+      allow update: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.user_ref == resource.data.user_ref
+        && request.resource.data.business_ref == resource.data.business_ref
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5
+        && resource.data.edit_count < 2
+        && request.resource.data.edit_count == resource.data.edit_count + 1;
+
       allow delete: if false;
     }
 
@@ -195,6 +420,82 @@ service cloud.firestore {
       match /engagement/{engagementDocument} {
         allow read, write: if false;
       }
+    }
+
+    // Written only by sendSupportChatMessage (Cloud Function, Admin SDK).
+    // This is also the suggestions/comments intake mechanism - a
+    // "suggestion" is just a message classified that way, not a separate
+    // form - so it gets the same deny-all-client-access treatment as
+    // ai_generation_logs: it holds raw user message text, and the
+    // Executive Dashboard only ever needs the server-aggregated counts from
+    // getSupportChatStats, not the collection itself.
+    match /support_chat_logs/{document} {
+      allow read, write: if false;
+    }
+
+    // Global live feed for the Community Shoutouts carousel - public read,
+    // same as reviews/exchange_posts. Written only by
+    // submitBusinessDiscovery/generateMysteryReward (Cloud Functions,
+    // Admin SDK - bypasses rules), never directly by a client.
+    match /kin_feed_events/{document} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Shared, ever-growing category vocabulary for Business Setup and the
+    // "Add a Business" discovery dialogs. Public read (every picker needs
+    // the full list), any signed-in user may add a new one - deliberately
+    // no moderation queue, matching this app's low-ops-overhead defaults
+    // elsewhere. Never updated or deleted: a category, once added, stays;
+    // doc ID is the normalized name, so a duplicate submission is a
+    // same-content overwrite, not a new row.
+    match /business_categories/{document} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // Mystery reward vouchers. A user may read only their own - the promo
+    // code and tier this unlocks aren't other users' business. Written
+    // only by generateMysteryReward/redeemReward (Cloud Functions, Admin
+    // SDK); redemption specifically has to be server-side so is_redeemed
+    // and expiration_date can't be forged from the client.
+    match /unlocked_rewards/{document} {
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow write: if false;
+    }
+
+    // In-app notification inbox. A user may read only their own, and may
+    // only ever flip is_read - everything else (title, body, type, ...) is
+    // written exclusively by createNotification (Cloud Functions, Admin
+    // SDK) so a client can't forge or edit its own notification content.
+    match /notifications/{document} {
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow create: if false;
+      allow update: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['is_read']);
+      allow delete: if false;
+    }
+
+    // Audit trail for the "Add a Business" discovery flow - admin-only
+    // read, same reasoning as activity_logs/analytics_daily. Written only
+    // by submitBusinessDiscovery (Cloud Function, Admin SDK).
+    match /business_submissions/{document} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+    }
+
+    // Nationwide reward caps (e.g. the Elite Growth annual limit). No
+    // client needs this and it must not be readable/writable from one -
+    // the whole point is a count a client can't see or race against.
+    match /system_counters/{document} {
+      allow read, write: if false;
     }
   }
 }

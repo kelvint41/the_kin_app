@@ -11,7 +11,6 @@ import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
 import 'dart:math';
 import 'dart:ui';
 import '/index.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -23,9 +22,24 @@ export 'merchant_pricing_suite_model.dart';
 
 // TODO: Replace with the real RevenueCat package identifiers once the
 // corresponding products are configured in the RevenueCat dashboard.
-const _kFoundingLocalPackageId = 'founding_local_monthly';
-const _kProGrowthPackageId = 'pro_growth_monthly';
-const _kEliteGrowthPackageId = 'elite_growth_monthly';
+//
+// Note the app currently initialises RevenueCat with the literal
+// "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN" for BOTH platforms (see main.dart),
+// which is not a real SDK key - real ones start appl_ and goog_ and differ
+// per platform. Until those are set, getOfferings returns nothing,
+// purchasePackage finds no package, and every upgrade button does nothing
+// on a real device as well as in the Simulator.
+const _kFoundingLocalMonthly = 'founding_local_monthly';
+const _kProGrowthMonthly = 'pro_growth_monthly';
+const _kEliteGrowthMonthly = 'elite_growth_monthly';
+
+// Annual equivalents. These need creating as separate products in App Store
+// Connect and Google Play and attaching to the same RevenueCat offering -
+// the stores treat monthly and annual as distinct products, not as one
+// product billed differently.
+const _kFoundingLocalYearly = 'founding_local_yearly';
+const _kProGrowthYearly = 'pro_growth_yearly';
+const _kEliteGrowthYearly = 'elite_growth_yearly';
 
 /// Create a high-fidelity mobile pricing subscription page for a premium
 /// local discovery app.
@@ -122,6 +136,147 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
     super.dispose();
   }
 
+  /// Monthly or annual. Community is unaffected - it is free, so there is
+  /// nothing to bill either way, and it keeps no toggle.
+  bool _yearly = false;
+
+  String _packageFor(String monthly, String yearly) =>
+      _yearly ? yearly : monthly;
+
+  /// Guards against a double-tap firing two startFoundingLocalTrial calls
+  /// before the first round-trip lands. The callable itself is the real
+  /// guard (has_used_trial is checked in a transaction) - this just stops
+  /// the second tap from surfacing a confusing "already used" error.
+  bool _startingTrial = false;
+
+  /// Whole days remaining before [endsAt], floored at zero.
+  int _trialDaysLeft(DateTime endsAt) {
+    final remaining = endsAt.difference(DateTime.now()).inDays;
+    return remaining < 0 ? 0 : remaining;
+  }
+
+  /// The status line under the Founding Local feature list while a trial
+  /// is running. Mirrors the in-app reminder copy that the nightly sweep
+  /// (founding_local_trial.js) stages via trial_reminder_stage.
+  String? _trialBannerText(BusinessesRecord business) {
+    if (business.trialStatus != 'active') return null;
+    switch (business.trialReminderStage) {
+      case 'day10':
+        return "You've got 3 days left on your Founding Local trial. Right now "
+            'you have your Verified Founding Member badge, 5 gallery photos, '
+            'and basic analytics live on your profile. Keep them going for '
+            '\$19/mo — cancel anytime.';
+      case 'day13':
+        return 'Your trial ends tomorrow. After that, your profile drops back '
+            'to the free Community tier — no trust badge, limited photos, no '
+            'analytics. Lock in Founding Local now for \$19/mo, or you\'ll '
+            'automatically move to the free tier with no charge.';
+      default:
+        final endsAt = business.trialEndAt;
+        if (endsAt == null) return null;
+        final days = _trialDaysLeft(endsAt);
+        return days == 1
+            ? '1 day left in your trial'
+            : '$days days left in your trial';
+    }
+  }
+
+  /// Trial button label, or null to hide the button entirely.
+  ///
+  /// Three states: never trialed (offer it), mid-trial (convert to paid),
+  /// and used-up (nothing - the card's own upgrade tap is the only path
+  /// left, so a second trial can never be started from the UI).
+  String? _trialCtaLabel(BusinessesRecord business) {
+    if (business.trialStatus == 'active') {
+      return 'Keep my Founding Local tier';
+    }
+    if (business.hasUsedTrial) return null;
+    return 'Start your 14-day trial';
+  }
+
+  Future<void> _startTrial(DocumentReference businessRef) async {
+    if (_startingTrial) return;
+    safeSetState(() => _startingTrial = true);
+    try {
+      final result =
+          await KinServices.startFoundingLocalTrial(businessRef: businessRef);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.isSuccess
+              ? 'Your 14-day Founding Local trial has started.'
+              : result.error!),
+        ),
+      );
+    } finally {
+      if (mounted) safeSetState(() => _startingTrial = false);
+    }
+  }
+
+  /// The store's own localised price for the selected billing period,
+  /// falling back to the literal when offerings have not loaded.
+  String _priceFor(String monthly, String yearly, String fallbackMonthly,
+          String fallbackYearly) =>
+      revenue_cat.storePriceFor(_packageFor(monthly, yearly)) ??
+      (_yearly ? fallbackYearly : fallbackMonthly);
+
+  /// Monthly / Yearly switch.
+  ///
+  /// Annual billing is the one payment option that genuinely can be added
+  /// here. Klarna and Afterpay cannot: a subscription unlocking in-app
+  /// features is a digital good, so Apple requires IAP and Google requires
+  /// Play Billing, and neither accepts an external BNPL provider. That is
+  /// policy rather than a technical gap. BNPL belongs on App Studio, which
+  /// is a real-world service delivered outside the app.
+  Widget _billingToggle(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    Widget option(String label, bool yearly) {
+      final selected = _yearly == yearly;
+      return Expanded(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(999.0),
+          onTap: () => safeSetState(() => _yearly = yearly),
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            decoration: BoxDecoration(
+              color: selected ? theme.accent1 : Colors.transparent,
+              borderRadius: BorderRadius.circular(999.0),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              label,
+              style: theme.labelMedium.override(
+                font: GoogleFonts.plusJakartaSans(
+                    fontWeight: FontWeight.w600),
+                color: selected ? theme.primary : theme.secondaryText,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 20),
+      child: Container(
+        padding: const EdgeInsets.all(4.0),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(999.0),
+          border: Border.all(color: theme.alternate),
+        ),
+        child: Row(
+          children: [
+            option('Monthly', false),
+            option('Yearly', true),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // Some navigation call sites push this route without a businessRef
@@ -156,7 +311,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -186,39 +341,44 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Container(
-                          height: 280.0,
+                          // Was a fixed height: 280.0 on both this Container
+                          // and the gradient behind it. That's a fine
+                          // estimate for the collapsed two-line headline +
+                          // two-line subtitle at default text scale, but at
+                          // larger system font sizes (Dynamic Type / display
+                          // scaling) the same four lines render taller than
+                          // 280px and get clipped - the debug overlay showed
+                          // this as "BOTTOM OVERFLOWED BY 62 PIXELS" eating
+                          // into "& Impact Plan". Sizing to content (via the
+                          // Stack's Positioned.fill gradient below, rather
+                          // than a magic-number height) means the header
+                          // simply grows with the text instead of clipping it.
                           child: Stack(
                             alignment: AlignmentDirectional(-1.0, -1.0),
                             children: [
-                              ClipRRect(
+                              // Was a CachedNetworkImage pointed at a
+                              // dreamflow.cloud AI-generated placeholder
+                              // ("luxury dark abstract gold waves") - a
+                              // scaffolding artifact never swapped for a
+                              // real asset, and prone to rendering as a
+                              // busy, uncontrolled speckle pattern (or
+                              // nothing at all if the request failed). A
+                              // plain brand gradient can't fail to load and
+                              // can't look like noise.
+                              Positioned.fill(
                                 child: Container(
-                                  height: 280.0,
-                                  child: Opacity(
-                                    opacity: 0.4,
-                                    child: CachedNetworkImage(
-                                      fadeInDuration: Duration(milliseconds: 0),
-                                      fadeOutDuration:
-                                          Duration(milliseconds: 0),
-                                      imageUrl:
-                                          'https://dimg.dreamflow.cloud/v1/image/luxury%20dark%20abstract%20gold%20waves%20background',
-                                      fit: BoxFit.cover,
-                                      alignment: Alignment(0.0, 0.0),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        FlutterFlowTheme.of(context).primary,
+                                        const Color(0xFF06251B),
+                                      ],
+                                      stops: [0.0, 1.0],
+                                      begin: AlignmentDirectional(1.0, -1.0),
+                                      end: AlignmentDirectional(-1.0, 1.0),
                                     ),
+                                    shape: BoxShape.rectangle,
                                   ),
-                                ),
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.transparent,
-                                      FlutterFlowTheme.of(context).primary
-                                    ],
-                                    stops: [0.0, 1.0],
-                                    begin: AlignmentDirectional(0.0, -1.0),
-                                    end: AlignmentDirectional(0, 1.0),
-                                  ),
-                                  shape: BoxShape.rectangle,
                                 ),
                               ),
                               Align(
@@ -231,21 +391,22 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      Stack(
-                                        children: [],
-                                      ),
                                       FlutterFlowIconButton(
                                         borderRadius: 8.0,
                                         buttonSize: 37.4,
                                         fillColor: Colors.transparent,
                                         icon: Icon(
                                           Icons.arrow_back_ios_new_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          // Fixed white, not a theme text
+                                          // token: this header is a fixed
+                                          // dark gradient in both themes, so
+                                          // a light-mode text colour here
+                                          // would go dark-on-dark.
+                                          color: Colors.white,
                                           size: 24.0,
                                         ),
                                         onPressed: () {
-                                          print('IconButton pressed ...');
+                                          context.safePop();
                                         },
                                       ),
                                       Container(
@@ -263,9 +424,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                                         .headlineLarge
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
+                                              color: Colors.white,
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.w800,
                                               fontStyle:
@@ -290,9 +449,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                                         .bodyMedium
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .secondaryText,
+                                              color: Colors.white70,
                                               letterSpacing: 0.0,
                                               fontWeight:
                                                   FlutterFlowTheme.of(context)
@@ -312,6 +469,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                             ],
                           ),
                         ),
+                        _billingToggle(context),
                         Padding(
                           padding: EdgeInsets.all(24.0),
                           child: Column(
@@ -348,9 +506,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -374,6 +532,67 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   ),
                                 ),
                               ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 8.0, 0.0, 16.0),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Choose your growth level.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .titleMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .primaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight: FontWeight.bold,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .titleMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    Text(
+                                      'Every tier gets you on the map. Higher tiers get you seen first.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodySmall
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodySmall
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .bodySmall
+                                                    .fontStyle,
+                                            lineHeight: 1.4,
+                                          ),
+                                    ),
+                                  ].divide(SizedBox(height: 4.0)),
+                                ),
+                              ),
                               InkWell(
                                 splashColor: Colors.transparent,
                                 focusColor: Colors.transparent,
@@ -385,10 +604,29 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   if (businessRef == null) {
                                     return;
                                   }
+
+                                  // Trial-eligible: the card's whole tap
+                                  // area starts the trial rather than a
+                                  // purchase, same as tapping the button
+                                  // inside it - two InkWells stacked on the
+                                  // same tap don't reliably give the inner
+                                  // one exclusive priority in Flutter, so
+                                  // this has to branch the same way the
+                                  // button does rather than relying on the
+                                  // button "winning".
+                                  if (merchantPricingSuiteBusinessesRecord
+                                              .trialStatus !=
+                                          'active' &&
+                                      !merchantPricingSuiteBusinessesRecord
+                                          .hasUsedTrial) {
+                                    await _startTrial(businessRef);
+                                    return;
+                                  }
+
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _kFoundingLocalPackageId,
+                                    packageId: _packageFor(_kFoundingLocalMonthly, _kFoundingLocalYearly),
                                     tierName: 'Founding Local',
                                     isPremium: true,
                                   );
@@ -403,9 +641,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -420,12 +658,40 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: false,
                                     title: 'Founding Local',
                                     badgeLabel: 'Founding Member Tier',
-                                    price: '\$19',
+                                    valueTag: 'Get discovered.',
+                                    price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$19', '\$190'),
+                                    isYearly: _yearly,
+                                    yearlyTeaser: _yearly ? null : 'or \$190/yr - 2 months free',
                                     f1: 'Verified Founding Member trust badge',
                                     f2: 'Up to 5 gallery photos on profile',
                                     f3: 'Basic profile analytics (views & trends)',
                                     f4: 'Post 1 promotion per month on The Exchange',
                                     beaconText: 'Upgrade',
+                                    // Founding Local is the only trial-
+                                    // eligible tier in this pass - Pro
+                                    // Growth and Elite Growth deliberately
+                                    // pass none of these.
+                                    trialBannerText: _trialBannerText(
+                                        merchantPricingSuiteBusinessesRecord),
+                                    trialCtaLabel: _trialCtaLabel(
+                                        merchantPricingSuiteBusinessesRecord),
+                                    onStartTrial: merchantPricingSuiteBusinessesRecord
+                                                .trialStatus ==
+                                            'active'
+                                        // Mid-trial the CTA converts to a
+                                        // real paid plan, which is the same
+                                        // purchase the card tap already does.
+                                        ? () async => await KinServices
+                                            .upgradeBusinessTier(
+                                              businessRef: businessRef,
+                                              packageId: _packageFor(
+                                                  _kFoundingLocalMonthly,
+                                                  _kFoundingLocalYearly),
+                                              tierName: 'Founding Local',
+                                              isPremium: true,
+                                            )
+                                        : () async =>
+                                            await _startTrial(businessRef),
                                   ),
                                 ),
                               ),
@@ -483,7 +749,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         final result = await KinServices
                                             .upgradeBusinessTier(
                                           businessRef: businessRef,
-                                          packageId: _kProGrowthPackageId,
+                                          packageId: _packageFor(_kProGrowthMonthly, _kProGrowthYearly),
                                           tierName: 'Pro Growth',
                                           isPremium: true,
                                         );
@@ -499,9 +765,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         }
 
                                         context.pushNamed(
-                                          BusinessProfileOwnerWidget.routeName,
+                                          BusinessProfileV2Widget.routeName,
                                           queryParameters: {
-                                            'businessRef': serializeParam(
+                                            'businessDocument': serializeParam(
                                               businessRef,
                                               ParamType.DocumentReference,
                                             ),
@@ -517,7 +783,10 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           isElite: false,
                                           title: 'Pro Growth',
                                           badgeLabel: 'Standard Business',
-                                          price: '\$29',
+                                          valueTag: 'Get chosen — before your competitors.',
+                                          price: _priceFor(_kProGrowthMonthly, _kProGrowthYearly, '\$29', '\$290'),
+                                          isYearly: _yearly,
+                                          yearlyTeaser: _yearly ? null : 'or \$290/yr - 2 months free',
                                           f1: 'Standard interactive map placement in San Antonio',
                                           f2: 'Clutter-free promotion updates on \'The Exchange\'',
                                           f3: 'Premium performance analytics dashboard',
@@ -543,7 +812,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _kEliteGrowthPackageId,
+                                    packageId: _packageFor(_kEliteGrowthMonthly, _kEliteGrowthYearly),
                                     tierName: 'Elite Growth',
                                     isPremium: true,
                                     isPriorityPinned: true,
@@ -560,9 +829,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   }
 
                                   context.pushNamed(
-                                    BusinessProfileOwnerWidget.routeName,
+                                    BusinessProfileV2Widget.routeName,
                                     queryParameters: {
-                                      'businessRef': serializeParam(
+                                      'businessDocument': serializeParam(
                                         businessRef,
                                         ParamType.DocumentReference,
                                       ),
@@ -577,8 +846,11 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isElite: true,
                                     title: 'Elite Growth',
                                     badgeLabel: 'Ultimate Exposure',
-                                    price: '\$59',
-                                    f1: 'Augmented Reality Camera Placement (3D Pins)',
+                                    valueTag: 'Get first, get boosted, get seen everywhere.',
+                                    price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$99', '\$990'),
+                                    isYearly: _yearly,
+                                    yearlyTeaser: _yearly ? null : 'or \$990/yr - 2 months free',
+                                    f1: 'Boosted KINDEX Score baseline (850 vs. 500) and ceiling (900 vs. 750)',
                                     f2: 'Interactive KINDEX dynamic ticker badge',
                                     f3: 'Geo-Fenced Flash Beacons (3-block radius)',
                                     f4: 'Priority Glowing Visual Map Pinning',
@@ -635,7 +907,14 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         size: 12.0,
                                       ),
                                       Text(
-                                        'Secure encrypted checkout',
+                                        // Was 'Secure encrypted checkout' -
+                                        // there is no custom checkout to
+                                        // secure. Purchases go through
+                                        // Apple/Google IAP, so this says
+                                        // what actually happens instead of
+                                        // implying a payment system KIN
+                                        // built itself.
+                                        'Billed securely through the App Store',
                                         style: FlutterFlowTheme.of(context)
                                             .labelSmall
                                             .override(
@@ -665,6 +944,99 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                             ),
                                       ),
                                     ].divide(SizedBox(width: 4.0)),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Wrap(
+                                      alignment: WrapAlignment.center,
+                                      children: [
+                                        Text(
+                                          'By subscribing you agree to our ',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                        InkWell(
+                                          onTap: () => context.pushNamed(
+                                              TermsOfServicePageWidget
+                                                  .routeName),
+                                          child: Text(
+                                            'Terms of Service',
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                          ),
+                                        ),
+                                        Text(
+                                          ' and ',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                        InkWell(
+                                          onTap: () => context.pushNamed(
+                                              PrivacyPolicyPageWidget
+                                                  .routeName),
+                                          child: Text(
+                                            'Privacy Policy',
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primary,
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                ),
+                                          ),
+                                        ),
+                                        Text(
+                                          '. Plans renew automatically until cancelled.',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ].divide(SizedBox(height: 4.0)),
                               ),

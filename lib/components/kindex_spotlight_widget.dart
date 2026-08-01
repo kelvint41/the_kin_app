@@ -4,11 +4,16 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/pages/business_profile_v2/business_profile_v2_widget.dart';
 import '/services/kin_services.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'kindex_spotlight_model.dart';
 export 'kindex_spotlight_model.dart';
 
-// 'Kindex Spotlight' preview card for The Exchange. Business Owners are
+const _gold = Color(0xFFFFD700);
+const _silver = Color(0xFFC0C0C0);
+const _bronze = Color(0xFFCD7F32);
+
+// 'KINDEX Spotlight' preview card for The Exchange. Business Owners are
 // ranked by their business's kindex_score; Customers are ranked by their
 // personal KindexScores.score - two separate scoring tracks that already
 // power the onboarding ticker (see KinServices.fetchTopBusinessKindex /
@@ -89,7 +94,7 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
                     ),
                   ),
                   Text(
-                    'Kindex Spotlight',
+                    'KINDEX Spotlight',
                     style: theme.headlineSmall.override(
                       font: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold),
@@ -122,8 +127,7 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    final topBusiness =
-        _businessEntries.isNotEmpty ? _businessEntries.first : null;
+    final topThreeBusinesses = _businessEntries.take(3).toList();
     final topCustomer =
         _customerEntries.isNotEmpty ? _customerEntries.first : null;
 
@@ -138,24 +142,27 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
         onTap: _loading ? null : () => _openLeaderboard(context),
         child: Container(
           decoration: BoxDecoration(
-            color: Color(0xFF1E1E1E),
+            gradient: LinearGradient(
+              colors: [Color(0xFF1E1E1E), Color(0xFF0F0F0F)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(theme.designToken.radius.lg),
-            border: Border.all(color: Color(0xFF333333), width: 1.0),
+            border: Border.all(color: Color(0x33FFD700), width: 1.0),
           ),
           child: Padding(
             padding: EdgeInsets.all(theme.designToken.spacing.md),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.emoji_events_rounded,
-                    color: Color(0xFFFFD700), size: 22.0),
-                SizedBox(width: theme.designToken.spacing.sm),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Kindex Spotlight',
+                Row(
+                  children: [
+                    Text('🏆', style: TextStyle(fontSize: 20.0)),
+                    SizedBox(width: theme.designToken.spacing.sm),
+                    Expanded(
+                      child: Text(
+                        'KINDEX Spotlight',
                         style: theme.bodyMedium.override(
                           font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold),
@@ -164,32 +171,176 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
                           letterSpacing: 0.0,
                         ),
                       ),
-                      SizedBox(height: 2.0),
-                      Text(
-                        _loading
-                            ? 'Loading leaderboard...'
-                            : [
-                                if (topBusiness != null)
-                                  '🏆 ${topBusiness.name} · ${topBusiness.score.toStringAsFixed(0)}',
-                                if (topCustomer != null)
-                                  '⭐ ${topCustomer.name} · ${topCustomer.score.toStringAsFixed(0)}',
-                              ].join('   '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.labelSmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: Color(0xFFAAAAAA),
-                          letterSpacing: 0.0,
+                    ),
+                    Icon(Icons.chevron_right_rounded,
+                        color: Color(0xFFAAAAAA), size: 20.0),
+                  ],
+                ),
+                SizedBox(height: theme.designToken.spacing.md),
+                if (_loading)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                        vertical: theme.designToken.spacing.md),
+                    child: Text(
+                      'Loading leaderboard...',
+                      style: theme.labelSmall.override(
+                        font: GoogleFonts.plusJakartaSans(),
+                        color: Color(0xFFAAAAAA),
+                        letterSpacing: 0.0,
+                      ),
+                    ),
+                  )
+                else if (topThreeBusinesses.isEmpty)
+                  Text(
+                    'No ranked businesses yet.',
+                    style: theme.labelSmall.override(
+                      font: GoogleFonts.plusJakartaSans(),
+                      color: Color(0xFFAAAAAA),
+                      letterSpacing: 0.0,
+                    ),
+                  )
+                else
+                  _Podium(entries: topThreeBusinesses),
+                if (topCustomer != null) ...[
+                  SizedBox(height: theme.designToken.spacing.sm),
+                  Row(
+                    children: [
+                      Text('⭐', style: TextStyle(fontSize: 13.0)),
+                      SizedBox(width: 6.0),
+                      Expanded(
+                        child: Text(
+                          'Top community member: ${topCustomer.name} · ${topCustomer.score.toStringAsFixed(0)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.labelSmall.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: Color(0xFFAAAAAA),
+                            letterSpacing: 0.0,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                Icon(Icons.chevron_right_rounded,
-                    color: Color(0xFFAAAAAA), size: 20.0),
+                ],
               ],
             ),
           ),
+        ),
+      )
+          .animate(delay: 150.ms)
+          .shimmer(duration: 1200.ms, color: Color(0x33FFD700)),
+    );
+  }
+}
+
+/// Top-3 business mini-podium: rank 1 centered and taller, 2 and 3 flanking
+/// it lower - the classic podium shape, in place of the old single trophy
+/// line. Medal colours on the rank badge do the identification work instead
+/// of a numeral, since gold/silver/bronze reads faster than "1/2/3" here.
+class _Podium extends StatelessWidget {
+  const _Podium({required this.entries});
+
+  final List<KindexTickerEntry> entries;
+
+  @override
+  Widget build(BuildContext context) {
+    // Reorder so index 1 (rank 1) renders centered: [2nd, 1st, 3rd].
+    final order = <int>[
+      if (entries.length > 1) 1,
+      0,
+      if (entries.length > 2) 2,
+    ];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: order.map((i) => _PodiumSlot(rank: i, entry: entries[i])).toList(),
+    );
+  }
+}
+
+class _PodiumSlot extends StatelessWidget {
+  const _PodiumSlot({required this.rank, required this.entry});
+
+  /// 0-indexed: 0 = gold, 1 = silver, 2 = bronze.
+  final int rank;
+  final KindexTickerEntry entry;
+
+  static const _medalColors = [_gold, _silver, _bronze];
+  static const _medalEmoji = ['🥇', '🥈', '🥉'];
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final medal = _medalColors[rank];
+    final isFirst = rank == 0;
+    final avatarSize = isFirst ? 52.0 : 42.0;
+    final initial =
+        entry.name.trim().isNotEmpty ? entry.name.trim()[0].toUpperCase() : '?';
+
+    return GestureDetector(
+      onTap: entry.businessRef == null
+          ? null
+          : () => context.pushNamed(
+                BusinessProfileV2Widget.routeName,
+                queryParameters: {
+                  'businessDocument': serializeParam(
+                    entry.businessRef,
+                    ParamType.DocumentReference,
+                  ),
+                }.withoutNulls,
+              ),
+      child: Padding(
+        padding: EdgeInsets.only(top: isFirst ? 0.0 : 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(_medalEmoji[rank], style: TextStyle(fontSize: isFirst ? 20.0 : 16.0)),
+            SizedBox(height: 4.0),
+            Container(
+              width: avatarSize,
+              height: avatarSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0x1AFFFFFF),
+                border: Border.all(color: medal, width: 2.0),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                initial,
+                style: theme.titleMedium.override(
+                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            SizedBox(height: 4.0),
+            SizedBox(
+              width: 76.0,
+              child: Text(
+                entry.name,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.labelSmall.override(
+                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.0,
+                ),
+              ),
+            ),
+            Text(
+              entry.score.toStringAsFixed(0),
+              style: theme.labelSmall.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                color: medal,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.0,
+              ),
+            ),
+          ],
         ),
       ),
     );

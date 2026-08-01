@@ -1,0 +1,84 @@
+{
+  "mode": "commit",
+  "category_corrections": [
+    {
+      "id": "1ITbZVcRERKyG1HX3tKt",
+      "name": "R. Smith Consulting & Design, LLC",
+      "was": "Construction Services",
+      "now": "Interior designer",
+      "because": "Interior decorating, furniture refinishing, home staging"
+    },
+    {
+      "id": "61bIkqgoVoLhOw3tMjJL",
+      "name": "Williams Tunneling Industries, Inc.",
+      "was": "Environmental Consulting Services",
+      "now": "Construction company",
+      "because": "Sewer tunnels, shafts and drainage tunnels"
+    },
+    {
+      "id": "70KCKcsAYHO9NzexXGS9",
+      "name": "The Big Bib, LLC",
+      "was": "Office Supplies Wholesaler",
+      "now": "Barbecue restaurant",
+      "because": "BBQ restaurant - dine in, carry out and catering"
+    },
+    {
+      "id": "D9a5AqGkZhvoVAkF6cmc",
+      "name": "SMR Security Services, LLC",
+      "was": "Environmental Consulting Services",
+      "now": "Security service",
+      "because": "Guard and patrol security services"
+    },
+    {
+      "id": "DJDdnOQPGfvHVMiD3ueE",
+      "name": "Techesive, LLC",
+      "was": "Office Supplies Wholesaler",
+      "now": "Computer consultant",
+      "because": "Enterprise application integration, software/hardware engineering"
+    },
+    {
+      "id": "HMbxYi45y6eFPpC2E6VE",
+      "name": "Smith's Sanitation Services",
+      "was": "BBQ restaurant",
+      "now": "Janitorial service",
+      "because": "Janitorial, carpet and upholstery cleaning, automotive detailing"
+    },
+    {
+      "id": "cNAvN5kHySHhOJ5Nhzjh",
+      "name": "Sol Studio Architects, LLC",
+      "was": "Health Care Services",
+      "now": "Architect",
+      "because": "Architectural services"
+    },
+    {
+      "id": "cn0C2YAPFF5gocEB8BAl",
+      "name": "Gwendolen Wilder Author",
+      "was": "Health Care Services",
+      "now": "Author",
+      "because": "Self-awareness and management training, books, journals"
+    },
+    {
+      "id": "xeyb8KXtibst9ZlRqCzh",
+      "name": "EJ Smith Construction Company, LLC",
+      "was": "Janitorial Services",
+      "now": "Construction company",
+      "because": "Commercial and institutional building construction"
+    },
+    {
+      "id": "yz2XNZWJ2sovKbKr7naj",
+      "name": "Digital Information Security Solutions",
+      "was": "Security Services",
+      "now": "Computer consultant",
+      "because": "Custom computer programming and related services"
+    }
+  ],
+  "coordinates_cleared": [
+    {
+      "id": "1ITbZVcRERKyG1HX3tKt",
+      "name": "R. Smith Consulting & Design, LLC",
+      "because": "longitude +29.53 is positive - that is Egypt, not Texas",
+      "current": "29.5539561, 29.5311267"
+    }
+  ],
+  "skipped": []
+}

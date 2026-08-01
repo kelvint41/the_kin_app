@@ -51,6 +51,17 @@ class ExchangePostsRecord extends FirestoreRecord {
   int get likesCount => _likesCount ?? 0;
   bool hasLikesCount() => _likesCount != null;
 
+  // "is_edited" field. Set true the first time the author edits post_text
+  // after posting - lets the feed show an "(edited)" marker.
+  bool? _isEdited;
+  bool get isEdited => _isEdited ?? false;
+  bool hasIsEdited() => _isEdited != null;
+
+  // "edited_at" field.
+  DateTime? _editedAt;
+  DateTime? get editedAt => _editedAt;
+  bool hasEditedAt() => _editedAt != null;
+
   void _initializeFields() {
     _postId = snapshotData['post_id'] as String?;
     _userRef = snapshotData['user_ref'] as DocumentReference?;
@@ -59,6 +70,8 @@ class ExchangePostsRecord extends FirestoreRecord {
     _postImage = snapshotData['post_image'] as String?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
     _likesCount = castToType<int>(snapshotData['likes_count']);
+    _isEdited = snapshotData['is_edited'] as bool?;
+    _editedAt = snapshotData['edited_at'] as DateTime?;
   }
 
   static CollectionReference get collection =>

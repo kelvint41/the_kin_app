@@ -11,6 +11,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/place.dart';
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 import '/index.dart';
@@ -76,6 +77,12 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  Timer? _matchDebounce;
+  MatchedBusinessSubmission? _matchedSubmission;
+  bool _matchDismissed = false;
+  bool _matchAccepted = false;
+  bool _checkingForMatch = false;
+
   @override
   void initState() {
     super.initState();
@@ -84,9 +91,121 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
 
   @override
   void dispose() {
+    _matchDebounce?.cancel();
     _model.dispose();
 
     super.dispose();
+  }
+
+  /// Debounced check against pending KIN Quest discoveries (see
+  /// KinServices.findMatchingBusinessSubmission) every time the business
+  /// name changes - the "someone already found your business" moment.
+  /// Resets any previous match/dismissal, since a changed name means a
+  /// stale match no longer applies.
+  void _onBusinessNameChanged(String name) {
+    _matchDebounce?.cancel();
+    if (_matchAccepted) return; // Already claimed one - don't re-check.
+    safeSetState(() {
+      _matchedSubmission = null;
+      _matchDismissed = false;
+    });
+    final trimmed = name.trim();
+    if (trimmed.length < 3) return;
+    _matchDebounce = Timer(const Duration(milliseconds: 600), () async {
+      if (!mounted) return;
+      safeSetState(() => _checkingForMatch = true);
+      final place = _model.placePickerValue;
+      final result = await KinServices.findMatchingBusinessSubmission(
+        businessName: trimmed,
+        latitude: place.latLng?.latitude,
+        longitude: place.latLng?.longitude,
+      );
+      if (!mounted) return;
+      safeSetState(() {
+        _checkingForMatch = false;
+        if (result.isSuccess) _matchedSubmission = result.data;
+      });
+    });
+  }
+
+  void _useMatchedSubmission() {
+    if (_matchedSubmission == null) return;
+    // There's no free-text address field here to prefill - location comes
+    // from FlutterFlowPlacePicker below, which still requires the owner to
+    // pick a real geocoded place. Accepting just remembers the match (shown
+    // as a hint) and queues it to be marked resolved once registration
+    // succeeds - see _matchDismissed/[resolveBusinessSubmission].
+    safeSetState(() => _matchAccepted = true);
+  }
+
+  Widget _matchedSubmissionBanner(FlutterFlowTheme theme) {
+    final match = _matchedSubmission;
+    if (match == null || _matchDismissed) return const SizedBox.shrink();
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.all(14.0),
+      decoration: BoxDecoration(
+        color: theme.primary,
+        borderRadius: BorderRadius.circular(14.0),
+        border: Border.all(color: theme.accentOnSurface, width: 1.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.travel_explore_rounded,
+                  color: theme.accentOnSurface, size: 20.0),
+              SizedBox(width: 8.0),
+              Expanded(
+                child: Text(
+                  'Someone already found your business on KIN Quest!',
+                  style: theme.bodyMedium.override(
+                    color: theme.primaryText,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6.0),
+          Text(
+            _matchAccepted
+                ? "We'll link that discovery to your business once you "
+                    'register.'
+                : 'They noted this address: "${match.address}". Want to '
+                    'claim that discovery? (Still pick your exact location '
+                    'below.)',
+            style: theme.bodySmall.override(color: theme.secondaryText),
+          ),
+          if (!_matchAccepted) ...[
+            SizedBox(height: 10.0),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => safeSetState(() => _matchDismissed = true),
+                  child: Text('Not Mine',
+                      style: theme.bodySmall.override(color: theme.secondaryText)),
+                ),
+                SizedBox(width: 8.0),
+                FFButtonWidget(
+                  onPressed: _useMatchedSubmission,
+                  text: 'Use This',
+                  options: FFButtonOptions(
+                    height: 36.0,
+                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    color: theme.accentOnSurface,
+                    textStyle: theme.bodySmall.override(color: Colors.white),
+                    elevation: 0.0,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
   }
 
   Widget _buildSetupTextField({
@@ -96,6 +215,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
     required String hintText,
     TextInputType keyboardType = TextInputType.text,
     int maxLines = 1,
+    void Function(String)? onChanged,
   }) {
     return TextFormField(
       controller: controller,
@@ -105,6 +225,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
       obscureText: false,
       maxLines: maxLines,
       keyboardType: keyboardType,
+      onChanged: onChanged,
       decoration: InputDecoration(
         isDense: true,
         labelText: labelText,
@@ -140,8 +261,96 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
     );
   }
 
+  /// Shown instead of the form when nobody is signed in. Offers the account
+  /// step rather than just refusing, and stamps signupType so that account
+  /// creation returns here instead of dropping them on the customer profile.
+  Widget _buildAccountRequiredState(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: theme.primaryBackground,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.storefront_rounded,
+                    size: 48.0, color: theme.accentOnSurface),
+                SizedBox(height: theme.designToken.spacing.md),
+                Text(
+                  'Create your account first',
+                  textAlign: TextAlign.center,
+                  style: theme.headlineSmall.override(
+                    color: theme.primaryText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                Text(
+                  'Your business is registered to your account, so we need '
+                  "that first. It only takes a moment, and you'll come "
+                  'straight back here.',
+                  textAlign: TextAlign.center,
+                  style: theme.bodyMedium.override(color: theme.secondaryText),
+                ),
+                SizedBox(height: theme.designToken.spacing.lg),
+                FFButtonWidget(
+                  onPressed: () {
+                    FFAppState().signupType = 'business';
+                    context.pushNamed(CustomersignupPageWidget.routeName);
+                  },
+                  text: 'Create Account',
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 48.0,
+                    color: theme.primary,
+                    textStyle: theme.titleSmall.override(color: Colors.white),
+                    elevation: 0.0,
+                    borderRadius:
+                        BorderRadius.circular(theme.designToken.radius.sm),
+                  ),
+                ),
+                SizedBox(height: theme.designToken.spacing.sm),
+                InkWell(
+                  onTap: () {
+                    FFAppState().signupType = 'business';
+                    context.pushNamed(SignInPageWidget.routeName);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12.0, horizontal: 16.0),
+                    child: Text(
+                      'Already have an account? Log in',
+                      style: theme.bodyMedium.override(
+                        color: theme.accentOnSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // registerBusiness needs a signed-in owner and refuses without one, so
+    // an unauthenticated visitor could previously fill in every field here
+    // and only discover that on submit - by which point the form was gone.
+    // The onboarding button now routes to sign-up first, but this page is
+    // also reachable directly and by deep link, so the guard lives here as
+    // well rather than only at the one entry point that happens to be
+    // fixed.
+    if (!loggedIn) {
+      return _buildAccountRequiredState(context);
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -181,7 +390,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                             size: 24.0,
                           ),
                           onPressed: () {
-                            print('IconButton pressed ...');
+                            context.safePop();
                           },
                         ),
                         Text(
@@ -246,6 +455,8 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
+                            _matchedSubmissionBanner(
+                                FlutterFlowTheme.of(context)),
                             Padding(
                               padding: EdgeInsetsDirectional.fromSTEB(
                                   0.0, 0.0, 0.0, 16.0),
@@ -257,84 +468,118 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                     FocusNode(),
                                 labelText: 'Business Name',
                                 hintText: 'Enter your business name',
+                                onChanged: _onBusinessNameChanged,
                               ),
                             ),
-                            FlutterFlowDropDown<String>(
-                              controller: _model.dropdownValueController ??=
-                                  FormFieldController<String>(
-                                _model.dropdownValue ??= 'Salon & Beauty',
+                            StreamBuilder<List<BusinessCategoriesRecord>>(
+                              stream: queryBusinessCategoriesRecord(
+                                queryBuilder: (q) =>
+                                    q.orderBy('display_name'),
                               ),
-                              options: [
-                                'Salon & Beauty',
-                                'Restaurant & Food',
-                                'Retail',
-                                'Professional Services',
-                                'Health & Wellness'
-                              ],
-                              onChanged: (val) => safeSetState(
-                                  () => _model.dropdownValue = val),
-                              width: 200.0,
-                              height: 40.0,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
+                              builder: (context, snapshot) {
+                                final categoryOptions = snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty
+                                    ? snapshot.data!
+                                        .map((c) => c.displayName)
+                                        .toList()
+                                    : [
+                                        'Salon & Beauty',
+                                        'Restaurant & Food',
+                                        'Retail',
+                                        'Professional Services',
+                                        'Health & Wellness'
+                                      ];
+                                return FlutterFlowDropDown<String>(
+                                  controller:
+                                      _model.dropdownValueController ??=
+                                          FormFieldController<String>(
+                                    _model.dropdownValue ??=
+                                        categoryOptions.first,
                                   ),
-                              hintText: 'Salon & Beauty',
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 24.0,
+                                  options: categoryOptions,
+                                  onChanged: (val) => safeSetState(
+                                      () => _model.dropdownValue = val),
+                                  width: 200.0,
+                                  height: 40.0,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                        lineHeight: 1.4,
+                                      ),
+                                  hintText: 'Salon & Beauty',
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    size: 24.0,
+                                  ),
+                                  fillColor:
+                                      FlutterFlowTheme.of(context).primary,
+                                  elevation: 2.0,
+                                  borderColor:
+                                      FlutterFlowTheme.of(context).alternate,
+                                  borderWidth: 1.0,
+                                  borderRadius: 14.0,
+                                  margin: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
+                                  hidesUnderline: true,
+                                  isOverButton: false,
+                                  isSearchable: false,
+                                  isMultiSelect: false,
+                                  labelText: 'Business Category',
+                                  labelTextStyle: FlutterFlowTheme.of(context)
+                                      .labelMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .fontStyle,
+                                        lineHeight: 1.4,
+                                      ),
+                                );
+                              },
+                            ),
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 4.0, 16.0, 0.0),
+                              child: _buildSetupTextField(
+                                controller: _model.otherCategoryTextController ??=
+                                    TextEditingController(),
+                                focusNode: _model.otherCategoryFocusNode ??=
+                                    FocusNode(),
+                                labelText: "Don't see your category?",
+                                hintText: 'Type a new one',
                               ),
-                              fillColor: FlutterFlowTheme.of(context).primary,
-                              elevation: 2.0,
-                              borderColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                              borderWidth: 1.0,
-                              borderRadius: 14.0,
-                              margin: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              hidesUnderline: true,
-                              isOverButton: false,
-                              isSearchable: false,
-                              isMultiSelect: false,
-                              labelText: 'Business Category',
-                              labelTextStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
                             ),
                             Column(
                               mainAxisSize: MainAxisSize.min,
@@ -1187,8 +1432,18 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
+                        final otherCategory =
+                            _model.otherCategoryTextController?.text.trim() ??
+                                '';
+                        final effectiveCategory = otherCategory.isNotEmpty
+                            ? otherCategory
+                            : _model.dropdownValue;
+                        if (otherCategory.isNotEmpty) {
+                          await KinServices.ensureBusinessCategoryExists(
+                              otherCategory);
+                        }
                         final result = await KinServices.registerBusiness(
-                          category: _model.dropdownValue,
+                          category: effectiveCategory,
                           businessType: _model.businessType,
                           isBlackOwned: _model.isBlackOwned,
                           place: _model.placePickerValue,
@@ -1205,6 +1460,17 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                             );
                           }
                           return;
+                        }
+
+                        // Best-effort: the business is already registered at
+                        // this point, so a failure here shouldn't block the
+                        // owner - it just means the submission stays
+                        // unresolved for admin review to catch later.
+                        if (_matchAccepted && _matchedSubmission != null) {
+                          unawaited(KinServices.resolveBusinessSubmission(
+                            submissionId: _matchedSubmission!.submissionId,
+                            businessRef: result.data!,
+                          ));
                         }
 
                         context.pushNamed(OwnerProfileWidget.routeName);

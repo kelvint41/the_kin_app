@@ -48,6 +48,19 @@ abstract class FlutterFlowTheme {
   late Color primaryBackground;
   late Color secondaryBackground;
   late Color accent1;
+  // The accent gold in its *foreground* role - text, icons and borders drawn
+  // directly on primaryBackground or secondaryBackground.
+  //
+  // accent1 can't serve both roles. It is the brand gold used as a fill
+  // (the 44x44 gold tiles on the profile pages carry a `primary` dark-green
+  // icon, which needs the bright gold to stay legible - 5.80:1 against
+  // #D4AF37, but only 2.05:1 against a deepened one). Meanwhile the same
+  // bright gold as text on a near-white light-mode background is 2.10:1,
+  // which fails WCAG AA at every size.
+  //
+  // Naming follows the existing onPrimary/onSecondary/onError convention:
+  // the accent colour for use *on* a surface, as opposed to as one.
+  late Color accentOnSurface;
   late Color accent2;
   late Color accent3;
   late Color accent4;
@@ -152,20 +165,52 @@ class LightModeTheme extends FlutterFlowTheme {
   Color get tertiaryColor => tertiary;
 
   late Color primary = const Color(0xFF0B3D2E);
-  late Color secondary = const Color(0xFFC5A059);
-  late Color tertiary = const Color(0xFF8A7B5E);
-  late Color alternate = const Color(0xFF3D3D3D);
-  // Deepened from the brand gold (0xFFD4AF37, still used in dark mode)
-  // specifically for light mode: gold-on-near-white is 2.05:1 contrast,
-  // failing WCAG AA at every text size since this is the default color
-  // for nearly all typography styles. This shade holds the same ~5.8:1
-  // contrast ratio the app already relies on for gold-on-dark-green
-  // elsewhere, while staying legible against a near-white background.
-  late Color primaryText = const Color(0xFF7D5F16);
+  late Color secondary = const Color(0xFF8F7032);
+  late Color tertiary = const Color(0xFF827358);
+  // Warm light grey, not the 0xFF3D3D3D borrowed from dark mode. That
+  // value sits at 10.86:1 on a white card - a near-black hairline - so
+  // every bordered container read as a hard outline drawn on glare-white
+  // rather than as a raised surface. Borders do not need text contrast;
+  // the fill difference below is what separates a card now, and this only
+  // has to define its edge.
+  late Color alternate = const Color(0xFFD9D1C2);
+  // Warm near-black, not gold. This token is the default colour for
+  // nearly all typography, so making it the brand gold meant essentially
+  // every word in light mode was gold - technically AA at 5.11:1, and
+  // still the reason the whole mode read as washed out and low contrast.
+  // Gold is an accent; an accent applied to everything stops being one.
+  //
+  // 14.01:1 on the page and 16.36:1 on cards, against 5.11/5.97 before.
+  // Warm rather than neutral black so it sits with the gold and green
+  // rather than against them.
+  //
+  // The gold has not gone anywhere - accentOnSurface below is the same
+  // 0xFF7D5F16 this used to be, and is what headings, links and emphasis
+  // should use. The difference is that they now have to ask for it.
+  late Color primaryText = const Color(0xFF241F17);
   late Color secondaryText = const Color(0xFF14181B);
-  late Color primaryBackground = const Color(0xFFFCFCFC);
+  // Light mode had no elevation ramp at all: the page was 0xFFFCFCFC and
+  // cards were pure white, which is 1.03:1 - indistinguishable. Every
+  // surface melted into one sheet of white and the only thing separating
+  // anything was the near-black border above, which is why the whole mode
+  // read as bright and unreadable while dark mode (0xFF121212 page against
+  // 0xFF242424 cards) read fine.
+  //
+  // This is a warm off-white rather than a neutral grey, because the brand
+  // is gold and green: a cool grey ground turns the gold slightly sickly.
+  // It measures 1.17:1 against the white cards - the usual ratio for light
+  // elevation - and holds 5.11:1 for primaryText, 15.28:1 for
+  // secondaryText and 10.44:1 for the dark green, so nothing loses AA.
+  late Color primaryBackground = const Color(0xFFF1EDE4);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
   late Color accent1 = const Color(0xFFD4AF37);
+  // Same deepened gold as primaryText above, and for the same reason: the
+  // brand gold as a foreground on this near-white background is 2.10:1.
+  // This holds 5.81:1 on primaryBackground and 5.97:1 on
+  // secondaryBackground, passing AA for body text. accent1 itself stays
+  // bright, because as a fill it is what makes the dark-green icons on top
+  // of it legible.
+  late Color accentOnSurface = const Color(0xFF7D5F16);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xCCFFFFFF);
@@ -174,9 +219,9 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color error = const Color(0xFFBA1A1A);
   late Color info = const Color(0xFFFFFFFF);
 
-  late Color divider = const Color(0xFF3D3D3D);
-  late Color hint = const Color(0xFF8A7B5E);
-  late Color outline = const Color(0xFF3D3D3D);
+  late Color divider = const Color(0xFFE4DDCF);
+  late Color hint = const Color(0xFF827358);
+  late Color outline = const Color(0xFFC9C1B2);
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);
   late Color onError = const Color(0xFFFFFFFF);
@@ -362,13 +407,18 @@ class DarkModeTheme extends FlutterFlowTheme {
 
   late Color primary = const Color(0xFF0B3D2E);
   late Color secondary = const Color(0xFFC5A059);
-  late Color tertiary = const Color(0xFF8A7B5E);
+  late Color tertiary = const Color(0xFF998969);
   late Color alternate = const Color(0xFF3D3D3D);
   late Color primaryText = const Color(0xFFD4AF37);
   late Color secondaryText = const Color(0xFFC5A059);
   late Color primaryBackground = const Color(0xFF121212);
   late Color secondaryBackground = const Color(0xFF242424);
   late Color accent1 = const Color(0xFFD4AF37);
+  // Unchanged from accent1 in dark mode - the brand gold is already 8.91:1
+  // on primaryBackground and 7.38:1 on cards here, so there was never a
+  // problem to solve on this side. The token exists so call sites can state
+  // their intent once and get the right value in both modes.
+  late Color accentOnSurface = const Color(0xFFD4AF37);
   late Color accent2 = const Color(0x4D39D2C0);
   late Color accent3 = const Color(0x4DEE8B60);
   late Color accent4 = const Color(0xB2262D34);
@@ -378,7 +428,7 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
 
   late Color divider = const Color(0xFF3D3D3D);
-  late Color hint = const Color(0xFF8A7B5E);
+  late Color hint = const Color(0xFF998969);
   late Color outline = const Color(0xFF3D3D3D);
   late Color onPrimary = const Color(0xFFFFFFFF);
   late Color onSecondary = const Color(0xFFFFFFFF);

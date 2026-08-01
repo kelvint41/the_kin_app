@@ -1,9 +1,9 @@
-import '/components/legal_section_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -91,187 +91,277 @@ class _TermsOfServicePageWidgetState extends State<TermsOfServicePageWidget> {
       },
       child: Scaffold(
         key: scaffoldKey,
-        backgroundColor: Color(0xFF121212),
+        // Theme tokens, not the hardcoded 0xFF121212 / 0xFF0D3B31 this page
+        // was built with. Those two colours belonged to no palette in the
+        // app - the forest-green header in particular appeared nowhere else
+        // - so the one screen everyone is asked to read before agreeing to
+        // anything looked like it came from a different product.
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Column(
           mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: 64.0,
-              decoration: BoxDecoration(
-                color: Color(0xFF0D3B31),
-                shape: BoxShape.rectangle,
-              ),
-              child: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                child: Container(
-                  child: Stack(
-                    alignment: AlignmentDirectional(-1.0, -1.0),
-                    children: [
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          child: FlutterFlowIconButton(
-                            borderRadius: 8.0,
-                            buttonSize: 40.0,
-                            fillColor: Colors.transparent,
-                            icon: Icon(
-                              Icons.arrow_back_rounded,
-                              color: Colors.white,
-                              size: 24.0,
+            // SafeArea, because a fixed 64px bar with no inset put the title
+            // under the status bar and the Dynamic Island ate the middle of
+            // it. The header also stacked two back buttons - a centred
+            // FlutterFlowIconButton and a left-aligned InkWell - one of
+            // which sat directly on top of the title.
+            SafeArea(
+              bottom: false,
+              child: Container(
+                height: 56.0,
+                decoration: BoxDecoration(
+                  color: FlutterFlowTheme.of(context).secondaryBackground,
+                  border: Border(
+                    bottom: BorderSide(
+                      color: FlutterFlowTheme.of(context).alternate,
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                child: Stack(
+                  alignment: AlignmentDirectional(0.0, 0.0),
+                  children: [
+                    Align(
+                      alignment: AlignmentDirectional(0.0, 0.0),
+                      child: Text(
+                        'Terms of Service',
+                        style: FlutterFlowTheme.of(context).titleMedium.override(
+                              font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FontWeight.bold),
+                              color: FlutterFlowTheme.of(context).primaryText,
+                              fontSize: 18.0,
+                              letterSpacing: 0.0,
+                              fontWeight: FontWeight.bold,
                             ),
-                            onPressed: () {
-                              print('IconButton pressed ...');
-                            },
-                          ),
-                        ),
                       ),
-                      Align(
-                        alignment: AlignmentDirectional(0.0, 0.0),
-                        child: Container(
-                          child: Text(
-                            'Terms of Service',
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  font: GoogleFonts.plusJakartaSans(
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                  ),
-                                  color: Colors.white,
-                                  fontSize: 18.0,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .fontStyle,
-                                  lineHeight: 1.4,
-                                ),
-                          ),
-                        ),
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional(-1.0, 0.0),
-                        child: InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () async {
-                            context.safePop();
-                          },
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: FlutterFlowTheme.of(context).primaryText,
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional(-1.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(4, 0, 0, 0),
+                        child: FlutterFlowIconButton(
+                          borderRadius: 20.0,
+                          buttonSize: 44.0,
+                          fillColor: Colors.transparent,
+                          icon: Icon(
+                            Icons.arrow_back_rounded,
+                            color: FlutterFlowTheme.of(context).accentOnSurface,
                             size: 24.0,
                           ),
+                          onPressed: () => context.safePop(),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
             Expanded(
-              flex: 1,
-              child: Container(
-                child: SingleChildScrollView(
-                  primary: false,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            16.0, 24.0, 16.0, 24.0),
-                        child: Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              wrapWithModel(
-                                model: _model.legalSectionModel1,
-                                updateCallback: () => safeSetState(() {}),
-                                child: LegalSectionWidget(
-                                  title: '1. Acceptance of Terms',
-                                  body:
-                                      'Welcome to The KIN App. By creating an account or accessing our directory, you agree to comply with our community standards and networking guidelines. If you do not agree, please do not use our services.',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.legalSectionModel2,
-                                updateCallback: () => safeSetState(() {}),
-                                child: LegalSectionWidget(
-                                  title:
-                                      '2. Business Tickers & Intellectual Property',
-                                  body:
-                                      'All unique 4-letter business ticker symbols (e.g., \$HMDN) are leased identifiers managed exclusively by the platform to safely protect local independent brand identities. KINVEST GUIDANCE LLC reserves the right to reassign or revoke any ticker symbol violating community trademarks or rules.',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.legalSectionModel3,
-                                updateCallback: () => safeSetState(() {}),
-                                child: LegalSectionWidget(
-                                  title: '3. Premium Plans & Billing',
-                                  body:
-                                      'Premium growth plan subscriptions provide enhanced marketing exposure across our key launch regions. All transactions and financial verification processing are securely handled off-device through Stripe. Subscriptions automatically renew monthly unless canceled.',
-                                ),
-                              ),
-                              wrapWithModel(
-                                model: _model.legalSectionModel4,
-                                updateCallback: () => safeSetState(() {}),
-                                child: LegalSectionWidget(
-                                  title: '4. Limitation of Liability',
-                                  body:
-                                      'The Kindex metrics and geofenced directory coordinates are provided strictly on an \'as-is\' basis for community networking and visibility support. We do not guarantee absolute data accuracy or commercial outcomes resulting from platform usage.',
-                                ),
-                              ),
-                              Container(
-                                height: 40.0,
-                              ),
-                              Text(
-                                'Last Updated: October 2023',
-                                textAlign: TextAlign.center,
-                                style: FlutterFlowTheme.of(context)
-                                    .labelSmall
-                                    .override(
-                                      font: GoogleFonts.plusJakartaSans(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .fontStyle,
-                                      lineHeight: 1.4,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+              child: SingleChildScrollView(
+                primary: false,
+                padding: EdgeInsets.fromLTRB(20.0, 24.0, 20.0, 40.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _intro(context),
+                    _section(context, '1. Accepting these Terms',
+                        'The KIN App is a directory of Black-owned businesses and a '
+                        'community space called The Exchange. These Terms apply to '
+                        'everyone who uses it - customers browsing the directory and '
+                        'business owners listing on it alike. By creating an account '
+                        'or using the app, you agree to them. If you do not agree, '
+                        'please do not use the app.'),
+                    _section(context, '2. Your account',
+                        'You need one KIN account to use the app, and you are '
+                        'responsible for what happens under it. Keep your password to '
+                        'yourself.\n\n'
+                        'We never see your password - it is stored only in encrypted '
+                        'form by our authentication provider, and nobody at KIN can '
+                        'read it or tell you what it is. If you are locked out, use '
+                        '"Forgot Password?" on the sign-in screen to set a new one by '
+                        'email. That is the only way in, by design.'),
+                    _section(context, '3. The Exchange: how we expect you to behave',
+                        'The Exchange is for supporting local businesses and the '
+                        'people behind them. Anyone with a KIN account can read it, '
+                        'and anyone can post - you do not need to own a business.\n\n'
+                        'Before you post for the first time you will be asked to '
+                        'agree to these Terms. When you post, you agree not to: '
+                        'harass, threaten or abuse anyone; post spam or repetitive '
+                        'promotional content; make false claims about a business or '
+                        'its owner; post content that is unlawful, hateful, or that '
+                        'you do not have the right to share.\n\n'
+                        'You keep ownership of what you post. You give us permission '
+                        'to display it in the app so that other members can see it. '
+                        'You can delete your own posts at any time. We may remove '
+                        'content or suspend an account that breaks these rules.'),
+                    _section(context, '4. Business listings and claiming',
+                        'Many listings are imported from public and certification '
+                        'sources, so details may be incomplete or out of date until an '
+                        'owner claims the listing.\n\n'
+                        'If you claim a business you confirm you are authorised to act '
+                        'for it and that the information you give us is accurate. '
+                        'Claims are reviewed before they are approved, and we may '
+                        'decline or reverse a claim.'),
+                    _section(context, '5. Business tickers',
+                        'Each business can hold a unique 4-letter ticker symbol (for '
+                        'example \$HMDN). Tickers are identifiers we license to you '
+                        'for use in the app - you do not own them, and holding one '
+                        'gives you no trademark rights. KINVEST GUIDANCE LLC may '
+                        'reassign or revoke a ticker that infringes someone else\'s '
+                        'mark or breaks these Terms.'),
+                    _section(context, '6. Subscriptions and billing',
+                        'Business owners can subscribe to a paid growth plan for extra '
+                        'marketing exposure and features.\n\n'
+                        'Subscriptions are sold and processed through the Apple App '
+                        'Store or Google Play, depending on your device. KIN never '
+                        'receives or stores your card details. Plans renew '
+                        'automatically for the period you chose unless you cancel, and '
+                        'you cancel or request refunds through your Apple or Google '
+                        'account, not through us.'),
+                    _section(context, '7. KINDEX scores and directory data',
+                        'KINDEX scores, business locations and other directory data '
+                        'are provided as-is, to help people find and support local '
+                        'businesses. They are calculated from activity in the app and '
+                        'are not a rating of quality, creditworthiness, or a '
+                        'recommendation to spend money anywhere.\n\n'
+                        'We do not guarantee that a listing is accurate or current, and '
+                        'we do not promise any commercial outcome from using the app.'),
+                    _section(context, '8. Changes to these Terms',
+                        'We may update these Terms. When we make a change that affects '
+                        'what you have agreed to, you will be asked to review and '
+                        'accept the new version before you post in The Exchange again. '
+                        'Continuing to use the app after a change means you accept it.'),
+                    _section(context, '9. Contact',
+                        'Questions about these Terms can be sent to '
+                        'kelvin@kinvestguidance.com.'),
+                    _lastUpdated(context),
+                  ],
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  /// The short framing that used to be missing entirely - the page opened
+  /// straight into "1. Acceptance of Terms" with no indication of who the
+  /// document was for or how long it would take to read.
+  Widget _intro(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 28),
+      child: Container(
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(16.0),
+          border: Border.all(color: theme.alternate, width: 1.0),
+        ),
+        child: Text(
+          'The plain-English version: browse freely, be decent to people in '
+          'The Exchange, and only claim a business that is actually yours. '
+          'The detail is below.',
+          style: theme.bodyMedium.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+            lineHeight: 1.5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// One numbered clause.
+  ///
+  /// Replaces LegalSectionWidget, which needed a model instance per section
+  /// - the page had exactly four because the model declared exactly four,
+  /// which is a poor reason for a legal document to be four clauses long.
+  Widget _section(BuildContext context, String title, String body) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 28),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 3.0,
+                height: 18.0,
+                decoration: BoxDecoration(
+                  color: theme.accentOnSurface,
+                  borderRadius: BorderRadius.circular(2.0),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
+                  child: Text(
+                    title,
+                    style: theme.titleSmall.override(
+                      font: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold),
+                      color: theme.accentOnSurface,
+                      fontSize: 16.0,
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(13, 10, 0, 0),
+            child: Text(
+              body,
+              style: theme.bodyMedium.override(
+                font: GoogleFonts.plusJakartaSans(),
+                color: theme.primaryText,
+                letterSpacing: 0.0,
+                lineHeight: 1.6,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Read from legal_config/exchange_terms rather than hardcoded.
+  ///
+  /// The page said "Last Updated: October 2023" - close to three years
+  /// stale, and contradicting the current_version the posting rule actually
+  /// enforces. Sourcing it from the same document that gates posting means
+  /// the two cannot drift apart again: bumping current_version to re-prompt
+  /// everyone also updates the date they see.
+  Widget _lastUpdated(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      future: FirebaseFirestore.instance
+          .collection('legal_config')
+          .doc('exchange_terms')
+          .get(),
+      builder: (context, snapshot) {
+        final version = snapshot.data?.data()?['current_version'];
+        return Text(
+          version is String && version.isNotEmpty
+              ? 'Last updated: $version'
+              : 'Last updated: -',
+          textAlign: TextAlign.center,
+          style: theme.labelSmall.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+          ),
+        );
+      },
     );
   }
 }

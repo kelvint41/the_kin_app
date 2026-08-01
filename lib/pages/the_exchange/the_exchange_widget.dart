@@ -1,11 +1,14 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/services/kin_services.dart';
 import '/components/exchange_feed_item_widget.dart';
 import '/components/kindex_spotlight_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/old_designs/premium_story/premium_story_widget.dart';
+import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
+import '/index.dart';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -33,10 +36,201 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Whether the signed-in user has accepted the Exchange code of conduct.
+  /// Mirrors the exchange_profiles doc that firestore.rules checks on every
+  /// post; this copy only drives whether we prompt before the first post.
+  bool _acceptedConduct = false;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => TheExchangeModel());
+    _loadConductAcceptance();
+  }
+
+  Future<void> _loadConductAcceptance() async {
+    final uid = currentUserUid;
+    if (uid.isEmpty) return;
+    final accepted = await KinServices.hasAcceptedExchangeConduct(uid);
+    if (mounted && accepted) setState(() => _acceptedConduct = true);
+  }
+
+  /// A standing notice for anyone who hasn't accepted the terms yet.
+  ///
+  /// Reading the feed is deliberately not blocked - the liability that
+  /// matters here attaches to posting, and gating the feed would mean
+  /// nobody could see what the Exchange is before agreeing to join it. What
+  /// this fixes is the timing: the terms used to appear only at the moment
+  /// someone tried to post, which is the worst time to meet them. Tapping
+  /// through accepts on the spot, so the first post isn't interrupted.
+  ///
+  /// Renders nothing once accepted, so it never nags.
+  Widget _buildTermsBanner() {
+    if (_acceptedConduct || currentUserUid.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(
+          theme.designToken.spacing.lg, 0.0, theme.designToken.spacing.lg, 12.0),
+      child: Container(
+        padding: const EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+          border: Border.all(color: theme.accent1.withValues(alpha: 0.35)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.gavel_rounded, size: 20.0,
+                color: theme.accentOnSurface),
+            const SizedBox(width: 12.0),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Browse freely. To post, agree to the Terms.',
+                    style: theme.bodyMedium.override(
+                      color: theme.primaryText,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4.0),
+                  Text(
+                    'Keep it respectful: no harassment, no spam, no false '
+                    'claims about a business.',
+                    style: theme.bodySmall
+                        .override(color: theme.secondaryText),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Row(
+                    children: [
+                      InkWell(
+                        onTap: () async {
+                          final ok = await _ensureConductAccepted();
+                          if (ok && mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Thanks - you can post in the Exchange now.'),
+                              ),
+                            );
+                          }
+                        },
+                        child: Text(
+                          'Review & agree',
+                          style: theme.bodyMedium.override(
+                            color: theme.accentOnSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 20.0),
+                      InkWell(
+                        onTap: () => context
+                            .pushNamed(TermsOfServicePageWidget.routeName),
+                        child: Text(
+                          'Terms of Service',
+                          style: theme.bodyMedium.override(
+                            color: theme.secondaryText,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Prompts for the code of conduct if it has not been accepted yet.
+  ///
+  /// Returns true when the user may post. Posting without this would simply
+  /// be rejected by firestore.rules, so the prompt is what turns a silent
+  /// permission-denied into an explicit, answerable question.
+  Future<bool> _ensureConductAccepted() async {
+    if (_acceptedConduct) return true;
+    final uid = currentUserUid;
+    if (uid.isEmpty) return false;
+
+    final agreed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        title: Text('Before you post',
+            style: FlutterFlowTheme.of(context).headlineSmall),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'The Exchange is for supporting local businesses and the people '
+              'behind them.\n\nKeep it respectful: no harassment, no spam, no '
+              'false claims about a business. You are responsible for what you '
+              'post, and you can delete your own posts at any time.',
+              style: FlutterFlowTheme.of(context).bodyMedium,
+            ),
+            const SizedBox(height: 16.0),
+            // The summary above is a plain-language précis, not the
+            // agreement itself. Agreeing here is agreeing to the Terms, so
+            // they have to be reachable from the point of consent rather
+            // than living on an unlinked page.
+            InkWell(
+              onTap: () => context.pushNamed(
+                  TermsOfServicePageWidget.routeName),
+              child: Text(
+                'Read the full Terms of Service',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).primaryText,
+                      decoration: TextDecoration.underline,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    )),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text('I agree to the Terms',
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                      fontWeight: FontWeight.bold,
+                    )),
+          ),
+        ],
+      ),
+    );
+    if (agreed != true) return false;
+
+    final result = await KinServices.acceptExchangeConduct(
+      uid: uid,
+      displayName: currentUserDisplayName,
+    );
+    if (!result.isSuccess) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.error ?? 'Could not save agreement.')),
+        );
+      }
+      return false;
+    }
+    if (mounted) setState(() => _acceptedConduct = true);
+    return true;
   }
 
   @override
@@ -46,13 +240,101 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     super.dispose();
   }
 
+  /// Shown when there is no business to display a feed for - reached from the
+  /// Directory tab by a user who does not own a business yet.
+  Widget _buildNoBusinessState(BuildContext context) {
+    return Scaffold(
+      key: scaffoldKey,
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(32.0, 0.0, 32.0, 0.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.storefront_outlined,
+                color: FlutterFlowTheme.of(context).secondaryText,
+                size: 48.0,
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 8.0),
+                child: Text(
+                  'No business selected',
+                  textAlign: TextAlign.center,
+                  style: FlutterFlowTheme.of(context).headlineSmall,
+                ),
+              ),
+              Text(
+                'Open The Exchange from a business profile, or claim your own '
+                'business to start posting.',
+                textAlign: TextAlign.center,
+                style: FlutterFlowTheme.of(context).bodyMedium.override(
+                      color: FlutterFlowTheme.of(context).secondaryText,
+                    ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+                child: TextButton(
+                  onPressed: () => context.safePop(),
+                  child: Text(
+                    'Go back',
+                    // Not `primary` - that token is the brand dark green,
+                    // which is close to unreadable on the dark background
+                    // this page uses.
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          color: FlutterFlowTheme.of(context).secondaryText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<BusinessesRecord>(
-      stream: BusinessesRecord.getDocument(widget!.businessRef!),
+    // The Exchange is a per-business feed, but not every entry point knows
+    // which business that is. The Directory tab opens CustomerProfilePage
+    // with no businessRef, so its "The Exchange" card forwards a null one
+    // (queryParameters uses .withoutNulls, which drops the key entirely).
+    // Force-unwrapping that here crashed the page for anyone arriving from
+    // the bottom nav - the common path. Fall back to the business the
+    // signed-in user owns, and show an empty state when there is none.
+    final businessRef =
+        widget.businessRef ?? currentUserDocument?.ownedBusiness;
+
+    // No business is now an ordinary state, not a wall. The Exchange is a
+    // place anyone can be - a customer who owns nothing gets the same feed
+    // and the same composer as an owner. Previously this returned
+    // _buildNoBusinessState and the entire page was unreachable for them,
+    // which is most of the people the Exchange is meant to be for.
+    return StreamBuilder<BusinessesRecord?>(
+      stream: businessRef == null
+          ? Stream<BusinessesRecord?>.value(null)
+          : BusinessesRecord.getDocument(businessRef)
+              .map<BusinessesRecord?>((r) => r)
+              .handleError((_) {}),
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
-        if (!snapshot.hasData) {
+        // A reference can outlive the document it points at - the businesses
+        // collection was re-imported at least once, which left several
+        // users.owned_business refs pointing at deleted docs. fromSnapshot
+        // throws on a non-existent document, so without this the page sat on
+        // the spinner forever instead of ever resolving.
+        // A dangling business ref is no longer a dead end either - the feed
+        // is global, so a broken owned_business just means no business tag.
+        // Fall through with a null record rather than replacing the page.
+        //
+        // Waiting is checked by connectionState, not hasData. `hasData` is
+        // false when the value *is* null, so once no-business became a legal
+        // state this guard held the page on its spinner forever for exactly
+        // the users the global feed was opened up for.
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Center(
@@ -61,7 +343,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -69,10 +351,10 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
           );
         }
 
-        final theExchangeBusinessesRecord = snapshot.data!;
+        final theExchangeBusinessesRecord = snapshot.data;
         final isVerifiedBusinessOwner = currentUserReference != null &&
-            theExchangeBusinessesRecord.ownerRef == currentUserReference &&
-            theExchangeBusinessesRecord.isVerified;
+            theExchangeBusinessesRecord?.ownerRef == currentUserReference &&
+            (theExchangeBusinessesRecord?.isVerified ?? false);
         _model.postTextController ??= TextEditingController();
         _model.postTextFieldFocusNode ??= FocusNode();
         _model.feedComposerController ??= TextEditingController();
@@ -81,6 +363,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
         return Scaffold(
           key: scaffoldKey,
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          // The Exchange had no app bar, no back control and no nav bar, so
+          // once you were here the only way out was the system back-swipe -
+          // and on a tab that is pushed rather than popped, that isn't
+          // obvious. Same dead end, and the same fix, as
+          // CustomerProfilePage.
+          bottomNavigationBar: KinBottomNav2Widget(),
           body: SafeArea(
             child: Stack(
               children: [
@@ -215,7 +503,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                 currentUserReference,
                                                             businessRef:
                                                                 theExchangeBusinessesRecord
-                                                                    .reference,
+                                                                    ?.reference,
                                                             postText: postText,
                                                             timestamp:
                                                                 getCurrentTimestamp,
@@ -232,7 +520,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                       currentUserReference,
                                                                   businessRef:
                                                                       theExchangeBusinessesRecord
-                                                                          .reference,
+                                                                          ?.reference,
                                                                   targetRef:
                                                                       exchangePostsRecordReference,
                                                                   eventType:
@@ -260,18 +548,13 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             safeSetState(() {});
                                           },
                                         ),
-                                      FlutterFlowIconButton(
-                                        buttonSize: 42.0,
-                                        icon: Icon(
-                                          Icons.forum_outlined,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primary,
-                                          size: 26.0,
-                                        ),
-                                        onPressed: () {
-                                          print('IconButton pressed ...');
-                                        },
-                                      ),
+                                      // Removed: a forum icon, on the forum
+                                      // page, painted in the dark brand
+                                      // green against a dark background so
+                                      // it was barely visible, wired to
+                                      // `print('IconButton pressed ...')`.
+                                      // It pointed at nothing and did
+                                      // nothing.
                                     ].divide(SizedBox(
                                         width: FlutterFlowTheme.of(context)
                                             .designToken
@@ -282,6 +565,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                               ),
                             ),
                           ),
+                          _buildTermsBanner(),
                           KindexSpotlightWidget(),
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
@@ -298,14 +582,24 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                     .designToken
                                     .spacing
                                     .md),
+                            // The global feed. This used to filter on
+                            // business_ref == the business being viewed,
+                            // which made the Exchange one business's wall
+                            // rather than a place: 8 posts existed and the
+                            // page read "No posts yet" because they belonged
+                            // to other businesses. A post's business_ref is
+                            // now a tag on the post, not the thing that
+                            // decides whether you can see it.
+                            //
+                            // Ordered newest-first and bounded - an
+                            // unbounded feed re-reads every post ever
+                            // written on each open.
                             child: StreamBuilder<List<ExchangePostsRecord>>(
                               stream: queryExchangePostsRecord(
                                 queryBuilder: (exchangePostsRecord) =>
-                                    exchangePostsRecord.where(
-                                  'business_ref',
-                                  isEqualTo:
-                                      theExchangeBusinessesRecord.reference,
-                                ),
+                                    exchangePostsRecord.orderBy('timestamp',
+                                        descending: true),
+                                limit: 50,
                               ),
                               builder: (context, snapshot) {
                                 // Customize what your widget looks like when it's loading.
@@ -317,7 +611,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                       child: CircularProgressIndicator(
                                         valueColor:
                                             AlwaysStoppedAnimation<Color>(
-                                          FlutterFlowTheme.of(context).primary,
+                                          FlutterFlowTheme.of(context)
+                                              .secondaryText,
                                         ),
                                       ),
                                     ),
@@ -390,8 +685,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                               'Keyt40_${columnExchangePostsRecord.reference.id}'),
                                           postRecord: columnExchangePostsRecord,
                                           businessRef:
-                                              theExchangeBusinessesRecord
-                                                  .reference,
+                                              columnExchangePostsRecord
+                                                  .businessRef,
                                           authorDisplayName:
                                               feedItemUsersRecord.displayName,
                                           authorPhotoUrl:
@@ -692,39 +987,48 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             children: [
                                               Expanded(
                                                 flex: 1,
-                                                child: isVerifiedBusinessOwner
-                                                    ? TextFormField(
-                                                        controller: _model
-                                                            .feedComposerController,
-                                                        focusNode: _model
-                                                            .feedComposerFocusNode,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          hintText:
-                                                              'Join the conversation...',
-                                                          hintStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyMedium
-                                                                  .override(
-                                                                    color: FlutterFlowTheme.of(
-                                                                            context)
-                                                                        .hint,
-                                                                  ),
-                                                          border:
-                                                              InputBorder.none,
-                                                          isDense: true,
-                                                        ),
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
+                                                // Was gated on
+                                                // isVerifiedBusinessOwner, so
+                                                // the field itself did not
+                                                // exist for anyone - no
+                                                // business has an owner yet.
+                                                // The Exchange is a
+                                                // conversation, so anyone
+                                                // signed in gets the composer;
+                                                // the code of conduct is
+                                                // checked on send.
+                                                child:
+                                                    currentUserReference != null
+                                                        ? TextFormField(
+                                                            controller: _model
+                                                                .feedComposerController,
+                                                            focusNode: _model
+                                                                .feedComposerFocusNode,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              hintText:
+                                                                  'Join the conversation...',
+                                                              hintStyle:
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMedium
+                                                                      .override(
+                                                                        color: FlutterFlowTheme.of(context)
+                                                                            .hint,
+                                                                      ),
+                                                              border:
+                                                                  InputBorder
+                                                                      .none,
+                                                              isDense: true,
+                                                            ),
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
                                                                 .bodyMedium,
-                                                      )
-                                                    : Text(
-                                                        'Join the conversation...',
-                                                        style:
-                                                            FlutterFlowTheme.of(
-                                                                    context)
+                                                          )
+                                                        : Text(
+                                                            'Join the conversation...',
+                                                            style: FlutterFlowTheme
+                                                                    .of(context)
                                                                 .bodyMedium
                                                                 .override(
                                                                   font: GoogleFonts
@@ -752,7 +1056,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                       .bodyMedium
                                                                       .fontStyle,
                                                                 ),
-                                                      ),
+                                                          ),
                                               ),
                                               Icon(
                                                 Icons.gif_box_outlined,
@@ -778,12 +1082,16 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         final composerText = _model
                                             .feedComposerController?.text
                                             .trim();
-                                        if (!isVerifiedBusinessOwner ||
-                                            composerText == null ||
+                                        if (composerText == null ||
                                             composerText.isEmpty ||
                                             currentUserReference == null) {
                                           print(
-                                              'TheExchangeWidget: composer send ignored (not owner, empty text, or not logged in)');
+                                              'TheExchangeWidget: composer send ignored (empty text or not logged in)');
+                                          return;
+                                        }
+                                        if (!await _ensureConductAccepted()) {
+                                          print(
+                                              'TheExchangeWidget: composer send ignored (conduct not accepted)');
                                           return;
                                         }
                                         final exchangePostsRecordReference =
@@ -796,7 +1104,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             userRef: currentUserReference,
                                             businessRef:
                                                 theExchangeBusinessesRecord
-                                                    .reference,
+                                                    ?.reference,
                                             postText: composerText,
                                             timestamp: getCurrentTimestamp,
                                             likesCount: 0,
@@ -811,7 +1119,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                   userRef: currentUserReference,
                                                   businessRef:
                                                       theExchangeBusinessesRecord
-                                                          .reference,
+                                                          ?.reference,
                                                   targetRef:
                                                       exchangePostsRecordReference,
                                                   eventType: 'post',

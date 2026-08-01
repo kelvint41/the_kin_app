@@ -52,11 +52,16 @@ class _MetricCard4WidgetState extends State<MetricCard4Widget> {
     return Container(
       width: 120.0,
       decoration: BoxDecoration(
-        color: Color(0xFF242424),
+        // Was 0xFF242424 / 0xFF333333 / 0xFF999999 - dark-mode values
+        // hardcoded into the component, so these cards stayed black on a
+        // light page while everything around them turned. This is the
+        // "buttons blending into the background" case: a card that never
+        // reads its theme cannot follow it.
+        color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(24.0),
         shape: BoxShape.rectangle,
         border: Border.all(
-          color: Color(0xFF333333),
+          color: FlutterFlowTheme.of(context).alternate,
           width: 1.0,
         ),
       ),
@@ -80,7 +85,10 @@ class _MetricCard4WidgetState extends State<MetricCard4Widget> {
                         fontStyle:
                             FlutterFlowTheme.of(context).titleLarge.fontStyle,
                       ),
-                      color: Colors.white,
+                      // Was Colors.white, which only worked because the card
+                      // itself was hardcoded dark. Once the card followed the
+                      // theme, the value went white-on-white and vanished.
+                      color: FlutterFlowTheme.of(context).primaryText,
                       letterSpacing: 0.0,
                       fontWeight: FontWeight.bold,
                       fontStyle:
@@ -100,7 +108,7 @@ class _MetricCard4WidgetState extends State<MetricCard4Widget> {
                         fontStyle:
                             FlutterFlowTheme.of(context).labelSmall.fontStyle,
                       ),
-                      color: Color(0xFF999999),
+                      color: FlutterFlowTheme.of(context).secondaryText,
                       letterSpacing: 0.0,
                       fontWeight:
                           FlutterFlowTheme.of(context).labelSmall.fontWeight,

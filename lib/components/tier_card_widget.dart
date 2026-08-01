@@ -22,8 +22,15 @@ class TierCardWidget extends StatefulWidget {
     String? f3,
     String? f4,
     this.beaconText,
+    bool? isYearly,
+    this.yearlyTeaser,
+    this.valueTag,
+    this.trialBannerText,
+    this.trialCtaLabel,
+    this.onStartTrial,
   })  : this.isPro = isPro ?? false,
         this.isElite = isElite ?? false,
+        this.isYearly = isYearly ?? false,
         this.title = title ?? 'Community',
         this.badgeLabel = badgeLabel ?? 'Free Community Tier',
         this.price = price ?? '\$0',
@@ -34,6 +41,7 @@ class TierCardWidget extends StatefulWidget {
 
   final bool isPro;
   final bool isElite;
+  final bool isYearly;
   final String title;
   final String badgeLabel;
   final String price;
@@ -42,9 +50,35 @@ class TierCardWidget extends StatefulWidget {
   final String f3;
   final String f4;
 
+  /// Cross-sell nudge shown under the price on the Monthly view (e.g. 'or
+  /// $190/yr - 2 months free'). Pass null to hide it - the caller only
+  /// supplies it when the Monthly tab is selected, since it would be
+  /// redundant once the card is already showing the yearly price.
+  final String? yearlyTeaser;
+
   /// Text shown on a small pulsing "beacon" badge at the card's top-left
   /// corner (e.g. 'Free' or 'Upgrade'). Null hides the beacon entirely.
   final String? beaconText;
+
+  /// One-line value pitch shown under the badge and above the price (e.g.
+  /// 'Get discovered.'). Null hides it entirely.
+  final String? valueTag;
+
+  /// Trial status line shown under the divider - either the countdown
+  /// ('6 days left in your trial') or a reminder message once the nightly
+  /// sweep has flagged one. Null hides it.
+  final String? trialBannerText;
+
+  /// Label for the trial button ('Start your 14-day trial', or the
+  /// reminder CTA 'Keep my Founding Local tier'). Null hides the button -
+  /// which is what happens once has_used_trial is true and the trial is
+  /// no longer active.
+  final String? trialCtaLabel;
+
+  /// Tapped when [trialCtaLabel] is shown. The card is wrapped in an
+  /// InkWell by its caller for the upgrade action, so this button stops
+  /// propagation itself rather than relying on the parent.
+  final Future<void> Function()? onStartTrial;
 
   @override
   State<TierCardWidget> createState() => _TierCardWidgetState();
@@ -84,21 +118,26 @@ class _TierCardWidgetState extends State<TierCardWidget>
   }
 
   Widget _buildBeacon(BuildContext context) {
-    final isFree = widget!.beaconText == 'Free';
+    // One colour for every beacon. They used to be theme.success for the
+    // "Free" card and the brand gold for the "Upgrade" ones - two different
+    // colours for the same element, and `success` is a dark forest green in
+    // light mode against a mint in dark, so the Free badge also changed
+    // identity between themes while the others did not.
+    //
+    // Gold in both, with black text: it is the badge colour used everywhere
+    // else in the app and it holds on the light card and the dark elite card
+    // alike.
+    const beacon = Color(0xFFD4AF37);
     return FadeTransition(
       opacity: _beaconOpacity,
       child: Container(
         padding: EdgeInsetsDirectional.fromSTEB(10.0, 5.0, 10.0, 5.0),
         decoration: BoxDecoration(
-          color:
-              isFree ? FlutterFlowTheme.of(context).success : Color(0xFFD4AF37),
+          color: beacon,
           borderRadius: BorderRadius.circular(9999.0),
           boxShadow: [
             BoxShadow(
-              color: (isFree
-                      ? FlutterFlowTheme.of(context).success
-                      : Color(0xFFD4AF37))
-                  .withOpacity(0.6),
+              color: beacon.withOpacity(0.6),
               blurRadius: 8.0,
               spreadRadius: 1.0,
             ),
@@ -171,17 +210,31 @@ class _TierCardWidgetState extends State<TierCardWidget>
                           shape: BoxShape.rectangle,
                         ),
                       ),
-                    if (widget!.beaconText != null)
-                      PositionedDirectional(
-                        top: -8.0,
-                        start: -8.0,
-                        child: _buildBeacon(context),
-                      ),
+                    // The badge used to be PositionedDirectional(top: -8,
+                    // start: -8) - anchored outside the card's own bounds at
+                    // the top-left, which put it directly on top of the tier
+                    // name. "Upgrade" sat across "Founding Local" and "Free"
+                    // across "Community".
+                    //
+                    // It now sits in the layout above the title rather than
+                    // floating over it, so it can never collide no matter how
+                    // long a tier name gets, and it is aligned to the start so
+                    // it reads as a label for the card rather than a sticker
+                    // on the corner.
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
+                        if (widget!.beaconText != null)
+                          Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                0.0, 0.0, 0.0, 12.0),
+                            child: Align(
+                              alignment: AlignmentDirectional(-1.0, 0.0),
+                              child: _buildBeacon(context),
+                            ),
+                          ),
                         Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -268,6 +321,36 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                     ),
                                   ),
                                 ),
+                                if (widget!.valueTag != null)
+                                  Text(
+                                    widget!.valueTag!,
+                                    style: FlutterFlowTheme.of(context)
+                                        .labelSmall
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelSmall
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelSmall
+                                                    .fontStyle,
+                                          ),
+                                          color: widget!.isElite
+                                              ? Color(0xFFD4AF37)
+                                              : FlutterFlowTheme.of(context)
+                                                  .secondaryText,
+                                          letterSpacing: 0.0,
+                                          fontWeight: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .fontWeight,
+                                          fontStyle: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .fontStyle,
+                                          lineHeight: 1.4,
+                                        ),
+                                  ),
                               ].divide(SizedBox(height: 4.0)),
                             ),
                             if (valueOrDefault<bool>(
@@ -276,8 +359,12 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ))
                               Container(
                                 decoration: BoxDecoration(
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  // Was primaryText - a text token used as a
+                                  // pill fill, so this badge changed colour
+                                  // with the body copy rather than staying a
+                                  // badge. Brand gold with black text is the
+                                  // pairing used everywhere else.
+                                  color: const Color(0xFFD4AF37),
                                   borderRadius: BorderRadius.circular(9999.0),
                                   shape: BoxShape.rectangle,
                                 ),
@@ -342,7 +429,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                   ),
                             ),
                             Text(
-                              '/ Month',
+                              widget!.isYearly ? '/ Year' : '/ Month',
                               style: FlutterFlowTheme.of(context)
                                   .bodySmall
                                   .override(
@@ -368,6 +455,23 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ),
                           ].divide(SizedBox(width: 4.0)),
                         ),
+                        if (widget!.yearlyTeaser != null)
+                          Text(
+                            widget!.yearlyTeaser!,
+                            style: FlutterFlowTheme.of(context)
+                                .bodySmall
+                                .override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  color: widget!.isElite
+                                      ? Color(0xFFD4AF37)
+                                      : FlutterFlowTheme.of(context)
+                                          .primaryText,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
                         Divider(
                           height: 16.0,
                           thickness: 1.0,
@@ -384,9 +488,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel1,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f1,
                                   'Access to public community forums',
@@ -397,9 +508,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel2,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f2,
                                   'Basic business profile page on local directory',
@@ -410,9 +528,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel3,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f3,
                                   'Up to 3 active local connections',
@@ -423,9 +548,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel4,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f4,
                                   'Basic community support',
@@ -434,6 +566,9 @@ class _TierCardWidgetState extends State<TierCardWidget>
                             ),
                           ].divide(SizedBox(height: 8.0)),
                         ),
+                        if (widget!.trialBannerText != null ||
+                            widget!.trialCtaLabel != null)
+                          _buildTrialSection(context),
                       ].divide(SizedBox(height: 16.0)),
                     ),
                   ],
@@ -443,6 +578,56 @@ class _TierCardWidgetState extends State<TierCardWidget>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTrialSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final accent =
+        widget!.isElite ? const Color(0xFFD4AF37) : theme.primary;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Divider(
+          height: 8.0,
+          thickness: 1.0,
+          color: theme.alternate,
+        ),
+        if (widget!.trialBannerText != null)
+          Text(
+            widget!.trialBannerText!,
+            style: theme.bodySmall.override(
+              font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              color: accent,
+              letterSpacing: 0.0,
+              fontWeight: FontWeight.w600,
+              lineHeight: 1.4,
+            ),
+          ),
+        if (widget!.trialCtaLabel != null)
+          FFButtonWidget(
+            onPressed: widget!.onStartTrial == null
+                ? null
+                : () async => await widget!.onStartTrial!(),
+            text: widget!.trialCtaLabel!,
+            options: FFButtonOptions(
+              width: double.infinity,
+              height: 44.0,
+              color: accent,
+              textStyle: theme.titleSmall.override(
+                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                // Black on gold/green in both themes - the fill is a fixed
+                // brand colour, so a theme text token would invert against it.
+                color: Colors.black,
+                letterSpacing: 0.0,
+                fontWeight: FontWeight.bold,
+              ),
+              elevation: 0.0,
+              borderRadius: BorderRadius.circular(999.0),
+            ),
+          ),
+      ].divide(SizedBox(height: 10.0)),
     );
   }
 }

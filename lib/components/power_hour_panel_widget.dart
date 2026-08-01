@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '/components/ai_marketing_sheet_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -114,6 +115,18 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(result.error!)));
     }
+  }
+
+  void _openAiMarketing() {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => Padding(
+        padding: MediaQuery.viewInsetsOf(context),
+        child: AiMarketingSheetWidget(businessRef: widget.businessRef),
+      ),
+    );
   }
 
   Future<void> _confirmStop() async {
@@ -234,37 +247,37 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
         Row(
           children: durations
               .map(
-                (minutes) => Padding(
-                  padding: EdgeInsetsDirectional.only(end: 8.0),
-                  child: InkWell(
-                    splashColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onTap: () =>
-                        setState(() => _selectedDurationMinutes = minutes),
-                    child: Container(
-                      height: 34.0,
-                      padding:
-                          EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).primary,
-                        borderRadius: BorderRadius.circular(8.0),
-                        border: Border.all(
-                          color: _selectedDurationMinutes == minutes
-                              ? FlutterFlowTheme.of(context).primaryText
-                              : FlutterFlowTheme.of(context).alternate,
-                          width: 1.0,
+                (minutes) => Expanded(
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.symmetric(horizontal: 4.0),
+                    child: InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: () =>
+                          setState(() => _selectedDurationMinutes = minutes),
+                      child: Container(
+                        height: 34.0,
+                        decoration: BoxDecoration(
+                          color: FlutterFlowTheme.of(context).primary,
+                          borderRadius: BorderRadius.circular(8.0),
+                          border: Border.all(
+                            color: _selectedDurationMinutes == minutes
+                                ? const Color(0xFFD4AF37)
+                                : FlutterFlowTheme.of(context).alternate,
+                            width: 1.0,
+                          ),
                         ),
-                      ),
-                      alignment: AlignmentDirectional(0.0, 0.0),
-                      child: Text(
-                        minutes < 60 ? '$minutes min' : '${minutes ~/ 60} hr',
-                        style: FlutterFlowTheme.of(context)
-                            .labelMedium
-                            .override(
-                              color: FlutterFlowTheme.of(context).primaryText,
-                            ),
+                        alignment: AlignmentDirectional(0.0, 0.0),
+                        child: Text(
+                          minutes < 60 ? '$minutes min' : '${minutes ~/ 60} hr',
+                          style: FlutterFlowTheme.of(context)
+                              .labelMedium
+                              .override(
+                                color: const Color(0xFFD4AF37),
+                              ),
+                        ),
                       ),
                     ),
                   ),
@@ -272,7 +285,28 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
               )
               .toList(),
         ),
-        SizedBox(height: 16.0),
+        SizedBox(height: 12.0),
+        FFButtonWidget(
+          onPressed: _openAiMarketing,
+          text: 'Get an AI post idea for this promotion',
+          icon: Icon(Icons.auto_awesome_rounded,
+              color: const Color(0xFFD4AF37), size: 16.0),
+          options: FFButtonOptions(
+            width: double.infinity,
+            height: 40.0,
+            color: Colors.transparent,
+            textStyle: FlutterFlowTheme.of(context).labelMedium.override(
+                  color: const Color(0xFFD4AF37),
+                ),
+            elevation: 0.0,
+            borderSide: BorderSide(
+              color: const Color(0xFFD4AF37).withAlpha(102),
+              width: 1.0,
+            ),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+        ),
+        SizedBox(height: 12.0),
         FFButtonWidget(
           onPressed: _isSubmitting ? null : _start,
           text: _isSubmitting ? 'Starting...' : 'Start Power Hour',
@@ -280,8 +314,15 @@ class _PowerHourPanelWidgetState extends State<PowerHourPanelWidget>
             width: double.infinity,
             height: 44.0,
             color: FlutterFlowTheme.of(context).primary,
+            // // The brand gold as a literal, not primaryText. These sit on a fixed dark
+            // surface (theme.primary, the deep green, and a hardcoded 0xFF1E1E1E chip)
+            // which does not change with the theme - so a *text* token that inverts
+            // between modes is the wrong tool. When light-mode primaryText became a
+            // near-black for body legibility, every one of these labels turned
+            // near-black on dark green and disappeared. 0xFFD4AF37 reads on this
+            // surface in both modes, which is the whole reason the app pairs them.
             textStyle: FlutterFlowTheme.of(context).titleSmall.override(
-                  color: FlutterFlowTheme.of(context).primaryText,
+                  color: const Color(0xFFD4AF37),
                 ),
             elevation: 0.0,
             borderRadius: BorderRadius.circular(8.0),

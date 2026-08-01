@@ -11,6 +11,7 @@ import '/backend/schema/structs/index.dart';
 import '/auth/base_auth_user_provider.dart';
 
 import '/main.dart';
+import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/lat_lng.dart';
 import '/flutter_flow/place.dart';
@@ -134,16 +135,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: KINVIPFinalWidget.routeName,
-          path: KINVIPFinalWidget.routePath,
-          builder: (context, params) => KINVIPFinalWidget(),
-        ),
-        FFRoute(
-          name: BusinessSignUpWidget.routeName,
-          path: BusinessSignUpWidget.routePath,
-          builder: (context, params) => BusinessSignUpWidget(),
-        ),
-        FFRoute(
           name: PrivacyPolicyPageWidget.routeName,
           path: PrivacyPolicyPageWidget.routePath,
           builder: (context, params) => PrivacyPolicyPageWidget(),
@@ -166,9 +157,54 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           ),
         ),
         FFRoute(
-          name: BusinessProfileOwnerWidget.routeName,
-          path: BusinessProfileOwnerWidget.routePath,
-          builder: (context, params) => BusinessProfileOwnerWidget(
+          // Same requireAuth as TheExchange - this is the same content, just
+          // aggregated across nearby businesses.
+          name: NearbyFeedWidget.routeName,
+          path: NearbyFeedWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => NearbyFeedWidget(),
+        ),
+        FFRoute(
+          // Check-in requires a signed-in uid (recordVerifiedVisit), same
+          // as NearbyFeed.
+          name: KinQuestWidget.routeName,
+          path: KinQuestWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KinQuestWidget(),
+        ),
+        FFRoute(
+          // Reachable only from within KinQuestWidget, but registered as
+          // its own route (not a mode toggle) so the two lists stay
+          // independently navigable and back/deep-link behavior is normal.
+          name: KinQuestSearchWidget.routeName,
+          path: KinQuestSearchWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KinQuestSearchWidget(),
+        ),
+        FFRoute(
+          // Requires auth like every other user-generated-content path -
+          // sendSupportChatMessage rejects an unauthenticated caller anyway.
+          name: SupportChatWidget.routeName,
+          path: SupportChatWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => SupportChatWidget(),
+        ),
+        FFRoute(
+          name: BusinessInsightsWidget.routeName,
+          path: BusinessInsightsWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => BusinessInsightsWidget(),
+        ),
+        FFRoute(
+          name: NotificationsWidget.routeName,
+          path: NotificationsWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => NotificationsWidget(),
+        ),
+        FFRoute(
+          name: ClaimBusinessWidget.routeName,
+          path: ClaimBusinessWidget.routePath,
+          builder: (context, params) => ClaimBusinessWidget(
             businessRef: params.getParam(
               'businessRef',
               ParamType.DocumentReference,
@@ -210,21 +246,6 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => MerchantSuccessScreenWidget(),
         ),
         FFRoute(
-          name: ProfessionalLandingPageWidget.routeName,
-          path: ProfessionalLandingPageWidget.routePath,
-          builder: (context, params) => ProfessionalLandingPageWidget(),
-        ),
-        FFRoute(
-          name: AppBuilder1Widget.routeName,
-          path: AppBuilder1Widget.routePath,
-          builder: (context, params) => AppBuilder1Widget(),
-        ),
-        FFRoute(
-          name: FullyFunctionalPremiumPageWidget.routeName,
-          path: FullyFunctionalPremiumPageWidget.routePath,
-          builder: (context, params) => FullyFunctionalPremiumPageWidget(),
-        ),
-        FFRoute(
           name: BusinessSetupPageWidget.routeName,
           path: BusinessSetupPageWidget.routePath,
           builder: (context, params) => BusinessSetupPageWidget(),
@@ -239,6 +260,14 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: ExecutiveDashboardWidget.routePath,
           builder: (context, params) => ExecutiveDashboardWidget(),
         ),
+        // requireAuth deliberately omitted (defaults false): the App Studio
+        // offer is open to people who do not have a KIN account, which is
+        // most of the small businesses who might want one built.
+        FFRoute(
+          name: AppStudioPageWidget.routeName,
+          path: AppStudioPageWidget.routePath,
+          builder: (context, params) => AppStudioPageWidget(),
+        ),
         FFRoute(
           name: CustomerProfilePageWidget.routeName,
           path: CustomerProfilePageWidget.routePath,
@@ -249,6 +278,11 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               isList: false,
               collectionNamePath: ['businesses'],
             ),
+            scrollToMilestones: params.getParam(
+                  'scrollToMilestones',
+                  ParamType.bool,
+                ) ??
+                false,
           ),
         ),
         FFRoute(
@@ -257,49 +291,15 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => OwnerProfileWidget(),
         ),
         FFRoute(
-          name: CommunityPrestigeWidget.routeName,
-          path: CommunityPrestigeWidget.routePath,
-          builder: (context, params) => CommunityPrestigeWidget(),
-        ),
-        FFRoute(
           name: SignInPageWidget.routeName,
           path: SignInPageWidget.routePath,
           builder: (context, params) => SignInPageWidget(),
-        ),
-        FFRoute(
-          name: CleanPremiumDarkPageWidget.routeName,
-          path: CleanPremiumDarkPageWidget.routePath,
-          builder: (context, params) => CleanPremiumDarkPageWidget(),
         ),
         FFRoute(
           name: CustomersignupPageWidget.routeName,
           path: CustomersignupPageWidget.routePath,
           builder: (context, params) => CustomersignupPageWidget(),
         ),
-        FFRoute(
-          name: MobileSignUpPageWidget.routeName,
-          path: MobileSignUpPageWidget.routePath,
-          builder: (context, params) => MobileSignUpPageWidget(),
-        ),
-        FFRoute(
-          name: BusinessShowcaseWidget.routeName,
-          path: BusinessShowcaseWidget.routePath,
-          asyncParams: {
-            'businessRecord':
-                getDoc(['businesses'], BusinessesRecord.fromSnapshot),
-          },
-          builder: (context, params) => BusinessShowcaseWidget(
-            businessRecord: params.getParam(
-              'businessRecord',
-              ParamType.Document,
-            ),
-          ),
-        ),
-        FFRoute(
-          name: MobileCalledPowerPageWidget.routeName,
-          path: MobileCalledPowerPageWidget.routePath,
-          builder: (context, params) => MobileCalledPowerPageWidget(),
-        )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 
@@ -484,15 +484,8 @@ class FFRoute {
                   builder: (context, _) => builder(context, ffParams),
                 )
               : builder(context, ffParams);
-          final child = appStateNotifier.loading
-              ? Container(
-                  color: Colors.transparent,
-                  child: Image.asset(
-                    'assets/images/Untitled_design_(1).png',
-                    fit: BoxFit.contain,
-                  ),
-                )
-              : page;
+          final child =
+              appStateNotifier.loading ? const KinSplashWidget() : page;
 
           final transitionInfo = state.transitionInfo;
           return transitionInfo.hasTransition

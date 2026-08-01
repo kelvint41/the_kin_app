@@ -1,4 +1,6 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/animated_kin_logo_widget.dart';
 import '/components/marquee_ticker_widget.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -113,7 +115,7 @@ class _OnboardingSelectionCardWidgetState
             height: 50.0,
             child: CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(
-                FlutterFlowTheme.of(context).primary,
+                FlutterFlowTheme.of(context).secondaryText,
               ),
             ),
           ),
@@ -142,7 +144,7 @@ class _OnboardingSelectionCardWidgetState
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -160,7 +162,15 @@ class _OnboardingSelectionCardWidgetState
           child: Scaffold(
             key: scaffoldKey,
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-            body: Column(
+            // The ticker was the first thing in an unpadded Column, so it
+            // rendered underneath the status bar - the clock, battery and
+            // signal icons sat directly on top of the scrolling scores.
+            // SafeArea drops it clear of the notch. bottom: false because
+            // the buttons below already carry their own padding and would
+            // otherwise gain a second inset.
+            body: SafeArea(
+              bottom: false,
+              child: Column(
               children: [
                 MarqueeTickerWidget(
                   businessEntries: _businessKindexEntries,
@@ -183,15 +193,12 @@ class _OnboardingSelectionCardWidgetState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.asset(
-                                      'assets/images/Untitled_design_(1).png',
-                                      width: 200.0,
-                                      height: 208.1,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
+                                  // Was a static Image.asset at 200x208.1
+                                  // with BoxFit.cover, which cropped the
+                                  // mark slightly. AnimatedKinLogo uses
+                                  // BoxFit.contain inside a square box, so
+                                  // it also shows the whole logo.
+                                  const AnimatedKinLogo(size: 208.0),
                                   SizedBox(height: 32.0),
                                   Column(
                                     mainAxisSize: MainAxisSize.min,
@@ -267,8 +274,18 @@ class _OnboardingSelectionCardWidgetState
                                     child: Container(
                                       height: 55.0,
                                       decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
+                                        // Was theme.secondaryText - a text
+                                        // color token, not a fill, misused as
+                                        // this button's background. In light
+                                        // mode secondaryText is near-black
+                                        // (0xFF14181B), which combined with
+                                        // this button's hardcoded black text
+                                        // made it unreadable - black on
+                                        // black. Fixed brand gold instead,
+                                        // consistent in both themes and
+                                        // visually distinct from the green
+                                        // "Black-Owned Business" button below.
+                                        color: const Color(0xFFD4AF37),
                                         boxShadow: [
                                           BoxShadow(
                                             blurRadius: 15.0,
@@ -319,8 +336,24 @@ class _OnboardingSelectionCardWidgetState
                                       FFAppState().signupType = 'business';
                                       safeSetState(() {});
 
-                                      context.pushNamed(
-                                          BusinessSetupPageWidget.routeName);
+                                      // Business setup registers against the
+                                      // signed-in user - registerBusiness
+                                      // fails outright without one. Sending a
+                                      // signed-out visitor straight there
+                                      // meant filling the whole form (name,
+                                      // category, address picker, phone,
+                                      // description) only to be told to sign
+                                      // in on submit, with all of it lost and
+                                      // no route to an account from that
+                                      // screen. Account first, then setup.
+                                      //
+                                      // signupType is what carries the intent
+                                      // across: it was already being set here
+                                      // and on the customer button, and read
+                                      // nowhere.
+                                      context.pushNamed(loggedIn
+                                          ? BusinessSetupPageWidget.routeName
+                                          : CustomersignupPageWidget.routeName);
                                     },
                                     child: Container(
                                       height: 55.0,
@@ -370,7 +403,17 @@ class _OnboardingSelectionCardWidgetState
                                       context.pushNamed(
                                           SignInPageWidget.routeName);
                                     },
-                                    child: Text(
+                                    // The InkWell wrapped the Text directly,
+                                    // so the tap target was exactly the glyph
+                                    // bounds - about 20pt tall, well under
+                                    // the 44pt minimum, and easy to miss on
+                                    // the one control that returning users
+                                    // need. Padding inside the InkWell grows
+                                    // the target; outside it would not.
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12.0, horizontal: 16.0),
+                                      child: Text(
                                       'Already have an account?',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
@@ -398,6 +441,7 @@ class _OnboardingSelectionCardWidgetState
                                                     .fontStyle,
                                           ),
                                     ),
+                                    ),
                                   ),
                                 ].divide(SizedBox(height: 32.0)),
                               ),
@@ -409,6 +453,7 @@ class _OnboardingSelectionCardWidgetState
                   ),
                 ),
               ],
+              ),
             ),
           ),
         );

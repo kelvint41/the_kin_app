@@ -28,6 +28,8 @@ class CustomerProfilePageModel
   late MetricCard3Model metricCardModel2;
   // Model for MetricCard.
   late MetricCard3Model metricCardModel3;
+  // Model for MetricCard.
+  late MetricCard3Model metricCardModel4;
   // Model for PromoCard.
   late PromoCardModel promoCardModel1;
   // Model for PromoCard.
@@ -43,6 +45,7 @@ class CustomerProfilePageModel
     metricCardModel1 = createModel(context, () => MetricCard3Model());
     metricCardModel2 = createModel(context, () => MetricCard3Model());
     metricCardModel3 = createModel(context, () => MetricCard3Model());
+    metricCardModel4 = createModel(context, () => MetricCard3Model());
     promoCardModel1 = createModel(context, () => PromoCardModel());
     promoCardModel2 = createModel(context, () => PromoCardModel());
     promoCardModel3 = createModel(context, () => PromoCardModel());
@@ -56,6 +59,7 @@ class CustomerProfilePageModel
     metricCardModel1.dispose();
     metricCardModel2.dispose();
     metricCardModel3.dispose();
+    metricCardModel4.dispose();
     promoCardModel1.dispose();
     promoCardModel2.dispose();
     promoCardModel3.dispose();

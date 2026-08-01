@@ -4,7 +4,12 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
+import '/components/mystery_reward_panel_widget.dart';
+import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
+import '/components/business_image_widget.dart';
+import '/components/community_shoutout_carousel.dart';
+import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -120,6 +125,26 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       return Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        // No AppBar on this page normally (the hero header below draws its
+        // own back button over the business image), but this early-return
+        // branch skips that header entirely, which left this exact state -
+        // no owned business yet - with no way back at all.
+        appBar: AppBar(
+          backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+          automaticallyImplyLeading: false,
+          leading: FlutterFlowIconButton(
+            borderRadius: 8.0,
+            buttonSize: 40.0,
+            fillColor: Colors.transparent,
+            icon: Icon(
+              Icons.arrow_back_ios_new_rounded,
+              color: FlutterFlowTheme.of(context).primaryText,
+              size: 20.0,
+            ),
+            onPressed: () => context.safePop(),
+          ),
+          elevation: 0.0,
+        ),
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(24.0),
@@ -156,6 +181,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
             ),
           ),
         ),
+        bottomNavigationBar: const KinBottomNav2Widget(),
       );
     }
 
@@ -179,16 +205,51 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                 child: Stack(
                   alignment: AlignmentDirectional(-1.0, -1.0),
                   children: [
+                    // This page has no AppBar - the hero image fills that
+                    // role visually - so it never had a back button either.
+                    // Reached from the map hamburger menu's "My Business /
+                    // Profile" and pushed (not replaced), so there was
+                    // always a screen to return to; there just wasn't a
+                    // button for it.
+                    SafeArea(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: FlutterFlowIconButton(
+                          borderRadius: 8.0,
+                          buttonSize: 37.4,
+                          fillColor:
+                              FlutterFlowTheme.of(context).primaryBackground,
+                          icon: Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            color: FlutterFlowTheme.of(context).primaryText,
+                            size: 20.0,
+                          ),
+                          onPressed: () => context.safePop(),
+                        ),
+                      ),
+                    ),
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
-                      child: CachedNetworkImage(
-                        fadeInDuration: Duration(milliseconds: 0),
-                        fadeOutDuration: Duration(milliseconds: 0),
-                        imageUrl:
-                            'https://dimg.dreamflow.cloud/v1/image/luxury%20business%20storefront',
-                        height: 280.0,
-                        fit: BoxFit.cover,
-                        alignment: Alignment(0.0, 0.0),
+                      // Was a hardcoded dimg.dreamflow.cloud placeholder -
+                      // a stock "luxury business storefront" every owner saw
+                      // instead of their own. hero_image was never read here.
+                      //
+                      // Its own StreamBuilder because this page already opens
+                      // one per card rather than sharing a single record;
+                      // matching that is a smaller change than restructuring
+                      // the page, though the duplication is worth removing.
+                      child: StreamBuilder<BusinessesRecord>(
+                        stream: BusinessesRecord.getDocument(
+                            currentUserDocument!.ownedBusiness!),
+                        builder: (context, snapshot) {
+                          final hero = snapshot.data?.heroImage;
+                          return BusinessImage(
+                            imageUrl: hero,
+                            width: double.infinity,
+                            height: 280.0,
+                            fit: BoxFit.cover,
+                          );
+                        },
                       ),
                     ),
                     Align(
@@ -197,10 +258,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              Colors.transparent,
+                              // Was transparent at the top, so the white
+                              // heading sat on whatever the hero happened to
+                              // be - and with the KIN logo fallback that is a
+                              // pale gold, which the text disappeared into.
                               FlutterFlowTheme.of(context)
                                   .primary
-                                  .withAlpha(153),
+                                  .withAlpha(102),
+                              FlutterFlowTheme.of(context)
+                                  .primary
+                                  .withAlpha(197),
                               FlutterFlowTheme.of(context).primary
                             ],
                             stops: [0.0, 0.7, 1.0],
@@ -223,8 +290,21 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     AuthUserStreamWidget(
-                                      builder: (context) => Text(
-                                        currentUserDisplayName,
+                                      // Was currentUserDisplayName - the
+                                      // owner's own name, sitting above the
+                                      // business's category and above the
+                                      // business's score, views and reviews.
+                                      // Everything else on this page is about
+                                      // the business, so the heading is too.
+                                      builder: (context) => StreamBuilder<
+                                          BusinessesRecord>(
+                                        stream: BusinessesRecord.getDocument(
+                                            currentUserDocument!
+                                                .ownedBusiness!),
+                                        builder: (context, nameSnapshot) =>
+                                            Text(
+                                        nameSnapshot.data?.businessName ??
+                                            currentUserDisplayName,
                                         style: FlutterFlowTheme.of(context)
                                             .headlineMedium
                                             .override(
@@ -244,6 +324,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                       .fontStyle,
                                               lineHeight: 1.4,
                                             ),
+                                      ),
                                       ),
                                     ),
                                     Icon(
@@ -502,37 +583,38 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         final metricCardBusinessesRecord =
                                             snapshot.data!;
 
-                                        return InkWell(
-                                          splashColor: Colors.transparent,
-                                          focusColor: Colors.transparent,
-                                          hoverColor: Colors.transparent,
-                                          highlightColor: Colors.transparent,
-                                          onTap: () async {
-                                            context.pushNamed(
-                                                CommunityPrestigeWidget
-                                                    .routeName);
-                                          },
-                                          child: wrapWithModel(
-                                            model: _model.metricCardModel2,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: MetricCard4Widget(
-                                              icon: Icon(
-                                                Icons.trending_up_rounded,
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
-                                                size: 20.0,
-                                              ),
-                                              value: formatNumber(
-                                                metricCardBusinessesRecord
-                                                    .kindexScore,
-                                                formatType: FormatType.decimal,
-                                                decimalType:
-                                                    DecimalType.periodDecimal,
-                                              ),
-                                              label: 'KINDEX Score',
+                                        // Was wrapped in an InkWell that
+                                        // pushed to CommunityPrestigeWidget -
+                                        // a v2/v3 rewards mockup that reads
+                                        // nothing from Firestore and renders
+                                        // hardcoded businesses/scores. Tapping
+                                        // an owner's real Kindex score sent
+                                        // them to fake data about someone
+                                        // else's business. Removed rather
+                                        // than repointed - no real "Kindex
+                                        // score details" destination exists
+                                        // yet, and the sibling Check-Ins card
+                                        // below is plain display too.
+                                        return wrapWithModel(
+                                          model: _model.metricCardModel2,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard4Widget(
+                                            icon: Icon(
+                                              Icons.trending_up_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
                                             ),
+                                            value: formatNumber(
+                                              metricCardBusinessesRecord
+                                                  .kindexScore,
+                                              formatType: FormatType.decimal,
+                                              decimalType:
+                                                  DecimalType.periodDecimal,
+                                            ),
+                                            label: 'KINDEX Score',
                                           ),
                                         );
                                       },
@@ -660,7 +742,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Your K-Index Score',
+                      'Community Shoutouts',
                       style: FlutterFlowTheme.of(context).titleSmall.override(
                             font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
@@ -676,122 +758,55 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                 .fontStyle,
                           ),
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(24.0),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: Container(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              LinearPercentIndicator(
-                                percent: 0.85,
-                                lineHeight: 8.0,
-                                animation: true,
-                                animateFromLastPercent: true,
-                                progressColor:
-                                    FlutterFlowTheme.of(context).primaryText,
-                                backgroundColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                barRadius: Radius.circular(4.0),
-                                padding: EdgeInsets.zero,
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    '642',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyLarge
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyLarge
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyLarge
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  ),
-                                  Text(
-                                    '750 Max',
-                                    style: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelMedium
-                                                    .fontStyle,
-                                          ),
-                                          color:
-                                              FlutterFlowTheme.of(context).hint,
-                                          letterSpacing: 0.0,
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                          lineHeight: 1.4,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              Text(
-                                'Your score updates automatically based on customer reviews and community activity.',
-                                style: FlutterFlowTheme.of(context)
-                                    .bodySmall
-                                    .override(
-                                      font: GoogleFonts.playfairDisplay(
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodySmall
-                                            .fontStyle,
-                                      ),
-                                      color: FlutterFlowTheme.of(context).hint,
-                                      letterSpacing: 0.0,
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodySmall
-                                          .fontStyle,
-                                      lineHeight: 1.4,
-                                    ),
-                              ),
-                            ].divide(SizedBox(height: 16.0)),
-                          ),
-                        ),
-                      ),
+                    CommunityShoutoutCarousel(
+                      businessRef: currentUserDocument!.ownedBusiness!,
                     ),
                   ].divide(SizedBox(height: 16.0)),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
+                child: StreamBuilder<BusinessesRecord>(
+                  stream: BusinessesRecord.getDocument(
+                      currentUserDocument!.ownedBusiness!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox.shrink();
+                    }
+                    return MysteryRewardPanelWidget(
+                      businessRef: snapshot.data!.reference,
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
+                child: FFButtonWidget(
+                  onPressed: () => showModalBottomSheet(
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    context: context,
+                    builder: (context) => Padding(
+                      padding: MediaQuery.viewInsetsOf(context),
+                      child: const AddBusinessDiscoveryDialog(),
+                    ),
+                  ),
+                  text: 'Add a Business',
+                  icon: const Icon(Icons.explore_rounded, size: 18.0),
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 44.0,
+                    color: Colors.transparent,
+                    textStyle: FlutterFlowTheme.of(context)
+                        .labelMedium
+                        .override(color: const Color(0xFFD4AF37)),
+                    elevation: 0.0,
+                    borderSide: BorderSide(
+                      color: const Color(0xFFD4AF37).withAlpha(102),
+                      width: 1.0,
+                    ),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                 ),
               ),
               Padding(
@@ -851,7 +866,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                   height: 24.0,
                                   child: CircularProgressIndicator(
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).primary,
+                                      FlutterFlowTheme.of(context).secondaryText,
                                     ),
                                   ),
                                 ),
@@ -920,7 +935,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                     height: 50.0,
                                     child: CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        FlutterFlowTheme.of(context).primary,
+                                        FlutterFlowTheme.of(context).secondaryText,
                                       ),
                                     ),
                                   ),
@@ -991,9 +1006,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                       child: Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              FlutterFlowTheme.of(context).secondaryBackground,
-                              FlutterFlowTheme.of(context).primary
+                            // Was [secondaryBackground, primary]: in light mode that
+                              // runs white to dark green, so this card's text
+                              // was legible at one end and invisible at the
+                              // other. Two stops of the same green instead -
+                              // it is the premium tier card and reads as one
+                              // dark surface in both themes, which also means
+                              // its contents can assume a dark background.
+                              colors: [
+                              FlutterFlowTheme.of(context).primary,
+                              const Color(0xFF06251B)
                             ],
                             stops: [0.0, 1.0],
                             begin: AlignmentDirectional(1.0, 1.0),
@@ -1040,9 +1062,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                         .labelSmall
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
+                                              // Fixed gold, not primaryText -
+                                              // same fixed-dark-card reasoning
+                                              // as the tier name below.
+                                              color: const Color(0xFFD4AF37),
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.bold,
                                               fontStyle:
@@ -1055,30 +1078,54 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                     ),
                                   ),
                                 ),
+                                // Was currentUserDocument?.subscriptionStatus -
+                                // a users/{uid} field nothing in the app ever
+                                // writes (upgradeBusinessTier only sets
+                                // subscription_tier on the *business* doc), so
+                                // this always rendered as an empty string. The
+                                // real tier name lives on the business.
                                 AuthUserStreamWidget(
-                                  builder: (context) => Text(
-                                    valueOrDefault(
-                                        currentUserDocument?.subscriptionStatus,
-                                        ''),
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineSmall
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .headlineSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .headlineSmall
-                                                  .fontStyle,
-                                        ),
+                                  builder: (context) =>
+                                      StreamBuilder<BusinessesRecord>(
+                                    stream: BusinessesRecord.getDocument(
+                                        currentUserDocument!.ownedBusiness!),
+                                    builder: (context, snapshot) {
+                                      final tierName = snapshot.hasData
+                                          ? snapshot.data!.subscriptionTier
+                                          : '';
+                                      return Text(
+                                        tierName.isEmpty
+                                            ? 'Community'
+                                            : tierName,
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineSmall
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .headlineSmall
+                                                        .fontStyle,
+                                              ),
+                                              // Fixed gold literal, not
+                                              // primaryText - this card's
+                                              // gradient is a fixed dark green
+                                              // in both themes (see the
+                                              // comment on it above), so a
+                                              // text token that inverts with
+                                              // the theme turned this near-
+                                              // black and unreadable in light
+                                              // mode.
+                                              color: const Color(0xFFD4AF37),
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .headlineSmall
+                                                      .fontStyle,
+                                            ),
+                                      );
+                                    },
                                   ),
                                 ),
                                 Column(
@@ -1095,12 +1142,11 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          color: const Color(0xFFD4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
-                                          'Priority K-Index Ranking',
+                                          'Priority KINDEX Ranking',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1118,8 +1164,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .fontStyle,
                                                 ),
                                                 color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                    const Color(0xFFD4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1143,8 +1188,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          color: const Color(0xFFD4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
@@ -1166,8 +1210,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .fontStyle,
                                                 ),
                                                 color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                    const Color(0xFFD4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1191,8 +1234,13 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          // Fixed dim gold, not primaryText.
+                                          // This row is deliberately muted -
+                                          // a feature the current tier
+                                          // doesn't include - but primaryText
+                                          // made it invisible in light mode
+                                          // instead of dim in both.
+                                          color: const Color(0x99D4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
@@ -1213,9 +1261,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                color: const Color(0x99D4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)
@@ -1267,10 +1313,15 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           child: wrapWithModel(
                             model: _model.actionBtnModel1,
                             updateCallback: () => safeSetState(() {}),
+                            // Icon colour is the brand gold, not primaryText. These sit on a
+                            // circle hardcoded to 0xFF242424 on a dark green
+                            // bar - a surface that does not follow the theme -
+                            // so a text token that inverts turned all five
+                            // icons near-black on near-black.
                             child: ActionBtnWidget(
                               icon: Icon(
                                 Icons.edit_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
+                                color: const Color(0xFFD4AF37),
                                 size: 24.0,
                               ),
                               label: 'Setup',
@@ -1284,12 +1335,17 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             hoverColor: Colors.transparent,
                             highlightColor: Colors.transparent,
                             onTap: () async {
+                              final ownedBusiness =
+                                  currentUserDocument?.ownedBusiness;
+                              if (ownedBusiness == null) return;
+                              final business = await BusinessesRecord
+                                  .getDocumentOnce(ownedBusiness);
                               await KinServices.shareApp(
-                                text:
-                                    'Check out my business on KIN:${currentUserDocument?.ownedBusiness?.id}',
+                                text: 'Check out ${business.businessName} on '
+                                    'KIN! Download the app: $kPlayStoreUrl',
                                 sharePositionOrigin:
                                     getWidgetBoundingBox(context),
-                                businessRef: currentUserDocument?.ownedBusiness,
+                                businessRef: ownedBusiness,
                               );
                             },
                             child: wrapWithModel(
@@ -1298,8 +1354,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               child: ActionBtnWidget(
                                 icon: Icon(
                                   Icons.share_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: const Color(0xFFD4AF37),
                                   size: 24.0,
                                 ),
                                 label: 'Promote',
@@ -1314,9 +1369,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                           highlightColor: Colors.transparent,
                           onTap: () async {
                             context.pushNamed(
-                              BusinessProfileOwnerWidget.routeName,
+                              BusinessProfileV2Widget.routeName,
                               queryParameters: {
-                                'businessRef': serializeParam(
+                                'businessDocument': serializeParam(
                                   currentUserDocument?.ownedBusiness,
                                   ParamType.DocumentReference,
                                 ),
@@ -1329,23 +1384,31 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             child: ActionBtnWidget(
                               icon: Icon(
                                 Icons.visibility_rounded,
-                                color: FlutterFlowTheme.of(context).primaryText,
+                                color: const Color(0xFFD4AF37),
                                 size: 24.0,
                               ),
                               label: 'Preview',
                             ),
                           ),
                         ),
-                        wrapWithModel(
-                          model: _model.actionBtnModel4,
-                          updateCallback: () => safeSetState(() {}),
-                          child: ActionBtnWidget(
-                            icon: Icon(
-                              Icons.headset_mic_rounded,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 24.0,
+                        InkWell(
+                          splashColor: Colors.transparent,
+                          focusColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          onTap: () =>
+                              context.pushNamed(SupportChatWidget.routeName),
+                          child: wrapWithModel(
+                            model: _model.actionBtnModel4,
+                            updateCallback: () => safeSetState(() {}),
+                            child: ActionBtnWidget(
+                              icon: Icon(
+                                Icons.headset_mic_rounded,
+                                color: const Color(0xFFD4AF37),
+                                size: 24.0,
+                              ),
+                              label: 'Get Support',
                             ),
-                            label: 'Get Support',
                           ),
                         ),
                         if (currentUserDocument?.isAdmin == true)
@@ -1364,8 +1427,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                               child: ActionBtnWidget(
                                 icon: Icon(
                                   Icons.dashboard_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
+                                  color: const Color(0xFFD4AF37),
                                   size: 24.0,
                                 ),
                                 label: 'Dashboard',
@@ -1377,6 +1439,70 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ),
                 ),
               ),
+              _appStudioPrompt(context),
+              Container(
+                height: 24.0,
+              ),
+            ],
+          ),
+        ),
+        bottomNavigationBar: const KinBottomNav2Widget(),
+      ),
+    );
+  }
+
+  /// Entry point to the App Studio waitlist, offered to owners here - the
+  /// people this offer is actually for. Was briefly on Customer Profile
+  /// (removed per explicit request, commit 673c31ad) and never existed on
+  /// Owner Profile until now; same card content/behavior as the original.
+  Widget _appStudioPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 16.0, 24.0, 0.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => context.pushNamed(AppStudioPageWidget.routeName),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.auto_awesome_mosaic_rounded,
+                  color: theme.accentOnSurface, size: 22.0),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Need an app for your business?',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'KIN App Studio - coming soon. Join the list.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded,
+                  color: theme.secondaryText, size: 20.0),
             ],
           ),
         ),

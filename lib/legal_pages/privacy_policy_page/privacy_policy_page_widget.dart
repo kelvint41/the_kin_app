@@ -59,14 +59,14 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
           return Scaffold(
-            backgroundColor: Colors.black,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Center(
               child: SizedBox(
                 width: 50.0,
                 height: 50.0,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    FlutterFlowTheme.of(context).primary,
+                    FlutterFlowTheme.of(context).secondaryText,
                   ),
                 ),
               ),
@@ -91,7 +91,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
           },
           child: Scaffold(
             key: scaffoldKey,
-            backgroundColor: Colors.black,
+            backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
             body: Stack(
               children: [
                 Column(
@@ -129,7 +129,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
                                       size: 20.0,
                                     ),
                                     onPressed: () {
-                                      print('IconButton pressed ...');
+                                      context.safePop();
                                     },
                                   ),
                                   Text(
@@ -545,7 +545,7 @@ class _PrivacyPolicyPageWidgetState extends State<PrivacyPolicyPageWidget> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8.0),
                       child: Image.asset(
-                        'assets/images/magic_edit#TUFIS2dNYnIxM2cjMSMzMzc1ZDMwNWI0NDJlN2QyY2RiYjVjYTMwYmI3MmE2NyMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
+                        'assets/images/kin_logo.png',
                         width: 36.0,
                         height: 40.0,
                         fit: BoxFit.cover,

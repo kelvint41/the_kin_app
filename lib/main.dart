@@ -6,11 +6,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'auth/firebase_auth/firebase_user_provider.dart';
 import 'auth/firebase_auth/auth_util.dart';
 
 import 'backend/backend.dart';
 import 'backend/firebase/firebase_config.dart';
+import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
@@ -26,15 +29,32 @@ void main() async {
   usePathUrlStrategy();
 
   await initFirebase();
+  _maybeUseFirebaseEmulator();
 
   await FlutterFlowTheme.initialize();
 
   final appState = FFAppState(); // Initialize FFAppState
   await appState.initializePersistedState();
 
+  // Real keys come from RevenueCat's dashboard (Project settings > API keys)
+  // once the founding_local/pro_growth/elite_growth products exist in App
+  // Store Connect and Google Play Console and are attached to a RevenueCat
+  // offering. Pass them at build time so they never get checked into source:
+  //   flutter build ... --dart-define=REVENUECAT_APPLE_KEY=appl_xxx
+  //                      --dart-define=REVENUECAT_GOOGLE_KEY=goog_xxx
+  // Falls back to the literal test key, which has no real offering behind
+  // it, so purchasePackage finds nothing and every upgrade button no-ops.
+  const appStoreKey = String.fromEnvironment(
+    'REVENUECAT_APPLE_KEY',
+    defaultValue: 'test_nlIQSnnGvtvhLZnWwgHRKoDnhsN',
+  );
+  const playStoreKey = String.fromEnvironment(
+    'REVENUECAT_GOOGLE_KEY',
+    defaultValue: 'test_nlIQSnnGvtvhLZnWwgHRKoDnhsN',
+  );
   await revenue_cat.initialize(
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
-    "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN",
+    appStoreKey,
+    playStoreKey,
     loadDataAfterLaunch: true,
   );
 
@@ -49,6 +69,28 @@ void main() async {
     create: (context) => appState,
     child: MyApp(),
   ));
+}
+
+/// Points Firestore/Functions at the local Firebase Emulator Suite instead
+/// of production, for testing the Mystery Reward System end-to-end without
+/// touching real data. Off by default - only activates with:
+///
+///   flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+///
+/// Gated on kDebugMode for the same reason as the dev sign-in bypass below:
+/// the branch is dead code (eliminated by the compiler) in release/profile
+/// builds, so this can never point a real user's app at localhost.
+void _maybeUseFirebaseEmulator() {
+  const useEmulator =
+      bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: false);
+  if (!kDebugMode || !useEmulator) return;
+
+  final host = defaultTargetPlatform == TargetPlatform.android
+      ? '10.0.2.2' // Android emulator's alias for the host machine's localhost
+      : 'localhost';
+  FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+  FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
+  debugPrint('Using Firebase Emulator Suite at $host (Firestore :8080, Functions :5001)');
 }
 
 /// Debug-only auto sign-in for local testing, so you don't have to log in
@@ -153,6 +195,26 @@ void _maybeForceThemeMode() {
   }
 }
 
+/// Snackbars are how every failure in this app reaches the user - validation
+/// messages, service errors, the AI quota notice - and they were rendering
+/// with Material's stock colours: a near-white bar with black text against a
+/// near-black app. Pulling the surface out of the app's own palette makes an
+/// error look like it belongs to the product rather than like a system
+/// dialog that escaped.
+///
+/// Built from an explicit theme instance rather than FlutterFlowTheme.of()
+/// because this runs while constructing ThemeData, before there is a context
+/// whose brightness could be read.
+SnackBarThemeData _snackBarTheme(FlutterFlowTheme theme) => SnackBarThemeData(
+      backgroundColor: theme.secondaryBackground,
+      contentTextStyle: TextStyle(color: theme.primaryText),
+      actionTextColor: theme.accentOnSurface,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+      ),
+    );
+
 class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   @override
@@ -197,10 +259,20 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
-    Future.delayed(
-      Duration(milliseconds: 1000),
-      () => _appStateNotifier.stopShowingSplashImage(),
-    );
+    // Held for the length of the intro animation rather than a bare 1000ms,
+    // so the splash isn't cut off part-way through. KinSplashWidget owns the
+    // duration so the two can't drift apart.
+    //
+    // Timed from the first rendered frame rather than from initState: the
+    // engine spends a noticeable stretch on the native launch screen before
+    // the splash is ever on screen, and counting that stretch against the
+    // hold meant the animation was being torn down part-way through.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(
+        KinSplashWidget.introDuration,
+        () => _appStateNotifier.stopShowingSplashImage(),
+      );
+    });
   }
 
   @override
@@ -229,10 +301,12 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         brightness: Brightness.light,
         useMaterial3: false,
+        snackBarTheme: _snackBarTheme(LightModeTheme()),
       ),
       darkTheme: ThemeData(
         brightness: Brightness.dark,
         useMaterial3: false,
+        snackBarTheme: _snackBarTheme(DarkModeTheme()),
       ),
       themeMode: _themeMode,
       routerConfig: _router,

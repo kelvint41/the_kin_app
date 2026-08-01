@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/edit_exchange_post_sheet.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,27 +9,75 @@ import 'package:google_fonts/google_fonts.dart';
 import 'exchange_feed_item_model.dart';
 export 'exchange_feed_item_model.dart';
 
-// Quick Reaction emoji -> the Kindex event_type it logs. These event types
-// are already live in kindex_config/scoring_weights.
-const _kQuickReactions = <String, String>{
-  '❤️': 'react_love',
-  '🙌🏾': 'react_praise',
-  '🔥': 'react_fire',
-  '✨': 'react_sparkle',
-  '👏🏾': 'react_applause',
-};
+/// One Exchange reaction: what it says, the glyph that says it, the Kindex
+/// event_type it logs, and the theme color that carries its meaning (e.g.
+/// money-green for a vouch, not just the uniform brand gold every reaction
+/// used before).
+class KinReaction {
+  const KinReaction(this.eventType, this.label, this.icon, this.activeColor);
+
+  final String eventType;
+  final String label;
+  final IconData icon;
+  final Color Function(FlutterFlowTheme theme) activeColor;
+}
+
+/// The Exchange's reactions.
+///
+/// These replace ❤️ 🙌🏾 🔥 ✨ 👏🏾. Three things were wrong with that set.
+/// It was Unicode emoji, so it rendered as Apple's and Google's artwork -
+/// which is precisely why it looked borrowed from every other social app.
+/// Two of the five hardcoded a skin tone, making a choice about identity
+/// on behalf of every user who tapped them. And all five carried a Kindex
+/// weight of 1, so they were five different ways of saying the same thing
+/// to the scoring engine.
+///
+/// These are named for what someone means in a directory of businesses
+/// rather than for a mood, and weighted by how strong a signal each is:
+/// Backed is a vouch and worth five times a nod. Weights live in
+/// kindex_config/scoring_weights, not here.
+///
+/// The old react_love/praise/fire/sparkle/applause weights are
+/// deliberately left in that config. 19 UserEngagementEvents already carry
+/// those types, and removing the weights would silently drop them out of
+/// every score that has already counted them.
+///
+/// Icons are Material glyphs in the brand gold as an interim. Genuinely
+/// distinctive marks need drawn artwork; swapping `icon` here is the only
+/// change that takes, because nothing else refers to the glyph.
+const kQuickReactions = <KinReaction>[
+  // Money signal - the app's existing `success` token (a green tuned per
+  // theme, not a hardcoded hex) rather than the shared brand gold every
+  // reaction used before.
+  KinReaction('react_backed', 'Backed', Icons.paid_rounded, _successColor),
+  KinReaction('react_kin', 'Kin', Icons.diversity_3_rounded, _goldColor),
+  // Craft/build signal - warm terracotta (accent3) instead of gold.
+  KinReaction('react_built', 'Built', Icons.handyman_rounded, _accent3Color),
+  KinReaction(
+      'react_spotlight', 'Spotlight', Icons.highlight_rounded, _goldColor),
+  KinReaction(
+      'react_proud', 'Proud', Icons.military_tech_rounded, _goldColor),
+];
+
+Color _successColor(FlutterFlowTheme theme) => theme.success;
+Color _goldColor(FlutterFlowTheme theme) => theme.accentOnSurface;
+Color _accent3Color(FlutterFlowTheme theme) =>
+    Color(theme.accent3.value).withAlpha(255);
 
 class ExchangeFeedItemWidget extends StatefulWidget {
   const ExchangeFeedItemWidget({
     super.key,
     required this.postRecord,
-    required this.businessRef,
+    this.businessRef,
     this.authorDisplayName,
     this.authorPhotoUrl,
   });
 
   final ExchangePostsRecord postRecord;
-  final DocumentReference businessRef;
+  /// The business this post is tagged with, if any. Optional since the
+  /// Exchange became a global feed: a customer with no business can post,
+  /// and their post is tagged with nothing.
+  final DocumentReference? businessRef;
   final String? authorDisplayName;
   final String? authorPhotoUrl;
 
@@ -162,10 +211,12 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                             ],
                           ),
                           Text(
-                            widget.postRecord.timestamp != null
-                                ? dateTimeFormat(
-                                    'relative', widget.postRecord.timestamp!)
-                                : '',
+                            [
+                              if (widget.postRecord.timestamp != null)
+                                dateTimeFormat(
+                                    'relative', widget.postRecord.timestamp!),
+                              if (widget.postRecord.isEdited) 'edited',
+                            ].join(' · '),
                             style: theme.labelSmall.override(
                               font: GoogleFonts.plusJakartaSans(),
                               color: theme.hint,
@@ -175,6 +226,24 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                         ],
                       ),
                     ),
+                    if (widget.postRecord.userRef == currentUserReference)
+                      InkWell(
+                        onTap: () => showModalBottomSheet(
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                          context: context,
+                          builder: (context) => Padding(
+                            padding: MediaQuery.viewInsetsOf(context),
+                            child:
+                                EditExchangePostSheet(postRecord: widget.postRecord),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(4.0),
+                          child: Icon(Icons.edit_outlined,
+                              color: theme.secondaryText, size: 18.0),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -213,27 +282,54 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     theme.designToken.spacing.md),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: _kQuickReactions.entries.map((entry) {
-                    final emoji = entry.key;
-                    final eventType = entry.value;
-                    final isActive = _reactedEmoji.contains(emoji);
+                  children: kQuickReactions.map((reaction) {
+                    final isActive =
+                        _reactedEmoji.contains(reaction.eventType);
+                    final activeColor = reaction.activeColor(theme);
                     return InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
-                      onTap: () => _handleReaction(emoji, eventType),
+                      onTap: () => _handleReaction(
+                          reaction.eventType, reaction.eventType),
                       child: AnimatedScale(
-                        scale: isActive ? 1.3 : 1.0,
+                        scale: isActive ? 1.15 : 1.0,
                         duration: Duration(milliseconds: 150),
                         child: Opacity(
-                          opacity: isActive ? 1.0 : 0.6,
-                          child: Text(
-                            emoji,
-                            style: theme.titleMedium.override(
-                              font: GoogleFonts.plusJakartaSans(),
-                              letterSpacing: 0.0,
-                            ),
+                          opacity: isActive ? 1.0 : 0.55,
+                          // Labelled, unlike the emoji it replaces. 'Backed'
+                          // and 'Kin' mean something specific here and
+                          // neither is guessable from a glyph alone.
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                reaction.icon,
+                                size: 22.0,
+                                color:
+                                    isActive ? activeColor : theme.secondaryText,
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 2.0, 0.0, 0.0),
+                                child: Text(
+                                  reaction.label,
+                                  style: theme.labelSmall.override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: isActive
+                                          ? FontWeight.bold
+                                          : FontWeight.w500,
+                                    ),
+                                    fontSize: 10.0,
+                                    color: isActive
+                                        ? activeColor
+                                        : theme.secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

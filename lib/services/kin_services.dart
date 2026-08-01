@@ -1,4 +1,5 @@
 import '/auth/firebase_auth/auth_util.dart';
+import '/auth/firebase_auth/google_auth.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
@@ -8,6 +9,12 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:share_plus/share_plus.dart';
+
+/// Placeholder until the app is actually published - update this one
+/// constant once android/app/build.gradle's applicationId is set to the
+/// real package name and the Play Store listing goes live.
+const String kPlayStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.mycompany.thekinapp';
 
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
 /// catching exceptions themselves - every service method below already
@@ -20,6 +27,159 @@ class ServiceResult<T> {
   final String? error;
 
   bool get isSuccess => error == null;
+}
+
+/// Aggregated AI Marketing usage, for the Executive Dashboard (see
+/// [KinServices.getAiMarketingStats]).
+///
+/// Counts only - the underlying `ai_generation_logs` documents hold the
+/// generated captions and the prompts behind them, and never leave the
+/// server.
+class AiMarketingStats {
+  const AiMarketingStats({
+    required this.total,
+    required this.byStatus,
+    required this.byTier,
+    required this.byEngagement,
+    required this.unrecognisedStatus,
+    required this.engagementUnavailable,
+  });
+
+  final int total;
+
+  /// Keyed by the orchestrator's own status values: `success`,
+  /// `rejected_not_entitled`, `rejected_quota_exceeded`, `error`.
+  final Map<String, int> byStatus;
+
+  /// Requests per `subscription_tier` at the time of the request. The
+  /// unentitled tiers matter most here - a Community-tier request is an
+  /// owner who wanted this and couldn't buy it.
+  final Map<String, int> byTier;
+
+  /// What owners did with the suggestions: `used`, `edited`,
+  /// `regenerated`, `dismissed`.
+  final Map<String, int> byEngagement;
+
+  /// Logs whose status the server didn't recognise. Non-zero means the
+  /// orchestrator has grown a status the stats function doesn't know
+  /// about, so the breakdown under-reports and should be trusted less
+  /// than [total].
+  final int unrecognisedStatus;
+
+  /// True when the engagement counts could not be read at all - so an
+  /// empty [byEngagement] means "unknown", not "nobody responded".
+  final bool engagementUnavailable;
+
+  int get succeeded => byStatus['success'] ?? 0;
+  int get turnedAwayUnentitled => byStatus['rejected_not_entitled'] ?? 0;
+  int get turnedAwayOverQuota => byStatus['rejected_quota_exceeded'] ?? 0;
+  int get errored => byStatus['error'] ?? 0;
+}
+
+/// One classified, summarized entry from the support chat log, for the
+/// Executive Dashboard's recent-themes list - never the raw message text or
+/// who sent it, see [KinServices.getSupportChatStats].
+class SupportChatRecentEntry {
+  const SupportChatRecentEntry({
+    required this.category,
+    this.summary,
+    this.createdAt,
+  });
+
+  final String category;
+  final String? summary;
+  final DateTime? createdAt;
+}
+
+/// Aggregated counts from `support_chat_logs` (see
+/// [KinServices.getSupportChatStats]) - counts and short summaries only,
+/// same reasoning as [AiMarketingStats].
+class SupportChatStats {
+  const SupportChatStats({
+    required this.total,
+    required this.byCategory,
+    required this.unrecognisedCategory,
+    required this.recent,
+  });
+
+  final int total;
+
+  /// Keyed by the classifier's categories: `question`, `bug_report`,
+  /// `suggestion`, `praise`, `other`.
+  final Map<String, int> byCategory;
+
+  final int unrecognisedCategory;
+  final List<SupportChatRecentEntry> recent;
+
+  int get questions => byCategory['question'] ?? 0;
+  int get bugReports => byCategory['bug_report'] ?? 0;
+  int get suggestions => byCategory['suggestion'] ?? 0;
+  int get praise => byCategory['praise'] ?? 0;
+}
+
+/// One turn in a support chat exchange - kept client-side only, as recent
+/// context sent with the next message (see
+/// [KinServices.sendSupportChatMessage]). Never persisted locally between
+/// app sessions.
+class SupportChatTurn {
+  const SupportChatTurn({required this.role, required this.text});
+
+  /// 'user' or 'assistant'.
+  final String role;
+  final String text;
+
+  Map<String, String> toJson() => {'role': role, 'text': text};
+}
+
+/// A pending customer-submitted KIN Quest discovery that matches a
+/// business name an owner is entering during setup - see
+/// [KinServices.findMatchingBusinessSubmission].
+class MatchedBusinessSubmission {
+  const MatchedBusinessSubmission({
+    required this.submissionId,
+    required this.businessName,
+    required this.address,
+    required this.category,
+  });
+
+  final String submissionId;
+  final String businessName;
+  final String address;
+  final String category;
+}
+
+/// Result of a GPS-verified check-in (see
+/// [KinServices.checkInToBusiness]).
+class VisitCheckIn {
+  const VisitCheckIn({
+    required this.visitId,
+    required this.alreadyCheckedIn,
+    required this.distanceMeters,
+    this.rarityTier = 'Standard',
+    this.pointsAwarded = 0,
+    this.totalPoints,
+  });
+
+  final String visitId;
+
+  /// True when a recent visit was reused rather than a new one recorded,
+  /// so repeated taps during one trip don't stack duplicate visits.
+  final bool alreadyCheckedIn;
+
+  final int distanceMeters;
+
+  /// The business's rarity_tier at check-in time - 'Standard', 'Rare', or
+  /// 'Hidden Gem'. Used by the Scavenger Hunt page to show the right
+  /// celebration for what was just found.
+  final String rarityTier;
+
+  /// Scavenger points this check-in was worth. Zero for a deduped repeat
+  /// check-in - see [alreadyCheckedIn].
+  final int pointsAwarded;
+
+  /// The caller's scavenger point total after this check-in. Null on the
+  /// deduped path (the server doesn't recompute it there).
+  final int? totalPoints;
 }
 
 /// A single row of display data for the Kindex ticker (see
@@ -65,13 +225,13 @@ class MarketingContent {
 /// Power Hour caps for one subscription tier. See
 /// [KinServices.startPowerHour].
 class _PowerHourLimits {
-  const _PowerHourLimits({required this.durationCapMinutes, this.weeklyLimit});
+  const _PowerHourLimits({required this.durationCapMinutes, this.monthlyLimit});
 
   final int durationCapMinutes;
 
-  /// Max Power Hours per rolling 7-day window. Null means unlimited -
+  /// Max Power Hours per rolling 30-day window. Null means unlimited -
   /// skip the frequency check entirely.
-  final int? weeklyLimit;
+  final int? monthlyLimit;
 }
 
 /// Real subscription_tier values, as written by the live upgrade flow in
@@ -82,27 +242,27 @@ class _PowerHourLimits {
 /// through to [_defaultPowerHourLimits] rather than risk granting
 /// broader access than intended.
 const _powerHourLimitsByTier = <String, _PowerHourLimits>{
-  'Community': _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1),
-  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, weeklyLimit: 2),
-  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, weeklyLimit: 3),
-  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, weeklyLimit: null),
+  'Community': _PowerHourLimits(durationCapMinutes: 30, monthlyLimit: 1),
+  'Founding Local': _PowerHourLimits(durationCapMinutes: 45, monthlyLimit: 2),
+  'Pro Growth': _PowerHourLimits(durationCapMinutes: 60, monthlyLimit: 4),
+  'Elite Growth': _PowerHourLimits(durationCapMinutes: 90, monthlyLimit: null),
 };
 const _defaultPowerHourLimits =
-    _PowerHourLimits(durationCapMinutes: 30, weeklyLimit: 1);
+    _PowerHourLimits(durationCapMinutes: 30, monthlyLimit: 1);
 
 String _powerHourLimitMessage(String tier) {
   switch (tier) {
     case 'Community':
-      return "You've reached your weekly Power Hour limit. Upgrade to "
+      return "You've reached your monthly Power Hour limit. Upgrade to "
           'Founding Local or Pro Growth for more!';
     case 'Founding Local':
-      return "You've reached your weekly Power Hour limit for Founding "
+      return "You've reached your monthly Power Hour limit for Founding "
           'Local. Upgrade to Pro Growth for more!';
     case 'Pro Growth':
-      return "You've reached your weekly Power Hour limit for Pro Growth. "
+      return "You've reached your monthly Power Hour limit for Pro Growth. "
           'Upgrade to Elite Growth for unlimited Power Hours!';
     default:
-      return "You've reached your weekly Power Hour limit. Upgrade your "
+      return "You've reached your monthly Power Hour limit. Upgrade your "
           'plan for more!';
   }
 }
@@ -240,7 +400,7 @@ class KinServices {
           .toList();
       return ServiceResult.success(entries);
     } catch (_) {
-      return const ServiceResult.failure('Could not load the Kindex ticker.');
+      return const ServiceResult.failure('Could not load the KINDEX ticker.');
     }
   }
 
@@ -273,11 +433,317 @@ class KinServices {
           .toList();
       return ServiceResult.success(entries);
     } catch (_) {
-      return const ServiceResult.failure('Could not load the Kindex ticker.');
+      return const ServiceResult.failure('Could not load the KINDEX ticker.');
     }
   }
 
-  /// Submits a star rating + text review for a business.
+  /// Deterministic review id: one review document per customer per
+  /// business, so re-submitting edits the existing review in place instead
+  /// of stacking duplicates.
+  static String reviewDocId({
+    required DocumentReference businessRef,
+    required DocumentReference userRef,
+  }) =>
+      '${businessRef.id}_${userRef.id}';
+
+  /// Records a GPS-verified check-in, the prerequisite for a review to
+  /// count toward the business's Kindex score.
+  ///
+  /// Takes a single one-shot location reading (no background tracking) and
+  /// hands it to the `recordVerifiedVisit` callable, which does the radius
+  /// check server-side and writes the visit with the Admin SDK - clients
+  /// cannot write `uservisits` directly.
+  ///
+  /// Used by: Business Profile V2 -> "I'm Here" check-in.
+  static Future<ServiceResult<VisitCheckIn>> checkInToBusiness({
+    required DocumentReference businessRef,
+  }) async {
+    if (currentUserReference == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to check in.');
+    }
+
+    LatLng? position;
+    try {
+      position = await queryCurrentUserLocation();
+    } catch (e) {
+      // queryCurrentUserLocation surfaces denied/disabled as errors. Say
+      // why location is needed rather than just failing - the review can
+      // still be posted, it just won't count toward the score.
+      final message = e.toString();
+      if (message.contains('denied') || message.contains('disabled')) {
+        return const ServiceResult.failure(
+            'Location access is needed to verify you visited this business. '
+            'You can still leave a review without checking in - it just '
+            "won't count toward the business's KINDEX score.");
+      }
+      return const ServiceResult.failure(
+          'Could not read your location. Please try again.');
+    }
+
+    if (position == null) {
+      return const ServiceResult.failure(
+          'Could not get a location fix. Please try again.');
+    }
+
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'recordVerifiedVisit',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessRefPath': businessRef.path,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+      });
+      final data = result.data;
+      return ServiceResult.success(VisitCheckIn(
+        visitId: data['visitId'] as String,
+        alreadyCheckedIn: data['alreadyCheckedIn'] as bool? ?? false,
+        distanceMeters: (data['distanceMeters'] as num?)?.toInt() ?? 0,
+        rarityTier: data['rarityTier'] as String? ?? 'Standard',
+        pointsAwarded: (data['pointsAwarded'] as num?)?.toInt() ?? 0,
+        totalPoints: (data['totalPoints'] as num?)?.toInt(),
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not check you in.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not check you in. Please try again.');
+    }
+  }
+
+  /// Submits a new business the signed-in owner found, via the
+  /// `submitBusinessDiscovery` callable. This is what advances
+  /// businesses_discovered_count toward the 5/15/30 mystery-reward
+  /// milestones (mystery_reward_engine.js).
+  static Future<ServiceResult<void>> submitBusinessDiscovery({
+    required String businessName,
+    required String address,
+    required String category,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'submitBusinessDiscovery',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        'address': address,
+        'category': category,
+      });
+      return const ServiceResult.success(null);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit that business. Please try again.');
+    }
+  }
+
+  /// Submits a business a *customer* found while traveling outside their
+  /// usual KIN Quest radius, via the `submitCustomerBusinessDiscovery`
+  /// callable. Unlike [submitBusinessDiscovery], this has no owned-business
+  /// gate and captures the device's current coordinates as the business's
+  /// starting `business_location` - the callable rejects it outright if it
+  /// looks like a duplicate of something already in the directory or
+  /// already submitted. It only queues a `business_submissions` row for
+  /// review; it does not make the business check-in-able immediately.
+  static Future<ServiceResult<void>> submitTravelerBusinessDiscovery({
+    required String businessName,
+    required String address,
+    required String category,
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'submitCustomerBusinessDiscovery',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        'address': address,
+        'category': category,
+        'latitude': latitude,
+        'longitude': longitude,
+      });
+      return const ServiceResult.success(null);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit that business. Please try again.');
+    }
+  }
+
+  /// Looks up whether a customer already submitted this business as a KIN
+  /// Quest discovery while an owner is filling out business setup - see
+  /// `findMatchingBusinessSubmission` (business_discovery.js). Deliberately
+  /// never surfaces who submitted it, only business-shaped fields the owner
+  /// would already know.
+  static Future<ServiceResult<MatchedBusinessSubmission?>>
+      findMatchingBusinessSubmission({
+    required String businessName,
+    double? latitude,
+    double? longitude,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'findMatchingBusinessSubmission',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 20)),
+      )
+          .call<Map<String, dynamic>>({
+        'businessName': businessName,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+      });
+      final data = result.data;
+      if (data['matched'] != true) {
+        return const ServiceResult.success(null);
+      }
+      return ServiceResult.success(MatchedBusinessSubmission(
+        submissionId: data['submissionId'] as String,
+        businessName: data['businessName'] as String? ?? '',
+        address: data['address'] as String? ?? '',
+        category: data['category'] as String? ?? '',
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not check for a matching submission.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not check for a matching submission.');
+    }
+  }
+
+  /// Marks a matched submission as claimed once the owner it matched has
+  /// finished registering their business - see [findMatchingBusinessSubmission].
+  /// Best-effort: a failure here shouldn't block business registration,
+  /// which has already completed by the time this is called, so callers
+  /// should ignore [ServiceResult.failure] rather than surface it.
+  static Future<ServiceResult<void>> resolveBusinessSubmission({
+    required String submissionId,
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      await FirebaseFunctions.instance
+          .httpsCallable(
+        'resolveBusinessSubmission',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 20)),
+      )
+          .call<Map<String, dynamic>>({
+        'submissionId': submissionId,
+        'businessRefPath': businessRef.path,
+      });
+      return const ServiceResult.success(null);
+    } catch (_) {
+      return const ServiceResult.failure('Could not resolve the submission.');
+    }
+  }
+
+  /// Redeems an unlocked mystery reward via the `redeemReward` callable,
+  /// which validates ownership/expiry server-side and applies the tier or
+  /// beacon grant.
+  static Future<ServiceResult<String>> redeemReward({
+    required String rewardId,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'redeemReward',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'rewardId': rewardId});
+      final rewardType = result.data['rewardType'] as String? ?? '';
+      return ServiceResult.success(rewardType);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not redeem this reward.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not redeem this reward. Please try again.');
+    }
+  }
+
+  /// Sends post text to the `cleanUpPostText` callable for an optional,
+  /// opt-in AI grammar/spelling cleanup pass. Never called automatically -
+  /// only from an explicit "Clean up with AI" tap in the composer/editor.
+  static Future<ServiceResult<String>> cleanUpPostText({
+    required String postText,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'cleanUpPostText',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'postText': postText});
+      final cleanedText = result.data['cleanedText'] as String? ?? postText;
+      return ServiceResult.success(cleanedText);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not clean up this post.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not clean up this post. Please try again.');
+    }
+  }
+
+  /// Edits an Exchange post the signed-in user authored. Firestore rules
+  /// should restrict this write to the post's own user_ref - this method
+  /// doesn't re-check ownership client-side beyond what the UI already
+  /// gates, since rules are the actual enforcement boundary.
+  static Future<ServiceResult<void>> editExchangePost({
+    required DocumentReference postRef,
+    required String postText,
+  }) async {
+    try {
+      await postRef.update({
+        'post_text': postText,
+        'is_edited': true,
+        'edited_at': FieldValue.serverTimestamp(),
+      });
+      return const ServiceResult.success(null);
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your changes. Please try again.');
+    }
+  }
+
+  /// Whether the signed-in user has a verified visit to this business
+  /// inside the scoring window, which is what decides if their review
+  /// counts toward the Kindex score.
+  static Future<bool> hasVerifiedVisit({
+    required DocumentReference businessRef,
+    Duration window = const Duration(days: 7),
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) return false;
+    try {
+      final snapshot = await UservisitsRecord.collection
+          .where('user_ref', isEqualTo: userRef)
+          .where('business_ref', isEqualTo: businessRef)
+          .where('visit_timestamp',
+              isGreaterThanOrEqualTo: DateTime.now().subtract(window))
+          .limit(1)
+          .get();
+      return snapshot.docs.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Submits or updates a star rating + text review for a business.
+  ///
+  /// Reviews always post, whether or not the customer checked in - only
+  /// whether they *count toward the score* depends on a verified visit,
+  /// which the nightly recompute decides. Writing at a composite id means a
+  /// second submission edits the customer's existing review rather than
+  /// creating a duplicate.
+  ///
   /// Used by: Business Profile V2 -> "Submit Review".
   static Future<ServiceResult<void>> submitReview({
     required DocumentReference businessRef,
@@ -289,14 +755,37 @@ class KinServices {
       return const ServiceResult.failure(
           'You need to be signed in to leave a review.');
     }
+    final docRef = ReviewsRecord.collection
+        .doc(reviewDocId(businessRef: businessRef, userRef: userRef));
     try {
-      await ReviewsRecord.collection.doc().set(createReviewsRecordData(
-            businessRef: businessRef,
-            userRef: userRef,
-            rating: rating,
-            reviewText: reviewText,
-            timestamp: getCurrentTimestamp,
-          ));
+      final existing = await docRef.get();
+      if (!existing.exists) {
+        await docRef.set(createReviewsRecordData(
+          businessRef: businessRef,
+          userRef: userRef,
+          rating: rating,
+          reviewText: reviewText,
+          timestamp: getCurrentTimestamp,
+          editCount: 0,
+        ));
+        return const ServiceResult.success();
+      }
+
+      // Editing an existing review. The cap is enforced in Firestore rules
+      // too; this check exists to give a clear message instead of a bare
+      // permission-denied.
+      final currentEdits =
+          (existing.data() as Map<String, dynamic>?)?['edit_count'] as int? ?? 0;
+      if (currentEdits >= 2) {
+        return const ServiceResult.failure(
+            "You've reached the edit limit for this review.");
+      }
+      await docRef.update({
+        'rating': rating,
+        'review_text': reviewText,
+        'timestamp': getCurrentTimestamp,
+        'edit_count': currentEdits + 1,
+      });
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure(
@@ -368,6 +857,79 @@ class KinServices {
     }
   }
 
+  /// Files a claim on an existing (bulk-imported, unclaimed) business.
+  /// Used by: Claim Business Page -> "Submit Claim".
+  ///
+  /// Deliberately writes *only* to `claim_requests` and never touches the
+  /// business doc: firestore.rules gates business updates on
+  /// `owner_ref == the signed-in user`, and an unclaimed business has a null
+  /// owner_ref, so ownership can only be granted server-side after review.
+  /// That's what stops anyone from claiming a business they don't run.
+  ///
+  /// [declaredBlackOwned] and [declaredVeteran] are recorded here as the
+  /// claimant's own declaration - they are NOT copied onto the business until
+  /// a reviewer approves the claim. We never ask for documentation of either.
+  ///
+  /// Note: `claim_requests` is write-only for clients (allow read: if false),
+  /// so this can't check whether the same user already has a claim pending on
+  /// this business. Duplicate submissions are expected and de-duped by the
+  /// reviewer on business_id + applicant_user_id.
+  static Future<ServiceResult<void>> submitClaimRequest({
+    required DocumentReference businessRef,
+    required String businessName,
+    required String claimantName,
+    required String claimantRole,
+    required String contactEmail,
+    required String contactPhone,
+    required bool attested,
+    required bool declaredBlackOwned,
+    required bool declaredVeteran,
+    String? verificationProofLink,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to claim a business.');
+    }
+    if (!attested) {
+      return const ServiceResult.failure(
+          'Please confirm you are authorized to claim this business.');
+    }
+    if (claimantName.trim().isEmpty) {
+      return const ServiceResult.failure('Please enter your name.');
+    }
+    if (contactEmail.trim().isEmpty && contactPhone.trim().isEmpty) {
+      return const ServiceResult.failure(
+          'Please give us an email or phone number so we can reach you.');
+    }
+
+    try {
+      final now = getCurrentTimestamp;
+      await ClaimRequestsRecord.collection
+          .doc()
+          .set(createClaimRequestsRecordData(
+            businessId: businessRef.id,
+            businessName: businessName,
+            applicantUserId: userRef.id,
+            claimantName: claimantName.trim(),
+            claimantRole: claimantRole.trim(),
+            contactEmail: contactEmail.trim(),
+            contactPhone: contactPhone.trim(),
+            verificationProofLink: verificationProofLink?.trim(),
+            attested: true,
+            attestedAt: now,
+            declaredBlackOwned: declaredBlackOwned,
+            declaredVeteran: declaredVeteran,
+            status: 'pending',
+            timestamp: now,
+          ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not submit your claim. Please try again.');
+    }
+  }
+
   /// Purchases/activates a subscription tier for a business via RevenueCat,
   /// then updates the business record only on a confirmed purchase.
   /// Used by: Merchant Pricing Suite -> each tier card's action button.
@@ -390,10 +952,47 @@ class KinServices {
         isPremium: isPremium,
         isPriorityPinned: isPriorityPinned,
         hasFlashBeacon: hasFlashBeacon,
+        // A paid purchase ends any trial in progress: 'converted' stops the
+        // nightly sweep (founding_local_trial.js) from ever downgrading this
+        // business at day 14, and clears the reminder banner. has_used_trial
+        // is deliberately not touched - it stays true forever.
+        trialStatus: 'converted',
+        trialReminderStage: '',
       ));
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your subscription.');
+    }
+  }
+
+  /// Starts the one-per-business 14-day Founding Local trial via the
+  /// `startFoundingLocalTrial` callable, which validates ownership and the
+  /// has_used_trial guard server-side (both trivially bypassable if left to
+  /// the client) and grants the same entitlement fields a real Founding
+  /// Local purchase would. No payment method is involved.
+  /// Used by: Merchant Pricing Suite -> Founding Local card trial CTA.
+  static Future<ServiceResult<DateTime>> startFoundingLocalTrial({
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'startFoundingLocalTrial',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({'businessRef': businessRef.id});
+      final endsAtMillis = result.data['trialEndsAtMillis'] as int?;
+      if (endsAtMillis == null) {
+        return const ServiceResult.failure(
+            'Could not start your trial. Please try again.');
+      }
+      return ServiceResult.success(
+          DateTime.fromMillisecondsSinceEpoch(endsAtMillis));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not start your trial.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not start your trial. Please try again.');
     }
   }
 
@@ -408,11 +1007,50 @@ class KinServices {
         isPremium: false,
         isPriorityPinned: false,
         hasFlashBeacon: false,
+        // Choosing the free tier during a trial ends it early, by the same
+        // rules as expiry - the entitlement is already being dropped here,
+        // so leaving trial_status 'active' would just leave the nightly
+        // sweep to re-downgrade an already-downgraded business.
+        trialStatus: 'expired',
+        trialReminderStage: '',
       ));
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your plan.');
     }
+  }
+
+  /// Opens a business's own outbound link (website, DoorDash/UberEats/
+  /// Grubhub, social profile) with an explicit `utm_source=kin_app` /
+  /// `utm_medium=business_directory` pair merged into its query string, so
+  /// server logs on the business's end can attribute the click to KIN.
+  ///
+  /// This is plain UTM tagging, not link cloaking: the destination is
+  /// exactly the URL the business gave us, unobscured, just with our
+  /// attribution appended - the same thing any directory or marketplace
+  /// app does to outbound links.
+  ///
+  /// Existing query parameters are preserved (merged via
+  /// [Uri.queryParameters], then re-serialised through [Uri.replace] so the
+  /// result always has exactly one `?` and properly `&`-joined pairs,
+  /// however the business's stored URL was formatted). Non-http(s) URLs
+  /// (tel:, mailto:) and empty strings pass through unchanged - a UTM
+  /// parameter on a phone number is meaningless and would just break the
+  /// dialer.
+  /// Used by: Business Profile -> website/social/food-delivery links.
+  static Future<void> launchBusinessLink(String url) async {
+    if (url.isEmpty) return;
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.scheme.startsWith('http')) {
+      await launchURL(url);
+      return;
+    }
+    final attributedUri = uri.replace(queryParameters: {
+      ...uri.queryParameters,
+      'utm_source': 'kin_app',
+      'utm_medium': 'business_directory',
+    });
+    await launchURL(attributedUri.toString());
   }
 
   /// Opens the native share sheet with [text], then records a
@@ -448,9 +1086,35 @@ class KinServices {
     }
   }
 
+  /// Adds [displayName] to the shared business_categories vocabulary if
+  /// it isn't already there. Doc ID is the normalized (lowercase,
+  /// trimmed) name, so this is idempotent - a `.set()` against an
+  /// existing ID is a same-content overwrite, never a duplicate, and no
+  /// existence check is needed first. Best-effort: called right before
+  /// submitting a business/discovery request, and a failure here
+  /// shouldn't block that submission - the category still gets attached
+  /// to the business either way, it just wouldn't be pre-selectable for
+  /// the next person until this succeeds.
+  /// Used by: Business Setup, Add Business / Add Traveler Discovery
+  /// dialogs' "Don't see your category?" field.
+  static Future<void> ensureBusinessCategoryExists(String displayName) async {
+    final trimmed = displayName.trim();
+    if (trimmed.isEmpty) return;
+    try {
+      await BusinessCategoriesRecord.collection
+          .doc(trimmed.toLowerCase())
+          .set(createBusinessCategoriesRecordData(
+            displayName: trimmed,
+            createdAt: getCurrentTimestamp,
+          ));
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+  }
+
   /// Starts a Power Hour flash-beacon promotion, gated by the business's
-  /// subscription_tier: [durationMinutes] is capped, and a rolling
-  /// 7-day usage count is checked against a per-tier weekly limit (see
+  /// subscription_tier: [durationMinutes] is capped, and a rolling 30-day
+  /// usage count is checked against a per-tier monthly limit (see
   /// _powerHourLimitsByTier). Fetches the business fresh rather than
   /// trusting the caller's possibly-stale cached data, since this is
   /// enforcing a real limit, not just display. checkAndExpireBeacons (a
@@ -470,10 +1134,11 @@ class KinServices {
 
       final now = DateTime.now();
       final windowExpired = business.powerHourLastReset == null ||
-          now.difference(business.powerHourLastReset!).inDays >= 7;
+          now.difference(business.powerHourLastReset!).inDays >= 30;
       final currentUsage = windowExpired ? 0 : business.powerHourUsageCount;
 
-      if (limits.weeklyLimit != null && currentUsage >= limits.weeklyLimit!) {
+      if (limits.monthlyLimit != null &&
+          currentUsage >= limits.monthlyLimit!) {
         return ServiceResult.failure(
             _powerHourLimitMessage(business.subscriptionTier));
       }
@@ -512,6 +1177,118 @@ class KinServices {
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not stop Power Hour.');
+    }
+  }
+
+  /// The Exchange terms version currently in force.
+  ///
+  /// Kept in Firestore rather than as a constant in this file so revising
+  /// the terms is a single write instead of an app release. `firestore.rules`
+  /// reads this same document when a post is created, so an older app build
+  /// is held to exactly the same bar as a current one - which would not be
+  /// true if each build carried its own hardcoded version string.
+  ///
+  /// Returns null if the document is missing or unreadable. Callers treat
+  /// that as "cannot establish the current terms" and fail open on *reading*
+  /// while the rule continues to fail closed on *posting*.
+  static Future<String?> currentExchangeTermsVersion() async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('legal_config')
+          .doc('exchange_terms')
+          .get();
+      final version = snap.data()?['current_version'];
+      return version is String && version.isNotEmpty ? version : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Whether [uid] has accepted the Exchange terms *as they stand now*.
+  ///
+  /// Acceptance lives in `exchange_profiles`, keyed by uid so
+  /// firestore.rules can check it with a get() when a post is created. The
+  /// client check here is a UX affordance only - the rule is what actually
+  /// enforces it.
+  ///
+  /// A profile that agreed to a superseded version counts as not accepted,
+  /// so a terms revision re-prompts rather than silently letting someone
+  /// post under terms they never saw.
+  static Future<bool> hasAcceptedExchangeConduct(String uid) async {
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('exchange_profiles')
+          .doc(uid)
+          .get();
+      if (!snap.exists || snap.data()?['agreed_to_conduct'] != true) {
+        return false;
+      }
+      final required = await currentExchangeTermsVersion();
+      // No version on file means nothing to enforce against - don't lock
+      // people out on a misconfigured config doc.
+      if (required == null) return true;
+      return snap.data()?['terms_version'] == required;
+    } catch (_) {
+      // Treat an unreadable profile as "not accepted" - the worst case is
+      // the user is asked to accept again, whereas assuming acceptance
+      // would send them into a post that the rules then reject.
+      return false;
+    }
+  }
+
+  /// Records acceptance of the Exchange terms.
+  ///
+  /// Doc ID is the uid, matching the rule in firestore.rules. Uses set with
+  /// merge so re-accepting is harmless and never clobbers display_name.
+  ///
+  /// Stamps the version accepted and the time it happened, so a later terms
+  /// revision can tell who agreed to what - `agreed_to_conduct: true` alone
+  /// records that someone agreed to *something*, which is not much use if
+  /// the terms have since changed.
+  static Future<ServiceResult<void>> acceptExchangeConduct({
+    required String uid,
+    String? displayName,
+  }) async {
+    try {
+      final version = await currentExchangeTermsVersion();
+      await FirebaseFirestore.instance
+          .collection('exchange_profiles')
+          .doc(uid)
+          .set({
+        'user_ref': FirebaseFirestore.instance.collection('users').doc(uid),
+        'display_name': displayName ?? '',
+        'agreed_to_conduct': true,
+        if (version != null) 'terms_version': version,
+        'accepted_at': FieldValue.serverTimestamp(),
+        'created_at': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your agreement. Please try again.');
+    }
+  }
+
+  /// Files a report against an Exchange post.
+  ///
+  /// Reports are write-only from the client (see firestore.rules) - an
+  /// operator reads them with the Admin SDK. Nothing here can take a post
+  /// down; only its author can delete it from the app.
+  static Future<ServiceResult<void>> reportExchangePost({
+    required DocumentReference postRef,
+    required DocumentReference reporterRef,
+    String? reason,
+  }) async {
+    try {
+      await FirebaseFirestore.instance.collection('exchange_post_reports').add({
+        'post_ref': postRef,
+        'reporter_ref': reporterRef,
+        'reason': reason ?? '',
+        'created_at': FieldValue.serverTimestamp(),
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not send the report.');
     }
   }
 
@@ -568,15 +1345,25 @@ class KinServices {
     }
   }
 
-  /// Records what the owner did with an AI suggestion (used it, asked for
-  /// another, or dismissed it) - the "user engagement with suggested
-  /// posts" side of the AI analytics, separate from generation latency.
+  /// Records what the owner did with an AI suggestion (used it as written,
+  /// used it after editing, asked for another, or dismissed it) - the
+  /// "user engagement with suggested posts" side of the AI analytics,
+  /// separate from generation latency.
+  ///
+  /// [finalCaption] carries the owner's rewritten caption when [action] is
+  /// `edited`. The generated original is already stored on the parent
+  /// generation log, so the pair is what makes the edit legible - what the
+  /// model wrote next to what the owner actually wanted. That gap is the
+  /// strongest available signal about a business's real voice, and it only
+  /// exists if it's captured at the moment of editing.
+  ///
   /// Best-effort: a logging failure shouldn't block the owner from
   /// continuing to use the suggestion.
   /// Used by: Owner Profile -> AI Marketing suggestion card actions.
   static Future<void> logAiSuggestionEngagement({
     required String generationLogId,
     required String action,
+    String? finalCaption,
   }) async {
     try {
       await FirebaseFunctions.instance
@@ -584,9 +1371,163 @@ class KinServices {
           .call<void>({
         'generationLogId': generationLogId,
         'action': action,
+        if (finalCaption != null && finalCaption.isNotEmpty)
+          'finalCaption': finalCaption,
       });
     } catch (_) {
       // Best-effort - see doc comment above.
+    }
+  }
+
+  /// Signs the current user out of every service the app signed them in to.
+  ///
+  /// `authManager.signOut()` alone only clears Firebase Auth. Two other
+  /// sessions outlive it and have to be closed explicitly:
+  ///
+  ///   - Google keeps its own session, so the next sign-in would silently
+  ///     reuse the previous Google account instead of offering the picker -
+  ///     which on a shared device means signing back in as someone else.
+  ///   - RevenueCat keeps attributing purchases to the old uid until it is
+  ///     told otherwise, so entitlements could follow the wrong account.
+  ///
+  /// Both are best-effort: neither failing should trap someone in a signed-in
+  /// state they asked to leave, so only the Firebase step decides the result.
+  /// `signOutWithGoogle` is safe to call on an email/password session - it's
+  /// a no-op when there's no Google session to clear.
+  ///
+  /// Navigation is deliberately left to the caller. The router refreshes on
+  /// auth change unless `prepareAuthEvent()` is called first, so the widget
+  /// has to own that ordering.
+  ///
+  /// Used by: the map page's hamburger menu -> Sign Out.
+  /// Aggregated AI Marketing usage for the Executive Dashboard.
+  ///
+  /// The counting happens server-side: `ai_generation_logs` is `read:
+  /// false` in firestore.rules because it stores generated captions and
+  /// prompts, and it grows one document per generation, so a client-side
+  /// tally would both over-share and re-read the whole collection on every
+  /// dashboard open. The callable re-checks `is_admin` itself rather than
+  /// trusting the page's redirect, which guards a screen and not an
+  /// endpoint.
+  /// Used by: Executive Dashboard -> AI Marketing.
+  static Future<ServiceResult<AiMarketingStats>> getAiMarketingStats() async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('getAiMarketingStats')
+          .call<Map<String, dynamic>>();
+      final data = result.data;
+      Map<String, int> counts(String key) => {
+            for (final entry
+                in (data[key] as Map? ?? const {}).entries.cast<MapEntry>())
+              entry.key as String: (entry.value as num).toInt(),
+          };
+      return ServiceResult.success(AiMarketingStats(
+        total: (data['total'] as num).toInt(),
+        byStatus: counts('byStatus'),
+        byTier: counts('byTier'),
+        byEngagement: counts('byEngagement'),
+        unrecognisedStatus: (data['unrecognisedStatus'] as num?)?.toInt() ?? 0,
+        engagementUnavailable: data['engagementUnavailable'] == true,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not load AI marketing stats.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not load AI marketing stats.');
+    }
+  }
+
+  /// Sends one message in the in-app support chat via the
+  /// `sendSupportChatMessage` callable and returns the assistant's reply.
+  /// [history] is recent prior turns from this session only, used purely as
+  /// prompt context - the server is the source of truth for what actually
+  /// gets logged.
+  static Future<ServiceResult<SupportChatTurn>> sendSupportChatMessage({
+    required String message,
+    String? conversationId,
+    List<SupportChatTurn> history = const [],
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'sendSupportChatMessage',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 30)),
+      )
+          .call<Map<String, dynamic>>({
+        'message': message,
+        if (conversationId != null) 'conversationId': conversationId,
+        'history': history.map((t) => t.toJson()).toList(),
+      });
+      final reply = result.data['reply'] as String? ?? '';
+      return ServiceResult.success(
+          SupportChatTurn(role: 'assistant', text: reply));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not get a response right now.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not get a response right now. Please try again.');
+    }
+  }
+
+  /// Admin-only aggregation of `support_chat_logs` for the Executive
+  /// Dashboard - see `getSupportChatStats` (support_chat_stats.js).
+  static Future<ServiceResult<SupportChatStats>> getSupportChatStats() async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('getSupportChatStats')
+          .call<Map<String, dynamic>>();
+      final data = result.data;
+      final byCategory = {
+        for (final entry
+            in (data['byCategory'] as Map? ?? const {}).entries.cast<MapEntry>())
+          entry.key as String: (entry.value as num).toInt(),
+      };
+      final recent = (data['recent'] as List? ?? const [])
+          .cast<Map>()
+          .map((r) => SupportChatRecentEntry(
+                category: r['category'] as String? ?? 'other',
+                summary: r['summary'] as String?,
+                createdAt: r['createdAt'] != null
+                    ? DateTime.fromMillisecondsSinceEpoch(
+                        (r['createdAt'] as num).toInt())
+                    : null,
+              ))
+          .toList();
+      return ServiceResult.success(SupportChatStats(
+        total: (data['total'] as num).toInt(),
+        byCategory: byCategory,
+        unrecognisedCategory:
+            (data['unrecognisedCategory'] as num?)?.toInt() ?? 0,
+        recent: recent,
+      ));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not load support chat stats.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not load support chat stats.');
+    }
+  }
+
+  static Future<ServiceResult<void>> signOut() async {
+    try {
+      await revenue_cat.login(null);
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+    try {
+      await signOutWithGoogle();
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+    try {
+      await authManager.signOut();
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not sign out. Please try again.');
     }
   }
 }

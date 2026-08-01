@@ -124,7 +124,7 @@ class _DeliveryStatusWidgetState extends State<DeliveryStatusWidget> {
                   height: 50.0,
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      FlutterFlowTheme.of(context).primary,
+                      FlutterFlowTheme.of(context).secondaryText,
                     ),
                   ),
                 ),
@@ -171,7 +171,7 @@ class _DeliveryStatusWidgetState extends State<DeliveryStatusWidget> {
                                     size: 20.0,
                                   ),
                                   onPressed: () {
-                                    print('IconButton pressed ...');
+                                    context.safePop();
                                   },
                                 ),
                               ),

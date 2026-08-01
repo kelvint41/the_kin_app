@@ -95,6 +95,28 @@ List<String> get activeEntitlementIds => _customerInfo != null
         .toList()
     : [];
 
+/// The real, localised store price for [packageId], or null when offerings
+/// aren't loaded.
+///
+/// The pricing page displayed hardcoded strings - `price: '\$59'` and so on -
+/// while the amount actually charged came from App Store Connect and Google
+/// Play through RevenueCat. Nothing kept the two in step, so the app could
+/// advertise one price and charge another: a store-review problem, a trust
+/// problem, and wrong for every customer outside the US, who saw a US dollar
+/// figure and was billed in their own currency.
+///
+/// This is the store's own price string, already localised and formatted by
+/// the platform. Callers fall back to their literal when it returns null,
+/// which is the case before offerings load and on any device with no store
+/// connection - the Simulator included.
+String? storePriceFor(String packageId) {
+  try {
+    return _offerings?.current?.getPackage(packageId)?.storeProduct.priceString;
+  } catch (_) {
+    return null;
+  }
+}
+
 Future loadOfferings() async {
   if (!_isConfigured) {
     return;

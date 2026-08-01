@@ -216,9 +216,13 @@ meaning the business row's trend arrow always shows "up" today. This was
 discovered while building the customer side (which does compute a real
 trend) but was left as-is since the business ticker row was explicitly
 scoped as "keep as is." Fixing it properly would mean deciding where
-business Kindex scoring should actually happen (nothing currently
-updates `businesses.kindex_score`/`kindex_velocity` at all outside of
-manual/admin writes) - a bigger scope than the ticker feature itself.
+business Kindex scoring should actually happen - since resolved: see
+`business_kindex_engine.js` in the "Kindex formulas" section below, which
+now updates `businesses.kindex_score` automatically on review creation.
+`kindex_velocity` still has no writer - deliberately left alone rather
+than filled with a placeholder value - so this trend-arrow issue is
+unchanged for now; a real velocity metric is tracked as separate future
+work.
 
 ## Exchange Feed & Kindex Spotlight
 
@@ -442,8 +446,9 @@ pattern used correctly elsewhere (`the_exchange_widget.dart`,
 
 ## Kindex formulas (as of this audit)
 
-Three separate, disconnected systems currently calculate "Kindex" - only
-the first one actually writes to Firestore in production.
+Three separate systems currently calculate "Kindex" - the first two now
+both write to Firestore in production automatically; the third remains
+dead code.
 
 **1. Live event-weight engine** - `firebase/custom_cloud_functions/kindex_engine.js`,
 `processUserEngagementEvent`. Triggered on `UserEngagementEvents/{id}`
@@ -467,18 +472,73 @@ decay, no rolling window exists today.
 
 **2. `BusinessesRecord.kindex_score` / `kindex_velocity`** - the fields
 actually displayed everywhere (business cards, the ticker, the
-leaderboard). Nothing writes to these; they only change via manual
-Firestore console edits. No automated business-side scoring exists.
+leaderboard). `kindex_score` now has a real automated writer: see
+`firebase/custom_cloud_functions/business_kindex_engine.js`,
+`processBusinessReview`, below. `kindex_velocity` still has no writer -
+it's intentionally left untouched by the new function rather than filled
+with a placeholder sign-based value (see "Proposed velocity metric"
+below) - so it still reads as its default (0) for every business.
 
 **3. `lib/custom_code/actions/calculate_real_time_kindex.dart`** -
 `calculateRealTimeKindex(currentScore, newStarRating, isPremiumBusiness)`.
 A real formula: baseline 500 (or 850 premium) when `currentScore == 0`,
 otherwise `±15` for 5-star / `±5` for 4-star / `-5` for 2-star / `-15` for
 1-star (3-star neutral), clamped to a tier ceiling (750 standard / 900
-premium). Its only remaining call site
-(`business_profile_v2_widget.dart`, the "Customer Reviews" header tap)
-stores the result in local model state and never persists it - decorative
-today, not live.
+premium). Its original call site (`business_profile_v2_widget.dart`, the
+"Customer Reviews" header tap) stores the result in local model state and
+never persists it - still decorative, still dead code, left untouched.
+The formula itself has been ported (not moved) into
+`business_kindex_engine.js` as the live implementation - see below.
+
+**SUPERSEDED (July 2026): the reactive business engine was replaced by a
+nightly recompute.** `business_kindex_engine.js` / `processBusinessReview`
+has been deleted. It applied a fixed delta per review with no verified-visit
+requirement and no per-customer cap, so one account could move a score
+without bound by submitting repeated reviews. Business scoring now lives in
+`business_kindex_nightly.js` (`recomputeBusinessKindexScores`, 2am
+America/Chicago) plus `visit_verification.js` (`recordVerifiedVisit`
+callable). See "Anti-manipulation scoring" below. The description that
+follows is retained for history only:
+
+**Former live business-side engine (deleted)** -
+`firebase/custom_cloud_functions/business_kindex_engine.js`,
+`processBusinessReview`. Triggered on `reviews/{reviewId}` document
+creation (the review flow already wired up via
+`KinServices.submitReview`), mirroring `kindex_engine.js`'s structure:
+inside a transaction, re-reads the review and the target business,
+applies the ported `calculateRealTimeKindex` formula (item 3 above) using
+the business's current `kindex_score` and `is_premium` flag, writes the
+new `kindex_score` plus `last_kindex_review_id` onto the business doc, and
+marks the review `status: "processed"` (or `"rejected"` with an `error`
+for a missing `business_ref`, non-numeric `rating`, or a business that no
+longer exists). Idempotency guard: `reviews` docs have no client-settable
+`status` field (unlike `UserEngagementEvents`' `"pending"` convention), so
+the guard is simply "does `status` already exist at all" - it's only ever
+written by this function, so its presence means the review was already
+handled and reprocessing (from an at-least-once redelivery) is a safe
+no-op.
+
+**Tests.** `firebase/custom_cloud_functions/test/business_kindex_engine.test.js`
+covers this function against the Firestore emulator - the tier
+baselines/ceilings, the star deltas, the clamps, the rejection paths, and
+the idempotency guard (which can't be verified by reading the code
+alone). Run with:
+
+```bash
+cd firebase/custom_cloud_functions
+npm install       # first time only
+npm test
+```
+
+`npm test` shells out to `firebase emulators:exec --only firestore`
+against a throwaway `demo-kin-test` project, so it needs no credentials
+and touches no real data - but it does need Java (the Firestore emulator
+is a JAR) and downloads that JAR on first run. `firebase-tools` is a
+devDependency here so the suite is self-contained; a global install works
+too. Note these tests use the Admin SDK, which bypasses `firestore.rules`
+exactly as the deployed function does - so they say nothing about
+client-side rule enforcement, including the `kindex_score` write
+restriction described above.
 
 ### Proposed velocity metric (not yet implemented)
 
@@ -603,21 +663,130 @@ occasionally malformed free text. Includes the business's name, category,
 and description from Firestore, plus an optional caller-supplied `theme`
 (e.g. "weekend brunch special").
 
+**Generation quota**: monthly per-tier caps, enforced server-side in the
+same function as entitlement. `DEFAULT_MONTHLY_LIMITS` gives Pro Growth 30
+and Elite Growth 150, overridable per-deployment from
+`ai_config/generation_limits` (per-tier keys; an explicit `null` means
+uncapped, junk values fall back to the code default, and a missing or
+unreadable config never takes the feature down). Deliberately uncached,
+unlike `getScoringDynamics`' 5-minute cache - this is one read on a
+user-initiated action, not a sweep over every business, so a stale cap is
+the worse trade.
+
+Before this existed, an entitled business had unlimited Gemini calls:
+`marketing_generations_used` had been on the businesses schema all along
+but nothing read or wrote it, so an owner holding down Regenerate was
+unmetered spend against a thinking model. Elite Growth gets a
+high-but-finite cap rather than the `null` that `_powerHourLimitsByTier`
+gives its top tier - Power Hour unlimited costs nothing per use, this
+does; 150/month is far above plausible real usage while still bounding a
+runaway loop or a compromised account.
+
+The count is claimed *before* the model call, not after it. Counting after
+leaves a race where two concurrent taps both pass the check and both
+spend, which defeats the cap; the price is that a failed generation is
+refunded (`refundGeneration`), a cheap write on a rare path. Our own
+outage never eats the owner's allowance. The refund is guarded on the
+stored month still matching, so a rollover mid-flight can't decrement the
+wrong month's tally.
+
+Usage is stored as `marketing_generations_used` plus
+`marketing_generations_month` ("YYYY-MM" in `America/Chicago`, matching the
+nightly Kindex jobs' timezone). The month is stored alongside the count
+because without it there is no way to distinguish "0 used this month" from
+"never reset" - a stored month that isn't the current one is treated as
+zero rather than carried forward. Built via `Intl.formatToParts` rather
+than a locale string so the format can't drift with the runtime's ICU
+data. Exhaustion throws `resource-exhausted` with a tier-specific upgrade
+message, surfaced verbatim by `KinServices.generateMarketingContent`'s
+existing `FirebaseFunctionsException` path.
+
+**Model**: pinned via a single `GEMINI_MODEL` constant used both for the
+API call and the `model` field on every generation log - previously written
+out twice, so a model change made the logs claim a model that was never
+called. Currently `gemini-3.6-flash`. The original `gemini-1.5-flash` has
+been retired and now 404s ("not found for API version v1beta");
+`gemini-2.5-flash` is not a fallback either, returning "no longer available
+to new users" for this project's key. Deliberately pinned rather than using
+the floating `gemini-flash-latest` alias, so the model cannot change
+underneath a feature whose value depends on a stable per-business signal.
+Note this is a thinking model - expect materially higher latency and token
+cost per generation than 1.5-flash (in testing, ~4x more thought tokens
+than output tokens); the 30s client and 60s function timeouts both have
+ample headroom.
+
+**Hashtag count** is enforced by the schema (`minItems`/`maxItems` of 3),
+not by prose. The `description` alone asked for exactly 3 and
+`gemini-3.6-flash` ignored it - the first two real in-app generations each
+returned a single hashtag, and an A/B run over the actual prompt produced
+`[1, 3, 3]` unbounded against `[3, 3, 3]` bounded. A one-hashtag post is
+materially weaker for the owner, so the count is a constraint now.
+
+Handling stays tolerant on top of that: only a missing or empty array is a
+failure, and anything longer is sliced to the first 3. The previous strict
+`length !== 3` check - calibrated against the now-retired 1.5-flash - would
+have thrown away a good caption, CTA and image concept over a cosmetic
+difference and shown the owner a bare "INTERNAL"; it did exactly that risk
+on the very first successful generation, which returned 1. With bounds in
+place the slice should be a no-op, and stays only as a backstop, since the
+bound is enforced by the API rather than by us. The sliced array is what
+gets logged, so `generated_output.hashtags` always matches what the owner
+actually saw.
+
 **Logging** (`ai_generation_logs` collection, Admin-SDK-write-only,
 `allow read, write: if false` in rules - no client path touches it
 directly):
-- Every call logs `status` (`success`/`error`/`rejected_not_entitled`),
+- Every call also logs `prompt` - the exact string sent to the model - plus
+  `prompt_version`, bumped whenever `buildPrompt`'s wording changes. The
+  prompt was technically reconstructible from `theme` + `context_used`,
+  since `buildPrompt` is deterministic, but only for as long as
+  `buildPrompt` itself never changed. Once the template is reworded, older
+  logs become unreplayable and "this business prefers shorter captions"
+  stops being distinguishable from "we changed the instructions" - two
+  explanations that look identical if all you kept was the output. Both are
+  null on a rejection, where no prompt was composed.
+- `generations_used` and `generations_limit` record the quota state at the
+  moment of the call, on rejections too, so hitting the cap reads as data
+  rather than as an owner quietly abandoning the feature. A null limit means
+  the tier is uncapped.
+- Every call logs `status`
+  (`success`/`error`/`rejected_not_entitled`/`rejected_quota_exceeded`),
   `latency_ms` (wall-clock time around the Gemini call), `subscription_tier`,
   and `theme` - this is the AI latency + system load data. Rejected
   (not-entitled) attempts are logged too, not just successes, so upgrade-prompt
   friction is visible in the data.
+- Successful calls also log `generated_output` (the `caption`, `hashtags`,
+  `cta`, and `image_concept` that were actually returned) and `context_used`
+  (a snapshot of the `business_name`, `category`, and `description` the
+  prompt was built from). Both are `null` on error and rejection. This is
+  the content side of the log, as opposed to the health side: the client
+  copies the caption to the clipboard and retains nothing, so without this
+  the engagement subcollection can record that a suggestion was dismissed
+  but not what it said. `context_used` is stored alongside it because the
+  business doc is mutable - a caption can't be judged later against a
+  description that has since been rewritten. Neither field is
+  reconstructable after the fact, which is why they're written on every
+  generation rather than added once there's a consumer for them.
 - A subcollection (`ai_generation_logs/{id}/engagement`) records what the
-  owner did with each suggestion - `used`/`regenerated`/`dismissed`, via
-  the separate `logAiSuggestionEngagement` callable
+  owner did with each suggestion - `used`/`edited`/`regenerated`/`dismissed`,
+  via the separate `logAiSuggestionEngagement` callable
   (`KinServices.logAiSuggestionEngagement`, called from
   `ai_marketing_sheet_widget.dart`'s three action buttons) - this is the
   "user engagement with suggested posts" metric, tracked independently of
   whether generation itself succeeded.
+- `edited` is recorded instead of `used` when the owner changed the caption
+  before using it, and carries `final_caption` (the owner's text, capped at
+  5000 chars server-side). Both actions mean the owner posted something;
+  only `edited` says the model didn't get there by itself. Paired with
+  `generated_output.caption` on the parent doc, this is the closest thing
+  available to a direct statement of what a given business actually wants
+  its voice to sound like - which is why the caption is editable in the
+  sheet at all rather than copy-only. A copy-only flow pushes the rewrite
+  into Instagram, where it's invisible and unrecoverable.
+- The diff itself is not computed or stored - the original and final text
+  are both retained and the diff is derived at analysis time, since any
+  diff representation chosen now would likely be the wrong granularity for
+  whatever consumes it later.
 - "Overall system load" beyond the per-call latency log: Cloud Functions
   already emit invocation count/concurrency/duration to Cloud Monitoring
   automatically, no extra code needed - visible in the Firebase console's
@@ -630,7 +799,13 @@ button ("AI Marketing") added to Business Profile V2's existing "Manage
 Your Business" row (owner-only, same gating as the other three buttons
 there). Shows the theme input, a Generate button, and - once generated -
 the result plus Use This (copies to clipboard) / Regenerate / Dismiss,
-each logging the corresponding engagement action.
+each logging the corresponding engagement action. The caption renders as
+an editable field (borderless, so it still reads as content rather than a
+form) seeded from each generation, including regenerates - stale text
+left over from a previous suggestion would otherwise be logged as an edit
+of content it didn't come from. Use This copies whatever is in that field,
+so editing and using is one action rather than two. Hashtags, CTA, and
+image concept remain read-only.
 
 **Not yet wired**: image generation itself (the "image concept" is a text
 description for the owner to shoot themselves, not a generated image) and
@@ -649,3 +824,119 @@ follow-up if this gets used in practice).
 - No manual-entry ticker UI/service method exists yet - `generateUniqueTicker`
   failing just surfaces an error today, per the explicit ask; building the
   actual manual-input flow is future work.
+
+## Anti-manipulation business scoring (July 2026)
+
+Replaces the reactive `processBusinessReview` trigger, which had no
+manipulation protection.
+
+**`visit_verification.js` - `recordVerifiedVisit` (callable).** A review
+only counts toward a score if the customer has a GPS-verified check-in for
+that business. The client takes a single one-shot location reading (no
+background tracking) and calls this function; the radius check happens
+server-side against the business's stored coordinates, and the visit is
+written with the Admin SDK and a server timestamp. Radius (default 100m)
+and a dedup window (default 1h) are tunable from
+`kindex_config/visit_verification` without a redeploy.
+
+The collection is **`uservisits`**, not `user_visits` - worth noting because
+its rules previously read `allow create: if true`, meaning any caller, even
+unauthenticated, could forge a visit. Client writes are now denied outright.
+
+**Limits of GPS verification.** This proves the *reported* coordinates are
+in range and makes forgery require deliberately faking a location rather
+than just POSTing a document. It cannot prove physical presence - a
+mock-location provider on a rooted device still defeats it. Unspoofable
+presence needs a venue-side factor (in-store QR, or confirmed purchase).
+
+**`business_kindex_nightly.js` - `recomputeBusinessKindexScores`.** Runs at
+2:00am America/Chicago. For every business it takes the trailing 7 days of
+reviews, keeps only customers with a verified visit in that window, reduces
+each customer to their single highest star rating, and recomputes the score
+from the tier baseline using the existing deltas and ceilings. Writes
+`kindex_score`, `kindex_last_recomputed_at` and
+`kindex_qualifying_review_count`; `kindex_velocity` is deliberately never
+touched.
+
+**Behavioural consequence worth knowing:** because the score is recomputed
+from scratch each night over a 7-day window, it is now a rolling measure
+rather than a running total. A business with no qualifying reviews in the
+window sits exactly at its baseline (500 standard / 850 premium) rather
+than retaining points earned earlier. That follows from the spec's
+"recompute from scratch", but it means scores decay toward baseline instead
+of accumulating.
+
+**Owner self-farming is blocked at three layers.** An owner checking in to
+their own business would make their own review count toward their own
+score, so: the check-in control is hidden for the owner on their own
+profile; `recordVerifiedVisit` refuses a check-in whose caller matches the
+business's `owner_ref`; and the nightly recompute drops the owner's review
+outright regardless of whether a verified visit exists. The nightly gate is
+the authoritative one - it decides scoring directly, so it holds even for
+visits recorded before the callable check existed, or written directly back
+when `uservisits` was still client-writable. The UI gate alone would be
+bypassable by invoking the callable directly.
+
+**Reviews use composite ids** (`{businessId}_{userId}`), so re-submitting
+edits a customer's existing review rather than creating duplicates. Rules
+allow owner updates with a 2-edit cap - anti-spam only; score integrity
+comes from the nightly rules, not the cap. Grouping by customer in the
+nightly job also means legacy duplicate review documents cannot double-count.
+
+Tests: `test/business_kindex_nightly.test.js` (21 cases, emulator-backed),
+covering the manipulation scenarios directly - repeat reviews from one
+account, competitor 1-star farming, unverified reviews, window boundaries.
+
+## Kindex smoothing & decay (Phase 2, July 2026)
+
+Layered on top of the anti-manipulation redesign. Config lives in
+`kindex_config/scoring_dynamics` (same tunable pattern as
+`visit_verification`): per-side max nightly change (default 20) and
+per-side weekly decay amounts (10 / 20 / 25, holding at the week-3 rate
+unless `*_decay_escalates` is set).
+
+**Capped movement.** Each night a score moves toward its windowed target by
+at most the configured cap rather than jumping to it, so a grand opening
+with 50 verified check-ins climbs like a ticker instead of snapping to the
+ceiling. The cap applies in both directions.
+
+**Escalating inactivity decay.** With no qualifying activity, the score
+decays on an escalating weekly schedule. Decay is charged per *week
+crossing*, not per nightly run - the amounts in the spec are weekly and the
+job runs nightly, so `kindex_decayed_through_week` acts as a ledger that
+keeps re-runs idempotent. Any qualifying activity resets both the streak
+and the ledger immediately.
+
+**Floor semantics.** The floor bounds *decay* only: business scores stop at
+their tier baseline (500/850), customers at 0. Movement toward a target may
+still land below baseline, because a genuinely badly-reviewed business
+should be able to score under it - mere inactivity should not.
+
+**First-run safety.** A business or customer with no recorded
+`last_activity_at` starts its clock on the first run rather than being
+treated as infinitely inactive, which would otherwise decay every
+pre-existing record the night the job first ships.
+
+**Customer side: one writer.** `kindex_engine.js` no longer writes `score`
+or `is_trending_up`. It remains the validator and audit trail (rejects
+unknown event types, stamps `points_awarded`, denormalizes
+`ticker_symbol`), while `customer_kindex_nightly.js` owns the score. Two
+writers would make smoothing meaningless - the score would still jump the
+instant an event landed. `is_trending_up` now reflects real score movement
+rather than the sign of the last processed event.
+
+**Customer dedup.** Events with a `business_ref` are grouped per business
+and only the highest-weighted one counts, so breadth of engagement beats
+repetition. Events without one (`post`, `share_app`) are deduped per
+event_type - an extension beyond the spec, without which `post` at 10
+points could be farmed by posting repeatedly.
+
+**Dashboard feed.** Every run writes a `kindex_score_history` row per
+entity at a deterministic `{type}_{id}_{YYYY-MM-DD}` id, so re-runs update
+the day rather than duplicating while days accumulate. Rows carry
+score_before/after, target, capped, decay_applied, inactivity_weeks,
+qualifying counts, and (business) verified_visit_count.
+
+Tests: 50 emulator-backed cases across
+`test/business_kindex_nightly.test.js` and
+`test/customer_kindex_nightly.test.js`.

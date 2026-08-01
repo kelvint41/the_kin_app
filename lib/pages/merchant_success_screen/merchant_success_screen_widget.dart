@@ -92,7 +92,7 @@ class _MerchantSuccessScreenWidgetState
                         image: DecorationImage(
                           fit: BoxFit.cover,
                           image: Image.asset(
-                            'assets/images/magic_edit#TUFIS2dNYnIxM2cjMSMzMzc1ZDMwNWI0NDJlN2QyY2RiYjVjYTMwYmI3MmE2NyMxMDI0IyNUUkFOU0ZPUk1BVElPTl9SRVFVRVNU.png',
+                            'assets/images/kin_logo.png',
                           ).image,
                         ),
                         boxShadow: [

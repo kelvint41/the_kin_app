@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/form_validation.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,12 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: Padding(
+        // Without this the back button sat level with the status-bar clock.
+        // bottom: false - the page's own 32pt padding already clears that
+        // edge, and a second inset would push the content up.
+        body: SafeArea(
+          bottom: false,
+          child: Padding(
           padding: EdgeInsets.all(32.0),
           child: Column(
             mainAxisSize: MainAxisSize.max,
@@ -125,8 +131,15 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                         size: 24.0,
                       ),
                       onPressed: () async {
-                        context
-                            .pushNamed(OnboardingSelectionCardWidget.routeName);
+                        // safePop rather than pushing onboarding: pushing
+                        // grew the stack on every back tap, so repeatedly
+                        // moving between here and onboarding left an
+                        // unbounded history behind the user. safePop also
+                        // covers the case this page is the only route -
+                        // arriving here from sign-out replaces the stack -
+                        // by going to '/', which renders onboarding while
+                        // logged out.
+                        context.safePop();
                       },
                     ),
                   ),
@@ -452,21 +465,46 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
               FFButtonWidget(
                 onPressed: () async {
+                  // Checked before prepareAuthEvent so an empty form never
+                  // starts an auth event it can't finish.
+                  final problem = authFormError(
+                    email: _model.emailFieldTextController.text,
+                    password: _model.passwordFieldTextController.text,
+                  );
+                  if (problem != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(problem)),
+                    );
+                    return;
+                  }
+
                   GoRouter.of(context).prepareAuthEvent();
 
                   final user = await authManager.signInWithEmail(
                     context,
-                    _model.emailFieldTextController.text,
+                    _model.emailFieldTextController.text.trim(),
                     _model.passwordFieldTextController.text,
                   );
                   if (user == null) {
                     return;
                   }
 
+                  // An existing owner who came in through the business path
+                  // should land on business setup, not the map - otherwise
+                  // logging in silently abandons what they set out to do.
+                  // Same signupType handoff the sign-up page uses, cleared
+                  // on the way out so it can't leak into a later session.
+                  final wasBusiness = FFAppState().signupType == 'business';
+                  FFAppState().signupType = '';
                   context.goNamedAuth(
-                      GoogleMapPageWidget.routeName, context.mounted);
+                      wasBusiness
+                          ? BusinessSetupPageWidget.routeName
+                          : GoogleMapPageWidget.routeName,
+                      context.mounted);
                 },
-                text: 'Welcome Back!',
+                // Was 'Welcome Back!', a duplicate of the page heading. A
+                // submit control should name its action.
+                text: 'Log In',
                 options: FFButtonOptions(
                   height: 40.0,
                   padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
@@ -572,6 +610,7 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
             ].divide(SizedBox(height: 32.0)),
           ),
+        ),
         ),
       ),
     );

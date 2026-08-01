@@ -41,12 +41,19 @@ class ReviewsRecord extends FirestoreRecord {
   DateTime? get timestamp => _timestamp;
   bool hasTimestamp() => _timestamp != null;
 
+  // "edit_count" field. Number of times the customer has edited this
+  // review; capped in Firestore rules purely as an anti-spam measure.
+  int? _editCount;
+  int get editCount => _editCount ?? 0;
+  bool hasEditCount() => _editCount != null;
+
   void _initializeFields() {
     _businessRef = snapshotData['business_ref'] as DocumentReference?;
     _userRef = snapshotData['user_ref'] as DocumentReference?;
     _rating = castToType<double>(snapshotData['rating']);
     _reviewText = snapshotData['review_text'] as String?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
+    _editCount = castToType<int>(snapshotData['edit_count']);
   }
 
   static CollectionReference get collection =>
@@ -89,6 +96,7 @@ Map<String, dynamic> createReviewsRecordData({
   double? rating,
   String? reviewText,
   DateTime? timestamp,
+  int? editCount,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -97,6 +105,7 @@ Map<String, dynamic> createReviewsRecordData({
       'rating': rating,
       'review_text': reviewText,
       'timestamp': timestamp,
+      'edit_count': editCount,
     }.withoutNulls,
   );
 
@@ -112,12 +121,15 @@ class ReviewsRecordDocumentEquality implements Equality<ReviewsRecord> {
         e1?.userRef == e2?.userRef &&
         e1?.rating == e2?.rating &&
         e1?.reviewText == e2?.reviewText &&
-        e1?.timestamp == e2?.timestamp;
+        e1?.timestamp == e2?.timestamp &&
+        e1?.editCount == e2?.editCount;
   }
 
   @override
   int hash(ReviewsRecord? e) => const ListEquality().hash(
-      [e?.businessRef, e?.userRef, e?.rating, e?.reviewText, e?.timestamp]);
+      [e?.businessRef, e?.userRef, e?.rating, e?.reviewText, e?.timestamp,
+        e?.editCount
+      ]);
 
   @override
   bool isValidKey(Object? o) => o is ReviewsRecord;

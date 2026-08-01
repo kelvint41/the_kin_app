@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -118,13 +119,19 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.doordashUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.doordashUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.doordashUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -181,13 +188,19 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                       ),
                     ),
                   ),
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.ubereatsUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.ubereatsUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.ubereatsUrl);
                     },
                     child: Container(
                       height: 56.0,
@@ -244,13 +257,19 @@ class _CleanElegantMobileWidgetState extends State<CleanElegantMobileWidget> {
                       ),
                     ),
                   ),
+                  // Only rendered when we actually hold this
+                  // platform's link. Every tile used to render
+                  // unconditionally, so a business listed on one service
+                  // still showed all three and two of them called
+                  // launchURL('').
+                  if (widget!.businessDoc!.grubhubUrl.isNotEmpty)
                   InkWell(
                     splashColor: Colors.transparent,
                     focusColor: Colors.transparent,
                     hoverColor: Colors.transparent,
                     highlightColor: Colors.transparent,
                     onTap: () async {
-                      await launchURL(widget!.businessDoc!.grubhubUrl);
+                      await KinServices.launchBusinessLink(widget!.businessDoc!.grubhubUrl);
                     },
                     child: Container(
                       height: 56.0,
