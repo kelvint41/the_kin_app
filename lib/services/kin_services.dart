@@ -522,6 +522,8 @@ class KinServices {
     required String businessName,
     required String address,
     required String category,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       await FirebaseFunctions.instance
@@ -533,6 +535,8 @@ class KinServices {
         'businessName': businessName,
         'address': address,
         'category': category,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
       });
       return const ServiceResult.success(null);
     } on FirebaseFunctionsException catch (e) {

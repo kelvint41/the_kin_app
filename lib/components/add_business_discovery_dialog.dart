@@ -2,10 +2,16 @@ import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
+import '/flutter_flow/flutter_flow_place_picker.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/services/kin_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+// Same key already used by FlutterFlowPlacePicker on the Business Setup
+// page (business_setup_page_widget.dart) - kept identical rather than
+// introducing a second copy of it.
+const _kGoogleMapsApiKey = 'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go';
 
 const _kDiscoveryCategories = [
   'Salon & Beauty',
@@ -34,6 +40,13 @@ class _AddBusinessDiscoveryDialogState
   final _otherCategoryController = TextEditingController();
   final _categoryController =
       FormFieldController<String>(_kDiscoveryCategories.first);
+
+  // Set only when the owner picks a place via FlutterFlowPlacePicker rather
+  // than typing an address by hand - hand-typed addresses (e.g. a business
+  // not yet indexed by Google Places) still submit fine, just without
+  // coordinates, same as submitCustomerBusinessDiscovery already tolerates.
+  double? _latitude;
+  double? _longitude;
 
   bool _submitting = false;
   String? _error;
@@ -71,6 +84,8 @@ class _AddBusinessDiscoveryDialogState
       businessName: name,
       address: address,
       category: effectiveCategory,
+      latitude: _latitude,
+      longitude: _longitude,
     );
 
     if (!mounted) return;
@@ -174,6 +189,40 @@ class _AddBusinessDiscoveryDialogState
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: EdgeInsets.all(theme.designToken.spacing.sm),
+                // Lets an owner standing at the business search/select it
+                // instead of typing the address by hand, and captures real
+                // coordinates in the same step - typing is still available
+                // for a business Google Places doesn't have indexed yet.
+                suffixIcon: FlutterFlowPlacePicker(
+                  iOSGoogleMapsApiKey: _kGoogleMapsApiKey,
+                  androidGoogleMapsApiKey: _kGoogleMapsApiKey,
+                  webGoogleMapsApiKey: _kGoogleMapsApiKey,
+                  defaultText: '',
+                  // accentOnSurface, not primary/info - this icon sits
+                  // directly on secondaryBackground, and both of those
+                  // alternatives break in one mode (primary's dark green
+                  // nearly disappears on dark mode's #242424 card; info's
+                  // white nearly disappears on light mode's white card).
+                  // See the light-mode-text-token-bug-class memory.
+                  icon: Icon(Icons.my_location_rounded,
+                      color: theme.accentOnSurface, size: 20.0),
+                  onSelect: (place) {
+                    setState(() {
+                      _addressController.text = place.address;
+                      _latitude = place.latLng.latitude;
+                      _longitude = place.latLng.longitude;
+                    });
+                  },
+                  buttonOptions: FFButtonOptions(
+                    width: 40.0,
+                    height: 40.0,
+                    padding: EdgeInsets.zero,
+                    color: Colors.transparent,
+                    elevation: 0.0,
+                    borderRadius:
+                        BorderRadius.circular(theme.designToken.radius.sm),
+                  ),
+                ),
               ),
               style: theme.bodyMedium.override(color: theme.primaryText),
             ),

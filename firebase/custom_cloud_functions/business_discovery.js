@@ -62,7 +62,8 @@ exports.submitBusinessDiscovery = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
 
-  const { businessName, address, category } = request.data || {};
+  const { businessName, address, category, latitude, longitude } =
+    request.data || {};
   if (typeof businessName !== "string" || !businessName.trim()) {
     throw new HttpsError("invalid-argument", "businessName is required.");
   }
@@ -72,6 +73,9 @@ exports.submitBusinessDiscovery = onCall(async (request) => {
   if (typeof category !== "string" || !category.trim()) {
     throw new HttpsError("invalid-argument", "category is required.");
   }
+  // Optional - the owner may have typed an address by hand instead of using
+  // the place picker (e.g. a business not indexed by Google Places yet).
+  const hasCoords = isValidCoord(latitude, longitude);
 
   const db = admin.firestore();
   const userRef = db.collection("users").doc(uid);
@@ -97,6 +101,9 @@ exports.submitBusinessDiscovery = onCall(async (request) => {
     business_name: businessName.trim(),
     address: address.trim(),
     category: category.trim(),
+    business_location: hasCoords
+      ? new GeoPoint(latitude, longitude)
+      : null,
     created_at: FieldValue.serverTimestamp(),
   });
 
