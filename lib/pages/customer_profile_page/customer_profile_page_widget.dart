@@ -6,6 +6,7 @@ import '/components/business_image_widget.dart';
 import '/components/image_upload_button.dart';
 import '/components/feedback_sheet_widget.dart';
 import '/components/promo_card_widget.dart';
+import '/components/edit_bio_sheet.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -392,6 +393,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                     style: FlutterFlowTheme.of(context).headlineSmall,
                   ),
                 ),
+              _bioSection(context),
               Padding(
                 padding: EdgeInsets.all(24.0),
                 child: Column(
@@ -779,7 +781,6 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   ),
                 ),
               ),
-              _appStudioPrompt(context),
               _supportChatPrompt(context),
               _feedbackPrompt(context),
               Container(
@@ -805,59 +806,54 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
     );
   }
 
-  /// Entry point to the App Studio waitlist.
-  ///
-  /// Offered to customers, not just owners: someone browsing the directory
-  /// may well run a business that isn't listed here, and they are exactly
-  /// the person this offer is for.
-  Widget _appStudioPrompt(BuildContext context) {
+  /// A short, self-authored "About Me" blurb. Tapping opens [EditBioSheet];
+  /// the sheet returns the saved text so this can update immediately rather
+  /// than waiting on the next currentUserDocument refresh.
+  Widget _bioSection(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
+    final bio = currentUserDocument?.bio ?? '';
+
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () => context.pushNamed(AppStudioPageWidget.routeName),
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: theme.alternate, width: 1.0),
-          ),
+        borderRadius: BorderRadius.circular(12.0),
+        onTap: () async {
+          final saved = await showModalBottomSheet<String>(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (_) => EditBioSheet(currentBio: bio),
+          );
+          if (saved != null && mounted) safeSetState(() {});
+        },
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.auto_awesome_mosaic_rounded,
-                  color: theme.accentOnSurface, size: 22.0),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Need an app for your business?',
-                        style: theme.bodyMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'KIN App Studio - coming soon. Join the list.',
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                    ],
+              Flexible(
+                child: Text(
+                  bio.isEmpty ? 'Add a short bio about yourself' : bio,
+                  textAlign: TextAlign.center,
+                  style: theme.bodySmall.override(
+                    font: GoogleFonts.plusJakartaSans(
+                      fontStyle:
+                          bio.isEmpty ? FontStyle.italic : FontStyle.normal,
+                    ),
+                    color: theme.secondaryText,
+                    letterSpacing: 0.0,
                   ),
                 ),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: theme.secondaryText, size: 20.0),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(4.0, 2.0, 0.0, 0.0),
+                child: Icon(
+                  Icons.edit_rounded,
+                  color: theme.secondaryText,
+                  size: 14.0,
+                ),
+              ),
             ],
           ),
         ),

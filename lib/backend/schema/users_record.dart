@@ -109,6 +109,13 @@ class UsersRecord extends FirestoreRecord {
   DateTime? get kinQuestTermsAcceptedAt => _kinQuestTermsAcceptedAt;
   bool hasKinQuestTermsAcceptedAt() => _kinQuestTermsAcceptedAt != null;
 
+  // "bio" field. Self-authored, customer-facing short blurb shown on
+  // CustomerProfilePage. Free text, no moderation - same trust level as
+  // display_name, which has never been moderated either.
+  String? _bio;
+  String get bio => _bio ?? '';
+  bool hasBio() => _bio != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -128,6 +135,7 @@ class UsersRecord extends FirestoreRecord {
     _scavengerPoints = castToType<int>(snapshotData['scavenger_points']);
     _kinQuestTermsAcceptedAt =
         snapshotData['kin_quest_terms_accepted_at'] as DateTime?;
+    _bio = snapshotData['bio'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -181,6 +189,7 @@ Map<String, dynamic> createUsersRecordData({
   bool? isAdmin,
   int? scavengerPoints,
   DateTime? kinQuestTermsAcceptedAt,
+  String? bio,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -201,6 +210,7 @@ Map<String, dynamic> createUsersRecordData({
       'is_admin': isAdmin,
       'scavenger_points': scavengerPoints,
       'kin_quest_terms_accepted_at': kinQuestTermsAcceptedAt,
+      'bio': bio,
     }.withoutNulls,
   );
 
@@ -228,7 +238,8 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e1?.arToursCompleted == e2?.arToursCompleted &&
         e1?.isAdmin == e2?.isAdmin &&
         e1?.scavengerPoints == e2?.scavengerPoints &&
-        e1?.kinQuestTermsAcceptedAt == e2?.kinQuestTermsAcceptedAt;
+        e1?.kinQuestTermsAcceptedAt == e2?.kinQuestTermsAcceptedAt &&
+        e1?.bio == e2?.bio;
   }
 
   @override
@@ -249,7 +260,8 @@ class UsersRecordDocumentEquality implements Equality<UsersRecord> {
         e?.arToursCompleted,
         e?.isAdmin,
         e?.scavengerPoints,
-        e?.kinQuestTermsAcceptedAt
+        e?.kinQuestTermsAcceptedAt,
+        e?.bio,
       ]);
 
   @override

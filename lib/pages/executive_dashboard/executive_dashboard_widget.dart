@@ -4,6 +4,7 @@ import '/components/business_item_widget.dart';
 import '/components/kpi_card_widget.dart';
 import '/components/signup_item_widget.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
+import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -77,6 +78,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
 
   /// Same memoization as [_aiStatsFuture], for the Support Chat panel.
   Future<ServiceResult<SupportChatStats>>? _supportChatStatsFuture;
+
+  /// Same memoization as [_aiStatsFuture], for the check-in heat map.
+  Future<List<FlutterFlowHeatmapPoint>>? _heatmapFuture;
 
   @override
   void initState() {
@@ -1180,6 +1184,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           ),
                           _aiMarketingSection(context),
                           _powerHourSection(context),
+                          _checkInHeatmapSection(context),
                           _deliveriesSection(context),
                           _feedbackSection(context),
                           _supportChatSection(context),
@@ -1683,6 +1688,150 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           ].divide(SizedBox(height: 12.0)),
         ),
       ),
+    );
+  }
+
+  /// Nationwide check-in density, last 30 days, across every business
+  /// regardless of [selectedCity] - deliberately not scoped to the city
+  /// dropdown like the panels above, since the entire point is to see all
+  /// metros at once. `uservisits` carries no location of its own (just
+  /// user_ref/business_ref/visit_timestamp - see UservisitsRecord), so
+  /// each visit is resolved to its business's `business_location` GeoPoint
+  /// and folded into a single weighted point per business rather than one
+  /// point per visit, keeping the read volume to "one doc per business
+  /// with recent visits" instead of "one doc per visit".
+  ///
+  /// Reads across the whole (unfiltered) uservisits collection - allowed
+  /// for an admin under firestore.rules' `is_admin == true` branch, same
+  /// as every other cross-business panel on this page.
+  Future<List<FlutterFlowHeatmapPoint>> _loadCheckInHeatmap() async {
+    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+    List<UservisitsRecord> visits;
+    try {
+      visits = await queryUservisitsRecordOnce(
+        queryBuilder: (q) => q.where(
+          'visit_timestamp',
+          isGreaterThanOrEqualTo: thirtyDaysAgo,
+        ),
+      );
+    } catch (_) {
+      return const [];
+    }
+
+    final visitCountsByBusiness = <DocumentReference, int>{};
+    for (final visit in visits) {
+      final businessRef = visit.businessRef;
+      if (businessRef == null) continue;
+      visitCountsByBusiness[businessRef] =
+          (visitCountsByBusiness[businessRef] ?? 0) + 1;
+    }
+
+    final points = <FlutterFlowHeatmapPoint>[];
+    for (final entry in visitCountsByBusiness.entries) {
+      BusinessesRecord business;
+      try {
+        business = await BusinessesRecord.getDocumentOnce(entry.key);
+      } catch (_) {
+        continue;
+      }
+      final location = business.businessLocation;
+      if (location == null) continue;
+      points.add(FlutterFlowHeatmapPoint(location, entry.value.toDouble()));
+    }
+    return points;
+  }
+
+  Widget _checkInHeatmapSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+
+    _heatmapFuture ??= _loadCheckInHeatmap();
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Check-In Heat Map',
+          style: theme.titleMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            letterSpacing: 0.0,
+            fontWeight: FontWeight.bold,
+            lineHeight: 1.4,
+          ),
+        ),
+        Text(
+          'Every metro at once, regardless of the city selector above - '
+          'where customers are checking in nationwide, last 30 days.',
+          style: theme.bodySmall.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+            lineHeight: 1.4,
+          ),
+        ),
+        Container(
+          height: 320.0,
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.0),
+            border: Border.all(color: theme.alternate, width: 1.0),
+          ),
+          child: FutureBuilder<List<FlutterFlowHeatmapPoint>>(
+            future: _heatmapFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(
+                  child: SizedBox(
+                    width: 30.0,
+                    height: 30.0,
+                    child: CircularProgressIndicator(
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.primary),
+                    ),
+                  ),
+                );
+              }
+              final points = snapshot.data!;
+              if (points.isEmpty) {
+                return Container(
+                  color: theme.secondaryBackground,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: Text(
+                        'No check-ins recorded in the last 30 days.',
+                        textAlign: TextAlign.center,
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return FlutterFlowGoogleMap(
+                controller: Completer<GoogleMapController>(),
+                // Geographic center of the contiguous US, zoomed to show
+                // the whole country - the heat concentrates wherever the
+                // business directory actually has coverage today and will
+                // spread out on its own as that coverage grows.
+                initialLocation: const LatLng(39.8283, -98.5795),
+                initialZoom: 3.4,
+                allowInteraction: true,
+                allowZoom: true,
+                showZoomControls: false,
+                showLocation: false,
+                showLocationButton: false,
+                showCompass: false,
+                mapTakesGesturePreference: true,
+                heatmapPoints: points,
+              );
+            },
+          ),
+        ),
+      ].divide(SizedBox(height: 16.0)),
     );
   }
 
