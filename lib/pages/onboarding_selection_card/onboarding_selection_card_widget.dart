@@ -274,8 +274,18 @@ class _OnboardingSelectionCardWidgetState
                                     child: Container(
                                       height: 55.0,
                                       decoration: BoxDecoration(
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
+                                        // Was theme.secondaryText - a text
+                                        // color token, not a fill, misused as
+                                        // this button's background. In light
+                                        // mode secondaryText is near-black
+                                        // (0xFF14181B), which combined with
+                                        // this button's hardcoded black text
+                                        // made it unreadable - black on
+                                        // black. Fixed brand gold instead,
+                                        // consistent in both themes and
+                                        // visually distinct from the green
+                                        // "Black-Owned Business" button below.
+                                        color: const Color(0xFFD4AF37),
                                         boxShadow: [
                                           BoxShadow(
                                             blurRadius: 15.0,

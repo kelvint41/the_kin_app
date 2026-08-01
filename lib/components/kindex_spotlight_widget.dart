@@ -13,7 +13,7 @@ const _gold = Color(0xFFFFD700);
 const _silver = Color(0xFFC0C0C0);
 const _bronze = Color(0xFFCD7F32);
 
-// 'Kindex Spotlight' preview card for The Exchange. Business Owners are
+// 'KINDEX Spotlight' preview card for The Exchange. Business Owners are
 // ranked by their business's kindex_score; Customers are ranked by their
 // personal KindexScores.score - two separate scoring tracks that already
 // power the onboarding ticker (see KinServices.fetchTopBusinessKindex /
@@ -94,7 +94,7 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
                     ),
                   ),
                   Text(
-                    'Kindex Spotlight',
+                    'KINDEX Spotlight',
                     style: theme.headlineSmall.override(
                       font: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold),
@@ -162,7 +162,7 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
                     SizedBox(width: theme.designToken.spacing.sm),
                     Expanded(
                       child: Text(
-                        'Kindex Spotlight',
+                        'KINDEX Spotlight',
                         style: theme.bodyMedium.override(
                           font: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold),

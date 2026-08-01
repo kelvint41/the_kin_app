@@ -325,11 +325,19 @@ service cloud.firestore {
       // state - which it can still do, while no longer showing everyone
       // else's. These are GPS-verified visits: where a named account
       // physically went, and when.
+      //
+      // Also readable by the business's own owner (KIN Quest check-in
+      // analytics on Owner Profile/the hamburger menu) - a business owner
+      // seeing who checked in at their own storefront is the same kind of
+      // disclosure any in-person loyalty program already makes, and it's
+      // scoped to their own business_ref only, never another owner's.
       allow read: if request.auth != null
         && (resource.data.user_ref
               == /databases/$(database)/documents/users/$(request.auth.uid)
             || get(/databases/$(database)/documents/users/$(request.auth.uid))
-               .data.is_admin == true);
+               .data.is_admin == true
+            || get(resource.data.business_ref).data.owner_ref
+               == /databases/$(database)/documents/users/$(request.auth.uid));
       allow write: if false;
       allow delete: if false;
     }

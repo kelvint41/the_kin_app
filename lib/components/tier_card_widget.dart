@@ -466,7 +466,8 @@ class _TierCardWidgetState extends State<TierCardWidget>
                                   ),
                                   color: widget!.isElite
                                       ? Color(0xFFD4AF37)
-                                      : FlutterFlowTheme.of(context).primary,
+                                      : FlutterFlowTheme.of(context)
+                                          .primaryText,
                                   letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -487,9 +488,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel1,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f1,
                                   'Access to public community forums',
@@ -500,9 +508,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel2,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f2,
                                   'Basic business profile page on local directory',
@@ -513,9 +528,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel3,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f3,
                                   'Up to 3 active local connections',
@@ -526,9 +548,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel4,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
+                                // theme.primaryText, not theme.primary - this
+                                // card's background is secondaryBackground,
+                                // which flips (white/dark charcoal), and
+                                // primary is a fixed dark green that read
+                                // fine on white but vanished on dark
+                                // charcoal. primaryText flips with the same
+                                // surface, so it stays legible in both modes.
                                 iconColor: widget!.isElite
                                     ? Color(0xFFD4AF37)
-                                    : FlutterFlowTheme.of(context).primary,
+                                    : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f4,
                                   'Basic community support',

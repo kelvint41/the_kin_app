@@ -13,6 +13,8 @@ export '/pages/kin_quest/kin_quest_widget.dart' show KinQuestWidget;
 export '/pages/kin_quest_search/kin_quest_search_widget.dart'
     show KinQuestSearchWidget;
 export '/pages/support_chat/support_chat_widget.dart' show SupportChatWidget;
+export '/pages/business_insights/business_insights_widget.dart'
+    show BusinessInsightsWidget;
 export '/pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart'
     show MerchantPricingSuiteWidget;
 export '/legal_pages/terms_of_service_page/terms_of_service_page_widget.dart'

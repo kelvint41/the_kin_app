@@ -394,7 +394,7 @@ class KinServices {
           .toList();
       return ServiceResult.success(entries);
     } catch (_) {
-      return const ServiceResult.failure('Could not load the Kindex ticker.');
+      return const ServiceResult.failure('Could not load the KINDEX ticker.');
     }
   }
 
@@ -427,7 +427,7 @@ class KinServices {
           .toList();
       return ServiceResult.success(entries);
     } catch (_) {
-      return const ServiceResult.failure('Could not load the Kindex ticker.');
+      return const ServiceResult.failure('Could not load the KINDEX ticker.');
     }
   }
 
@@ -469,7 +469,7 @@ class KinServices {
         return const ServiceResult.failure(
             'Location access is needed to verify you visited this business. '
             'You can still leave a review without checking in - it just '
-            "won't count toward the business's Kindex score.");
+            "won't count toward the business's KINDEX score.");
       }
       return const ServiceResult.failure(
           'Could not read your location. Please try again.');

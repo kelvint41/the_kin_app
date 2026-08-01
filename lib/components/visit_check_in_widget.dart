@@ -61,7 +61,7 @@ class _VisitCheckInWidgetState extends State<VisitCheckInWidget> {
       messenger.showSnackBar(SnackBar(
         content: Text(result.data!.alreadyCheckedIn
             ? "You're already checked in here - your review will count."
-            : "Checked in. Your review will count toward this business's Kindex score."),
+            : "Checked in. Your review will count toward this business's KINDEX score."),
       ));
     } else {
       messenger.showSnackBar(SnackBar(
@@ -89,7 +89,7 @@ class _VisitCheckInWidgetState extends State<VisitCheckInWidget> {
             const SizedBox(width: 8.0),
             Flexible(
               child: Text(
-                'Visit verified - your review counts toward the Kindex score.',
+                'Visit verified - your review counts toward the KINDEX score.',
                 style: theme.labelSmall.override(
                   font: GoogleFonts.plusJakartaSans(
                     fontWeight: theme.labelSmall.fontWeight,
@@ -145,7 +145,7 @@ class _VisitCheckInWidgetState extends State<VisitCheckInWidget> {
           ),
           const SizedBox(height: 6.0),
           Text(
-            'Checking in confirms you actually visited, which keeps Kindex '
+            'Checking in confirms you actually visited, which keeps KINDEX '
             'scores trustworthy. You can still leave a review without it - '
             "it just won't affect the score.",
             style: theme.labelSmall.override(

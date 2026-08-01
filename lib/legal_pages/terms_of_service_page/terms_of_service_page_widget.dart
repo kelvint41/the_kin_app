@@ -220,8 +220,8 @@ class _TermsOfServicePageWidgetState extends State<TermsOfServicePageWidget> {
                         'automatically for the period you chose unless you cancel, and '
                         'you cancel or request refunds through your Apple or Google '
                         'account, not through us.'),
-                    _section(context, '7. Kindex scores and directory data',
-                        'Kindex scores, business locations and other directory data '
+                    _section(context, '7. KINDEX scores and directory data',
+                        'KINDEX scores, business locations and other directory data '
                         'are provided as-is, to help people find and support local '
                         'businesses. They are calculated from activity in the app and '
                         'are not a rating of quality, creditworthiness, or a '

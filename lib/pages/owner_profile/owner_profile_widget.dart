@@ -1062,9 +1062,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                         .labelSmall
                                                         .fontStyle,
                                               ),
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
+                                              // Fixed gold, not primaryText -
+                                              // same fixed-dark-card reasoning
+                                              // as the tier name below.
+                                              color: const Color(0xFFD4AF37),
                                               letterSpacing: 0.0,
                                               fontWeight: FontWeight.bold,
                                               fontStyle:
@@ -1077,30 +1078,54 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                     ),
                                   ),
                                 ),
+                                // Was currentUserDocument?.subscriptionStatus -
+                                // a users/{uid} field nothing in the app ever
+                                // writes (upgradeBusinessTier only sets
+                                // subscription_tier on the *business* doc), so
+                                // this always rendered as an empty string. The
+                                // real tier name lives on the business.
                                 AuthUserStreamWidget(
-                                  builder: (context) => Text(
-                                    valueOrDefault(
-                                        currentUserDocument?.subscriptionStatus,
-                                        ''),
-                                    style: FlutterFlowTheme.of(context)
-                                        .headlineSmall
-                                        .override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .headlineSmall
-                                                    .fontStyle,
-                                          ),
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .headlineSmall
-                                                  .fontStyle,
-                                        ),
+                                  builder: (context) =>
+                                      StreamBuilder<BusinessesRecord>(
+                                    stream: BusinessesRecord.getDocument(
+                                        currentUserDocument!.ownedBusiness!),
+                                    builder: (context, snapshot) {
+                                      final tierName = snapshot.hasData
+                                          ? snapshot.data!.subscriptionTier
+                                          : '';
+                                      return Text(
+                                        tierName.isEmpty
+                                            ? 'Community'
+                                            : tierName,
+                                        style: FlutterFlowTheme.of(context)
+                                            .headlineSmall
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.bold,
+                                                fontStyle:
+                                                    FlutterFlowTheme.of(context)
+                                                        .headlineSmall
+                                                        .fontStyle,
+                                              ),
+                                              // Fixed gold literal, not
+                                              // primaryText - this card's
+                                              // gradient is a fixed dark green
+                                              // in both themes (see the
+                                              // comment on it above), so a
+                                              // text token that inverts with
+                                              // the theme turned this near-
+                                              // black and unreadable in light
+                                              // mode.
+                                              color: const Color(0xFFD4AF37),
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.bold,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .headlineSmall
+                                                      .fontStyle,
+                                            ),
+                                      );
+                                    },
                                   ),
                                 ),
                                 Column(
@@ -1117,12 +1142,11 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          color: const Color(0xFFD4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
-                                          'Priority K-Index Ranking',
+                                          'Priority KINDEX Ranking',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(
@@ -1164,8 +1188,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          color: const Color(0xFFD4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
@@ -1211,8 +1234,13 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                       children: [
                                         Icon(
                                           Icons.check_circle_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
+                                          // Fixed dim gold, not primaryText.
+                                          // This row is deliberately muted -
+                                          // a feature the current tier
+                                          // doesn't include - but primaryText
+                                          // made it invisible in light mode
+                                          // instead of dim in both.
+                                          color: const Color(0x99D4AF37),
                                           size: 18.0,
                                         ),
                                         Text(
@@ -1233,9 +1261,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                                           .bodyMedium
                                                           .fontStyle,
                                                 ),
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primaryText,
+                                                color: const Color(0x99D4AF37),
                                                 letterSpacing: 0.0,
                                                 fontWeight:
                                                     FlutterFlowTheme.of(context)

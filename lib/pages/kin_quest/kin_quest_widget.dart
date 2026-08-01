@@ -435,7 +435,7 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
                   'particular often get discovered the slowest and lose '
                   'customers the fastest when visibility dries up. Every '
                   'check-in you log is a real, verified visit - it raises that '
-                  'business\'s standing in the app (their Kindex score) and '
+                  'business\'s standing in the app (their KINDEX score) and '
                   'helps the next person find them. The Quest is just a game '
                   'on the surface; underneath it, it\'s a running, visible '
                   'record of a community choosing to show up for its own.',

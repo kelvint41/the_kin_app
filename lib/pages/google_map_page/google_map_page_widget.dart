@@ -227,14 +227,33 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                       );
                     },
                   ),
+                  // Was unconditionally OwnerProfileWidget - every signed-in
+                  // user got the owner dashboard regardless of role. A
+                  // customer with no owned business landed on
+                  // OwnerProfileWidget's "set up your business" empty state
+                  // instead of their own profile. Branches on the same
+                  // ownedBusiness check OwnerProfileWidget itself already
+                  // guards on (see its build() method).
                   ListTile(
-                    leading: Icon(Icons.storefront_rounded,
-                        color: theme.primaryText),
-                    title:
-                        Text('My Business / Profile', style: theme.bodyLarge),
+                    leading: Icon(
+                      currentUserDocument?.ownedBusiness != null
+                          ? Icons.storefront_rounded
+                          : Icons.person_rounded,
+                      color: theme.primaryText,
+                    ),
+                    title: Text(
+                      currentUserDocument?.ownedBusiness != null
+                          ? 'My Business / Profile'
+                          : 'My Profile',
+                      style: theme.bodyLarge,
+                    ),
                     onTap: () {
                       Navigator.pop(sheetContext);
-                      context.pushNamed(OwnerProfileWidget.routeName);
+                      context.pushNamed(
+                        currentUserDocument?.ownedBusiness != null
+                            ? OwnerProfileWidget.routeName
+                            : CustomerProfilePageWidget.routeName,
+                      );
                     },
                   ),
                   // 'Community Feed' used to point at CommunityPrestigeWidget,
@@ -251,12 +270,33 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                   // and needs no separate entry point; the full-page flow this
                   // used to open (MobileCalledPowerPageWidget) was a broken,
                   // redundant duplicate and has been retired.
+                  // Same slot, different destination by role. A business
+                  // owner has no reason to play the customer Quest
+                  // themselves (see KinQuestWidget's own doc comment -
+                  // deliberately customer-only), but the underlying
+                  // check-in data is exactly what they'd want to see about
+                  // their own business - so this becomes their insights
+                  // dashboard instead of just disappearing.
                   ListTile(
-                    leading: Icon(Icons.explore_rounded, color: theme.primaryText),
-                    title: Text('The KIN Quest', style: theme.bodyLarge),
+                    leading: Icon(
+                      currentUserDocument?.ownedBusiness != null
+                          ? Icons.insights_rounded
+                          : Icons.explore_rounded,
+                      color: theme.primaryText,
+                    ),
+                    title: Text(
+                      currentUserDocument?.ownedBusiness != null
+                          ? 'Business Insights'
+                          : 'The KIN Quest',
+                      style: theme.bodyLarge,
+                    ),
                     onTap: () {
                       Navigator.pop(sheetContext);
-                      context.pushNamed(KinQuestWidget.routeName);
+                      context.pushNamed(
+                        currentUserDocument?.ownedBusiness != null
+                            ? BusinessInsightsWidget.routeName
+                            : KinQuestWidget.routeName,
+                      );
                     },
                   ),
                   Divider(

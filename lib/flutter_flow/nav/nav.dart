@@ -190,6 +190,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => SupportChatWidget(),
         ),
         FFRoute(
+          name: BusinessInsightsWidget.routeName,
+          path: BusinessInsightsWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => BusinessInsightsWidget(),
+        ),
+        FFRoute(
           name: ClaimBusinessWidget.routeName,
           path: ClaimBusinessWidget.routePath,
           builder: (context, params) => ClaimBusinessWidget(

@@ -27,12 +27,17 @@ class _MilestoneStats {
     required this.streakDays,
     required this.reviewCount,
     required this.kindexScore,
+    required this.visitCount30d,
     this.isTrendingUp,
   });
 
   final int streakDays;
   final int reviewCount;
   final double? kindexScore;
+
+  /// GPS-verified check-ins (uservisits) in the trailing 30 days - a real
+  /// count of businesses physically visited, not the day-streak above.
+  final int visitCount30d;
 
   /// Direction of the user's Kindex score, straight from the
   /// KindexScores row's is_trending_up. Null when they have no score yet,
@@ -181,11 +186,16 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
     final userRef = currentUserReference;
     if (userRef == null) {
       return const _MilestoneStats(
-          streakDays: 0, reviewCount: 0, kindexScore: null);
+          streakDays: 0,
+          reviewCount: 0,
+          kindexScore: null,
+          visitCount30d: 0);
     }
 
     Future<T> orDefault<T>(Future<T> future, T fallback) =>
         future.catchError((_) => fallback);
+
+    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
 
     final results = await Future.wait([
       orDefault(
@@ -207,11 +217,20 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         ),
         <KindexScoresRecord>[],
       ),
+      orDefault(
+        queryUservisitsRecordOnce(
+          queryBuilder: (q) => q
+              .where('user_ref', isEqualTo: userRef)
+              .where('visit_timestamp', isGreaterThanOrEqualTo: thirtyDaysAgo),
+        ),
+        <UservisitsRecord>[],
+      ),
     ]);
 
     final activity = results[0] as List<ActivityLogsRecord>;
     final reviews = results[1] as List<ReviewsRecord>;
     final scores = results[2] as List<KindexScoresRecord>;
+    final visits = results[3] as List<UservisitsRecord>;
 
     final timestamps = activity
         .map((a) => a.timestamp)
@@ -222,6 +241,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
       streakDays: supportStreakDays(timestamps, now: DateTime.now()),
       reviewCount: reviews.length,
       kindexScore: scores.isEmpty ? null : scores.first.score,
+      visitCount30d: visits.length,
       isTrendingUp: scores.isEmpty || !scores.first.hasIsTrendingUp()
           ? null
           : scores.first.isTrendingUp,
@@ -620,6 +640,23 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                         // direction; streak and milestones
                                         // are counts.
                                         showTrend: true,
+                                      ),
+                                    ),
+                                    wrapWithModel(
+                                      model: _model.metricCardModel4,
+                                      updateCallback: () => safeSetState(() {}),
+                                      child: MetricCard3Widget(
+                                        icon: Icon(
+                                          Icons.storefront_rounded,
+                                          color: FlutterFlowTheme.of(context)
+                                              .primaryText,
+                                          size: 20.0,
+                                        ),
+                                        tint: Color(0xFFFFD700),
+                                        label: 'Visits (30d)',
+                                        value: stats == null
+                                            ? '--'
+                                            : '${stats.visitCount30d}',
                                       ),
                                     ),
                                   ].divide(SizedBox(width: 16.0)),
