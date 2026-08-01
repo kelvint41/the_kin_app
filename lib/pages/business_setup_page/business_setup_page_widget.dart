@@ -471,82 +471,115 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                 onChanged: _onBusinessNameChanged,
                               ),
                             ),
-                            FlutterFlowDropDown<String>(
-                              controller: _model.dropdownValueController ??=
-                                  FormFieldController<String>(
-                                _model.dropdownValue ??= 'Salon & Beauty',
+                            StreamBuilder<List<BusinessCategoriesRecord>>(
+                              stream: queryBusinessCategoriesRecord(
+                                queryBuilder: (q) =>
+                                    q.orderBy('display_name'),
                               ),
-                              options: [
-                                'Salon & Beauty',
-                                'Restaurant & Food',
-                                'Retail',
-                                'Professional Services',
-                                'Health & Wellness'
-                              ],
-                              onChanged: (val) => safeSetState(
-                                  () => _model.dropdownValue = val),
-                              width: 200.0,
-                              height: 40.0,
-                              textStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
+                              builder: (context, snapshot) {
+                                final categoryOptions = snapshot.hasData &&
+                                        snapshot.data!.isNotEmpty
+                                    ? snapshot.data!
+                                        .map((c) => c.displayName)
+                                        .toList()
+                                    : [
+                                        'Salon & Beauty',
+                                        'Restaurant & Food',
+                                        'Retail',
+                                        'Professional Services',
+                                        'Health & Wellness'
+                                      ];
+                                return FlutterFlowDropDown<String>(
+                                  controller:
+                                      _model.dropdownValueController ??=
+                                          FormFieldController<String>(
+                                    _model.dropdownValue ??=
+                                        categoryOptions.first,
                                   ),
-                              hintText: 'Salon & Beauty',
-                              icon: Icon(
-                                Icons.keyboard_arrow_down_rounded,
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                size: 24.0,
+                                  options: categoryOptions,
+                                  onChanged: (val) => safeSetState(
+                                      () => _model.dropdownValue = val),
+                                  width: 200.0,
+                                  height: 40.0,
+                                  textStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .fontStyle,
+                                        lineHeight: 1.4,
+                                      ),
+                                  hintText: 'Salon & Beauty',
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    size: 24.0,
+                                  ),
+                                  fillColor:
+                                      FlutterFlowTheme.of(context).primary,
+                                  elevation: 2.0,
+                                  borderColor:
+                                      FlutterFlowTheme.of(context).alternate,
+                                  borderWidth: 1.0,
+                                  borderRadius: 14.0,
+                                  margin: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 0.0, 16.0, 0.0),
+                                  hidesUnderline: true,
+                                  isOverButton: false,
+                                  isSearchable: false,
+                                  isMultiSelect: false,
+                                  labelText: 'Business Category',
+                                  labelTextStyle: FlutterFlowTheme.of(context)
+                                      .labelMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                          fontWeight:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontWeight,
+                                          fontStyle:
+                                              FlutterFlowTheme.of(context)
+                                                  .labelMedium
+                                                  .fontStyle,
+                                        ),
+                                        letterSpacing: 0.0,
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .labelMedium
+                                            .fontStyle,
+                                        lineHeight: 1.4,
+                                      ),
+                                );
+                              },
+                            ),
+                            Padding(
+                              padding: EdgeInsetsDirectional.fromSTEB(
+                                  16.0, 4.0, 16.0, 0.0),
+                              child: _buildSetupTextField(
+                                controller: _model.otherCategoryTextController ??=
+                                    TextEditingController(),
+                                focusNode: _model.otherCategoryFocusNode ??=
+                                    FocusNode(),
+                                labelText: "Don't see your category?",
+                                hintText: 'Type a new one',
                               ),
-                              fillColor: FlutterFlowTheme.of(context).primary,
-                              elevation: 2.0,
-                              borderColor:
-                                  FlutterFlowTheme.of(context).alternate,
-                              borderWidth: 1.0,
-                              borderRadius: 14.0,
-                              margin: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 0.0, 16.0, 0.0),
-                              hidesUnderline: true,
-                              isOverButton: false,
-                              isSearchable: false,
-                              isMultiSelect: false,
-                              labelText: 'Business Category',
-                              labelTextStyle: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
                             ),
                             Column(
                               mainAxisSize: MainAxisSize.min,
@@ -1399,8 +1432,18 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                     ),
                     FFButtonWidget(
                       onPressed: () async {
+                        final otherCategory =
+                            _model.otherCategoryTextController?.text.trim() ??
+                                '';
+                        final effectiveCategory = otherCategory.isNotEmpty
+                            ? otherCategory
+                            : _model.dropdownValue;
+                        if (otherCategory.isNotEmpty) {
+                          await KinServices.ensureBusinessCategoryExists(
+                              otherCategory);
+                        }
                         final result = await KinServices.registerBusiness(
-                          category: _model.dropdownValue,
+                          category: effectiveCategory,
                           businessType: _model.businessType,
                           isBlackOwned: _model.isBlackOwned,
                           place: _model.placePickerValue,

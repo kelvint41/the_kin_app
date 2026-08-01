@@ -1,3 +1,4 @@
+import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -40,6 +41,7 @@ class _AddTravelerDiscoveryDialogState
   late final _nameController =
       TextEditingController(text: widget.initialName ?? '');
   final _addressController = TextEditingController();
+  final _otherCategoryController = TextEditingController();
   final _categoryController =
       FormFieldController<String>(_kDiscoveryCategories.first);
 
@@ -50,6 +52,7 @@ class _AddTravelerDiscoveryDialogState
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
+    _otherCategoryController.dispose();
     super.dispose();
   }
 
@@ -85,10 +88,18 @@ class _AddTravelerDiscoveryDialogState
       return;
     }
 
+    final otherCategory = _otherCategoryController.text.trim();
+    final effectiveCategory = otherCategory.isNotEmpty
+        ? otherCategory
+        : (_categoryController.value ?? _kDiscoveryCategories.first);
+    if (otherCategory.isNotEmpty) {
+      await KinServices.ensureBusinessCategoryExists(otherCategory);
+    }
+
     final result = await KinServices.submitTravelerBusinessDiscovery(
       businessName: name,
       address: address,
-      category: _categoryController.value ?? _kDiscoveryCategories.first,
+      category: effectiveCategory,
       latitude: location.latitude,
       longitude: location.longitude,
     );
@@ -202,20 +213,50 @@ class _AddTravelerDiscoveryDialogState
               style: theme.bodyMedium.override(color: theme.primaryText),
             ),
             SizedBox(height: theme.designToken.spacing.sm),
-            FlutterFlowDropDown<String>(
-              controller: _categoryController,
-              options: _kDiscoveryCategories,
-              onChanged: (val) => setState(() {}),
-              width: double.infinity,
-              height: 44.0,
-              textStyle: theme.bodyMedium.override(color: theme.primaryText),
-              hintText: 'Category',
-              fillColor: theme.secondaryBackground,
-              elevation: 2.0,
-              borderColor: Colors.transparent,
-              borderRadius: theme.designToken.radius.sm,
-              borderWidth: 0.0,
-              margin: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+            StreamBuilder<List<BusinessCategoriesRecord>>(
+              stream: queryBusinessCategoriesRecord(
+                queryBuilder: (q) => q.orderBy('display_name'),
+              ),
+              builder: (context, snapshot) {
+                final categoryOptions =
+                    snapshot.hasData && snapshot.data!.isNotEmpty
+                        ? snapshot.data!.map((c) => c.displayName).toList()
+                        : _kDiscoveryCategories;
+                return FlutterFlowDropDown<String>(
+                  controller: _categoryController,
+                  options: categoryOptions,
+                  onChanged: (val) => setState(() {}),
+                  width: double.infinity,
+                  height: 44.0,
+                  textStyle:
+                      theme.bodyMedium.override(color: theme.primaryText),
+                  hintText: 'Category',
+                  fillColor: theme.secondaryBackground,
+                  elevation: 2.0,
+                  borderColor: Colors.transparent,
+                  borderRadius: theme.designToken.radius.sm,
+                  borderWidth: 0.0,
+                  margin:
+                      EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+                );
+              },
+            ),
+            SizedBox(height: theme.designToken.spacing.sm),
+            TextFormField(
+              controller: _otherCategoryController,
+              decoration: InputDecoration(
+                hintText: "Don't see your category? Type a new one",
+                hintStyle: theme.bodySmall.override(color: theme.hint),
+                filled: true,
+                fillColor: theme.secondaryBackground,
+                border: OutlineInputBorder(
+                  borderRadius:
+                      BorderRadius.circular(theme.designToken.radius.sm),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.all(theme.designToken.spacing.sm),
+              ),
+              style: theme.bodyMedium.override(color: theme.primaryText),
             ),
             if (_error != null) ...[
               SizedBox(height: theme.designToken.spacing.sm),

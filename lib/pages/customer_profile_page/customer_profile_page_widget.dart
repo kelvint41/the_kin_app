@@ -12,6 +12,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
 import '/services/engagement_stats.dart';
+import '/services/kin_services.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -781,6 +782,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   ),
                 ),
               ),
+              _shareKinPrompt(context),
               _supportChatPrompt(context),
               _feedbackPrompt(context),
               Container(
@@ -855,6 +857,74 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Customers' only invite/share mechanism - owners already have one via
+  /// Owner Profile's "Promote" button. Reuses the same [KinServices.shareApp]
+  /// -> UserEngagementEvent -> kindex_engine.js pipeline with generic text
+  /// and no businessRef; that pipeline already scores by user, not by
+  /// caller, so it needs no changes to pick this up.
+  Widget _shareKinPrompt(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+      child: Builder(
+        builder: (context) => InkWell(
+          borderRadius: BorderRadius.circular(16.0),
+          onTap: () async {
+            await KinServices.shareApp(
+              text: 'Discover Black-owned businesses near you with KIN. '
+                  'Download the app: $kPlayStoreUrl',
+              sharePositionOrigin: getWidgetBoundingBox(context),
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: theme.secondaryBackground,
+              borderRadius: BorderRadius.circular(16.0),
+              border: Border.all(color: theme.alternate, width: 1.0),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.share_rounded,
+                    color: theme.accentOnSurface, size: 22.0),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Share KIN',
+                          style: theme.bodyMedium.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold),
+                            letterSpacing: 0.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          'Invite friends to discover Black-owned businesses.',
+                          style: theme.bodySmall.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: theme.secondaryText,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded,
+                    color: theme.secondaryText, size: 20.0),
+              ],
+            ),
           ),
         ),
       ),

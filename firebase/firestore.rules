@@ -442,6 +442,20 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Shared, ever-growing category vocabulary for Business Setup and the
+    // "Add a Business" discovery dialogs. Public read (every picker needs
+    // the full list), any signed-in user may add a new one - deliberately
+    // no moderation queue, matching this app's low-ops-overhead defaults
+    // elsewhere. Never updated or deleted: a category, once added, stays;
+    // doc ID is the normalized name, so a duplicate submission is a
+    // same-content overwrite, not a new row.
+    match /business_categories/{document} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update: if false;
+      allow delete: if false;
+    }
+
     // Mystery reward vouchers. A user may read only their own - the promo
     // code and tier this unlocks aren't other users' business. Written
     // only by generateMysteryReward/redeemReward (Cloud Functions, Admin

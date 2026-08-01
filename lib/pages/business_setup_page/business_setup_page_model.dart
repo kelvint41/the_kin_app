@@ -29,6 +29,9 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
   // State field(s) for Dropdown widget.
   String? dropdownValue;
   FormFieldController<String>? dropdownValueController;
+  // State field(s) for the "Don't see your category?" field.
+  FocusNode? otherCategoryFocusNode;
+  TextEditingController? otherCategoryTextController;
   // Model for SectionHeader.
   late SectionHeaderModel sectionHeaderModel2;
   // State field(s) for PlacePicker widget.
@@ -74,6 +77,8 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
     sectionHeaderModel2.dispose();
     businessNameFocusNode?.dispose();
     businessNameTextController?.dispose();
+    otherCategoryFocusNode?.dispose();
+    otherCategoryTextController?.dispose();
     phoneNumberFocusNode?.dispose();
     phoneNumberTextController?.dispose();
     emailFocusNode?.dispose();

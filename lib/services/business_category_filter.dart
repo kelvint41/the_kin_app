@@ -94,7 +94,6 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'barbecue',
       'seafood',
       'soul food',
-      'food truck',
       'bistro',
       'brunch',
       'bakery shop',
@@ -108,6 +107,15 @@ const List<BusinessCategoryFilter> kBusinessCategoryFilters = [
       'cocktail',
       'hookah',
       'distillery',
+    ],
+  ),
+  BusinessCategoryFilter(
+    label: 'Food Trucks',
+    icon: Icons.local_shipping_rounded,
+    keywords: [
+      'food truck',
+      'food cart',
+      'taco truck',
     ],
   ),
   BusinessCategoryFilter(

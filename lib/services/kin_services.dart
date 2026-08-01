@@ -10,6 +10,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Placeholder until the app is actually published - update this one
+/// constant once android/app/build.gradle's applicationId is set to the
+/// real package name and the Play Store listing goes live.
+const String kPlayStoreUrl =
+    'https://play.google.com/store/apps/details?id=com.mycompany.thekinapp';
+
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
 /// catching exceptions themselves - every service method below already
 /// wraps its Firebase call in a try/catch and reports failure this way.
@@ -1075,6 +1081,32 @@ class KinServices {
               createdAt: getCurrentTimestamp,
             ),
           );
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+  }
+
+  /// Adds [displayName] to the shared business_categories vocabulary if
+  /// it isn't already there. Doc ID is the normalized (lowercase,
+  /// trimmed) name, so this is idempotent - a `.set()` against an
+  /// existing ID is a same-content overwrite, never a duplicate, and no
+  /// existence check is needed first. Best-effort: called right before
+  /// submitting a business/discovery request, and a failure here
+  /// shouldn't block that submission - the category still gets attached
+  /// to the business either way, it just wouldn't be pre-selectable for
+  /// the next person until this succeeds.
+  /// Used by: Business Setup, Add Business / Add Traveler Discovery
+  /// dialogs' "Don't see your category?" field.
+  static Future<void> ensureBusinessCategoryExists(String displayName) async {
+    final trimmed = displayName.trim();
+    if (trimmed.isEmpty) return;
+    try {
+      await BusinessCategoriesRecord.collection
+          .doc(trimmed.toLowerCase())
+          .set(createBusinessCategoriesRecordData(
+            displayName: trimmed,
+            createdAt: getCurrentTimestamp,
+          ));
     } catch (_) {
       // Best-effort - see doc comment above.
     }

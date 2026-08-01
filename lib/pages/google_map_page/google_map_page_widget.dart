@@ -85,6 +85,14 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   /// (no filter).
   BusinessCategoryFilter _selectedCategory = kNearMeFilter;
 
+  /// Independent of the category chip - composes with it rather than
+  /// replacing it, so "Food Trucks" + this together finds Black-owned
+  /// food trucks specifically. Trusts is_certified_black_owned only (set
+  /// exclusively by apply_bob_certification.js), never the unreliable
+  /// bulk-imported is_black_owned flag - see BusinessesRecord's doc
+  /// comment on the two fields.
+  bool _blackOwnedOnly = false;
+
   /// The map's current visible region, used to bound the businesses query
   /// to what's actually on screen (see GoogleMapPageModel.businessesForViewport).
   /// Null until the map's first onCameraIdle fires, which happens once
@@ -626,6 +634,57 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     );
   }
 
+  /// Independent toggle, same visual language as [_categoryChip] - trusts
+  /// only is_certified_black_owned (see _blackOwnedOnly's doc comment).
+  Widget _blackOwnedChip(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    final isSelected = _blackOwnedOnly;
+    final foreground = isSelected ? theme.primaryBackground : theme.primaryText;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => safeSetState(() => _blackOwnedOnly = !_blackOwnedOnly),
+      child: Container(
+        height: 34.0,
+        decoration: BoxDecoration(
+          color: isSelected ? theme.tertiary : theme.secondaryBackground,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: isSelected ? theme.tertiary : theme.alternate,
+            width: 1.0,
+          ),
+        ),
+        alignment: AlignmentDirectional(0.0, 0.0),
+        child: Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 12.0, 0.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.verified_rounded, color: foreground, size: 18.0),
+              Text(
+                'Black-Owned',
+                style: theme.labelMedium.override(
+                  font: GoogleFonts.plusJakartaSans(
+                    fontWeight: theme.labelMedium.fontWeight,
+                    fontStyle: theme.labelMedium.fontStyle,
+                  ),
+                  color: foreground,
+                  fontSize: 14.0,
+                  letterSpacing: 0.0,
+                  fontWeight: theme.labelMedium.fontWeight,
+                  fontStyle: theme.labelMedium.fontStyle,
+                  lineHeight: 1.4,
+                ),
+              ),
+            ].divide(SizedBox(width: 6.0)),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// One category filter chip. The chips used to be a hand-unrolled set of
   /// five Containers with no tap handler at all, rebuilt once per business
   /// document by a `List.generate(businessList.length, ...)` over a second
@@ -733,9 +792,14 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
         List<BusinessesRecord> googleMapPageBusinessesRecordList =
             snapshot.data![0];
 
-        // Map pins honour the active category chip.
+        // Map pins honour both the active category chip and the
+        // Black-Owned toggle - independent filters, composed in sequence.
         final visibleBusinesses = applyCategoryFilter(
-          googleMapPageBusinessesRecordList,
+          _blackOwnedOnly
+              ? googleMapPageBusinessesRecordList
+                  .where((b) => b.isCertifiedBlackOwned)
+                  .toList()
+              : googleMapPageBusinessesRecordList,
           _selectedCategory,
         );
 
@@ -885,11 +949,12 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                   mainAxisSize: MainAxisSize.min,
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: kBusinessCategoryFilters
-                                      .map((filter) =>
-                                          _categoryChip(context, filter))
-                                      .toList()
-                                      .divide(SizedBox(width: 8.0)),
+                                  children: [
+                                    ...kBusinessCategoryFilters.map(
+                                        (filter) =>
+                                            _categoryChip(context, filter)),
+                                    _blackOwnedChip(context),
+                                  ].divide(SizedBox(width: 8.0)),
                                 ),
                               ),
                             ].divide(SizedBox(height: 16.0)),
