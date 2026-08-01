@@ -65,25 +65,12 @@ class FlutterFlowMarker {
   final Future Function()? onTap;
 }
 
-/// A single weighted point for [FlutterFlowGoogleMap.heatmapPoints].
-///
-/// [weight] lets a caller fold repeat visits to the same location into one
-/// point instead of duplicating it - a business with 40 check-ins passes
-/// weight: 40 rather than 40 separate entries at the same coordinate.
-class FlutterFlowHeatmapPoint {
-  const FlutterFlowHeatmapPoint(this.location, [this.weight = 1.0]);
-  final latlng.LatLng location;
-  final double weight;
-}
-
 class FlutterFlowGoogleMap extends StatefulWidget {
   const FlutterFlowGoogleMap({
     required this.controller,
     this.onCameraIdle,
     this.initialLocation,
     this.markers = const [],
-    this.heatmapPoints = const [],
-    this.heatmapRadiusPixels = 40,
     this.markerColor = GoogleMarkerColor.red,
     this.markerImage,
     this.mapType = MapType.normal,
@@ -109,8 +96,6 @@ class FlutterFlowGoogleMap extends StatefulWidget {
   final Function(latlng.LatLng)? onCameraIdle;
   final latlng.LatLng? initialLocation;
   final Iterable<FlutterFlowMarker> markers;
-  final Iterable<FlutterFlowHeatmapPoint> heatmapPoints;
-  final int heatmapRadiusPixels;
   final GoogleMarkerColor markerColor;
   final MarkerImage? markerImage;
   final MapType mapType;
@@ -264,20 +249,6 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
               ),
             )
             .toSet(),
-        heatmaps: widget.heatmapPoints.isEmpty
-            ? const {}
-            : {
-                Heatmap(
-                  heatmapId: const HeatmapId('flutter_flow_heatmap'),
-                  data: widget.heatmapPoints
-                      .map((p) => WeightedLatLng(
-                            p.location.toGoogleMaps(),
-                            weight: p.weight,
-                          ))
-                      .toList(),
-                  radius: HeatmapRadius.fromPixels(widget.heatmapRadiusPixels),
-                ),
-              },
         gestureRecognizers: {
           if (mapHasGesturePreference)
             const Factory<OneSequenceGestureRecognizer>(

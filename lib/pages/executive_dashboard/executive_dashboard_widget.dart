@@ -55,6 +55,22 @@ export 'executive_dashboard_model.dart';
 /// 6. A Recent Registrations Feed Section: A final list feed section titled
 /// "Recent Signups" mapping a direct firestore query limited to 10 entries
 /// displaying user name strings, city fields, and user status type badges.
+/// One pin on the KIN Quest Finds map - a business the scavenger hunt has
+/// recorded at least one verified check-in for, plus how many.
+class _BusinessFindPin {
+  const _BusinessFindPin({
+    required this.markerId,
+    required this.businessName,
+    required this.location,
+    required this.findCount,
+  });
+
+  final String markerId;
+  final String businessName;
+  final LatLng location;
+  final int findCount;
+}
+
 class ExecutiveDashboardWidget extends StatefulWidget {
   const ExecutiveDashboardWidget({super.key});
 
@@ -79,8 +95,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// Same memoization as [_aiStatsFuture], for the Support Chat panel.
   Future<ServiceResult<SupportChatStats>>? _supportChatStatsFuture;
 
-  /// Same memoization as [_aiStatsFuture], for the check-in heat map.
-  Future<List<FlutterFlowHeatmapPoint>>? _heatmapFuture;
+  /// Same memoization as [_aiStatsFuture], for the KIN Quest finds map.
+  Future<List<_BusinessFindPin>>? _heatmapFuture;
 
   @override
   void initState() {
@@ -1184,7 +1200,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           ),
                           _aiMarketingSection(context),
                           _powerHourSection(context),
-                          _checkInHeatmapSection(context),
+                          _businessFindsMapSection(context),
                           _deliveriesSection(context),
                           _feedbackSection(context),
                           _supportChatSection(context),
@@ -1691,43 +1707,36 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
     );
   }
 
-  /// Nationwide check-in density, last 30 days, across every business
-  /// regardless of [selectedCity] - deliberately not scoped to the city
-  /// dropdown like the panels above, since the entire point is to see all
-  /// metros at once. `uservisits` carries no location of its own (just
-  /// user_ref/business_ref/visit_timestamp - see UservisitsRecord), so
-  /// each visit is resolved to its business's `business_location` GeoPoint
-  /// and folded into a single weighted point per business rather than one
-  /// point per visit, keeping the read volume to "one doc per business
-  /// with recent visits" instead of "one doc per visit".
+  /// Every business the KIN Quest scavenger hunt has ever recorded a
+  /// verified check-in for, nationwide, regardless of [selectedCity] - the
+  /// entire point is to see every metro at once. `uservisits` carries no
+  /// location of its own (just user_ref/business_ref/visit_timestamp - see
+  /// UservisitsRecord), so each visit is resolved to its business's
+  /// `business_location` GeoPoint. All-time rather than a rolling window:
+  /// a business that's been "found" stays found, the same way
+  /// scavenger_points never resets (see visit_verification.js).
   ///
   /// Reads across the whole (unfiltered) uservisits collection - allowed
   /// for an admin under firestore.rules' `is_admin == true` branch, same
   /// as every other cross-business panel on this page.
-  Future<List<FlutterFlowHeatmapPoint>> _loadCheckInHeatmap() async {
-    final thirtyDaysAgo = DateTime.now().subtract(const Duration(days: 30));
+  Future<List<_BusinessFindPin>> _loadBusinessFindPins() async {
     List<UservisitsRecord> visits;
     try {
-      visits = await queryUservisitsRecordOnce(
-        queryBuilder: (q) => q.where(
-          'visit_timestamp',
-          isGreaterThanOrEqualTo: thirtyDaysAgo,
-        ),
-      );
+      visits = await queryUservisitsRecordOnce();
     } catch (_) {
       return const [];
     }
 
-    final visitCountsByBusiness = <DocumentReference, int>{};
+    final findCountsByBusiness = <DocumentReference, int>{};
     for (final visit in visits) {
       final businessRef = visit.businessRef;
       if (businessRef == null) continue;
-      visitCountsByBusiness[businessRef] =
-          (visitCountsByBusiness[businessRef] ?? 0) + 1;
+      findCountsByBusiness[businessRef] =
+          (findCountsByBusiness[businessRef] ?? 0) + 1;
     }
 
-    final points = <FlutterFlowHeatmapPoint>[];
-    for (final entry in visitCountsByBusiness.entries) {
+    final pins = <_BusinessFindPin>[];
+    for (final entry in findCountsByBusiness.entries) {
       BusinessesRecord business;
       try {
         business = await BusinessesRecord.getDocumentOnce(entry.key);
@@ -1736,22 +1745,27 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
       }
       final location = business.businessLocation;
       if (location == null) continue;
-      points.add(FlutterFlowHeatmapPoint(location, entry.value.toDouble()));
+      pins.add(_BusinessFindPin(
+        markerId: entry.key.path,
+        businessName: business.businessName,
+        location: location,
+        findCount: entry.value,
+      ));
     }
-    return points;
+    return pins;
   }
 
-  Widget _checkInHeatmapSection(BuildContext context) {
+  Widget _businessFindsMapSection(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
 
-    _heatmapFuture ??= _loadCheckInHeatmap();
+    _heatmapFuture ??= _loadBusinessFindPins();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Check-In Heat Map',
+          'KIN Quest Finds',
           style: theme.titleMedium.override(
             font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
             letterSpacing: 0.0,
@@ -1761,7 +1775,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
         ),
         Text(
           'Every metro at once, regardless of the city selector above - '
-          'where customers are checking in nationwide, last 30 days.',
+          'businesses customers have found via the scavenger hunt. Tap a '
+          'pin for the business name and find count.',
           style: theme.bodySmall.override(
             font: GoogleFonts.plusJakartaSans(),
             color: theme.secondaryText,
@@ -1776,7 +1791,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
             borderRadius: BorderRadius.circular(24.0),
             border: Border.all(color: theme.alternate, width: 1.0),
           ),
-          child: FutureBuilder<List<FlutterFlowHeatmapPoint>>(
+          child: FutureBuilder<List<_BusinessFindPin>>(
             future: _heatmapFuture,
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
@@ -1791,20 +1806,19 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                   ),
                 );
               }
-              final points = snapshot.data!;
-              if (points.isEmpty) {
+              final pins = snapshot.data!;
+              if (pins.isEmpty) {
                 return Container(
                   color: theme.secondaryBackground,
                   child: Center(
                     child: Padding(
                       padding: EdgeInsets.all(24.0),
                       child: Text(
-                        'No check-ins recorded in the last 30 days.',
+                        'No KIN Quest finds recorded yet.',
                         textAlign: TextAlign.center,
                         style: theme.bodySmall.override(
                           font: GoogleFonts.plusJakartaSans(),
                           color: theme.secondaryText,
-                          letterSpacing: 0.0,
                         ),
                       ),
                     ),
@@ -1814,9 +1828,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               return FlutterFlowGoogleMap(
                 controller: Completer<GoogleMapController>(),
                 // Geographic center of the contiguous US, zoomed to show
-                // the whole country - the heat concentrates wherever the
+                // the whole country - the pins concentrate wherever the
                 // business directory actually has coverage today and will
-                // spread out on its own as that coverage grows.
+                // spread out on their own as that coverage grows.
                 initialLocation: const LatLng(39.8283, -98.5795),
                 initialZoom: 3.4,
                 allowInteraction: true,
@@ -1826,7 +1840,23 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                 showLocationButton: false,
                 showCompass: false,
                 mapTakesGesturePreference: true,
-                heatmapPoints: points,
+                markerColor: GoogleMarkerColor.rose,
+                markers: pins.map((pin) => FlutterFlowMarker(
+                      pin.markerId,
+                      pin.location,
+                      () async {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${pin.businessName} - '
+                              '${pin.findCount} '
+                              '${pin.findCount == 1 ? "find" : "finds"}',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    )),
               );
             },
           ),
