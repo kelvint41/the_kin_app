@@ -1,7 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
-import '/components/action_btn_widget.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/mystery_reward_panel_widget.dart';
@@ -9,6 +8,7 @@ import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -143,6 +143,12 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
             ),
             onPressed: () => context.safePop(),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: MainMenuButton(),
+            ),
+          ],
           elevation: 0.0,
         ),
         body: Center(
@@ -225,6 +231,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             size: 20.0,
                           ),
                           onPressed: () => context.safePop(),
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional(1.0, -1.0),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: MainMenuButton(
+                              extraItems: _ownerMenuItems(context)),
                         ),
                       ),
                     ),
@@ -1287,158 +1303,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ].divide(SizedBox(height: 16.0)),
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primary,
-                  shape: BoxShape.rectangle,
-                ),
-                child: Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(20.0, 32.0, 20.0, 48.0),
-                  child: Container(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () async {
-                            context
-                                .pushNamed(BusinessSetupPageWidget.routeName);
-                          },
-                          child: wrapWithModel(
-                            model: _model.actionBtnModel1,
-                            updateCallback: () => safeSetState(() {}),
-                            // Icon colour is the brand gold, not primaryText. These sit on a
-                            // circle hardcoded to 0xFF242424 on a dark green
-                            // bar - a surface that does not follow the theme -
-                            // so a text token that inverts turned all five
-                            // icons near-black on near-black.
-                            child: ActionBtnWidget(
-                              icon: Icon(
-                                Icons.edit_rounded,
-                                color: const Color(0xFFD4AF37),
-                                size: 24.0,
-                              ),
-                              label: 'Setup',
-                            ),
-                          ),
-                        ),
-                        Builder(
-                          builder: (context) => InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              final ownedBusiness =
-                                  currentUserDocument?.ownedBusiness;
-                              if (ownedBusiness == null) return;
-                              final business = await BusinessesRecord
-                                  .getDocumentOnce(ownedBusiness);
-                              await KinServices.shareApp(
-                                text: 'Check out ${business.businessName} on '
-                                    'KIN! Download the app: $kPlayStoreUrl',
-                                sharePositionOrigin:
-                                    getWidgetBoundingBox(context),
-                                businessRef: ownedBusiness,
-                              );
-                            },
-                            child: wrapWithModel(
-                              model: _model.actionBtnModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ActionBtnWidget(
-                                icon: Icon(
-                                  Icons.share_rounded,
-                                  color: const Color(0xFFD4AF37),
-                                  size: 24.0,
-                                ),
-                                label: 'Promote',
-                              ),
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () async {
-                            context.pushNamed(
-                              BusinessProfileV2Widget.routeName,
-                              queryParameters: {
-                                'businessDocument': serializeParam(
-                                  currentUserDocument?.ownedBusiness,
-                                  ParamType.DocumentReference,
-                                ),
-                              }.withoutNulls,
-                            );
-                          },
-                          child: wrapWithModel(
-                            model: _model.actionBtnModel3,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ActionBtnWidget(
-                              icon: Icon(
-                                Icons.visibility_rounded,
-                                color: const Color(0xFFD4AF37),
-                                size: 24.0,
-                              ),
-                              label: 'Preview',
-                            ),
-                          ),
-                        ),
-                        InkWell(
-                          splashColor: Colors.transparent,
-                          focusColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          onTap: () =>
-                              context.pushNamed(SupportChatWidget.routeName),
-                          child: wrapWithModel(
-                            model: _model.actionBtnModel4,
-                            updateCallback: () => safeSetState(() {}),
-                            child: ActionBtnWidget(
-                              icon: Icon(
-                                Icons.headset_mic_rounded,
-                                color: const Color(0xFFD4AF37),
-                                size: 24.0,
-                              ),
-                              label: 'Get Support',
-                            ),
-                          ),
-                        ),
-                        if (currentUserDocument?.isAdmin == true)
-                          InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(
-                                  ExecutiveDashboardWidget.routeName);
-                            },
-                            child: wrapWithModel(
-                              model: _model.actionBtnModel5,
-                              updateCallback: () => safeSetState(() {}),
-                              child: ActionBtnWidget(
-                                icon: Icon(
-                                  Icons.dashboard_rounded,
-                                  color: const Color(0xFFD4AF37),
-                                  size: 24.0,
-                                ),
-                                label: 'Dashboard',
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
               _appStudioPrompt(context),
               Container(
                 height: 24.0,
@@ -1449,6 +1313,92 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
         bottomNavigationBar: const KinBottomNav2Widget(),
       ),
     );
+  }
+
+  /// Owner-specific actions appended to the hamburger sheet via
+  /// [MainMenuButton]'s `extraItems` - used to be a six-button icon row
+  /// sitting directly above the bottom nav bar, which read as a second,
+  /// competing nav bar right next to the real one. Same six actions, same
+  /// destinations, just presented as menu items instead.
+  List<Widget> _ownerMenuItems(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return [
+      Divider(
+        height: theme.designToken.spacing.md,
+        thickness: 1.0,
+        indent: 16.0,
+        endIndent: 16.0,
+        color: theme.alternate,
+      ),
+      ListTile(
+        leading: Icon(Icons.edit_rounded, color: theme.primaryText),
+        title: Text('Setup', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(BusinessSetupPageWidget.routeName);
+        },
+      ),
+      Builder(
+        builder: (builderContext) => ListTile(
+          leading: Icon(Icons.share_rounded, color: theme.primaryText),
+          title: Text('Promote', style: theme.bodyLarge),
+          onTap: () async {
+            Navigator.pop(context);
+            final ownedBusiness = currentUserDocument?.ownedBusiness;
+            if (ownedBusiness == null) return;
+            final business =
+                await BusinessesRecord.getDocumentOnce(ownedBusiness);
+            await KinServices.shareApp(
+              text: 'Check out ${business.businessName} on '
+                  'KIN! Download the app: $kPlayStoreUrl',
+              sharePositionOrigin: getWidgetBoundingBox(builderContext),
+              businessRef: ownedBusiness,
+            );
+          },
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.visibility_rounded, color: theme.primaryText),
+        title: Text('Preview', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(
+            BusinessProfileV2Widget.routeName,
+            queryParameters: {
+              'businessDocument': serializeParam(
+                currentUserDocument?.ownedBusiness,
+                ParamType.DocumentReference,
+              ),
+            }.withoutNulls,
+          );
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.headset_mic_rounded, color: theme.primaryText),
+        title: Text('Get Support', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(SupportChatWidget.routeName);
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.storefront_rounded, color: theme.primaryText),
+        title: Text('My Items', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(MyItemsWidget.routeName);
+        },
+      ),
+      if (currentUserDocument?.isAdmin == true)
+        ListTile(
+          leading: Icon(Icons.dashboard_rounded, color: theme.primaryText),
+          title: Text('Dashboard', style: theme.bodyLarge),
+          onTap: () {
+            Navigator.pop(context);
+            context.pushNamed(ExecutiveDashboardWidget.routeName);
+          },
+        ),
+    ];
   }
 
   /// Entry point to the App Studio waitlist, offered to owners here - the

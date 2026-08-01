@@ -456,6 +456,34 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Showcase items (Phase 1, discovery only - no payment fields exist
+    // yet on this doc; a future in-app-purchase phase is additive, not a
+    // schema break). Public read so the rail/grid work for signed-out
+    // browsing, same as businesses. Create/update/delete gated on owning
+    // the business referenced, via the same get()-the-parent pattern
+    // uservisits uses for owner-scoped access. interest_count is
+    // server-only: must start at 0 on create, and is frozen on update -
+    // only recordItemInterest (Cloud Functions, Admin SDK) may change it.
+    match /business_items/{document} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && get(request.resource.data.business_ref).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.price_display is string
+        && request.resource.data.category is string
+        && request.resource.data.interest_count == 0;
+      allow update: if request.auth != null
+        && get(resource.data.business_ref).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.business_ref == resource.data.business_ref
+        && request.resource.data.interest_count == resource.data.interest_count;
+      allow delete: if request.auth != null
+        && get(resource.data.business_ref).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
     // Mystery reward vouchers. A user may read only their own - the promo
     // code and tier this unlocks aren't other users' business. Written
     // only by generateMysteryReward/redeemReward (Cloud Functions, Admin

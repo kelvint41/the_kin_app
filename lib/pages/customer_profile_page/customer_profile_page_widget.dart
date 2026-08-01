@@ -1,7 +1,9 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
+import '/components/main_menu_button.dart';
 import '/components/metric_card3_widget.dart';
+import '/components/showcase_item_card_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/image_upload_button.dart';
 import '/components/feedback_sheet_widget.dart';
@@ -140,6 +142,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
   // handed a future created during build re-queries on every rebuild.
   late final Future<_MilestoneStats> _statsFuture;
   late final Future<List<_PromoView>> _promosFuture;
+  late final Future<List<BusinessItemsRecord>> _recommendedFuture;
 
   /// Anchors the "Personal Milestones" block for [_scrollToMilestones].
   final _milestonesKey = GlobalKey();
@@ -150,6 +153,9 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
     _model = createModel(context, () => CustomerProfilePageModel());
     _statsFuture = _loadStats();
     _promosFuture = _loadPromos();
+    _recommendedFuture = currentUserReference == null
+        ? Future.value(<BusinessItemsRecord>[])
+        : KinServices.fetchRecommendedItems(userRef: currentUserReference!);
 
     if (widget.scrollToMilestones) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -380,6 +386,10 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             ),
                           ),
                         ),
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional(1.0, -1.0),
+                        child: MainMenuButton(),
                       ),
                     ],
                   ),
@@ -782,6 +792,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   ),
                 ),
               ),
+              _recommendedForYouCarousel(context),
               _shareKinPrompt(context),
               _supportChatPrompt(context),
               _feedbackPrompt(context),
@@ -860,6 +871,49 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  /// A lightweight "more like what you liked" shelf, not real ML - see
+  /// KinServices.fetchRecommendedItems for the category-based heuristic.
+  /// Hidden entirely (no loading spinner, no empty state) until there's
+  /// something real to show, same "empty shelf beats fabricated content"
+  /// precedent as Showcase's "Popular near you" rail.
+  Widget _recommendedForYouCarousel(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return FutureBuilder<List<BusinessItemsRecord>>(
+      future: _recommendedFuture,
+      builder: (context, snapshot) {
+        final items = snapshot.data ?? [];
+        if (items.isEmpty) return const SizedBox.shrink();
+        return Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Recommended for you',
+                style: theme.labelLarge.override(
+                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  color: theme.secondaryText,
+                  letterSpacing: 0.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8.0),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: items
+                      .map((item) => ShowcaseItemCardWidget(item: item))
+                      .toList()
+                      .divide(SizedBox(width: 12.0)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

@@ -1,5 +1,6 @@
 import '/backend/backend.dart';
 import '/components/exchange_feed_item_widget.dart';
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -102,6 +103,12 @@ class _NearbyFeedWidgetState extends State<NearbyFeedWidget> {
                 fontWeight: FontWeight.bold,
               ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: MainMenuButton(),
+          ),
+        ],
         centerTitle: false,
         elevation: 0.0,
       ),

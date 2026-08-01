@@ -514,6 +514,8 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                   .bodyMedium
                                                   .fontStyle,
                                         ),
+                                        color: FlutterFlowTheme.of(context)
+                                            .accentOnSurface,
                                         letterSpacing: 0.0,
                                         fontWeight: FlutterFlowTheme.of(context)
                                             .bodyMedium
@@ -527,7 +529,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                   icon: Icon(
                                     Icons.keyboard_arrow_down_rounded,
                                     color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
+                                        .accentOnSurface,
                                     size: 24.0,
                                   ),
                                   fillColor:
@@ -641,7 +643,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                             color: _model.businessType ==
                                                     'Sole Proprietor'
                                                 ? FlutterFlowTheme.of(context)
-                                                    .primaryText
+                                                    .accentOnSurface
                                                 : FlutterFlowTheme.of(context)
                                                     .alternate,
                                             width: 1.0,
@@ -666,7 +668,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                   Icons.check_rounded,
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryText,
+                                                      .accentOnSurface,
                                                   size: 16.0,
                                                 ),
                                               Text(
@@ -690,7 +692,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                           ),
                                                           color: FlutterFlowTheme
                                                                   .of(context)
-                                                              .primaryText,
+                                                              .accentOnSurface,
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -728,7 +730,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                           border: Border.all(
                                             color: _model.businessType == 'LLC'
                                                 ? FlutterFlowTheme.of(context)
-                                                    .primaryText
+                                                    .accentOnSurface
                                                 : FlutterFlowTheme.of(context)
                                                     .alternate,
                                             width: 1.0,
@@ -752,7 +754,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                   Icons.check_rounded,
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryText,
+                                                      .accentOnSurface,
                                                   size: 16.0,
                                                 ),
                                               Text(
@@ -776,7 +778,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                           ),
                                                           color: FlutterFlowTheme
                                                                   .of(context)
-                                                              .primaryText,
+                                                              .accentOnSurface,
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -815,7 +817,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                             color: _model.businessType ==
                                                     'Corporation'
                                                 ? FlutterFlowTheme.of(context)
-                                                    .primaryText
+                                                    .accentOnSurface
                                                 : FlutterFlowTheme.of(context)
                                                     .alternate,
                                             width: 1.0,
@@ -840,7 +842,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                   Icons.check_rounded,
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryText,
+                                                      .accentOnSurface,
                                                   size: 16.0,
                                                 ),
                                               Text(
@@ -864,7 +866,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                           ),
                                                           color: FlutterFlowTheme
                                                                   .of(context)
-                                                              .primaryText,
+                                                              .accentOnSurface,
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:
@@ -903,7 +905,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                             color: _model.businessType ==
                                                     'Partnership'
                                                 ? FlutterFlowTheme.of(context)
-                                                    .primaryText
+                                                    .accentOnSurface
                                                 : FlutterFlowTheme.of(context)
                                                     .alternate,
                                             width: 1.0,
@@ -928,7 +930,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                   Icons.check_rounded,
                                                   color: FlutterFlowTheme.of(
                                                           context)
-                                                      .primaryText,
+                                                      .accentOnSurface,
                                                   size: 16.0,
                                                 ),
                                               Text(
@@ -952,7 +954,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                           ),
                                                           color: FlutterFlowTheme
                                                                   .of(context)
-                                                              .primaryText,
+                                                              .accentOnSurface,
                                                           fontSize: 14.0,
                                                           letterSpacing: 0.0,
                                                           fontWeight:

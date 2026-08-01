@@ -256,6 +256,17 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => GoogleMapPageWidget(),
         ),
         FFRoute(
+          name: ShowcaseWidget.routeName,
+          path: ShowcaseWidget.routePath,
+          builder: (context, params) => ShowcaseWidget(),
+        ),
+        FFRoute(
+          name: MyItemsWidget.routeName,
+          path: MyItemsWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => MyItemsWidget(),
+        ),
+        FFRoute(
           name: ExecutiveDashboardWidget.routeName,
           path: ExecutiveDashboardWidget.routePath,
           builder: (context, params) => ExecutiveDashboardWidget(),

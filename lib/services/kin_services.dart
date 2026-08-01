@@ -1112,6 +1112,178 @@ class KinServices {
     }
   }
 
+  /// Creates a Showcase item (Phase 1, discovery only - see memory
+  /// `showcase-feature-phased-commission`). `priceDisplay` is free text,
+  /// not a real chargeable amount, since there's no checkout yet.
+  /// `interestCount` always starts at 0 - firestore.rules enforces this on
+  /// create, so passing anything else here would just fail server-side.
+  static Future<ServiceResult<DocumentReference>> createBusinessItem({
+    required DocumentReference businessRef,
+    required String title,
+    String? description,
+    required String priceDisplay,
+    String? photoUrl,
+    required String category,
+    bool isAvailable = true,
+  }) async {
+    try {
+      final itemRef = BusinessItemsRecord.collection.doc();
+      await itemRef.set(createBusinessItemsRecordData(
+        businessRef: businessRef,
+        title: title,
+        description: description,
+        priceDisplay: priceDisplay,
+        photoUrl: photoUrl,
+        category: category,
+        isAvailable: isAvailable,
+        interestCount: 0,
+        createdAt: getCurrentTimestamp,
+        updatedAt: getCurrentTimestamp,
+      ));
+      return ServiceResult.success(itemRef);
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not add this item. Please try again.');
+    }
+  }
+
+  /// Edits a Showcase item's owner-writable fields. Never touches
+  /// `interestCount` or moves it to a different business - both are
+  /// frozen by firestore.rules on update, so a client attempt to change
+  /// either is rejected server-side; this signature simply never offers
+  /// the option.
+  static Future<ServiceResult<void>> updateBusinessItem({
+    required DocumentReference itemRef,
+    String? title,
+    String? description,
+    String? priceDisplay,
+    String? photoUrl,
+    String? category,
+    bool? isAvailable,
+  }) async {
+    try {
+      await itemRef.update(createBusinessItemsRecordData(
+        title: title,
+        description: description,
+        priceDisplay: priceDisplay,
+        photoUrl: photoUrl,
+        category: category,
+        isAvailable: isAvailable,
+        updatedAt: getCurrentTimestamp,
+      ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your changes. Please try again.');
+    }
+  }
+
+  /// Reacts to a Showcase item with one of `kQuickReactions`
+  /// (`lib/components/exchange_feed_item_widget.dart`) - same
+  /// deterministic-doc-ID dedup pattern as Exchange post reactions, so a
+  /// duplicate tap is a harmless no-op rejected by firestore.rules rather
+  /// than a second point award. Best-effort: the UI already reflects the
+  /// reaction optimistically, so a failure here (including the expected
+  /// "already reacted" rejection) doesn't need to surface to the user.
+  /// showcase_interest.js listens for these events (any target_ref
+  /// pointing into business_items) and increments the item's
+  /// interest_count - no kindex_config change needed, since these event
+  /// types are already weighted for Exchange reactions.
+  static Future<void> recordItemReaction({
+    required DocumentReference itemRef,
+    required DocumentReference businessRef,
+    required String eventType,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) return;
+    final reactionRef = UserEngagementEventsRecord.collection.doc(
+      '${userRef.id}_${itemRef.id}_$eventType',
+    );
+    try {
+      await reactionRef.set(createUserEngagementEventsRecordData(
+        userRef: userRef,
+        businessRef: businessRef,
+        targetRef: itemRef,
+        eventType: eventType,
+        createdAt: getCurrentTimestamp,
+      ));
+    } catch (_) {
+      // Duplicate reaction for this user+item+type - already counted.
+    }
+  }
+
+  /// The five reaction event types (see [recordItemReaction] and
+  /// `kQuickReactions` in `exchange_feed_item_widget.dart`), listed here
+  /// rather than imported since this is the only other place they're
+  /// needed as a bare list rather than paired with icon/label/color.
+  static const _kReactionEventTypes = [
+    'react_backed',
+    'react_kin',
+    'react_built',
+    'react_spotlight',
+    'react_proud',
+  ];
+
+  /// "Recommended for you" on Customer Profile: a lightweight, deterministic
+  /// heuristic (not real collaborative-filtering ML - the marketplace has
+  /// near-zero items/users right now, so that would be over-building for a
+  /// feature nobody's used yet). Looks up which categories [userRef] has
+  /// already reacted to Showcase items in, then returns other available
+  /// items in those same categories, ranked by interest_count, excluding
+  /// anything already reacted to. Returns `[]` (not an error) when the
+  /// user has no reaction history yet - the caller hides the carousel
+  /// entirely rather than showing a loading/empty state for it.
+  static Future<List<BusinessItemsRecord>> fetchRecommendedItems({
+    required DocumentReference userRef,
+    int limit = 10,
+  }) async {
+    try {
+      final reactions = await queryUserEngagementEventsRecordOnce(
+        queryBuilder: (q) => q
+            .where('user_ref', isEqualTo: userRef)
+            .where('event_type', whereIn: _kReactionEventTypes),
+      );
+      if (reactions.isEmpty) return [];
+
+      final reactedItemRefs = reactions
+          .map((r) => r.targetRef)
+          .whereType<DocumentReference>()
+          .toSet();
+      if (reactedItemRefs.isEmpty) return [];
+
+      final reactedItems = await Future.wait(
+        reactedItemRefs.map((ref) => BusinessItemsRecord.getDocumentOnce(ref)
+            .catchError((_) => null)),
+      );
+      final reactedItemIds = reactedItemRefs.map((r) => r.id).toSet();
+      final categories = reactedItems
+          .whereType<BusinessItemsRecord>()
+          .map((i) => i.category)
+          .where((c) => c.isNotEmpty)
+          .toSet()
+          .take(5)
+          .toList();
+      if (categories.isEmpty) return [];
+
+      final candidates = await queryBusinessItemsRecordOnce(
+        queryBuilder: (q) => q
+            .where('category', whereIn: categories)
+            .where('is_available', isEqualTo: true)
+            .orderBy('interest_count', descending: true)
+            .limit(15),
+      );
+
+      return candidates
+          .where((item) => !reactedItemIds.contains(item.reference.id))
+          .take(limit)
+          .toList();
+    } catch (_) {
+      // Best-effort - an optional discovery shelf failing to load is not
+      // worth surfacing an error over; the caller just hides it.
+      return [];
+    }
+  }
+
   /// Starts a Power Hour flash-beacon promotion, gated by the business's
   /// subscription_tier: [durationMinutes] is capped, and a rolling 30-day
   /// usage count is checked against a per-tier monthly limit (see

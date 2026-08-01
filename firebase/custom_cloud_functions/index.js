@@ -7,6 +7,9 @@ exports.checkAndExpireBeacons = checkAndExpireBeacons.checkAndExpireBeacons;
 const kindexEngine = require("./kindex_engine.js");
 exports.processUserEngagementEvent = kindexEngine.processUserEngagementEvent;
 
+const showcaseInterest = require("./showcase_interest.js");
+exports.recordItemInterest = showcaseInterest.recordItemInterest;
+
 // Business-side Kindex scoring moved from a reactive onCreate trigger on
 // `reviews/{reviewId}` to a nightly recompute. The old reactive engine
 // (processBusinessReview) applied a fixed delta per review with no

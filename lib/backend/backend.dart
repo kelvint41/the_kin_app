@@ -32,6 +32,7 @@ import 'schema/unlocked_rewards_record.dart';
 import 'schema/kin_feed_events_record.dart';
 import 'schema/notifications_record.dart';
 import 'schema/business_categories_record.dart';
+import 'schema/business_items_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -68,6 +69,7 @@ export 'schema/business_submissions_record.dart';
 export 'schema/system_counters_record.dart';
 export 'schema/notifications_record.dart';
 export 'schema/business_categories_record.dart';
+export 'schema/business_items_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -795,6 +797,33 @@ Future<List<BusinessCategoriesRecord>> queryBusinessCategoriesRecordOnce({
     queryCollectionOnce(
       BusinessCategoriesRecord.collection,
       BusinessCategoriesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query BusinessItemsRecords (as a Stream and as a Future).
+Stream<List<BusinessItemsRecord>> queryBusinessItemsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      BusinessItemsRecord.collection,
+      BusinessItemsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<BusinessItemsRecord>> queryBusinessItemsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      BusinessItemsRecord.collection,
+      BusinessItemsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,
