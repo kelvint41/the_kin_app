@@ -11,6 +11,7 @@ if (!admin.apps.length) {
 // also works, but this form works everywhere so there's no reason to keep
 // the version-sensitive one).
 const { Timestamp, FieldValue } = require("firebase-admin/firestore");
+const { createNotification } = require("./notifications.js");
 
 const MILESTONES = [5, 15, 30];
 const REWARD_EXPIRY_DAYS = 30;
@@ -131,6 +132,17 @@ exports.generateMysteryReward = onDocumentUpdated(
       business_ref: businessRef,
       business_name: after.business_name || "",
       timestamp: FieldValue.serverTimestamp(),
+    });
+
+    // Deliberately vague about what was won - the reveal animation on
+    // Owner Profile (reveal_animation_shown) is where that surprise lives,
+    // same "mystery" the reward is named for.
+    await createNotification(db, {
+      userRef: ownerRef,
+      type: "reward_unlocked",
+      title: "Mystery reward unlocked!",
+      body: `${after.business_name || "Your business"} hit ${crossedMilestone} discoveries. Open the app to see what you won.`,
+      routeName: "OwnerProfile",
     });
 
     return null;

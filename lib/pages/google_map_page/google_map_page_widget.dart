@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/business_preview_card_widget.dart';
+import '/components/notification_bell_button.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -875,6 +876,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                       },
                                     ),
                                   ),
+                                  const NotificationBellButton(),
                                 ].divide(SizedBox(width: 8.0)),
                               ),
                               SingleChildScrollView(

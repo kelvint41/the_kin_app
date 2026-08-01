@@ -72,3 +72,6 @@ exports.sendSupportChatMessage = supportChat.sendSupportChatMessage;
 
 const supportChatStats = require("./support_chat_stats.js");
 exports.getSupportChatStats = supportChatStats.getSupportChatStats;
+
+const claimNotifications = require("./claim_notifications.js");
+exports.notifyClaimApproved = claimNotifications.notifyClaimApproved;

@@ -196,6 +196,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => BusinessInsightsWidget(),
         ),
         FFRoute(
+          name: NotificationsWidget.routeName,
+          path: NotificationsWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => NotificationsWidget(),
+        ),
+        FFRoute(
           name: ClaimBusinessWidget.routeName,
           path: ClaimBusinessWidget.routePath,
           builder: (context, params) => ClaimBusinessWidget(

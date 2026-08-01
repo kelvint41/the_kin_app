@@ -3,6 +3,7 @@ const admin = require("firebase-admin");
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+const { createNotification } = require("./notifications.js");
 
 // The collection is `uservisits` (not `user_visits`) - that's the name
 // FlutterFlow generated and what UservisitsRecord binds to in the Dart
@@ -315,6 +316,16 @@ exports.recordVerifiedVisit = onCall(async (request) => {
       },
     );
     tx.set(userRef, { scavenger_points: newTotal }, { merge: true });
+
+    await createNotification(tx, {
+      userRef,
+      type: "check_in_confirmed",
+      title: "Check-in confirmed",
+      body: pointsAwarded > 0
+        ? `You checked in at ${business.business_name || "a business"} and earned ${pointsAwarded} points.`
+        : `You checked in at ${business.business_name || "a business"}.`,
+      routeName: "KinQuest",
+    });
 
     return newTotal;
   });
