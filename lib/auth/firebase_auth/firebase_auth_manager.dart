@@ -8,6 +8,7 @@ import '../base_auth_user_provider.dart';
 import '../../flutter_flow/flutter_flow_util.dart';
 
 import '/backend/backend.dart';
+import '/backend/cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'anonymous_auth.dart';
@@ -133,12 +134,14 @@ class FirebaseAuthManager extends AuthManager
     required String email,
     required BuildContext context,
   }) async {
-    try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
+    // Routed through a Cloud Function (Postmark) rather than
+    // FirebaseAuth.sendPasswordResetEmail directly - Firebase's default
+    // sender is unauthenticated and gets spam-filtered by most providers.
+    final result = await makeCloudCall('sendPasswordReset', {'email': email});
+    if (result['sent'] != true) {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message!}')),
+        SnackBar(content: Text('Error: could not send reset email')),
       );
       return null;
     }

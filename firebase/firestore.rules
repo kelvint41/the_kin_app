@@ -509,6 +509,16 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Record of images quarantined by moderateImageUpload (Cloud Vision
+    // SafeSearch). Admin-only read, same reasoning as business_submissions.
+    // Written only by moderateImageUpload (Cloud Function, Admin SDK).
+    match /flagged_uploads/{document} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+    }
+
     // Audit trail for the "Add a Business" discovery flow - admin-only
     // read, same reasoning as activity_logs/analytics_daily. Written only
     // by submitBusinessDiscovery (Cloud Function, Admin SDK).

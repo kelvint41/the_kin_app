@@ -78,3 +78,9 @@ exports.getSupportChatStats = supportChatStats.getSupportChatStats;
 
 const claimNotifications = require("./claim_notifications.js");
 exports.notifyClaimApproved = claimNotifications.notifyClaimApproved;
+
+const sendPasswordReset = require("./send_password_reset.js");
+exports.sendPasswordReset = sendPasswordReset.sendPasswordReset;
+
+const moderateImageUpload = require("./moderate_image_upload.js");
+exports.moderateImageUpload = moderateImageUpload.moderateImageUpload;
