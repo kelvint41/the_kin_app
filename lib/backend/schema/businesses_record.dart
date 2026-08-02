@@ -467,6 +467,26 @@ class BusinessesRecord extends FirestoreRecord {
   String get closingTime => _closingTime ?? '';
   bool hasClosingTime() => _closingTime != null;
 
+  // "is_mobile_vendor" field. True for food trucks, pop-ups, etc.
+  bool? _isMobileVendor;
+  bool get isMobileVendor => _isMobileVendor ?? false;
+  bool hasIsMobileVendor() => _isMobileVendor != null;
+
+  // "current_location" field. Free text location (e.g. "5th & Main").
+  String? _currentLocation;
+  String get currentLocation => _currentLocation ?? '';
+  bool hasCurrentLocation() => _currentLocation != null;
+
+  // "current_location_expires_at" field. When the location beacon expires.
+  DateTime? _currentLocationExpiresAt;
+  DateTime? get currentLocationExpiresAt => _currentLocationExpiresAt;
+  bool hasCurrentLocationExpiresAt() => _currentLocationExpiresAt != null;
+
+  // "mobile_location_active" field. True when location beacon is active.
+  bool? _mobileLocationActive;
+  bool get mobileLocationActive => _mobileLocationActive ?? false;
+  bool hasMobileLocationActive() => _mobileLocationActive != null;
+
   // "photo_gallery" field.
   List<String>? _photoGallery;
   List<String> get photoGallery => _photoGallery ?? const [];
@@ -561,6 +581,11 @@ class BusinessesRecord extends FirestoreRecord {
     _connectionCount = castToType<int>(snapshotData['connection_count']);
     _openingTime = snapshotData['opening_time'] as String?;
     _closingTime = snapshotData['closing_time'] as String?;
+    _isMobileVendor = snapshotData['is_mobile_vendor'] as bool?;
+    _currentLocation = snapshotData['current_location'] as String?;
+    _currentLocationExpiresAt =
+        snapshotData['current_location_expires_at'] as DateTime?;
+    _mobileLocationActive = snapshotData['mobile_location_active'] as bool?;
     _photoGallery = getDataList(snapshotData['photo_gallery']);
   }
 
@@ -846,6 +871,10 @@ Map<String, dynamic> createBusinessesRecordData({
   int? connectionCount,
   String? openingTime,
   String? closingTime,
+  bool? isMobileVendor,
+  String? currentLocation,
+  DateTime? currentLocationExpiresAt,
+  bool? mobileLocationActive,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -927,6 +956,10 @@ Map<String, dynamic> createBusinessesRecordData({
       'connection_count': connectionCount,
       'opening_time': openingTime,
       'closing_time': closingTime,
+      'is_mobile_vendor': isMobileVendor,
+      'current_location': currentLocation,
+      'current_location_expires_at': currentLocationExpiresAt,
+      'mobile_location_active': mobileLocationActive,
     }.withoutNulls,
   );
 
@@ -1017,6 +1050,10 @@ class BusinessesRecordDocumentEquality implements Equality<BusinessesRecord> {
         e1?.connectionCount == e2?.connectionCount &&
         e1?.openingTime == e2?.openingTime &&
         e1?.closingTime == e2?.closingTime &&
+        e1?.isMobileVendor == e2?.isMobileVendor &&
+        e1?.currentLocation == e2?.currentLocation &&
+        e1?.currentLocationExpiresAt == e2?.currentLocationExpiresAt &&
+        e1?.mobileLocationActive == e2?.mobileLocationActive &&
         listEquality.equals(e1?.photoGallery, e2?.photoGallery);
   }
 

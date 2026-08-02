@@ -2,7 +2,10 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/business_item_widget.dart';
 import '/components/kpi_card_widget.dart';
+import '/components/main_menu_button.dart';
 import '/components/signup_item_widget.dart';
+import '/components/admin_beacon_metrics_card.dart';
+import '/components/admin_discovery_metrics_card.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -199,22 +202,6 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
             appBar: AppBar(
               backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
               automaticallyImplyLeading: false,
-              // Was suppressed with no replacement - an admin landing here
-              // (only reachable from the map hamburger menu) had no way
-              // back except the OS swipe gesture. This page is always
-              // pushed on top of something, so a real back button belongs
-              // here, not just the bottom nav below.
-              leading: FlutterFlowIconButton(
-                borderRadius: 8.0,
-                buttonSize: 40.0,
-                fillColor: Colors.transparent,
-                icon: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 20.0,
-                ),
-                onPressed: () => context.safePop(),
-              ),
               title: Text(
                 'Executive Dashboard',
                 style: FlutterFlowTheme.of(context).titleLarge.override(
@@ -233,6 +220,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     ),
               ),
               actions: [
+                MainMenuButton(),
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -247,8 +235,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                         color: FlutterFlowTheme.of(context).primaryText,
                         size: 24.0,
                       ),
-                      onPressed: () {
-                        print('IconButton pressed ...');
+                      onPressed: () async {
+                        safeSetState(() => _model.isLoading = true);
+                        try {
+                          await Future.delayed(Duration(milliseconds: 500));
+                        } finally {
+                          safeSetState(() => _model.isLoading = false);
+                        }
                       },
                     ),
                     Expanded(
@@ -525,6 +518,16 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                 ),
                               ),
                             ].divide(SizedBox(height: 16.0)),
+                          ),
+                          // Location Beacon Metrics
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: AdminBeaconMetricsCard(),
+                          ),
+                          // Business Discovery Metrics
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: AdminDiscoveryMetricsCard(),
                           ),
                           Container(
                             decoration: BoxDecoration(

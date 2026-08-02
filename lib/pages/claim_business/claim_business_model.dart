@@ -29,6 +29,14 @@ class ClaimBusinessModel extends FlutterFlowModel<ClaimBusinessWidget> {
   FocusNode? proofLinkFocusNode;
   TextEditingController? proofLinkTextController;
 
+  // State field(s) for OpeningTime widget.
+  FocusNode? openingTimeFocusNode;
+  TextEditingController? openingTimeTextController;
+
+  // State field(s) for ClosingTime widget.
+  FocusNode? closingTimeFocusNode;
+  TextEditingController? closingTimeTextController;
+
   /// Self-declared attributes. Default to false so an owner has to actively
   /// assert them - we never pre-tick a claim on the owner's behalf.
   bool declaredBlackOwned = false;
@@ -79,5 +87,9 @@ class ClaimBusinessModel extends FlutterFlowModel<ClaimBusinessWidget> {
     contactPhoneTextController?.dispose();
     proofLinkFocusNode?.dispose();
     proofLinkTextController?.dispose();
+    openingTimeFocusNode?.dispose();
+    openingTimeTextController?.dispose();
+    closingTimeFocusNode?.dispose();
+    closingTimeTextController?.dispose();
   }
 }

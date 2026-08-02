@@ -377,24 +377,6 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                           ),
                         ],
                       ),
-                      // Previously a bare Icon with no gesture handler, so
-                      // the arrow was decorative and the only way off the
-                      // page was the system back swipe.
-                      Align(
-                        alignment: AlignmentDirectional(-1.0, -1.0),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(24.0),
-                          onTap: () => context.safePop(),
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 24.0,
-                            ),
-                          ),
-                        ),
-                      ),
                       Align(
                         alignment: AlignmentDirectional(1.0, -1.0),
                         child: MainMenuButton(),

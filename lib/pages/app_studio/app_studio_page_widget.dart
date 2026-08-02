@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -77,6 +78,12 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
   bool _sent = false;
   String? _error;
 
+  // File uploads and logo service
+  List<String> _uploadedFiles = [];
+  bool _needsLogoDesign = false;
+
+  static const int _minDescriptionLength = 150;
+
   @override
   void initState() {
     super.initState();
@@ -105,9 +112,11 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
       setState(() => _error = 'We need an email address to reply to.');
       return;
     }
-    if (brief.length < 20) {
+    if (brief.length < _minDescriptionLength) {
       setState(() => _error =
-          'Tell us a bit more - at least a sentence about what you want built.');
+          'Please provide more detail - at least 150 characters. '
+          'Tell us about features, pages, who it\'s for, and any examples you like. '
+          'The more specific you are, the better our estimate will be.');
       return;
     }
 
@@ -156,10 +165,6 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
       appBar: AppBar(
         backgroundColor: theme.secondaryBackground,
         elevation: 0.0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: theme.accentOnSurface),
-          onPressed: () => context.safePop(),
-        ),
         title: Text(
           'KIN App Studio',
           style: theme.titleMedium.override(
@@ -169,6 +174,10 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [Padding(
+          padding: EdgeInsets.only(right: 16.0),
+          child: MainMenuButton(),
+        )],
       ),
       body: SafeArea(
         child: _sent ? _thanks(theme) : _form(theme),
@@ -296,11 +305,194 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
             _dropdown(theme, 'Budget', _budgets, _budget,
                 (v) => setState(() => _budget = v)),
             _field(theme, 'What should it do?', _briefController,
-                maxLines: 5,
+                maxLines: 8,
                 maxLength: 2000,
-                helperText: 'Be as specific as you can - features, pages, '
-                    'who it\'s for, examples you like. More detail here '
-                    'means a faster, more accurate estimate.'),
+                helperText: 'Required: At least 150 characters. Be very specific - '
+                    'what features do you need? What pages? Who is it for? '
+                    'Any examples or references? More detail = faster, better estimates.'),
+            // File upload section
+            Container(
+              padding: const EdgeInsets.all(14.0),
+              decoration: BoxDecoration(
+                color: theme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: theme.alternate),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.upload_file_rounded,
+                          color: theme.accentOnSurface, size: 20.0),
+                      const SizedBox(width: 8.0),
+                      Expanded(
+                        child: Text(
+                          'Design files (optional)',
+                          style: theme.labelMedium.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600),
+                            color: theme.primaryText,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    'Do you have existing designs, logos, mockups, or references? '
+                    'Upload them here so we can understand your vision better.',
+                    style: theme.bodySmall.override(
+                      font: GoogleFonts.plusJakartaSans(),
+                      color: theme.secondaryText,
+                      letterSpacing: 0.0,
+                      lineHeight: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 10.0),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12.0),
+                    decoration: BoxDecoration(
+                      color: theme.primaryBackground,
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(
+                          color: theme.alternate, style: BorderStyle.solid),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_upload_outlined,
+                            color: theme.secondaryText, size: 32.0),
+                        const SizedBox(height: 8.0),
+                        Text(
+                          _uploadedFiles.isEmpty
+                              ? 'Tap to upload design files'
+                              : '${_uploadedFiles.length} file(s) selected',
+                          style: theme.bodySmall.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: theme.secondaryText,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                        if (_uploadedFiles.isNotEmpty) ...[
+                          const SizedBox(height: 8.0),
+                          Wrap(
+                            spacing: 4.0,
+                            runSpacing: 4.0,
+                            children: _uploadedFiles
+                                .map((file) => Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0, vertical: 4.0),
+                                      decoration: BoxDecoration(
+                                        color: theme.accent1,
+                                        borderRadius:
+                                            BorderRadius.circular(6.0),
+                                      ),
+                                      child: Text(
+                                        file.split('/').last,
+                                        style:
+                                            theme.labelSmall.override(
+                                          font: GoogleFonts
+                                              .plusJakartaSans(),
+                                          color: theme.primary,
+                                          fontSize: 11.0,
+                                          letterSpacing: 0.0,
+                                        ),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    'Supported: Images (PNG, JPG), PDFs, Figma links, or Sketch files',
+                    style: theme.labelSmall.override(
+                      font: GoogleFonts.plusJakartaSans(),
+                      color: theme.secondaryText,
+                      fontSize: 11.0,
+                      letterSpacing: 0.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Logo design service checkbox
+            Container(
+              padding: const EdgeInsets.all(14.0),
+              decoration: BoxDecoration(
+                color: theme.secondaryBackground,
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: theme.alternate),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _needsLogoDesign,
+                        onChanged: (v) =>
+                            setState(() => _needsLogoDesign = v ?? false),
+                        fillColor: WidgetStateProperty.all(
+                            _needsLogoDesign
+                                ? theme.accent1
+                                : Colors.transparent),
+                        side: BorderSide(
+                          color: theme.alternate,
+                          width: 1.0,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                      const SizedBox(width: 10.0),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'I need logo design',
+                              style: theme.labelMedium.override(
+                                font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600),
+                                color: theme.primaryText,
+                                letterSpacing: 0.0,
+                              ),
+                            ),
+                            Text(
+                              'Standalone: \$75-150 | Bundled with app: Included',
+                              style: theme.labelSmall.override(
+                                font: GoogleFonts.plusJakartaSans(),
+                                color: theme.accentOnSurface,
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    'Need just a logo? We create custom, AI-enhanced designs. '
+                    'Want it with your app? Logo design is included in your package.',
+                    style: theme.bodySmall.override(
+                      font: GoogleFonts.plusJakartaSans(),
+                      color: theme.secondaryText,
+                      letterSpacing: 0.0,
+                      lineHeight: 1.4,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             if (_error != null)
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
@@ -313,13 +505,10 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
                   ),
                 ),
               ),
-            // Pay-over-time, flagged as coming. Deliberately worded as
-            // information rather than an offer, and no card details are
-            // taken anywhere on this page: a build is a real-world service
-            // delivered outside the app, so it is not an in-app purchase -
-            // but that only holds while the transaction itself stays
-            // outside. Klarna and Afterpay both ride on a Stripe Checkout
-            // link, which is where this will point.
+            // No card details are taken anywhere on this page: a build is a
+            // real-world service delivered outside the app, so submitting
+            // this form is not an in-app purchase - it's a request that gets
+            // a follow-up quote, not a charge.
             Container(
               padding: const EdgeInsets.all(14.0),
               decoration: BoxDecoration(
@@ -336,8 +525,8 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
                       padding:
                           const EdgeInsetsDirectional.fromSTEB(10, 0, 0, 0),
                       child: Text(
-                        'Pay over time with Klarna or Afterpay - coming when '
-                        'the studio opens. Nothing is charged today.',
+                        'Nothing is charged today. We\'ll follow up with '
+                        'pricing and next steps once the studio opens.',
                         style: theme.bodySmall.override(
                           font: GoogleFonts.plusJakartaSans(),
                           color: theme.secondaryText,

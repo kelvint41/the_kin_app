@@ -77,21 +77,6 @@ class _NearbyFeedWidgetState extends State<NearbyFeedWidget> {
       appBar: AppBar(
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         automaticallyImplyLeading: false,
-        // Was suppressed with no replacement - this page is reached from
-        // the bottom nav's Feed tab, which pushes rather than replaces the
-        // route, so there was no way back to whatever screen was open
-        // before it except the OS swipe gesture.
-        leading: FlutterFlowIconButton(
-          borderRadius: 8.0,
-          buttonSize: 40.0,
-          fillColor: Colors.transparent,
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: FlutterFlowTheme.of(context).primaryText,
-            size: 20.0,
-          ),
-          onPressed: () => context.safePop(),
-        ),
         title: Text(
           'Nearby',
           style: FlutterFlowTheme.of(context).headlineMedium.override(

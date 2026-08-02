@@ -37,6 +37,9 @@ class ExecutiveDashboardModel
   String? dropdownValue;
   FormFieldController<String>? dropdownValueController;
 
+  // Loading state
+  bool isLoading = false;
+
   @override
   void initState(BuildContext context) {
     kpiCardModel1 = createModel(context, () => KpiCardModel());

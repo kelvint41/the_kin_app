@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/components/main_menu_button.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -73,6 +74,8 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
       contactEmail: _model.contactEmailTextController?.text ?? '',
       contactPhone: _model.contactPhoneTextController?.text ?? '',
       verificationProofLink: _model.proofLinkTextController?.text,
+      openingTime: _model.openingTimeTextController?.text,
+      closingTime: _model.closingTimeTextController?.text,
       attested: _model.attested,
       declaredBlackOwned: _model.declaredBlackOwned,
       declaredVeteran: _model.declaredVeteran,
@@ -119,11 +122,6 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
           automaticallyImplyLeading: false,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_rounded,
-                color: FlutterFlowTheme.of(context).info, size: 24.0),
-            onPressed: () => context.safePop(),
-          ),
           title: Text(
             'Claim Your Business',
             style: FlutterFlowTheme.of(context).headlineSmall.override(
@@ -137,6 +135,10 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
           ),
           centerTitle: false,
           elevation: 0.0,
+          actions: [Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: MainMenuButton(),
+          )],
         ),
         body: SafeArea(
           top: true,
@@ -239,6 +241,26 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
                           label: 'Link',
                           hint: 'https://',
                           keyboardType: TextInputType.url,
+                        ),
+                        SizedBox(height: 24.0),
+                        _sectionLabel('Business hours (optional)'),
+                        SizedBox(height: 12.0),
+                        _textField(
+                          controller: _model.openingTimeTextController ??=
+                              TextEditingController(),
+                          focusNode: _model.openingTimeFocusNode ??=
+                              FocusNode(),
+                          label: 'Opening time',
+                          hint: '9:00 AM',
+                        ),
+                        SizedBox(height: 16.0),
+                        _textField(
+                          controller: _model.closingTimeTextController ??=
+                              TextEditingController(),
+                          focusNode: _model.closingTimeFocusNode ??=
+                              FocusNode(),
+                          label: 'Closing time',
+                          hint: '6:00 PM',
                         ),
                         SizedBox(height: 24.0),
                         _sectionLabel('About your business'),

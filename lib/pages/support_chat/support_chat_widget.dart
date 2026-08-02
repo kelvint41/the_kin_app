@@ -1,3 +1,4 @@
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -109,14 +110,6 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
       appBar: AppBar(
         backgroundColor: theme.primaryBackground,
         automaticallyImplyLeading: false,
-        leading: FlutterFlowIconButton(
-          borderRadius: 8.0,
-          buttonSize: 40.0,
-          fillColor: Colors.transparent,
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: theme.primaryText, size: 20.0),
-          onPressed: () => context.safePop(),
-        ),
         title: Text(
           'Get Support',
           style: theme.headlineMedium.override(
@@ -127,6 +120,10 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
           ),
         ),
         centerTitle: false,
+        actions: [Padding(
+          padding: EdgeInsets.only(right: 16.0),
+          child: MainMenuButton(),
+        )],
         elevation: 0.0,
       ),
       body: SafeArea(
@@ -201,7 +198,14 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
         child: Text(
           turn.text,
           style: theme.bodyMedium.override(
-            color: isUser ? Colors.black : theme.primaryText,
+            // The user bubble's fill is theme.primary, a fixed dark green
+            // that doesn't change between light/dark mode. accentOnSurface
+            // flips to a deliberately darkened gold in light mode (tuned
+            // for AA contrast on light backgrounds elsewhere), which reads
+            // as near-invisible on this dark fill (2.05:1). accent1 is the
+            // brand gold, fixed bright in both themes, and holds 5.8:1
+            // against this specific green (0x0B3D2E) in both modes.
+            color: isUser ? theme.accent1 : theme.primaryText,
             lineHeight: 1.4,
           ),
         ),
@@ -269,7 +273,7 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
                 ),
                 alignment: Alignment.center,
                 child: Icon(Icons.arrow_upward_rounded,
-                    color: Colors.black, size: 20.0),
+                    color: theme.accent1, size: 20.0),
               ),
             ),
           ],

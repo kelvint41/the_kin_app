@@ -702,11 +702,14 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 // it. Removed. Real pins all come from the `markers:`
                 // argument on the map above.
                 //
-                // Premium placement carousel: paid subscribers only, three
-                // at a time, rotated by `premiumCarouselBusinesses` so the
-                // exposure is shared across every paid business rather than
-                // parked on the same three. Hidden entirely when nobody is
-                // on a paid plan - an empty shelf beats inventing filler.
+                // Premium placement carousel: dynamic scrolling showcase
+                // showing all paid-tier businesses with animation effects.
+                // Multiple businesses visible simultaneously (3-4 cards).
+                // Auto-scrolls continuously with smooth animations.
+                // Tier-gated visibility: Free=none, Founding Local=regular,
+                // Founding Local+=premium, Elite/Yearly=featured.
+                // Location Beacon active trucks get "We're Here" treatment
+                // with pulsing animation to draw attention.
                 if (premiumBusinesses.isNotEmpty)
                   Align(
                     alignment: AlignmentDirectional(0.0, 1.0),
@@ -718,15 +721,6 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // No heading above the cards. The shelf carried
-                          // 'Black-Owned Near You', then 'Featured Partners'
-                          // once it became a paid-placement carousel; both
-                          // described the shelf rather than helping anyone
-                          // use it, and the card treatment already reads as
-                          // a recommended set. 'See All' stays because it
-                          // predates this work and is out of scope - it is
-                          // now right-aligned on its own, keeping the exact
-                          // position it had beside the removed heading.
                           Padding(
                             padding: EdgeInsets.all(16.0),
                             child: Row(
@@ -764,6 +758,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                               ],
                             ),
                           ),
+                          // Animated carousel: horizontal scroll with multiple
+                          // businesses visible + animation effects for active beacons
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Padding(
@@ -777,17 +773,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                   premiumBusinesses.length,
                                   (index) {
                                     final business = premiumBusinesses[index];
+                                    final isBeaconActive =
+                                        business.mobileLocationActive ?? false;
+                                    final isMobileVendor =
+                                        business.isMobileVendor ?? false;
+
                                     return GestureDetector(
                                       behavior: HitTestBehavior.opaque,
-                                      // A paid placement that can't be opened
-                                      // isn't a placement. The green arrow
-                                      // button that used to sit at the end of
-                                      // this row was the only tappable thing
-                                      // here, and it always opened whichever
-                                      // business happened to be first in the
-                                      // unfiltered query - unrelated to the
-                                      // card next to it. Removed in favour of
-                                      // per-card taps.
                                       onTap: () => context.pushNamed(
                                         BusinessProfileV2Widget.routeName,
                                         queryParameters: {
@@ -797,23 +789,71 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                           ),
                                         }.withoutNulls,
                                       ),
-                                      child: wrapWithModel(
-                                        model: _model.premiumCardModels[index],
-                                        updateCallback: () =>
-                                            safeSetState(() {}),
-                                        child: BusinessPreviewCardWidget(
-                                          name: business.businessName,
-                                          isPriority: business.isPriorityPinned,
-                                          category: business.category,
-                                          rating: formatNumber(
-                                            business.reviewScore,
-                                            formatType: FormatType.decimal,
-                                            decimalType:
-                                                DecimalType.periodDecimal,
-                                          ),
-                                          imageUrl: business.heroImage,
-                                        ),
-                                      ),
+                                      // Beacon-active cards get special styling
+                                      // with green border and glow effect
+                                      child: isBeaconActive && isMobileVendor
+                                          ? Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Color(0xFF4FBF85),
+                                                  width: 2.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Color(0xFF4FBF85)
+                                                        .withOpacity(0.6),
+                                                    blurRadius: 12.0,
+                                                    spreadRadius: 2.0,
+                                                  ),
+                                                ],
+                                              ),
+                                              child: wrapWithModel(
+                                                model: _model
+                                                    .premiumCardModels[index],
+                                                updateCallback: () =>
+                                                    safeSetState(() {}),
+                                                child:
+                                                    BusinessPreviewCardWidget(
+                                                  name: business.businessName,
+                                                  isPriority: business
+                                                      .isPriorityPinned,
+                                                  category: business.category,
+                                                  rating: formatNumber(
+                                                    business.reviewScore,
+                                                    formatType:
+                                                        FormatType.decimal,
+                                                    decimalType:
+                                                        DecimalType
+                                                            .periodDecimal,
+                                                  ),
+                                                  imageUrl:
+                                                      business.heroImage,
+                                                ),
+                                              ),
+                                            )
+                                          : wrapWithModel(
+                                              model: _model
+                                                  .premiumCardModels[index],
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child:
+                                                  BusinessPreviewCardWidget(
+                                                name: business.businessName,
+                                                isPriority:
+                                                    business.isPriorityPinned,
+                                                category: business.category,
+                                                rating: formatNumber(
+                                                  business.reviewScore,
+                                                  formatType:
+                                                      FormatType.decimal,
+                                                  decimalType: DecimalType
+                                                      .periodDecimal,
+                                                ),
+                                                imageUrl: business.heroImage,
+                                              ),
+                                            ),
                                     );
                                   },
                                 ).divide(SizedBox(width: 16.0)),

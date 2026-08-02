@@ -94,6 +94,21 @@ class ClaimRequestsRecord extends FirestoreRecord {
   bool get declaredVeteran => _declaredVeteran ?? false;
   bool hasDeclaredVeteran() => _declaredVeteran != null;
 
+  // "opening_time" field. Free text, e.g. "9:00 AM" or "9:00".
+  String? _openingTime;
+  String get openingTime => _openingTime ?? '';
+  bool hasOpeningTime() => _openingTime != null;
+
+  // "closing_time" field. Free text, e.g. "6:00 PM" or "18:00".
+  String? _closingTime;
+  String get closingTime => _closingTime ?? '';
+  bool hasClosingTime() => _closingTime != null;
+
+  // "is_mobile_vendor" field. True for food trucks, pop-ups, etc.
+  bool? _isMobileVendor;
+  bool get isMobileVendor => _isMobileVendor ?? false;
+  bool hasIsMobileVendor() => _isMobileVendor != null;
+
   void _initializeFields() {
     _businessId = snapshotData['business_id'] as String?;
     _applicantUserId = snapshotData['applicant_user_id'] as String?;
@@ -109,6 +124,9 @@ class ClaimRequestsRecord extends FirestoreRecord {
     _attestedAt = snapshotData['attested_at'] as DateTime?;
     _declaredBlackOwned = snapshotData['declared_black_owned'] as bool?;
     _declaredVeteran = snapshotData['declared_veteran'] as bool?;
+    _openingTime = snapshotData['opening_time'] as String?;
+    _closingTime = snapshotData['closing_time'] as String?;
+    _isMobileVendor = snapshotData['is_mobile_vendor'] as bool?;
   }
 
   static CollectionReference get collection =>
@@ -160,6 +178,9 @@ Map<String, dynamic> createClaimRequestsRecordData({
   DateTime? attestedAt,
   bool? declaredBlackOwned,
   bool? declaredVeteran,
+  String? openingTime,
+  String? closingTime,
+  bool? isMobileVendor,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -177,6 +198,9 @@ Map<String, dynamic> createClaimRequestsRecordData({
       'attested_at': attestedAt,
       'declared_black_owned': declaredBlackOwned,
       'declared_veteran': declaredVeteran,
+      'opening_time': openingTime,
+      'closing_time': closingTime,
+      'is_mobile_vendor': isMobileVendor,
     }.withoutNulls,
   );
 
@@ -202,7 +226,10 @@ class ClaimRequestsRecordDocumentEquality
         e1?.attested == e2?.attested &&
         e1?.attestedAt == e2?.attestedAt &&
         e1?.declaredBlackOwned == e2?.declaredBlackOwned &&
-        e1?.declaredVeteran == e2?.declaredVeteran;
+        e1?.declaredVeteran == e2?.declaredVeteran &&
+        e1?.openingTime == e2?.openingTime &&
+        e1?.closingTime == e2?.closingTime &&
+        e1?.isMobileVendor == e2?.isMobileVendor;
   }
 
   @override
@@ -220,7 +247,10 @@ class ClaimRequestsRecordDocumentEquality
         e?.attested,
         e?.attestedAt,
         e?.declaredBlackOwned,
-        e?.declaredVeteran
+        e?.declaredVeteran,
+        e?.openingTime,
+        e?.closingTime,
+        e?.isMobileVendor,
       ]);
 
   @override

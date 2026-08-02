@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/add_edit_item_sheet.dart';
 import '/components/business_image_widget.dart';
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -86,14 +87,6 @@ class _MyItemsWidgetState extends State<MyItemsWidget> {
       appBar: AppBar(
         backgroundColor: theme.primaryBackground,
         automaticallyImplyLeading: false,
-        leading: FlutterFlowIconButton(
-          borderRadius: 8.0,
-          buttonSize: 40.0,
-          fillColor: Colors.transparent,
-          icon: Icon(Icons.arrow_back_ios_new_rounded,
-              color: theme.primaryText, size: 20.0),
-          onPressed: () => context.safePop(),
-        ),
         title: Text(
           'My items',
           style: theme.headlineMedium.override(
@@ -105,6 +98,10 @@ class _MyItemsWidgetState extends State<MyItemsWidget> {
         ),
         centerTitle: false,
         elevation: 0.0,
+        actions: [Padding(
+          padding: EdgeInsets.only(right: 16.0),
+          child: MainMenuButton(),
+        )],
       ),
       body: SafeArea(
         top: true,

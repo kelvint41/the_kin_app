@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/main_menu_button.dart';
 import '/components/kindex_trend_indicator.dart';
 import '/components/visit_check_in_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
@@ -217,25 +218,10 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               automaticallyImplyLeading: false,
-              leading: Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
-                child: FlutterFlowIconButton(
-                  borderColor: Colors.transparent,
-                  borderRadius: 20.0,
-                  borderWidth: 0.0,
-                  buttonSize: 40.0,
-                  fillColor: Color(0x33FFFFFF),
-                  icon: Icon(
-                    Icons.arrow_back_rounded,
-                    color: Colors.white,
-                    size: 20.0,
-                  ),
-                  onPressed: () {
-                    context.safePop();
-                  },
-                ),
-              ),
-              actions: [],
+              actions: [Padding(
+                padding: EdgeInsets.only(right: 16.0),
+                child: MainMenuButton(),
+              )],
               centerTitle: false,
               elevation: 0.0,
             ),
@@ -1115,6 +1101,10 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 color: FlutterFlowTheme.of(context)
                                     .secondaryBackground,
                                 borderRadius: BorderRadius.circular(16.0),
+                                border: Border.all(
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  width: 1.5,
+                                ),
                               ),
                               child: Padding(
                                 padding: EdgeInsets.all(16.0),
@@ -1125,14 +1115,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                     Text(
                                       'Manage Your Business',
                                       style: FlutterFlowTheme.of(context)
-                                          .labelMedium
+                                          .titleSmall
                                           .override(
                                             font: GoogleFonts.plusJakartaSans(
-                                              fontWeight: FontWeight.bold,
+                                              fontWeight: FontWeight.w700,
                                             ),
                                             color: FlutterFlowTheme.of(context)
-                                                .secondaryText,
-                                            fontWeight: FontWeight.bold,
+                                                .primary,
+                                            fontWeight: FontWeight.w700,
                                             letterSpacing: 0.0,
                                           ),
                                     ),

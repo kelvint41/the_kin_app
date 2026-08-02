@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/tier_card_widget.dart';
+import '/components/main_menu_button.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -29,17 +30,20 @@ export 'merchant_pricing_suite_model.dart';
 // per platform. Until those are set, getOfferings returns nothing,
 // purchasePackage finds no package, and every upgrade button does nothing
 // on a real device as well as in the Simulator.
+// RevenueCat package identifiers. Pricing: Founding Local $59/mo ($588/yr),
+// Premium Local $99/mo ($950/yr), Elite $149/mo ($1,430/yr).
+// Annual packages include 20% discount (2.4 months free).
 const _kFoundingLocalMonthly = 'founding_local_monthly';
-const _kProGrowthMonthly = 'pro_growth_monthly';
-const _kEliteGrowthMonthly = 'elite_growth_monthly';
+const _kPremiumLocalMonthly = 'premium_local_monthly';
+const _kEliteMonthly = 'elite_monthly';
 
 // Annual equivalents. These need creating as separate products in App Store
 // Connect and Google Play and attaching to the same RevenueCat offering -
 // the stores treat monthly and annual as distinct products, not as one
 // product billed differently.
 const _kFoundingLocalYearly = 'founding_local_yearly';
-const _kProGrowthYearly = 'pro_growth_yearly';
-const _kEliteGrowthYearly = 'elite_growth_yearly';
+const _kPremiumLocalYearly = 'premium_local_yearly';
+const _kEliteYearly = 'elite_yearly';
 
 /// Create a high-fidelity mobile pricing subscription page for a premium
 /// local discovery app.
@@ -329,6 +333,39 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
           child: Scaffold(
             key: scaffoldKey,
             backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+            appBar: AppBar(
+              backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+              automaticallyImplyLeading: true,
+              leading: FlutterFlowIconButton(
+                borderColor: Colors.transparent,
+                borderRadius: 30.0,
+                borderWidth: 1.0,
+                buttonSize: 60.0,
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  color: FlutterFlowTheme.of(context).primaryText,
+                  size: 30.0,
+                ),
+                onPressed: () {
+                  context.pop();
+                },
+              ),
+              actions: [
+                MainMenuButton(),
+              ],
+              centerTitle: true,
+              title: Text(
+                'Choose Your Plan',
+                style: FlutterFlowTheme.of(context).titleMedium.override(
+                      font: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      letterSpacing: 0.0,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              elevation: 0.0,
+            ),
             body: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
@@ -391,27 +428,6 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      FlutterFlowIconButton(
-                                        borderRadius: 8.0,
-                                        buttonSize: 37.4,
-                                        fillColor: Colors.transparent,
-                                        icon: Icon(
-                                          Icons.arrow_back_ios_new_rounded,
-                                          // Fixed white, not a theme text
-                                          // token: this header is a fixed
-                                          // dark gradient in both themes, so
-                                          // a light-mode text colour here
-                                          // would go dark-on-dark.
-                                          color: Colors.white,
-                                          size: 24.0,
-                                        ),
-                                        onPressed: () {
-                                          context.safePop();
-                                        },
-                                      ),
-                                      Container(
-                                        height: 8.0,
-                                      ),
                                       Text(
                                         'Choose Your Growth\n& Impact Plan',
                                         style: FlutterFlowTheme.of(context)
@@ -657,11 +673,11 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     isPro: false,
                                     isElite: false,
                                     title: 'Founding Local',
-                                    badgeLabel: 'Founding Member Tier',
-                                    valueTag: 'Get discovered.',
-                                    price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$19', '\$190'),
+                                    badgeLabel: 'Entry-Level Tier',
+                                    valueTag: 'Get discovered by your community.',
+                                    price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$59', '\$588'),
                                     isYearly: _yearly,
-                                    yearlyTeaser: _yearly ? null : 'or \$190/yr - 2 months free',
+                                    yearlyTeaser: _yearly ? null : 'or \$588/yr - save \$120',
                                     f1: 'Verified Founding Member trust badge',
                                     f2: 'Up to 5 gallery photos on profile',
                                     f3: 'Basic profile analytics (views & trends)',
@@ -749,8 +765,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         final result = await KinServices
                                             .upgradeBusinessTier(
                                           businessRef: businessRef,
-                                          packageId: _packageFor(_kProGrowthMonthly, _kProGrowthYearly),
-                                          tierName: 'Pro Growth',
+                                          packageId: _packageFor(_kPremiumLocalMonthly, _kPremiumLocalYearly),
+                                          tierName: 'Premium Local',
                                           isPremium: true,
                                         );
                                         if (!result.isSuccess) {
@@ -781,16 +797,16 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         child: TierCardWidget(
                                           isPro: true,
                                           isElite: false,
-                                          title: 'Pro Growth',
-                                          badgeLabel: 'Standard Business',
-                                          valueTag: 'Get chosen — before your competitors.',
-                                          price: _priceFor(_kProGrowthMonthly, _kProGrowthYearly, '\$29', '\$290'),
+                                          title: 'Premium Local',
+                                          badgeLabel: 'Premium Business Tier',
+                                          valueTag: 'Get featured with location beacons.',
+                                          price: _priceFor(_kPremiumLocalMonthly, _kPremiumLocalYearly, '\$99', '\$950'),
                                           isYearly: _yearly,
-                                          yearlyTeaser: _yearly ? null : 'or \$290/yr - 2 months free',
-                                          f1: 'Standard interactive map placement in San Antonio',
-                                          f2: 'Clutter-free promotion updates on \'The Exchange\'',
-                                          f3: 'Premium performance analytics dashboard',
-                                          f4: 'Priority support ticket handling',
+                                          yearlyTeaser: _yearly ? null : 'or \$950/yr - save \$238',
+                                          f1: 'Premium interactive map carousel placement',
+                                          f2: 'Location Beacon feature (broadcast your location)',
+                                          f3: 'Advanced performance analytics & insights',
+                                          f4: 'Priority support + featured business badge',
                                           beaconText: 'Upgrade',
                                         ),
                                       ),
@@ -812,8 +828,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _packageFor(_kEliteGrowthMonthly, _kEliteGrowthYearly),
-                                    tierName: 'Elite Growth',
+                                    packageId: _packageFor(_kEliteMonthly, _kEliteYearly),
+                                    tierName: 'Elite',
                                     isPremium: true,
                                     isPriorityPinned: true,
                                     hasFlashBeacon: true,
@@ -844,16 +860,16 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   child: TierCardWidget(
                                     isPro: false,
                                     isElite: true,
-                                    title: 'Elite Growth',
-                                    badgeLabel: 'Ultimate Exposure',
-                                    valueTag: 'Get first, get boosted, get seen everywhere.',
-                                    price: _priceFor(_kEliteGrowthMonthly, _kEliteGrowthYearly, '\$99', '\$990'),
+                                    title: 'Elite',
+                                    badgeLabel: 'Premium Flagship Tier',
+                                    valueTag: 'Always featured, maximum visibility.',
+                                    price: _priceFor(_kEliteMonthly, _kEliteYearly, '\$149', '\$1430'),
                                     isYearly: _yearly,
-                                    yearlyTeaser: _yearly ? null : 'or \$990/yr - 2 months free',
-                                    f1: 'Boosted KINDEX Score baseline (850 vs. 500) and ceiling (900 vs. 750)',
-                                    f2: 'Interactive KINDEX dynamic ticker badge',
-                                    f3: 'Geo-Fenced Flash Beacons (3-block radius)',
-                                    f4: 'Priority Glowing Visual Map Pinning',
+                                    yearlyTeaser: _yearly ? null : 'or \$1,430/yr - save \$358',
+                                    f1: 'Always featured on carousel (daily visibility)',
+                                    f2: 'Unlimited Location Beacons for mobile services',
+                                    f3: 'Priority support + account manager',
+                                    f4: 'Custom branding & co-marketing opportunities',
                                     beaconText: 'Upgrade',
                                   ),
                                 ),

@@ -874,6 +874,12 @@ class KinServices {
   /// claimant's own declaration - they are NOT copied onto the business until
   /// a reviewer approves the claim. We never ask for documentation of either.
   ///
+  /// [openingTime] and [closingTime] are stored as free text (e.g. "9:00 AM")
+  /// and copied to the business doc once a claim is approved.
+  ///
+  /// [isMobileVendor] marks this as a food truck / mobile vendor. Enables
+  /// Location Beacon feature for owners with paid tiers.
+  ///
   /// Note: `claim_requests` is write-only for clients (allow read: if false),
   /// so this can't check whether the same user already has a claim pending on
   /// this business. Duplicate submissions are expected and de-duped by the
@@ -889,6 +895,9 @@ class KinServices {
     required bool declaredBlackOwned,
     required bool declaredVeteran,
     String? verificationProofLink,
+    String? openingTime,
+    String? closingTime,
+    bool? isMobileVendor,
   }) async {
     final userRef = currentUserReference;
     if (userRef == null) {
@@ -924,6 +933,9 @@ class KinServices {
             attestedAt: now,
             declaredBlackOwned: declaredBlackOwned,
             declaredVeteran: declaredVeteran,
+            openingTime: openingTime?.trim(),
+            closingTime: closingTime?.trim(),
+            isMobileVendor: isMobileVendor,
             status: 'pending',
             timestamp: now,
           ));
@@ -931,6 +943,105 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not submit your claim. Please try again.');
+    }
+  }
+
+  /// Starts a location beacon for a mobile vendor (food truck, pop-up, etc).
+  /// Owner enters their current location and expiration time. Location beacon
+  /// is a paid-tier feature (Founding Local and above only).
+  ///
+  /// Returns success on write completion. Caller is responsible for tier check.
+  static Future<ServiceResult<void>> startLocationBeacon({
+    required DocumentReference businessRef,
+    required String currentLocation,
+    required DateTime expiresAt,
+    bool autoPost = false,
+  }) async {
+    try {
+      await businessRef.update(createBusinessesRecordData(
+        mobileLocationActive: true,
+        currentLocation: currentLocation,
+        currentLocationExpiresAt: expiresAt,
+      ));
+
+      if (autoPost) {
+        await createLocationPost(
+          businessRef: businessRef,
+          location: currentLocation,
+        );
+      }
+
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not start location beacon. Please try again.');
+    }
+  }
+
+  /// Stops the active location beacon.
+  static Future<ServiceResult<void>> stopLocationBeacon({
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      await businessRef.update(createBusinessesRecordData(
+        mobileLocationActive: false,
+      ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not stop location beacon. Please try again.');
+    }
+  }
+
+  /// Updates the current location while a beacon is active.
+  static Future<ServiceResult<void>> updateLocationBeacon({
+    required DocumentReference businessRef,
+    required String newLocation,
+  }) async {
+    try {
+      await businessRef.update(createBusinessesRecordData(
+        currentLocation: newLocation,
+      ));
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not update location. Please try again.');
+    }
+  }
+
+  /// Auto-generates a location beacon post in the Exchange feed. Called
+  /// automatically by startLocationBeacon if autoPost is true, or can be
+  /// called manually by the owner.
+  static Future<ServiceResult<void>> createLocationPost({
+    required DocumentReference businessRef,
+    required String location,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to post a location beacon.');
+    }
+
+    try {
+      final business = await BusinessesRecord.getDocumentOnce(businessRef);
+      final postText =
+          '🚨 We\'re live at $location! Come find us! 🚐';
+
+      await FirebaseFirestore.instance.collection('exchange_posts').add({
+        'user_ref': userRef,
+        'business_ref': businessRef,
+        'post_text': postText,
+        'created_at': FieldValue.serverTimestamp(),
+        'is_edited': false,
+        'reaction_counts': {},
+        'is_location_beacon_post': true,
+        'beacon_location': location,
+      });
+
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not post location beacon. Please try again.');
     }
   }
 

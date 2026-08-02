@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -7,12 +8,14 @@ import '/index.dart';
 import '/services/kin_services.dart';
 import '/services/nearby_feed.dart';
 import '/services/seasonal_theme.dart';
+import '/services/kin_quest_test_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'kin_quest_model.dart';
+import 'kin_quest_map_page.dart';
 export 'kin_quest_model.dart';
 
 /// A customer-facing page for discovering and checking in at nearby
@@ -45,8 +48,10 @@ class KinQuestWidget extends StatefulWidget {
   State<KinQuestWidget> createState() => _KinQuestWidgetState();
 }
 
-class _KinQuestWidgetState extends State<KinQuestWidget> {
+class _KinQuestWidgetState extends State<KinQuestWidget>
+    with TickerProviderStateMixin {
   late KinQuestModel _model;
+  late TabController _tabController;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -80,6 +85,7 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => KinQuestModel());
+    _tabController = TabController(length: 2, vsync: this);
     getCurrentUserLocation(defaultLocation: _defaultLocation, cached: true)
         .then((loc) {
       if (!mounted) return;
@@ -92,12 +98,44 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
 
   @override
   void dispose() {
+    _tabController.dispose();
     _model.dispose();
     super.dispose();
   }
 
   bool _isRare(BusinessesRecord b) =>
       b.rarityTier == 'Rare' || b.rarityTier == 'Hidden Gem';
+
+  /// Setup test data for KIN Quest gamification (dev/demo only)
+  Future<void> _setupTestData() async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('⏳ Setting up test data...')),
+      );
+
+      await KinQuestTestData.addSampleBusinesses();
+      final userId = currentUser?.uid;
+      if (userId != null) {
+        await KinQuestTestData.addSampleDiscoveries(userId);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Test data loaded! Switch to Discovery Map tab to see businesses.'),
+            duration: Duration(seconds: 4),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('❌ Error: $e')),
+        );
+      }
+    }
+  }
 
   Future<void> _acceptTerms(DocumentReference userRef) async {
     if (_acceptingTerms) return;
@@ -157,17 +195,6 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
       appBar: AppBar(
         backgroundColor: theme.primaryBackground,
         automaticallyImplyLeading: false,
-        leading: FlutterFlowIconButton(
-          borderRadius: 8.0,
-          buttonSize: 40.0,
-          fillColor: Colors.transparent,
-          icon: Icon(
-            Icons.arrow_back_ios_new_rounded,
-            color: theme.primaryText,
-            size: 20.0,
-          ),
-          onPressed: () => context.safePop(),
-        ),
         title: Text(
           'The KIN Quest',
           style: theme.headlineMedium.override(
@@ -179,6 +206,20 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
         ),
         centerTitle: false,
         elevation: 0.0,
+        actions: [
+          // Test data button (demo/dev only)
+          Tooltip(
+            message: 'Load sample businesses and discoveries',
+            child: IconButton(
+              icon: Icon(Icons.download, color: theme.primary),
+              onPressed: _setupTestData,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: MainMenuButton(),
+          )
+        ],
       ),
       body: SafeArea(
         top: true,
@@ -200,8 +241,33 @@ class _KinQuestWidgetState extends State<KinQuestWidget> {
                   }
                   return Column(
                     children: [
-                      _rulesLinkRow(theme),
-                      Expanded(child: _questList(theme)),
+                      // Tab bar for switching between List and Discovery Map
+                      TabBar(
+                        controller: _tabController,
+                        labelColor: theme.primary,
+                        unselectedLabelColor: theme.secondaryText,
+                        indicatorColor: theme.primary,
+                        tabs: const [
+                          Tab(text: 'Quests'),
+                          Tab(text: '🎮 Discovery Map'),
+                        ],
+                      ),
+                      Expanded(
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            // Tab 1: Quest List (original)
+                            Column(
+                              children: [
+                                _rulesLinkRow(theme),
+                                Expanded(child: _questList(theme)),
+                              ],
+                            ),
+                            // Tab 2: Gamified Discovery Map (new)
+                            const KinQuestMapPage(),
+                          ],
+                        ),
+                      ),
                     ],
                   );
                 },

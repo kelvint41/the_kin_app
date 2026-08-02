@@ -488,15 +488,18 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel1,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                // theme.primaryText, not theme.primary - this
+                                // Neither branch can be a fixed literal: this
                                 // card's background is secondaryBackground,
-                                // which flips (white/dark charcoal), and
-                                // primary is a fixed dark green that read
-                                // fine on white but vanished on dark
-                                // charcoal. primaryText flips with the same
-                                // surface, so it stays legible in both modes.
+                                // which flips (white/dark charcoal). Fixed
+                                // brand gold (D4AF37) only reads at 2.1:1 on
+                                // the light-mode white card - accentOnSurface
+                                // flips to a darker gold there (5.97:1) and
+                                // to the same bright gold in dark mode
+                                // (7.38:1 on charcoal). primaryText flips
+                                // with the same surface for the non-elite
+                                // case.
                                 iconColor: widget!.isElite
-                                    ? Color(0xFFD4AF37)
+                                    ? FlutterFlowTheme.of(context).accentOnSurface
                                     : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f1,
@@ -508,15 +511,18 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel2,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                // theme.primaryText, not theme.primary - this
+                                // Neither branch can be a fixed literal: this
                                 // card's background is secondaryBackground,
-                                // which flips (white/dark charcoal), and
-                                // primary is a fixed dark green that read
-                                // fine on white but vanished on dark
-                                // charcoal. primaryText flips with the same
-                                // surface, so it stays legible in both modes.
+                                // which flips (white/dark charcoal). Fixed
+                                // brand gold (D4AF37) only reads at 2.1:1 on
+                                // the light-mode white card - accentOnSurface
+                                // flips to a darker gold there (5.97:1) and
+                                // to the same bright gold in dark mode
+                                // (7.38:1 on charcoal). primaryText flips
+                                // with the same surface for the non-elite
+                                // case.
                                 iconColor: widget!.isElite
-                                    ? Color(0xFFD4AF37)
+                                    ? FlutterFlowTheme.of(context).accentOnSurface
                                     : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f2,
@@ -528,15 +534,18 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel3,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                // theme.primaryText, not theme.primary - this
+                                // Neither branch can be a fixed literal: this
                                 // card's background is secondaryBackground,
-                                // which flips (white/dark charcoal), and
-                                // primary is a fixed dark green that read
-                                // fine on white but vanished on dark
-                                // charcoal. primaryText flips with the same
-                                // surface, so it stays legible in both modes.
+                                // which flips (white/dark charcoal). Fixed
+                                // brand gold (D4AF37) only reads at 2.1:1 on
+                                // the light-mode white card - accentOnSurface
+                                // flips to a darker gold there (5.97:1) and
+                                // to the same bright gold in dark mode
+                                // (7.38:1 on charcoal). primaryText flips
+                                // with the same surface for the non-elite
+                                // case.
                                 iconColor: widget!.isElite
-                                    ? Color(0xFFD4AF37)
+                                    ? FlutterFlowTheme.of(context).accentOnSurface
                                     : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f3,
@@ -548,15 +557,18 @@ class _TierCardWidgetState extends State<TierCardWidget>
                               model: _model.featureItemModel4,
                               updateCallback: () => safeSetState(() {}),
                               child: FeatureItemWidget(
-                                // theme.primaryText, not theme.primary - this
+                                // Neither branch can be a fixed literal: this
                                 // card's background is secondaryBackground,
-                                // which flips (white/dark charcoal), and
-                                // primary is a fixed dark green that read
-                                // fine on white but vanished on dark
-                                // charcoal. primaryText flips with the same
-                                // surface, so it stays legible in both modes.
+                                // which flips (white/dark charcoal). Fixed
+                                // brand gold (D4AF37) only reads at 2.1:1 on
+                                // the light-mode white card - accentOnSurface
+                                // flips to a darker gold there (5.97:1) and
+                                // to the same bright gold in dark mode
+                                // (7.38:1 on charcoal). primaryText flips
+                                // with the same surface for the non-elite
+                                // case.
                                 iconColor: widget!.isElite
-                                    ? Color(0xFFD4AF37)
+                                    ? FlutterFlowTheme.of(context).accentOnSurface
                                     : FlutterFlowTheme.of(context).primaryText,
                                 benefit: valueOrDefault<String>(
                                   widget!.f4,
@@ -583,8 +595,16 @@ class _TierCardWidgetState extends State<TierCardWidget>
 
   Widget _buildTrialSection(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
+    // Fixed literal - correct only for the button fill below, which pairs
+    // it with fixed Colors.black text. It must not be reused as a text
+    // color directly on the card: non-elite green on the dark-mode
+    // charcoal card is 1.27:1, and elite gold on the light-mode white
+    // card is 2.1:1. bannerTextColor follows the card's own flipping
+    // surface instead.
     final accent =
         widget!.isElite ? const Color(0xFFD4AF37) : theme.primary;
+    final bannerTextColor =
+        widget!.isElite ? theme.accentOnSurface : theme.primaryText;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -599,7 +619,7 @@ class _TierCardWidgetState extends State<TierCardWidget>
             widget!.trialBannerText!,
             style: theme.bodySmall.override(
               font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
-              color: accent,
+              color: bannerTextColor,
               letterSpacing: 0.0,
               fontWeight: FontWeight.w600,
               lineHeight: 1.4,

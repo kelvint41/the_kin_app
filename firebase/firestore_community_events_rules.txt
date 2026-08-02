@@ -1,0 +1,114 @@
+// Community Events Board Security Rules
+// Allows businesses to post events, users to browse, and admins to moderate
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    function isBusinessOwner(businessRef) {
+      return isAuthenticated() &&
+             businessRef.get().data.owner_ref.id == request.auth.uid;
+    }
+
+    function validateEventCreate(data) {
+      return data.title.size() >= 3 && data.title.size() <= 100 &&
+             data.description.size() >= 20 &&
+             data.eventDate != null &&
+             data.eventType in ['backpack_drive', 'partnership', 'volunteering', 'workshop', 'celebration', 'other'] &&
+             data.location != null;
+    }
+
+    function validateEventUpdate(data) {
+      return (!('title' in data) || (data.title.size() >= 3 && data.title.size() <= 100)) &&
+             (!('description' in data) || data.description.size() >= 20) &&
+             (!('status' in data) || data.status in ['draft', 'published', 'cancelled', 'completed']) &&
+             data.updatedAt != null;
+    }
+
+    // Community Events Collection
+    match /community_events/{eventId} {
+
+      // READ: Public browsing
+      allow read: if isAuthenticated() && resource.data.status == 'published';
+
+      // CREATE: Business owners only
+      allow create: if isAuthenticated() &&
+                       validateEventCreate(request.resource.data) &&
+                       isBusinessOwner(request.resource.data.businessRef) &&
+                       request.resource.data.createdBy.id == request.auth.uid &&
+                       request.resource.data.status == 'draft';
+
+      // UPDATE: Owner or admin only
+      allow update: if isAuthenticated() &&
+                       validateEventUpdate(request.resource.data) &&
+                       (isBusinessOwner(resource.data.businessRef) || isAdmin());
+
+      // DELETE: Soft delete only (admin + owner)
+      allow delete: if false; // No hard deletes, use soft delete via status
+
+      // Event Attendees Subcollection
+      match /attendees/{attendeeId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.createdAt != null;
+        allow update: if isAuthenticated() &&
+                         resource.data.userId == request.auth.uid;
+        allow delete: if isAuthenticated() &&
+                         resource.data.userId == request.auth.uid;
+      }
+
+      // Event Comments/Discussion
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                         request.resource.data.authorId == request.auth.uid &&
+                         request.resource.data.text.size() >= 1 &&
+                         request.resource.data.createdAt != null;
+        allow update: if isAuthenticated() &&
+                         resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() &&
+                         (resource.data.authorId == request.auth.uid || isAdmin());
+      }
+    }
+
+    // Partnership Requests Collection
+    match /partnership_requests/{requestId} {
+
+      // READ: Only owner and recipient
+      allow read: if isAuthenticated() &&
+                     (resource.data.fromBusinessRef.id in get(/databases/$(database)/documents/businesses/$(resource.data.fromBusinessRef.id)).data.owner_ref.id ||
+                      resource.data.toBusinessRef.id in get(/databases/$(database)/documents/businesses/$(resource.data.toBusinessRef.id)).data.owner_ref.id);
+
+      // CREATE: Business owners
+      allow create: if isAuthenticated() &&
+                       isBusinessOwner(request.resource.data.fromBusinessRef) &&
+                       request.resource.data.status == 'pending' &&
+                       request.resource.data.createdAt != null;
+
+      // UPDATE: Both parties can accept/decline
+      allow update: if isAuthenticated() &&
+                       (isBusinessOwner(resource.data.fromBusinessRef) ||
+                        isBusinessOwner(resource.data.toBusinessRef)) &&
+                       (!('status' in request.resource.data) ||
+                        request.resource.data.status in ['pending', 'accepted', 'declined']) &&
+                       request.resource.data.updatedAt != null;
+    }
+
+    // Community Events Metrics (for admin dashboard)
+    match /admin_metrics/community_events {
+      allow read: if isAdmin();
+      allow write: if false; // Written by Cloud Functions only
+    }
+  }
+}

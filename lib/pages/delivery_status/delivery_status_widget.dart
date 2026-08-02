@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import '/components/main_menu_button.dart';
 import '/components/tracking_step_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -158,23 +159,6 @@ class _DeliveryStatusWidgetState extends State<DeliveryStatusWidget> {
                           child: Stack(
                             alignment: AlignmentDirectional(0.0, 0.0),
                             children: [
-                              Align(
-                                alignment: AlignmentDirectional(-1.0, 0.0),
-                                child: FlutterFlowIconButton(
-                                  borderRadius: 8.0,
-                                  buttonSize: 40.0,
-                                  fillColor: Colors.transparent,
-                                  icon: Icon(
-                                    Icons.arrow_back_ios_new_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .primaryText,
-                                    size: 20.0,
-                                  ),
-                                  onPressed: () {
-                                    context.safePop();
-                                  },
-                                ),
-                              ),
                               Text(
                                 'Delivery Status',
                                 style: FlutterFlowTheme.of(context)
@@ -195,6 +179,13 @@ class _DeliveryStatusWidgetState extends State<DeliveryStatusWidget> {
                                           .fontStyle,
                                       lineHeight: 1.4,
                                     ),
+                              ),
+                              Align(
+                                alignment: AlignmentDirectional(1.0, -1.0),
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: MainMenuButton(),
+                                ),
                               ),
                             ],
                           ),

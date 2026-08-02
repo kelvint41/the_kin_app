@@ -32,12 +32,17 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
   // State field(s) for the "Don't see your category?" field.
   FocusNode? otherCategoryFocusNode;
   TextEditingController? otherCategoryTextController;
+  // Whether the "Don't see your category?" field is expanded. Starts
+  // collapsed behind a text link so the common case (category picked from
+  // the dropdown) doesn't pay for a full-width field it won't use.
+  bool showOtherCategoryField = false;
   // Model for SectionHeader.
   late SectionHeaderModel sectionHeaderModel2;
   // State field(s) for PlacePicker widget.
   FFPlace placePickerValue = FFPlace();
-  // Selected business type (Choice Chips).
+  // Selected business type.
   String businessType = 'Sole Proprietor';
+  FormFieldController<String>? businessTypeValueController;
   // Whether this is a Black-owned business (defaults to true per design spec).
   bool isBlackOwned = true;
   // State field(s) for BusinessName widget.

@@ -3,12 +3,14 @@ import '/backend/backend.dart';
 import '/services/kin_services.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
+import '/components/location_beacon_card_widget.dart';
 import '/components/mystery_reward_panel_widget.dart';
 import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
 import '/components/main_menu_button.dart';
+import '/components/owner_roi_dashboard_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -132,17 +134,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           automaticallyImplyLeading: false,
-          leading: FlutterFlowIconButton(
-            borderRadius: 8.0,
-            buttonSize: 40.0,
-            fillColor: Colors.transparent,
-            icon: Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: FlutterFlowTheme.of(context).primaryText,
-              size: 20.0,
-            ),
-            onPressed: () => context.safePop(),
-          ),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
@@ -222,39 +213,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                 child: Stack(
                   alignment: AlignmentDirectional(-1.0, -1.0),
                   children: [
-                    // This page has no AppBar - the hero image fills that
-                    // role visually - so it never had a back button either.
-                    // Reached from the map hamburger menu's "My Business /
-                    // Profile" and pushed (not replaced), so there was
-                    // always a screen to return to; there just wasn't a
-                    // button for it.
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: FlutterFlowIconButton(
-                          borderRadius: 8.0,
-                          buttonSize: 37.4,
-                          fillColor:
-                              FlutterFlowTheme.of(context).primaryBackground,
-                          icon: Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 20.0,
-                          ),
-                          onPressed: () => context.safePop(),
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: AlignmentDirectional(1.0, -1.0),
-                      child: SafeArea(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: MainMenuButton(
-                              extraItems: _ownerMenuItems(context)),
-                        ),
-                      ),
-                    ),
                     Align(
                       alignment: AlignmentDirectional(0.0, 0.0),
                       // Was a hardcoded dimg.dreamflow.cloud placeholder -
@@ -430,11 +388,53 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         ),
                       ),
                     ),
+                    // This page has no AppBar - the hero image fills that
+                    // role visually - so it never had a back button either.
+                    // Reached from the map hamburger menu's "My Business /
+                    // Profile" and pushed (not replaced), so there was
+                    // always a screen to return to; there just wasn't a
+                    // button for it.
+                    //
+                    // These must paint after (i.e. be listed below) the hero
+                    // image and gradient above - they were previously listed
+                    // first, so the opaque hero image painted over them and
+                    // silently absorbed every tap meant for them. Both
+                    // buttons were invisible and completely unreachable as a
+                    // result, which also made every "Setup" / "Get Support" /
+                    // "My Items" menu item unreachable, since they all live
+                    // behind this same hamburger button.
+                    Align(
+                      alignment: AlignmentDirectional(1.0, -1.0),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: MainMenuButton(
+                              extraItems: _ownerMenuItems(context)),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
+              // ROI Dashboard - Prominently displayed to drive tier upgrades
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
+                padding: EdgeInsetsDirectional.fromSTEB(16.0, 24.0, 16.0, 24.0),
+                child: StreamBuilder<BusinessesRecord>(
+                  stream: BusinessesRecord.getDocument(
+                      currentUserDocument!.ownedBusiness!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return SizedBox.shrink();
+                    }
+                    return OwnerROIDashboardWidget(
+                      businessId: snapshot.data!.reference.id,
+                      currentTier: currentUserDocument?.subscriptionTier ?? 'free',
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -909,6 +909,46 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                             );
                           },
                         ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
+                      child: StreamBuilder<BusinessesRecord>(
+                        stream: BusinessesRecord.getDocument(
+                            currentUserDocument!.ownedBusiness!),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return SizedBox(
+                              height: 120.0,
+                              child: Center(
+                                child: SizedBox(
+                                  width: 24.0,
+                                  height: 24.0,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      FlutterFlowTheme.of(context).secondaryText,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          final beaconBusinessesRecord = snapshot.data!;
+                          return LocationBeaconCardWidget(
+                            businessRef:
+                                beaconBusinessesRecord.reference,
+                            businessName:
+                                beaconBusinessesRecord.businessName,
+                            isMobileVendor:
+                                beaconBusinessesRecord.isMobileVendor,
+                            currentLocation:
+                                beaconBusinessesRecord.currentLocation,
+                            expiresAt: beaconBusinessesRecord
+                                .currentLocationExpiresAt,
+                            isActive: beaconBusinessesRecord
+                                .mobileLocationActive,
+                          );
+                        },
                       ),
                     ),
                   ].divide(SizedBox(height: 16.0)),

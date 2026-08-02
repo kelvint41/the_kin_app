@@ -57,172 +57,196 @@ class MainMenuButton extends StatelessWidget {
 /// requires a real businessRef, so it's the only item gated on actually
 /// owning a business - My Business self-guards internally (OwnerProfileWidget
 /// already shows its own "set up your business" empty state).
-void showMainMenuSheet(BuildContext context, {List<Widget> extraItems = const []}) {
+void showMainMenuSheet(BuildContext context,
+    {List<Widget> extraItems = const []}) {
   final theme = FlutterFlowTheme.of(context);
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
+    // The base 4 items plus a page's extraItems (Owner Profile alone adds
+    // up to 6, 7 for admins) plus the divider and sign-out row can add up
+    // to more than the screen's height. A plain, non-scrollable Column
+    // here doesn't clip or scroll past that - it silently overflows, with
+    // the bottom rows (Get Support, My Items, Sign Out) rendered off the
+    // bottom of the screen and unreachable. isScrollControlled plus the
+    // SingleChildScrollView/ConstrainedBox below let it scroll instead.
+    isScrollControlled: true,
     builder: (sheetContext) {
-      return Container(
-        decoration: BoxDecoration(
-          color: theme.primaryBackground,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(theme.designToken.radius.lg),
-            topRight: Radius.circular(theme.designToken.radius.lg),
-          ),
+      return ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(sheetContext).size.height * 0.85,
         ),
-        child: SafeArea(
-          child: Padding(
-            padding:
-                EdgeInsets.symmetric(vertical: theme.designToken.spacing.md),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.0,
-                  height: 4.0,
-                  margin:
-                      EdgeInsets.only(bottom: theme.designToken.spacing.md),
-                  decoration: BoxDecoration(
-                    color: theme.alternate,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
-                ),
-                ListTile(
-                  leading:
-                      Icon(Icons.forum_outlined, color: theme.primaryText),
-                  title: Text('The Exchange', style: theme.bodyLarge),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    // No longer gated on owning a business. The Exchange
-                    // is a global feed that anyone can read and post to,
-                    // so requiring a business here turned the menu item
-                    // into a no-op with a snackbar for every customer -
-                    // most of the people it exists for. A null ref just
-                    // means posts carry no business tag.
-                    final businessRef = currentUserDocument?.ownedBusiness;
-                    context.pushNamed(
-                      TheExchangeWidget.routeName,
-                      queryParameters: {
-                        'businessRef': serializeParam(
-                          businessRef,
-                          ParamType.DocumentReference,
-                        ),
-                      }.withoutNulls,
-                    );
-                  },
-                ),
-                // Always visible, not role-adaptive - Showcase is
-                // discovery for everyone, same as the map itself. No
-                // auth required, matching ShowcaseWidget's public route.
-                ListTile(
-                  leading: Icon(Icons.storefront_outlined,
-                      color: theme.primaryText),
-                  title: Text('Showcase', style: theme.bodyLarge),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.pushNamed(ShowcaseWidget.routeName);
-                  },
-                ),
-                // Was unconditionally OwnerProfileWidget - every signed-in
-                // user got the owner dashboard regardless of role. A
-                // customer with no owned business landed on
-                // OwnerProfileWidget's "set up your business" empty state
-                // instead of their own profile. Branches on the same
-                // ownedBusiness check OwnerProfileWidget itself already
-                // guards on (see its build() method).
-                ListTile(
-                  leading: Icon(
-                    currentUserDocument?.ownedBusiness != null
-                        ? Icons.storefront_rounded
-                        : Icons.person_rounded,
-                    color: theme.primaryText,
-                  ),
-                  title: Text(
-                    currentUserDocument?.ownedBusiness != null
-                        ? 'My Business / Profile'
-                        : 'My Profile',
-                    style: theme.bodyLarge,
-                  ),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.pushNamed(
-                      currentUserDocument?.ownedBusiness != null
-                          ? OwnerProfileWidget.routeName
-                          : CustomerProfilePageWidget.routeName,
-                    );
-                  },
-                ),
-                // Same slot, different destination by role. A business
-                // owner has no reason to play the customer Quest
-                // themselves (see KinQuestWidget's own doc comment -
-                // deliberately customer-only), but the underlying
-                // check-in data is exactly what they'd want to see about
-                // their own business - so this becomes their insights
-                // dashboard instead of just disappearing.
-                ListTile(
-                  leading: Icon(
-                    currentUserDocument?.ownedBusiness != null
-                        ? Icons.insights_rounded
-                        : Icons.explore_rounded,
-                    color: theme.primaryText,
-                  ),
-                  title: Text(
-                    currentUserDocument?.ownedBusiness != null
-                        ? 'Business Insights'
-                        : 'The KIN Quest',
-                    style: theme.bodyLarge,
-                  ),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    context.pushNamed(
-                      currentUserDocument?.ownedBusiness != null
-                          ? BusinessInsightsWidget.routeName
-                          : KinQuestWidget.routeName,
-                    );
-                  },
-                ),
-                ...extraItems,
-                Divider(
-                  height: theme.designToken.spacing.md,
-                  thickness: 1.0,
-                  indent: 16.0,
-                  endIndent: 16.0,
-                  color: theme.alternate,
-                ),
-                // The account row. Before this existed there was no way to
-                // sign out anywhere in the app, so a device stayed signed in
-                // to whoever used it first.
-                if (loggedIn)
-                  ListTile(
-                    leading: Icon(Icons.logout_rounded, color: theme.error),
-                    title: Text(
-                      'Sign Out',
-                      style: theme.bodyLarge.override(color: theme.error),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.primaryBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(theme.designToken.radius.lg),
+              topRight: Radius.circular(theme.designToken.radius.lg),
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: theme.designToken.spacing.md),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40.0,
+                      height: 4.0,
+                      margin:
+                          EdgeInsets.only(bottom: theme.designToken.spacing.md),
+                      decoration: BoxDecoration(
+                        color: theme.alternate,
+                        borderRadius: BorderRadius.circular(2.0),
+                      ),
                     ),
-                    subtitle: currentUserEmail.isEmpty
-                        ? null
-                        : Text(
-                            currentUserEmail,
-                            style: theme.bodySmall
-                                .override(color: theme.secondaryText),
-                          ),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      confirmSignOut(context);
-                    },
-                  )
-                else
-                  ListTile(
-                    leading:
-                        Icon(Icons.login_rounded, color: theme.primaryText),
-                    title: Text('Sign In', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(SignInPageWidget.routeName);
-                    },
-                  ),
-              ],
+                    ListTile(
+                      leading: Icon(Icons.map_outlined, color: theme.primaryText),
+                      title: Text('Map', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(GoogleMapPageWidget.routeName);
+                      },
+                    ),
+                    ListTile(
+                      leading:
+                          Icon(Icons.forum_outlined, color: theme.primaryText),
+                      title: Text('The Exchange', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        // No longer gated on owning a business. The Exchange
+                        // is a global feed that anyone can read and post to,
+                        // so requiring a business here turned the menu item
+                        // into a no-op with a snackbar for every customer -
+                        // most of the people it exists for. A null ref just
+                        // means posts carry no business tag.
+                        final businessRef = currentUserDocument?.ownedBusiness;
+                        context.pushNamed(
+                          TheExchangeWidget.routeName,
+                          queryParameters: {
+                            'businessRef': serializeParam(
+                              businessRef,
+                              ParamType.DocumentReference,
+                            ),
+                          }.withoutNulls,
+                        );
+                      },
+                    ),
+                    // Always visible, not role-adaptive - Showcase is
+                    // discovery for everyone, same as the map itself. No
+                    // auth required, matching ShowcaseWidget's public route.
+                    ListTile(
+                      leading: Icon(Icons.storefront_outlined,
+                          color: theme.primaryText),
+                      title: Text('Showcase', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(ShowcaseWidget.routeName);
+                      },
+                    ),
+                    // Was unconditionally OwnerProfileWidget - every signed-in
+                    // user got the owner dashboard regardless of role. A
+                    // customer with no owned business landed on
+                    // OwnerProfileWidget's "set up your business" empty state
+                    // instead of their own profile. Branches on the same
+                    // ownedBusiness check OwnerProfileWidget itself already
+                    // guards on (see its build() method).
+                    ListTile(
+                      leading: Icon(
+                        currentUserDocument?.ownedBusiness != null
+                            ? Icons.storefront_rounded
+                            : Icons.person_rounded,
+                        color: theme.primaryText,
+                      ),
+                      title: Text(
+                        currentUserDocument?.ownedBusiness != null
+                            ? 'My Business / Profile'
+                            : 'My Profile',
+                        style: theme.bodyLarge,
+                      ),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(
+                          currentUserDocument?.ownedBusiness != null
+                              ? OwnerProfileWidget.routeName
+                              : CustomerProfilePageWidget.routeName,
+                        );
+                      },
+                    ),
+                    // Same slot, different destination by role. A business
+                    // owner has no reason to play the customer Quest
+                    // themselves (see KinQuestWidget's own doc comment -
+                    // deliberately customer-only), but the underlying
+                    // check-in data is exactly what they'd want to see about
+                    // their own business - so this becomes their insights
+                    // dashboard instead of just disappearing.
+                    ListTile(
+                      leading: Icon(
+                        currentUserDocument?.ownedBusiness != null
+                            ? Icons.insights_rounded
+                            : Icons.explore_rounded,
+                        color: theme.primaryText,
+                      ),
+                      title: Text(
+                        currentUserDocument?.ownedBusiness != null
+                            ? 'Business Insights'
+                            : 'The KIN Quest',
+                        style: theme.bodyLarge,
+                      ),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(
+                          currentUserDocument?.ownedBusiness != null
+                              ? BusinessInsightsWidget.routeName
+                              : KinQuestWidget.routeName,
+                        );
+                      },
+                    ),
+                    ...extraItems,
+                    Divider(
+                      height: theme.designToken.spacing.md,
+                      thickness: 1.0,
+                      indent: 16.0,
+                      endIndent: 16.0,
+                      color: theme.alternate,
+                    ),
+                    // The account row. Before this existed there was no way to
+                    // sign out anywhere in the app, so a device stayed signed in
+                    // to whoever used it first.
+                    if (loggedIn)
+                      ListTile(
+                        leading: Icon(Icons.logout_rounded, color: theme.error),
+                        title: Text(
+                          'Sign Out',
+                          style: theme.bodyLarge.override(color: theme.error),
+                        ),
+                        subtitle: currentUserEmail.isEmpty
+                            ? null
+                            : Text(
+                                currentUserEmail,
+                                style: theme.bodySmall
+                                    .override(color: theme.secondaryText),
+                              ),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          confirmSignOut(context);
+                        },
+                      )
+                    else
+                      ListTile(
+                        leading:
+                            Icon(Icons.login_rounded, color: theme.primaryText),
+                        title: Text('Sign In', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(SignInPageWidget.routeName);
+                        },
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

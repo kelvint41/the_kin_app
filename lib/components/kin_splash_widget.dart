@@ -192,7 +192,15 @@ class _KinSplashWidgetState extends State<KinSplashWidget>
                             child: Text(
                               _taglineWords[i],
                               style: theme.labelMedium.override(
-                                color: theme.secondary,
+                                // The splash's gradient (line ~120) is a
+                                // fixed green-to-near-black literal, not
+                                // theme-aware. theme.secondary flips to a
+                                // darker gold in light mode (2.63:1 here vs
+                                // 4.97:1 in dark), so it doesn't match this
+                                // always-dark surface. accent1, already used
+                                // for the glow above, is fixed and holds
+                                // 5.8:1+ regardless of theme.
+                                color: theme.accent1,
                                 letterSpacing: 2.2,
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.none,
