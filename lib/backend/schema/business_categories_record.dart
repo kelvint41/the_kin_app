@@ -32,9 +32,22 @@ class BusinessCategoriesRecord extends FirestoreRecord {
   DateTime? get createdAt => _createdAt;
   bool hasCreatedAt() => _createdAt != null;
 
+  // "quest_eligible" field. Whether businesses in this category can appear
+  // in the KIN Quest. Defaults to true when absent so an unflagged or
+  // newly-added category behaves the way every category did before this
+  // existed - only an explicit `false` opts a category out.
+  //
+  // Exists for service-area businesses (home care and similar): the client
+  // never visits the office, so a check-in Quest entry makes no sense, even
+  // though the business should still be listed and on the Job Board.
+  bool? _questEligible;
+  bool get questEligible => _questEligible ?? true;
+  bool hasQuestEligible() => _questEligible != null;
+
   void _initializeFields() {
     _displayName = snapshotData['display_name'] as String?;
     _createdAt = snapshotData['created_at'] as DateTime?;
+    _questEligible = snapshotData['quest_eligible'] as bool?;
   }
 
   static CollectionReference get collection =>

@@ -84,3 +84,12 @@ exports.sendPasswordReset = sendPasswordReset.sendPasswordReset;
 
 const moderateImageUpload = require("./moderate_image_upload.js");
 exports.moderateImageUpload = moderateImageUpload.moderateImageUpload;
+
+const jobBoard = require("./job_board.js");
+exports.trackJobView = jobBoard.trackJobView;
+exports.notifyOnJobApply = jobBoard.notifyOnJobApply;
+exports.expireJobPostings = jobBoard.expireJobPostings;
+exports.calculateJobBoardMetrics = jobBoard.calculateJobBoardMetrics;
+
+const communityEvents = require("./community_events.js");
+exports.notifyPartnershipRequest = communityEvents.notifyPartnershipRequest;

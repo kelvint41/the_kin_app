@@ -1,5 +1,6 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/quest_eligibility.dart';
 import 'kin_quest_widget.dart' show KinQuestWidget;
 import 'package:flutter/material.dart';
 
@@ -14,10 +15,14 @@ class KinQuestModel extends FlutterFlowModel<KinQuestWidget> {
   /// The directory, fetched once per visit - same one-shot pattern as
   /// NearbyFeedModel.businesses(). Rarity/points fields on each record are
   /// static enough that a live listener isn't worth paying for here.
+  ///
+  /// Excludes categories opted out of the Quest (see [QuestEligibility]) -
+  /// a home care agency has an office nobody visits, so it belongs in the
+  /// directory and the Job Board but not on a check-in list.
   Future<List<BusinessesRecord>>? _businesses;
 
   Future<List<BusinessesRecord>> businesses() =>
-      _businesses ??= queryBusinessesRecordOnce();
+      _businesses ??= QuestEligibility.questEligibleBusinesses();
 
   /// True while a check-in call is in flight, to disable the button and
   /// stop a double-tap firing two check-ins (the server already dedupes,
