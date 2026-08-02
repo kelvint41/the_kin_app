@@ -68,9 +68,9 @@ class _JobCreatePageState extends State<JobCreatePage> {
             'Post a Job',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           centerTitle: false,
@@ -218,9 +218,9 @@ class _JobCreatePageState extends State<JobCreatePage> {
                     color: theme.primary,
                     textStyle: theme.titleSmall.override(
                       font: GoogleFonts.plusJakartaSans(
-                        color: theme.info,
                         fontWeight: FontWeight.w600,
                       ),
+                      color: theme.info
                     ),
                     elevation: 0.0,
                     borderRadius: BorderRadius.circular(12.0),

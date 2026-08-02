@@ -67,9 +67,9 @@ class _EventCreatePageState extends State<EventCreatePage> {
             'Create Event',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           centerTitle: false,
@@ -198,9 +198,9 @@ class _EventCreatePageState extends State<EventCreatePage> {
                     color: theme.primary,
                     textStyle: theme.titleSmall.override(
                       font: GoogleFonts.plusJakartaSans(
-                        color: theme.info,
                         fontWeight: FontWeight.w600,
                       ),
+                      color: theme.info
                     ),
                     elevation: 0.0,
                     borderRadius: BorderRadius.circular(12.0),

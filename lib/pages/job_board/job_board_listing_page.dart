@@ -73,9 +73,9 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
             'Job Board',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           actions: [

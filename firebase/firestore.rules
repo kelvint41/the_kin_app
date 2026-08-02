@@ -618,15 +618,17 @@ service cloud.firestore {
       allow delete: if false;
 
       // Same two parties as the parent application, resolved by reading it.
+      // update exists only for markMessageAsRead and is gated identically -
+      // leaving it at `request.auth != null` would have let any signed-in
+      // user write into a conversation they have no part in.
       match /messages/{messageId} {
-        allow read, create: if request.auth != null
+        allow read, create, update: if request.auth != null
           && (get(/databases/$(database)/documents/job_applications/$(document))
                 .data.applicantRef
                 == /databases/$(database)/documents/users/$(request.auth.uid)
               || get(get(/databases/$(database)/documents/job_applications/$(document))
                 .data.businessRef).data.owner_ref
                 == /databases/$(database)/documents/users/$(request.auth.uid));
-        allow update: if request.auth != null;
         allow delete: if false;
       }
     }

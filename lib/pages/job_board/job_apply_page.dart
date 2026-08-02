@@ -83,9 +83,9 @@ class _JobApplyPageState extends State<JobApplyPage> {
             'Apply to Job',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           centerTitle: false,
@@ -190,9 +190,9 @@ class _JobApplyPageState extends State<JobApplyPage> {
                     color: theme.primary,
                     textStyle: theme.titleSmall.override(
                       font: GoogleFonts.plusJakartaSans(
-                        color: theme.info,
                         fontWeight: FontWeight.w600,
                       ),
+                      color: theme.info
                     ),
                     elevation: 0.0,
                     borderRadius: BorderRadius.circular(12.0),

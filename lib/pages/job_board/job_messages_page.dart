@@ -44,9 +44,9 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
             widget.otherUserName,
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           centerTitle: false,

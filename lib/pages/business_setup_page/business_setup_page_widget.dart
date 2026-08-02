@@ -506,7 +506,8 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                         'Restaurant & Food',
                                         'Retail',
                                         'Professional Services',
-                                        'Health & Wellness'
+                                        'Health & Wellness',
+                                        'Home Care & Health Services'
                                       ];
                                 return FlutterFlowDropDown<String>(
                                   controller:

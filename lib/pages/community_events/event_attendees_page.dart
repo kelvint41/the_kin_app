@@ -27,9 +27,9 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
           'Attendees',
           style: theme.headlineMedium.override(
             font: GoogleFonts.plusJakartaSans(
-              color: theme.info,
               fontWeight: FontWeight.w600,
             ),
+            color: theme.info
           ),
         ),
         centerTitle: false,

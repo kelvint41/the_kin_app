@@ -32,9 +32,9 @@ class _EventManagementPageState extends State<EventManagementPage> {
           'My Events',
           style: theme.headlineMedium.override(
             font: GoogleFonts.plusJakartaSans(
-              color: theme.info,
               fontWeight: FontWeight.w600,
             ),
+            color: theme.info
           ),
         ),
         centerTitle: false,

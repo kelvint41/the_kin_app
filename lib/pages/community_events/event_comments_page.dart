@@ -38,9 +38,9 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
             'Discussion',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
-                color: theme.info,
                 fontWeight: FontWeight.w600,
               ),
+              color: theme.info
             ),
           ),
           centerTitle: false,

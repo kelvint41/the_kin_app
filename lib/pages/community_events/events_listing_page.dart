@@ -60,9 +60,9 @@ class _EventsListingPageState extends State<EventsListingPage>
           'Community Events',
           style: theme.headlineMedium.override(
             font: GoogleFonts.plusJakartaSans(
-              color: theme.info,
               fontWeight: FontWeight.w600,
             ),
+            color: theme.info
           ),
         ),
         actions: [

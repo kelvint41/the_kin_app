@@ -29,9 +29,9 @@ class _JobApplicantsPageState extends State<JobApplicantsPage> {
           'Applicants',
           style: theme.headlineMedium.override(
             font: GoogleFonts.plusJakartaSans(
-              color: theme.info,
               fontWeight: FontWeight.w600,
             ),
+            color: theme.info
           ),
         ),
         centerTitle: false,
