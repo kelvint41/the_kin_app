@@ -54,7 +54,7 @@ class _OwnerROIDashboardWidgetState extends State<OwnerROIDashboardWidget> {
           .count()
           .get();
 
-      final discoveries = discoveriesSnapshot.data().count;
+      final discoveries = discoveriesSnapshot.count;
 
       // Metric 2: Job Applications
       final jobsSnapshot = await FirebaseFirestore.instance
@@ -69,7 +69,7 @@ class _OwnerROIDashboardWidgetState extends State<OwnerROIDashboardWidget> {
             .where('appliedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
             .count()
             .get();
-        jobApplications += appSnapshot.data().count;
+        jobApplications += appSnapshot.count ?? 0;
       }
 
       // Metric 3: Event Attendees
@@ -85,12 +85,12 @@ class _OwnerROIDashboardWidgetState extends State<OwnerROIDashboardWidget> {
             .collection('attendees')
             .count()
             .get();
-        eventAttendees += attendeesSnapshot.data().count;
+        eventAttendees += attendeesSnapshot.count ?? 0;
       }
 
       // Calculate estimated ROI (rough estimate)
       const avgTransactionValue = 15.0; // Average transaction value
-      final estimatedRevenue = discoveries * avgTransactionValue;
+      final estimatedRevenue = (discoveries ?? 0) * avgTransactionValue;
 
       return {
         'discoveries': discoveries,

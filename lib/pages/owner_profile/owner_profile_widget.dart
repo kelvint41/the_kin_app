@@ -428,7 +428,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                     }
                     return OwnerROIDashboardWidget(
                       businessId: snapshot.data!.reference.id,
-                      currentTier: currentUserDocument?.subscriptionTier ?? 'free',
+                      currentTier: snapshot.data!.subscriptionTier ?? 'free',
                     );
                   },
                 ),

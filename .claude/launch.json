@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "the_kin_app",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "iphone", "--dart-define-from-file=.env"],
+      "port": 5000
+    }
+  ]
+}
