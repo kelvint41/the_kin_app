@@ -349,6 +349,17 @@ class BusinessesRecord extends FirestoreRecord {
   bool get isVerified => _isVerified ?? false;
   bool hasIsVerified() => _isVerified != null;
 
+  // "quest_eligible" field. Per-business override for Quest visibility,
+  // authoritative over the category-level flag.
+  //
+  // Needed because `category` on the bulk-imported rows is a raw Google
+  // Places string ("hair salon", "home health care service"), not one of
+  // the curated business_categories display names - so the category flag
+  // alone can't reach them. Null means "defer to the category".
+  bool? _questEligible;
+  bool? get questEligible => _questEligible;
+  bool hasQuestEligible() => _questEligible != null;
+
   // "facebook_url" field.
   String? _facebookUrl;
   String get facebookUrl => _facebookUrl ?? '';
@@ -555,6 +566,7 @@ class BusinessesRecord extends FirestoreRecord {
     _ownerRef = snapshotData['owner_ref'] as DocumentReference?;
     _instagramUrl = snapshotData['instagram_url'] as String?;
     _isVerified = snapshotData['is_verified'] as bool?;
+    _questEligible = snapshotData['quest_eligible'] as bool?;
     _facebookUrl = snapshotData['facebook_url'] as String?;
     _tiktokUrl = snapshotData['tiktok_url'] as String?;
     _linkedinUrl = snapshotData['linkedin_url'] as String?;

@@ -32,20 +32,35 @@ class QuestEligibility {
         .toSet();
   }
 
-  /// [businesses] minus those in a Quest-excluded category.
+  /// [businesses] minus those excluded from the Quest.
   ///
-  /// A business whose `category` is empty or doesn't match any known
-  /// category is kept: the fallback is "behaves as it did before", so a
-  /// typo or a legacy row never silently disappears from the Quest.
+  /// Two levels, checked in this order:
+  ///
+  ///  1. `businesses.quest_eligible` - a per-business override. Set on the
+  ///     doc, it wins outright.
+  ///  2. `business_categories.quest_eligible` - the category default,
+  ///     matched on the category's display name.
+  ///
+  /// The override exists because `category` on the ~500 bulk-imported rows
+  /// is a raw Google Places string ("hair salon", "home health care
+  /// service"), not one of the six curated display names - so the category
+  /// flag only reaches businesses that picked a category through KIN's own
+  /// setup form. Without the override, an imported home care agency would
+  /// stay in the Quest no matter what the category said.
+  ///
+  /// A business whose category is empty or matches nothing is kept: the
+  /// fallback is "behaves as it did before", so a typo or a legacy row
+  /// never silently disappears from the Quest.
   static List<BusinessesRecord> filterQuestEligible(
     List<BusinessesRecord> businesses,
     Set<String> excludedCategoryNames,
   ) {
-    if (excludedCategoryNames.isEmpty) return businesses;
-    return businesses
-        .where((b) =>
-            !excludedCategoryNames.contains(b.category.trim().toLowerCase()))
-        .toList();
+    return businesses.where((b) {
+      final override = b.questEligible;
+      if (override != null) return override;
+      if (excludedCategoryNames.isEmpty) return true;
+      return !excludedCategoryNames.contains(b.category.trim().toLowerCase());
+    }).toList();
   }
 
   /// Convenience: load every business, minus the Quest-excluded categories.
