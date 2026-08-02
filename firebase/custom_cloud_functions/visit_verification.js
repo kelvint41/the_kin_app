@@ -86,7 +86,10 @@ function haversineMeters(a, b) {
 function businessCoords(business) {
   const geo = business.business_location || business.coordinates;
   if (geo && typeof geo.latitude === "number" && typeof geo.longitude === "number") {
-    return { lat: geo.latitude, lng: geo.longitude };
+    // Reject 0,0 for GeoPoints too - it indicates unset/empty coordinates
+    if (!(geo.latitude === 0 && geo.longitude === 0)) {
+      return { lat: geo.latitude, lng: geo.longitude };
+    }
   }
   if (
     typeof business.latitude === "number" &&
