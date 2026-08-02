@@ -1,13 +1,16 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
+import '/services/engagement_stats.dart';
+import '/components/create_promotion_sheet.dart';
 import '/components/exchange_feed_item_widget.dart';
 import '/components/kindex_spotlight_widget.dart';
 import '/components/main_menu_button.dart';
+import '/components/promo_card_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
-import '/old_designs/premium_story/premium_story_widget.dart';
+import '/flutter_flow/flutter_flow_widgets.dart';
 import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
 import '/index.dart';
 import 'dart:ui';
@@ -234,68 +237,106 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     return true;
   }
 
+  /// The "New Post" composer dialog for a verified business owner.
+  ///
+  /// Both the header's add_box_outlined button and the "Your Story" tile
+  /// open this. It used to skip the conduct check entirely and write
+  /// straight to Firestore with no try/catch - firestore.rules requires
+  /// exchange_profiles.agreed_to_conduct for every exchange_posts create, so
+  /// an owner who hadn't accepted yet got an unhandled permission-denied
+  /// exception and no feedback. This mirrors the persistent composer's
+  /// _ensureConductAccepted + try/catch instead.
+  Future<void> _showNewPostDialog(
+    BuildContext context,
+    DocumentReference? businessRef,
+  ) async {
+    if (!await _ensureConductAccepted()) return;
+    if (!context.mounted) return;
+    final theme = FlutterFlowTheme.of(context);
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: theme.secondaryBackground,
+          title: Text('New Post', style: theme.headlineSmall),
+          content: TextFormField(
+            controller: _model.postTextController,
+            focusNode: _model.postTextFieldFocusNode,
+            autofocus: true,
+            maxLines: 4,
+            style: theme.bodyMedium.override(color: theme.primaryText),
+            decoration: InputDecoration(
+              hintText: 'What\'s happening at your business?',
+              hintStyle: theme.bodyMedium.override(color: theme.hint),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text('Cancel',
+                  style: theme.bodyMedium
+                      .override(color: theme.secondaryText)),
+            ),
+            TextButton(
+              onPressed: () async {
+                final postText =
+                    _model.postTextController!.text.trim();
+                if (postText.isEmpty || currentUserReference == null) {
+                  return;
+                }
+                final exchangePostsRecordReference =
+                    ExchangePostsRecord.collection.doc();
+                try {
+                  await exchangePostsRecordReference.set(
+                    createExchangePostsRecordData(
+                      postId: exchangePostsRecordReference.id,
+                      userRef: currentUserReference,
+                      businessRef: businessRef,
+                      postText: postText,
+                      timestamp: getCurrentTimestamp,
+                      likesCount: 0,
+                    ),
+                  );
+                } catch (e) {
+                  if (dialogContext.mounted) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      SnackBar(content: Text('Could not post: $e')),
+                    );
+                  }
+                  return;
+                }
+                try {
+                  await UserEngagementEventsRecord.collection.doc().set(
+                        createUserEngagementEventsRecordData(
+                          userRef: currentUserReference,
+                          businessRef: businessRef,
+                          targetRef: exchangePostsRecordReference,
+                          eventType: 'post',
+                          createdAt: getCurrentTimestamp,
+                        ),
+                      );
+                } catch (_) {}
+                _model.postTextController?.clear();
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
+                }
+              },
+              child: Text('Post',
+                  style: theme.bodyMedium.override(
+                      color: theme.primaryText,
+                      fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _model.dispose();
 
     super.dispose();
-  }
-
-  /// Shown when there is no business to display a feed for - reached from the
-  /// Directory tab by a user who does not own a business yet.
-  Widget _buildNoBusinessState(BuildContext context) {
-    return Scaffold(
-      key: scaffoldKey,
-      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsetsDirectional.fromSTEB(32.0, 0.0, 32.0, 0.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.storefront_outlined,
-                color: FlutterFlowTheme.of(context).secondaryText,
-                size: 48.0,
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 16.0, 0.0, 8.0),
-                child: Text(
-                  'No business selected',
-                  textAlign: TextAlign.center,
-                  style: FlutterFlowTheme.of(context).headlineSmall,
-                ),
-              ),
-              Text(
-                'Open The Exchange from a business profile, or claim your own '
-                'business to start posting.',
-                textAlign: TextAlign.center,
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      color: FlutterFlowTheme.of(context).secondaryText,
-                    ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
-                child: TextButton(
-                  onPressed: () => context.safePop(),
-                  child: Text(
-                    'Go back',
-                    // Not `primary` - that token is the brand dark green,
-                    // which is close to unreadable on the dark background
-                    // this page uses.
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -467,96 +508,10 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             if (!isVerifiedBusinessOwner) {
                                               return;
                                             }
-                                            await showDialog(
-                                              context: context,
-                                              builder: (dialogContext) {
-                                                return AlertDialog(
-                                                  title: Text('New Post'),
-                                                  content: TextFormField(
-                                                    controller: _model
-                                                        .postTextController,
-                                                    focusNode: _model
-                                                        .postTextFieldFocusNode,
-                                                    autofocus: true,
-                                                    maxLines: 4,
-                                                    decoration: InputDecoration(
-                                                      hintText:
-                                                          'What\'s happening at your business?',
-                                                    ),
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              dialogContext),
-                                                      child: Text('Cancel'),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () async {
-                                                        final postText = _model
-                                                            .postTextController!
-                                                            .text
-                                                            .trim();
-                                                        if (postText.isEmpty ||
-                                                            currentUserReference ==
-                                                                null) {
-                                                          return;
-                                                        }
-                                                        final exchangePostsRecordReference =
-                                                            ExchangePostsRecord
-                                                                .collection
-                                                                .doc();
-                                                        await exchangePostsRecordReference
-                                                            .set(
-                                                          createExchangePostsRecordData(
-                                                            postId:
-                                                                exchangePostsRecordReference
-                                                                    .id,
-                                                            userRef:
-                                                                currentUserReference,
-                                                            businessRef:
-                                                                theExchangeBusinessesRecord
-                                                                    ?.reference,
-                                                            postText: postText,
-                                                            timestamp:
-                                                                getCurrentTimestamp,
-                                                            likesCount: 0,
-                                                          ),
-                                                        );
-                                                        try {
-                                                          await UserEngagementEventsRecord
-                                                              .collection
-                                                              .doc()
-                                                              .set(
-                                                                createUserEngagementEventsRecordData(
-                                                                  userRef:
-                                                                      currentUserReference,
-                                                                  businessRef:
-                                                                      theExchangeBusinessesRecord
-                                                                          ?.reference,
-                                                                  targetRef:
-                                                                      exchangePostsRecordReference,
-                                                                  eventType:
-                                                                      'post',
-                                                                  createdAt:
-                                                                      getCurrentTimestamp,
-                                                                ),
-                                                              );
-                                                        } catch (_) {}
-                                                        _model
-                                                            .postTextController
-                                                            ?.clear();
-                                                        if (dialogContext
-                                                            .mounted) {
-                                                          Navigator.pop(
-                                                              dialogContext);
-                                                        }
-                                                      },
-                                                      child: Text('Post'),
-                                                    ),
-                                                  ],
-                                                );
-                                              },
+                                            await _showNewPostDialog(
+                                              context,
+                                              theExchangeBusinessesRecord
+                                                  ?.reference,
                                             );
                                             safeSetState(() {});
                                           },
@@ -712,156 +667,183 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                               },
                             ),
                           ),
-                          Container(
-                            decoration: BoxDecoration(),
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .lg,
-                                  0.0,
-                                  FlutterFlowTheme.of(context)
-                                      .designToken
-                                      .spacing
-                                      .lg,
-                                  0.0),
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    if (isVerifiedBusinessOwner)
-                                      Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            width: 72.0,
-                                            height: 72.0,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .designToken
-                                                          .radius
-                                                          .full),
-                                              border: Border.all(
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .divider,
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                            alignment:
-                                                AlignmentDirectional(0.0, 0.0),
-                                            child: Icon(
-                                              Icons.add_rounded,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                              size: 24.0,
-                                            ),
-                                          ),
-                                          Text(
-                                            'Your Story',
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelSmall
-                                                .override(
-                                                  font: GoogleFonts
-                                                      .plusJakartaSans(
-                                                    fontWeight:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .labelSmall
-                                                            .fontWeight,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .labelSmall
-                                                            .fontStyle,
-                                                  ),
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondaryText,
-                                                  letterSpacing: 0.0,
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelSmall
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .labelSmall
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                        ].divide(SizedBox(
-                                            height: FlutterFlowTheme.of(context)
-                                                .designToken
-                                                .spacing
-                                                .xs)),
-                                      ),
-                                    wrapWithModel(
-                                      model: _model.premiumStoryModel1,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PremiumStoryWidget(
-                                        img_desc:
-                                            'https://dimg.dreamflow.cloud/v1/image/smiling%20black%20woman%20coffee%20shop%20owner',
-                                        label: 'The Grind',
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.premiumStoryModel2,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PremiumStoryWidget(
-                                        img_desc:
-                                            'https://dimg.dreamflow.cloud/v1/image/black%20male%20chef%20portrait',
-                                        label: 'Heritage',
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.premiumStoryModel3,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PremiumStoryWidget(
-                                        img_desc:
-                                            'https://dimg.dreamflow.cloud/v1/image/stylish%20black%20woman%20boutique%20owner',
-                                        label: 'Pearl Gold',
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.premiumStoryModel4,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PremiumStoryWidget(
-                                        img_desc:
-                                            'https://dimg.dreamflow.cloud/v1/image/black%20man%20in%20creative%20studio',
-                                        label: 'Urban Soul',
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.premiumStoryModel5,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: PremiumStoryWidget(
-                                        img_desc:
-                                            'https://dimg.dreamflow.cloud/v1/image/black%20woman%20yoga%20instructor',
-                                        label: 'Kindred',
-                                      ),
-                                    ),
-                                  ].divide(SizedBox(
-                                      width: FlutterFlowTheme.of(context)
+                          // Was 5 hardcoded stock photos ("The Grind",
+                          // "Heritage", "Pearl Gold"...) with fake labels,
+                          // identical for every viewer and unrelated to any
+                          // real business - decorative content presented as
+                          // if it were real. Replaced with a live rail of
+                          // exchange_promotions: the same collection
+                          // Customer Profile's "Exclusive Connection
+                          // Stream" already reads but that always showed
+                          // "No live offers", because nothing in the app
+                          // ever wrote to it. CreatePromotionSheet is that
+                          // missing write path.
+                          StreamBuilder<List<ExchangePromotionsRecord>>(
+                            stream: queryExchangePromotionsRecord(
+                              queryBuilder: (exchangePromotionsRecord) =>
+                                  exchangePromotionsRecord.orderBy(
+                                      'created_at',
+                                      descending: true),
+                              limit: 20,
+                            ),
+                            builder: (context, promoSnapshot) {
+                              final now = DateTime.now();
+                              final livePromos = (promoSnapshot.data ?? [])
+                                  .where((promo) =>
+                                      countdownLabel(promo.expiresAt,
+                                          now: now) !=
+                                      null)
+                                  .toList();
+                              if (!isVerifiedBusinessOwner &&
+                                  livePromos.isEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return Container(
+                                decoration: BoxDecoration(),
+                                child: Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      FlutterFlowTheme.of(context)
                                           .designToken
                                           .spacing
-                                          .md)),
+                                          .lg,
+                                      0.0,
+                                      FlutterFlowTheme.of(context)
+                                          .designToken
+                                          .spacing
+                                          .lg,
+                                      0.0),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        if (isVerifiedBusinessOwner)
+                                          GestureDetector(
+                                            onTap: () async {
+                                              final businessRef =
+                                                  theExchangeBusinessesRecord
+                                                      ?.reference;
+                                              if (businessRef == null) return;
+                                              await showModalBottomSheet(
+                                                isScrollControlled: true,
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                context: context,
+                                                builder: (sheetContext) =>
+                                                    Padding(
+                                                  padding: MediaQuery
+                                                      .viewInsetsOf(
+                                                          sheetContext),
+                                                  child: CreatePromotionSheet(
+                                                      businessRef:
+                                                          businessRef),
+                                                ),
+                                              );
+                                            },
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Container(
+                                                  width: 72.0,
+                                                  height: 72.0,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            FlutterFlowTheme
+                                                                    .of(
+                                                                        context)
+                                                                .designToken
+                                                                .radius
+                                                                .full),
+                                                    border: Border.all(
+                                                      color: FlutterFlowTheme
+                                                              .of(context)
+                                                          .divider,
+                                                      width: 1.0,
+                                                    ),
+                                                  ),
+                                                  alignment:
+                                                      AlignmentDirectional(
+                                                          0.0, 0.0),
+                                                  child: Icon(
+                                                    Icons.add_rounded,
+                                                    color: FlutterFlowTheme
+                                                            .of(context)
+                                                        .primary,
+                                                    size: 24.0,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Add Promo',
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .labelSmall
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .plusJakartaSans(
+                                                          fontWeight:
+                                                              FlutterFlowTheme
+                                                                      .of(
+                                                                          context)
+                                                                  .labelSmall
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme
+                                                                      .of(
+                                                                          context)
+                                                                  .labelSmall
+                                                                  .fontStyle,
+                                                        ),
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .secondaryText,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme
+                                                                    .of(
+                                                                        context)
+                                                                .labelSmall
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme
+                                                                    .of(
+                                                                        context)
+                                                                .labelSmall
+                                                                .fontStyle,
+                                                      ),
+                                                ),
+                                              ].divide(SizedBox(
+                                                  height: FlutterFlowTheme.of(
+                                                          context)
+                                                      .designToken
+                                                      .spacing
+                                                      .xs)),
+                                            ),
+                                          ),
+                                        ...livePromos.map(
+                                          (promo) => _PromoStoryTile(
+                                              key: Key(
+                                                  'promo_${promo.reference.id}'),
+                                              promo: promo),
+                                        ),
+                                      ].divide(SizedBox(
+                                          width: FlutterFlowTheme.of(context)
+                                              .designToken
+                                              .spacing
+                                              .md)),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
@@ -1071,13 +1053,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                 ),
                                                           ),
                                               ),
-                                              Icon(
-                                                Icons.gif_box_outlined,
-                                                color:
-                                                    FlutterFlowTheme.of(context)
-                                                        .primary,
-                                                size: 22.0,
-                                              ),
+                                              // Removed: a GIF-picker icon
+                                              // with no onTap and no GIF
+                                              // feature behind it anywhere
+                                              // in the app - same class of
+                                              // dead control as the forum
+                                              // icon removed above.
                                             ].divide(SizedBox(
                                                 width:
                                                     FlutterFlowTheme.of(context)
@@ -1148,8 +1129,17 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         width: 48.0,
                                         height: 48.0,
                                         decoration: BoxDecoration(
+                                          // Was secondaryText (near-black
+                                          // in light mode) with a primary
+                                          // (dark green) icon - both dark,
+                                          // so the send icon was nearly
+                                          // invisible in light mode. primary
+                                          // is the same forest green in
+                                          // both themes; paired with
+                                          // onPrimary (white, both themes)
+                                          // it's legible either way.
                                           color: FlutterFlowTheme.of(context)
-                                              .secondaryText,
+                                              .primary,
                                           borderRadius: BorderRadius.circular(
                                               FlutterFlowTheme.of(context)
                                                   .designToken
@@ -1161,7 +1151,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         child: Icon(
                                           Icons.send_rounded,
                                           color: FlutterFlowTheme.of(context)
-                                              .primary,
+                                              .onPrimary,
                                           size: 20.0,
                                         ),
                                       ),
@@ -1186,6 +1176,159 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// One tile in the promo rail: a real business's live exchange_promotions
+/// doc, in the same circular-avatar-plus-label shape the old fake story
+/// tiles used. Silently renders nothing if the business can't be resolved -
+/// same "cannot honestly render without both halves" rule Customer
+/// Profile's _loadPromos applies to the same collection.
+class _PromoStoryTile extends StatelessWidget {
+  const _PromoStoryTile({super.key, required this.promo});
+
+  final ExchangePromotionsRecord promo;
+
+  void _openDetail(BuildContext context, BusinessesRecord business) {
+    final theme = FlutterFlowTheme.of(context);
+    final countdown = countdownLabel(promo.expiresAt, now: DateTime.now());
+    if (countdown == null) return;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.all(theme.designToken.spacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PromoCardWidget(
+              initial: businessInitials(business.businessName),
+              business: business.businessName,
+              time: countdown,
+              deal: promo.body.isNotEmpty ? promo.body : promo.title,
+            ),
+            SizedBox(height: theme.designToken.spacing.md),
+            FFButtonWidget(
+              onPressed: () {
+                Navigator.pop(sheetContext);
+                context.pushNamed(
+                  BusinessProfileV2Widget.routeName,
+                  queryParameters: {
+                    'businessDocument': serializeParam(
+                      business.reference,
+                      ParamType.DocumentReference,
+                    ),
+                  }.withoutNulls,
+                );
+              },
+              text: 'View Business',
+              options: FFButtonOptions(
+                width: double.infinity,
+                height: 44.0,
+                color: theme.primary,
+                textStyle: theme.titleSmall.override(color: theme.onPrimary),
+                elevation: 0.0,
+                borderRadius:
+                    BorderRadius.circular(theme.designToken.radius.sm),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final businessRef = promo.businessRef;
+    if (businessRef == null) return const SizedBox.shrink();
+    final theme = FlutterFlowTheme.of(context);
+    return StreamBuilder<BusinessesRecord>(
+      stream: BusinessesRecord.getDocument(businessRef),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || snapshot.data!.businessName.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        final business = snapshot.data!;
+        return GestureDetector(
+          onTap: () => _openDetail(context, business),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 72.0,
+                height: 72.0,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [theme.accent1, theme.secondary],
+                    stops: [0.0, 1.0],
+                    begin: AlignmentDirectional(-1.0, 1.0),
+                    end: AlignmentDirectional(1.0, -1.0),
+                  ),
+                  borderRadius:
+                      BorderRadius.circular(theme.designToken.radius.full),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(2.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.primaryBackground,
+                      borderRadius: BorderRadius.circular(
+                          theme.designToken.radius.full),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(3.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            theme.designToken.radius.full),
+                        child: promo.imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                fadeInDuration: Duration(milliseconds: 0),
+                                fadeOutDuration: Duration(milliseconds: 0),
+                                imageUrl: promo.imageUrl,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(
+                                color: theme.secondaryBackground,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  businessInitials(business.businessName),
+                                  style: theme.titleMedium.override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold),
+                                    color: theme.primaryText,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 0.0,
+                                  ),
+                                ),
+                              ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(height: theme.designToken.spacing.xs),
+              SizedBox(
+                width: 72.0,
+                child: Text(
+                  business.businessName,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.labelSmall.override(
+                    font: GoogleFonts.plusJakartaSans(),
+                    color: theme.primaryText,
+                    letterSpacing: 0.0,
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },

@@ -284,11 +284,33 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Time-limited business promotions - shown in The Exchange's promo rail
+    // and in Customer Profile's Exclusive Connection Stream, both of which
+    // read this collection. Create was previously open to any signed-in
+    // user for any business (`allow create: if request.auth != null`),
+    // which was harmless while nothing in the app ever wrote here, but
+    // CreatePromotionSheet is now a real write path, so this is gated the
+    // same way business_items is: only the verified owner of the
+    // referenced business, via the same get()-the-parent pattern.
     match /exchange_promotions/{document} {
-      allow create: if request.auth != null;
       allow read: if request.auth != null;
-      allow write: if false;
-      allow delete: if false;
+      allow create: if request.auth != null
+        && get(request.resource.data.business_ref).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && get(request.resource.data.business_ref).data.is_verified == true
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 80
+        && request.resource.data.body is string
+        && request.resource.data.body.size() <= 500
+        && request.resource.data.expires_at is timestamp;
+      allow update: if false;
+      // Owners may cancel a promo early - was `allow delete: if false`,
+      // which meant an owner who posted the wrong deal had no way to take
+      // it down before it expired on its own.
+      allow delete: if request.auth != null
+        && get(resource.data.business_ref).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
     match /connections/{document} {
