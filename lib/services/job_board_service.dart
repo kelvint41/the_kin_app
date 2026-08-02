@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_functions/firebase_functions.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 
 /// Service for Job Board operations
@@ -67,11 +67,16 @@ class JobBoardService {
   }
 
   /// Get all active jobs (for browsing/searching)
+  ///
+  /// Deliberately does NOT filter on `deletedAt == null`: in Firestore an
+  /// equality-to-null clause only matches documents where the field is
+  /// present and null, and createJobPosting never writes the field, so
+  /// adding it here matched zero documents and the board was always empty.
+  /// `status` is the real gate - deleteJob sets it to 'deleted'.
   static Stream<List<Map<String, dynamic>>> getAllActiveJobs() {
     return _firestore
         .collection('job_postings')
         .where('status', isEqualTo: 'active')
-        .where('deletedAt', isEqualTo: null)
         .orderBy('postedAt', descending: true)
         .snapshots()
         .map((snapshot) {
@@ -144,9 +149,14 @@ class JobBoardService {
   }
 
   /// Delete job (soft delete)
+  ///
+  /// Also flips `status` off 'active' - the browse query filters on status,
+  /// not on deletedAt (see getAllActiveJobs), so without this a "deleted"
+  /// job would keep showing up on the public board.
   static Future<void> deleteJob(String jobId) async {
     try {
       await _firestore.collection('job_postings').doc(jobId).update({
+        'status': 'deleted',
         'deletedAt': FieldValue.serverTimestamp(),
       });
     } catch (e) {
@@ -162,12 +172,20 @@ class JobBoardService {
     required String jobId,
     required String applicantId,
     required String businessId,
+    required String applicantName,
+    required String applicantEmail,
+    required String applicantPhone,
+    required String coverLetter,
   }) async {
     try {
       final docRef = await _firestore.collection('job_applications').add({
         'jobRef': _firestore.collection('job_postings').doc(jobId),
         'applicantRef': _firestore.collection('users').doc(applicantId),
         'businessRef': _firestore.collection('businesses').doc(businessId),
+        'applicantName': applicantName,
+        'applicantEmail': applicantEmail,
+        'applicantPhone': applicantPhone,
+        'coverLetter': coverLetter,
         'appliedAt': FieldValue.serverTimestamp(),
         'status': 'pending',
         'messageCount': 0,

@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/auth/firebase_auth/auth_util.dart';
-import '/services/community_events_service.dart';
+import '/services/job_board_service.dart';
 
-class EventCreatePage extends StatefulWidget {
-  final String? businessId;
+class JobCreatePage extends StatefulWidget {
+  final String businessId;
 
-  const EventCreatePage({super.key, this.businessId});
+  const JobCreatePage({super.key, required this.businessId});
 
   @override
-  State<EventCreatePage> createState() => _EventCreatePageState();
+  State<JobCreatePage> createState() => _JobCreatePageState();
 }
 
-class _EventCreatePageState extends State<EventCreatePage> {
+class _JobCreatePageState extends State<JobCreatePage> {
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final locationController = TextEditingController();
-  DateTime? selectedDate;
-  String eventType = 'backpack_drive';
+  final rateMinController = TextEditingController();
+  final rateMaxController = TextEditingController();
+  String jobType = 'part_time';
   bool isCreating = false;
 
   @override
@@ -27,24 +27,25 @@ class _EventCreatePageState extends State<EventCreatePage> {
     titleController.dispose();
     descriptionController.dispose();
     locationController.dispose();
+    rateMinController.dispose();
+    rateMaxController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    final businessId = widget.businessId ?? currentUserDocument?.ownedBusiness?.id;
-    if (businessId == null) return;
     setState(() => isCreating = true);
     try {
-      final eventId = await CommunityEventsService.createEvent(
-        businessRef: businessId,
+      await JobBoardService.createJobPosting(
+        businessRef: widget.businessId,
         title: titleController.text,
         description: descriptionController.text,
-        eventType: eventType,
+        jobType: jobType,
         location: locationController.text,
-        eventDate: selectedDate ?? DateTime.now().add(const Duration(days: 7)),
-        businessLocation: null,
+        rateMin: double.tryParse(rateMinController.text) ?? 0,
+        rateMax: double.tryParse(rateMaxController.text) ?? 0,
+        tags: const [],
+        expiresAt: DateTime.now().add(const Duration(days: 30)),
       );
-      await CommunityEventsService.publishEvent(eventId);
       if (!mounted) return;
       Navigator.of(context).pop();
     } finally {
@@ -64,7 +65,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
           backgroundColor: theme.primary,
           automaticallyImplyLeading: true,
           title: Text(
-            'Create Event',
+            'Post a Job',
             style: theme.headlineMedium.override(
               font: GoogleFonts.plusJakartaSans(
                 color: theme.info,
@@ -84,7 +85,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
                 TextFormField(
                   controller: titleController,
                   decoration: InputDecoration(
-                    labelText: 'Event Title',
+                    labelText: 'Job Title',
                     labelStyle: theme.labelSmall,
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: theme.alternate),
@@ -134,40 +135,56 @@ class _EventCreatePageState extends State<EventCreatePage> {
                   style: theme.bodyMedium,
                 ),
                 const SizedBox(height: 16.0),
-                InkWell(
-                  onTap: () async {
-                    final picked = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now().add(const Duration(days: 7)),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 365)),
-                    );
-                    if (picked != null) {
-                      setState(() => selectedDate = picked);
-                    }
-                  },
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: 'Event Date',
-                      labelStyle: theme.labelSmall,
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: theme.alternate),
-                        borderRadius: BorderRadius.circular(8.0),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: rateMinController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Min Rate (\$/hr)',
+                          labelStyle: theme.labelSmall,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: theme.alternate),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: theme.primary, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        style: theme.bodyMedium,
                       ),
                     ),
-                    child: Text(
-                      selectedDate == null
-                          ? 'Select a date'
-                          : '${selectedDate!.month}/${selectedDate!.day}/${selectedDate!.year}',
-                      style: theme.bodyMedium,
+                    const SizedBox(width: 16.0),
+                    Expanded(
+                      child: TextFormField(
+                        controller: rateMaxController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          labelText: 'Max Rate (\$/hr)',
+                          labelStyle: theme.labelSmall,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: theme.alternate),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide:
+                                BorderSide(color: theme.primary, width: 2.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                        ),
+                        style: theme.bodyMedium,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 DropdownButtonFormField<String>(
-                  value: eventType,
+                  value: jobType,
                   decoration: InputDecoration(
-                    labelText: 'Event Type',
+                    labelText: 'Job Type',
                     labelStyle: theme.labelSmall,
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: theme.alternate),
@@ -178,20 +195,23 @@ class _EventCreatePageState extends State<EventCreatePage> {
                       borderRadius: BorderRadius.circular(8.0),
                     ),
                   ),
-                  items: CommunityEventsService.eventTypes
-                      .map((type) => DropdownMenuItem(
-                            value: type,
-                            child:
-                                Text(CommunityEventsService.eventTypeLabel(type)),
-                          ))
-                      .toList(),
+                  items: const [
+                    DropdownMenuItem(
+                        value: 'part_time', child: Text('Part-Time')),
+                    DropdownMenuItem(
+                        value: 'full_time', child: Text('Full-Time')),
+                    DropdownMenuItem(
+                        value: 'contract', child: Text('Contract')),
+                    DropdownMenuItem(
+                        value: 'seasonal', child: Text('Seasonal')),
+                  ],
                   onChanged: (value) =>
-                      setState(() => eventType = value ?? 'backpack_drive'),
+                      setState(() => jobType = value ?? 'part_time'),
                 ),
                 const SizedBox(height: 32.0),
                 FFButtonWidget(
                   onPressed: isCreating ? null : _submit,
-                  text: isCreating ? 'Creating...' : 'Create Event',
+                  text: isCreating ? 'Posting...' : 'Post Job',
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 56.0,

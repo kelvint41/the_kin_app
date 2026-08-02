@@ -557,5 +557,149 @@ service cloud.firestore {
     match /system_counters/{document} {
       allow read, write: if false;
     }
+
+    // ===== Job Board =====
+    //
+    // Job postings are public to any signed-in user (the whole point is
+    // that customers browse them), but only the verified owner of the
+    // referenced business may post - same get()-the-parent gate as
+    // exchange_promotions/business_items. Field names here are camelCase
+    // because JobBoardService writes them that way; the businesses doc it
+    // points at still uses snake_case owner_ref.
+    //
+    // viewCount/applicationCount are counters the client must not be able
+    // to set directly on create - trackJobView and notifyOnJobApply own
+    // them - so both are pinned to 0 on the create path.
+    match /job_postings/{document} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && get(request.resource.data.businessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && get(request.resource.data.businessRef).data.is_verified == true
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 5000
+        && request.resource.data.viewCount == 0
+        && request.resource.data.applicationCount == 0;
+      // Owners edit/close/soft-delete their own postings. The counters stay
+      // owner-writable here only because the increment path runs through
+      // this same rule from the client (trackJobView is a callable and uses
+      // the Admin SDK, so it bypasses rules either way).
+      allow update, delete: if request.auth != null
+        && get(resource.data.businessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    // An application is readable by exactly two parties: the applicant who
+    // wrote it and the owner of the business it was sent to. It carries the
+    // applicant's name/email/phone, so it must never be listable by anyone
+    // else. create pins applicantRef to the caller so nobody can file an
+    // application in someone else's name.
+    match /job_applications/{document} {
+      allow read: if request.auth != null
+        && (resource.data.applicantRef
+              == /databases/$(database)/documents/users/$(request.auth.uid)
+            || get(resource.data.businessRef).data.owner_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid));
+      allow create: if request.auth != null
+        && request.resource.data.applicantRef
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.messageCount == 0;
+      // The owner moves an application through its statuses; the applicant
+      // may only touch it via the messageCount bump when sending a message.
+      allow update: if request.auth != null
+        && (get(resource.data.businessRef).data.owner_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid)
+            || resource.data.applicantRef
+              == /databases/$(database)/documents/users/$(request.auth.uid));
+      allow delete: if false;
+
+      // Same two parties as the parent application, resolved by reading it.
+      match /messages/{messageId} {
+        allow read, create: if request.auth != null
+          && (get(/databases/$(database)/documents/job_applications/$(document))
+                .data.applicantRef
+                == /databases/$(database)/documents/users/$(request.auth.uid)
+              || get(get(/databases/$(database)/documents/job_applications/$(document))
+                .data.businessRef).data.owner_ref
+                == /databases/$(database)/documents/users/$(request.auth.uid));
+        allow update: if request.auth != null;
+        allow delete: if false;
+      }
+    }
+
+    // ===== Community Events =====
+    //
+    // Published events are browsable by any signed-in user; only the
+    // verified owner of the hosting business may create or manage one.
+    // attendeeCount/partnerCount are pinned to 0 on create for the same
+    // reason as the job counters.
+    match /community_events/{document} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && get(request.resource.data.businessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && get(request.resource.data.businessRef).data.is_verified == true
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 5000
+        && request.resource.data.attendeeCount == 0
+        && request.resource.data.partnerCount == 0;
+      allow update, delete: if request.auth != null
+        && get(resource.data.businessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+
+      // RSVPs. Doc id IS the uid (see registerForEvent), so a member can
+      // only ever create or drop their own - no need to trust a field.
+      // Readable by any signed-in user: the organizer needs the list, and
+      // an attendee needs to know whether they're already registered.
+      match /attendees/{userId} {
+        allow read: if request.auth != null;
+        allow create, delete: if request.auth != null
+          && request.auth.uid == userId;
+        allow update: if request.auth != null
+          && request.auth.uid == userId;
+      }
+
+      // Public discussion on an event. authorId is pinned to the caller so
+      // a comment can't be attributed to someone else.
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null
+          && request.resource.data.authorId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000;
+        allow update: if false;
+        allow delete: if request.auth != null
+          && resource.data.authorId == request.auth.uid;
+      }
+    }
+
+    // B2B partnership asks tied to an event. Visible only to the two
+    // businesses involved; the sender must own the from-business, and only
+    // the recipient can accept/decline.
+    match /partnership_requests/{document} {
+      allow read: if request.auth != null
+        && (get(resource.data.fromBusinessRef).data.owner_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid)
+            || get(resource.data.toBusinessRef).data.owner_ref
+              == /databases/$(database)/documents/users/$(request.auth.uid));
+      allow create: if request.auth != null
+        && get(request.resource.data.fromBusinessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 2000;
+      allow update: if request.auth != null
+        && get(resource.data.toBusinessRef).data.owner_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow delete: if false;
+    }
   }
 }

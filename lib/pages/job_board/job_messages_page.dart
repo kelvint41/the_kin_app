@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/backend/backend.dart';
-import 'job_messages_page_model.dart';
-
-export 'job_messages_page_model.dart';
+import '/auth/firebase_auth/auth_util.dart';
+import '/services/job_board_service.dart';
 
 class JobMessagesPage extends StatefulWidget {
-  final DocumentReference applicationRef;
+  final String applicationId;
+  final String otherUserId;
   final String otherUserName;
 
   const JobMessagesPage({
     super.key,
-    required this.applicationRef,
+    required this.applicationId,
+    required this.otherUserId,
     required this.otherUserName,
   });
 
@@ -22,18 +21,11 @@ class JobMessagesPage extends StatefulWidget {
 }
 
 class _JobMessagesPageState extends State<JobMessagesPage> {
-  late JobMessagesPageModel _model;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => JobMessagesPageModel());
-  }
+  final messageController = TextEditingController();
 
   @override
   void dispose() {
-    _model.dispose();
+    messageController.dispose();
     super.dispose();
   }
 
@@ -44,7 +36,6 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: scaffoldKey,
         backgroundColor: theme.primaryBackground,
         appBar: AppBar(
           backgroundColor: theme.primary,
@@ -63,34 +54,31 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
         ),
         body: Column(
           children: [
-            // Messages list
             Expanded(
-              child: StreamBuilder<List<JobApplicationMessagesRecord>>(
-                stream: _model.getMessages(widget.applicationRef),
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: JobBoardService.getApplicationMessages(
+                    widget.applicationId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
-                      child:
-                          CircularProgressIndicator(color: theme.primary),
+                      child: CircularProgressIndicator(color: theme.primary),
                     );
                   }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  final messages = snapshot.data ?? [];
+                  if (messages.isEmpty) {
                     return Center(
-                      child: Text(
-                        'No messages yet',
-                        style: theme.bodyMedium,
-                      ),
+                      child: Text('No messages yet', style: theme.bodyMedium),
                     );
                   }
-
-                  final messages = snapshot.data!;
                   return ListView.builder(
                     reverse: true,
                     padding: const EdgeInsets.all(16.0),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      final isOwn = message.senderRef == null; // Placeholder
+                      final fromRef = message['fromRef'];
+                      final isOwn = fromRef != null &&
+                          fromRef.id == currentUserUid;
                       return Align(
                         alignment: isOwn
                             ? Alignment.centerRight
@@ -105,7 +93,7 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
                             borderRadius: BorderRadius.circular(12.0),
                           ),
                           child: Text(
-                            message.messageText,
+                            message['messageText'] as String? ?? '',
                             style: theme.bodyMedium.override(
                               color: isOwn ? theme.info : theme.primaryText,
                             ),
@@ -117,21 +105,17 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
                 },
               ),
             ),
-
-            // Message input
             Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: theme.secondaryBackground,
-                border: Border(
-                  top: BorderSide(color: theme.alternate),
-                ),
+                border: Border(top: BorderSide(color: theme.alternate)),
               ),
               child: Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _model.messageController,
+                      controller: messageController,
                       decoration: InputDecoration(
                         hintText: 'Type a message...',
                         hintStyle: theme.labelSmall,
@@ -155,12 +139,14 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
                   const SizedBox(width: 8.0),
                   IconButton(
                     onPressed: () async {
-                      if (_model.messageController.text.isNotEmpty) {
-                        await _model.sendMessage(
-                          applicationRef: widget.applicationRef,
-                          message: _model.messageController.text,
+                      if (messageController.text.isNotEmpty) {
+                        await JobBoardService.sendMessage(
+                          applicationId: widget.applicationId,
+                          fromUserId: currentUserUid,
+                          toUserId: widget.otherUserId,
+                          messageText: messageController.text,
                         );
-                        _model.messageController.clear();
+                        messageController.clear();
                       }
                     },
                     icon: const Icon(Icons.send),

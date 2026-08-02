@@ -2,34 +2,70 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/backend/backend.dart';
-import 'job_apply_page_model.dart';
-
-export 'job_apply_page_model.dart';
+import '/auth/firebase_auth/auth_util.dart';
+import '/services/job_board_service.dart';
 
 class JobApplyPage extends StatefulWidget {
-  final DocumentReference jobRef;
+  final String jobId;
 
-  const JobApplyPage({super.key, required this.jobRef});
+  const JobApplyPage({super.key, required this.jobId});
 
   @override
   State<JobApplyPage> createState() => _JobApplyPageState();
 }
 
 class _JobApplyPageState extends State<JobApplyPage> {
-  late JobApplyPageModel _model;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _model = createModel(context, () => JobApplyPageModel());
-  }
+  final nameController = TextEditingController(text: currentUserDisplayName);
+  final emailController = TextEditingController(text: currentUserEmail);
+  final phoneController = TextEditingController();
+  final coverLetterController = TextEditingController();
+  bool isSubmitting = false;
 
   @override
   void dispose() {
-    _model.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    coverLetterController.dispose();
     super.dispose();
+  }
+
+  Future<void> _submit() async {
+    setState(() => isSubmitting = true);
+    try {
+      final job = await JobBoardService.getJobDetails(widget.jobId);
+      final businessRef = job?['businessRef'];
+      if (businessRef == null) {
+        throw Exception('Job has no business reference');
+      }
+      await JobBoardService.applyToJob(
+        jobId: widget.jobId,
+        applicantId: currentUserUid,
+        businessId: businessRef.id as String,
+        applicantName: nameController.text,
+        applicantEmail: emailController.text,
+        applicantPhone: phoneController.text,
+        coverLetter: coverLetterController.text,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Application submitted successfully!'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.of(context).pop();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to submit application'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
   }
 
   @override
@@ -39,7 +75,6 @@ class _JobApplyPageState extends State<JobApplyPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: scaffoldKey,
         backgroundColor: theme.primaryBackground,
         appBar: AppBar(
           backgroundColor: theme.primary,
@@ -64,17 +99,12 @@ class _JobApplyPageState extends State<JobApplyPage> {
               children: [
                 Text(
                   'Your Information',
-                  style: theme.titleSmall.override(
-                    font: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  style: theme.titleSmall
+                      .override(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16.0),
-
-                // Full name field
                 TextFormField(
-                  controller: _model.nameController,
+                  controller: nameController,
                   decoration: InputDecoration(
                     labelText: 'Full Name',
                     labelStyle: theme.labelSmall,
@@ -90,10 +120,8 @@ class _JobApplyPageState extends State<JobApplyPage> {
                   style: theme.bodyMedium,
                 ),
                 const SizedBox(height: 16.0),
-
-                // Email field
                 TextFormField(
-                  controller: _model.emailController,
+                  controller: emailController,
                   decoration: InputDecoration(
                     labelText: 'Email Address',
                     labelStyle: theme.labelSmall,
@@ -110,10 +138,8 @@ class _JobApplyPageState extends State<JobApplyPage> {
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16.0),
-
-                // Phone field
                 TextFormField(
-                  controller: _model.phoneController,
+                  controller: phoneController,
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
                     labelStyle: theme.labelSmall,
@@ -130,20 +156,14 @@ class _JobApplyPageState extends State<JobApplyPage> {
                   keyboardType: TextInputType.phone,
                 ),
                 const SizedBox(height: 24.0),
-
                 Text(
                   'Cover Letter',
-                  style: theme.titleSmall.override(
-                    font: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  style: theme.titleSmall
+                      .override(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 16.0),
-
-                // Cover letter field
                 TextFormField(
-                  controller: _model.coverLetterController,
+                  controller: coverLetterController,
                   maxLines: 6,
                   decoration: InputDecoration(
                     labelText: 'Tell the employer why you\'re a great fit',
@@ -161,35 +181,9 @@ class _JobApplyPageState extends State<JobApplyPage> {
                   style: theme.bodyMedium,
                 ),
                 const SizedBox(height: 32.0),
-
-                // Submit button
                 FFButtonWidget(
-                  onPressed: () async {
-                    final success = await _model.submitApplication(
-                      jobRef: widget.jobRef,
-                      name: _model.nameController.text,
-                      email: _model.emailController.text,
-                      phone: _model.phoneController.text,
-                      coverLetter: _model.coverLetterController.text,
-                    );
-                    if (success) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Application submitted successfully!'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Failed to submit application'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  },
-                  text: 'Submit Application',
+                  onPressed: isSubmitting ? null : _submit,
+                  text: isSubmitting ? 'Submitting...' : 'Submit Application',
                   options: FFButtonOptions(
                     width: double.infinity,
                     height: 56.0,

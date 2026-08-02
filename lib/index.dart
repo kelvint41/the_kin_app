@@ -44,3 +44,7 @@ export '/sign_in_page/sign_in_page_widget.dart' show SignInPageWidget;
 export '/customersignup_page/customersignup_page_widget.dart'
     show CustomersignupPageWidget;
 export '/pages/app_studio/app_studio_page_widget.dart' show AppStudioPageWidget;
+export '/pages/job_board/job_board_listing_page.dart' show JobBoardListingPage;
+export '/pages/job_board/job_management_page.dart' show JobManagementPage;
+export '/pages/community_events/events_listing_page.dart' show EventsListingPage;
+export '/pages/community_events/event_management_page.dart' show EventManagementPage;

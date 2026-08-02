@@ -311,6 +311,30 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           path: CustomersignupPageWidget.routePath,
           builder: (context, params) => CustomersignupPageWidget(),
         ),
+        FFRoute(
+          name: JobBoardListingPage.routeName,
+          path: JobBoardListingPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => JobBoardListingPage(),
+        ),
+        FFRoute(
+          name: JobManagementPage.routeName,
+          path: JobManagementPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => JobManagementPage(),
+        ),
+        FFRoute(
+          name: EventsListingPage.routeName,
+          path: EventsListingPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => EventsListingPage(),
+        ),
+        FFRoute(
+          name: EventManagementPage.routeName,
+          path: EventManagementPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => EventManagementPage(),
+        ),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

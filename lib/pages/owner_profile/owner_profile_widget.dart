@@ -1457,6 +1457,23 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           context.pushNamed(MyItemsWidget.routeName);
         },
       ),
+      ListTile(
+        leading: Icon(Icons.work_outline_rounded, color: theme.primaryText),
+        title: Text('Manage Jobs', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(JobManagementPage.routeName);
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.volunteer_activism_outlined,
+            color: theme.primaryText),
+        title: Text('Manage Events', style: theme.bodyLarge),
+        onTap: () {
+          Navigator.pop(context);
+          context.pushNamed(EventManagementPage.routeName);
+        },
+      ),
       if (currentUserDocument?.isAdmin == true)
         ListTile(
           leading: Icon(Icons.dashboard_rounded, color: theme.primaryText),

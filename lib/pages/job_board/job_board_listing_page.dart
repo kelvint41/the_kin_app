@@ -1,14 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/backend/backend.dart';
-import 'job_board_listing_page_model.dart';
-
-export 'job_board_listing_page_model.dart';
+import '/services/job_board_service.dart';
+import '/components/main_menu_button.dart';
+import 'job_detail_page.dart';
 
 class JobBoardListingPage extends StatefulWidget {
   const JobBoardListingPage({super.key});
+
+  static String routeName = 'JobBoardListing';
+  static String routePath = '/jobBoard';
 
   @override
   State<JobBoardListingPage> createState() => _JobBoardListingPageState();
@@ -16,21 +18,44 @@ class JobBoardListingPage extends StatefulWidget {
 
 class _JobBoardListingPageState extends State<JobBoardListingPage>
     with TickerProviderStateMixin {
-  late JobBoardListingPageModel _model;
-  final scaffoldKey = GlobalKey<ScaffoldState>();
+  late TabController _tabController;
+  final searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => JobBoardListingPageModel());
-    _model.tabController =
-        TabController(vsync: this, length: 3, initialIndex: 0);
+    _tabController = TabController(vsync: this, length: 3, initialIndex: 0);
   }
 
   @override
   void dispose() {
-    _model.dispose();
+    _tabController.dispose();
+    searchController.dispose();
     super.dispose();
+  }
+
+  List<Map<String, dynamic>> _filterAndSort(
+      List<Map<String, dynamic>> jobs, int tabIndex) {
+    var filtered = jobs;
+    final query = searchController.text.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      filtered = filtered
+          .where((job) =>
+              (job['title'] as String? ?? '').toLowerCase().contains(query) ||
+              (job['description'] as String? ?? '')
+                  .toLowerCase()
+                  .contains(query))
+          .toList();
+    }
+    final sorted = List<Map<String, dynamic>>.from(filtered);
+    if (tabIndex == 2) {
+      sorted.sort((a, b) =>
+          (b['applicationCount'] as int? ?? 0)
+              .compareTo(a['applicationCount'] as int? ?? 0));
+    }
+    // Tab 0 (All) and tab 1 (Recently Posted) both use the stream's default
+    // postedAt-descending order.
+    return sorted;
   }
 
   @override
@@ -40,7 +65,6 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: scaffoldKey,
         backgroundColor: theme.primaryBackground,
         appBar: AppBar(
           backgroundColor: theme.primary,
@@ -54,34 +78,33 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
               ),
             ),
           ),
+          actions: [
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 8, 0),
+              child: MainMenuButton(),
+            ),
+          ],
           centerTitle: false,
           elevation: 0.0,
         ),
         body: Column(
           children: [
-            // Search bar
             Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
+              padding:
+                  const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 12.0),
               child: TextFormField(
-                controller: _model.searchController,
+                controller: searchController,
                 onChanged: (_) => setState(() {}),
-                obscureText: false,
                 decoration: InputDecoration(
                   labelText: 'Search jobs...',
                   labelStyle: theme.labelSmall,
                   hintStyle: theme.labelSmall,
                   enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: theme.alternate,
-                      width: 2.0,
-                    ),
+                    borderSide: BorderSide(color: theme.alternate, width: 2.0),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(
-                      color: theme.primary,
-                      width: 2.0,
-                    ),
+                    borderSide: BorderSide(color: theme.primary, width: 2.0),
                     borderRadius: BorderRadius.circular(8.0),
                   ),
                   prefixIcon: Icon(Icons.search, color: theme.secondaryText),
@@ -89,32 +112,53 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                 style: theme.bodyMedium,
               ),
             ),
-
-            // Filter tabs
             TabBar(
-              controller: _model.tabController,
+              controller: _tabController,
               labelColor: theme.primary,
               unselectedLabelColor: theme.secondaryText,
               indicatorColor: theme.primary,
+              onTap: (_) => setState(() {}),
               tabs: const [
                 Tab(text: 'All Jobs'),
                 Tab(text: 'Recently Posted'),
                 Tab(text: 'Most Applied'),
               ],
             ),
-
-            // Job list
             Expanded(
-              child: TabBarView(
-                controller: _model.tabController,
-                children: [
-                  // All jobs
-                  _buildJobsList(context, _model.getAllJobs()),
-                  // Recently posted
-                  _buildJobsList(context, _model.getRecentJobs()),
-                  // Most applied
-                  _buildJobsList(context, _model.getMostAppliedJobs()),
-                ],
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream: JobBoardService.getAllActiveJobs(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(color: theme.primary),
+                    );
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Could not load jobs',
+                          style: theme.bodyMedium),
+                    );
+                  }
+                  final allJobs = snapshot.data ?? [];
+                  return TabBarView(
+                    controller: _tabController,
+                    children: List.generate(3, (tabIndex) {
+                      final jobs = _filterAndSort(allJobs, tabIndex);
+                      if (jobs.isEmpty) {
+                        return Center(
+                          child: Text('No jobs found', style: theme.bodyMedium),
+                        );
+                      }
+                      return ListView.builder(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            16.0, 12.0, 16.0, 16.0),
+                        itemCount: jobs.length,
+                        itemBuilder: (context, index) =>
+                            _buildJobCard(context, jobs[index]),
+                      );
+                    }),
+                  );
+                },
               ),
             ),
           ],
@@ -123,46 +167,26 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
     );
   }
 
-  Widget _buildJobsList(BuildContext context, Future<List<JobPostingsRecord>> jobsFuture) {
-    return FutureBuilder<List<JobPostingsRecord>>(
-      future: jobsFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
-            child: CircularProgressIndicator(color: FlutterFlowTheme.of(context).primary),
-          );
-        }
-        if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return Center(
-            child: Text(
-              'No jobs found',
-              style: FlutterFlowTheme.of(context).bodyMedium,
-            ),
-          );
-        }
-
-        final jobs = snapshot.data!;
-        return ListView.builder(
-          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 16.0),
-          itemCount: jobs.length,
-          itemBuilder: (context, index) {
-            final job = jobs[index];
-            return _buildJobCard(context, job);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildJobCard(BuildContext context, JobPostingsRecord job) {
+  Widget _buildJobCard(BuildContext context, Map<String, dynamic> job) {
     final theme = FlutterFlowTheme.of(context);
+    final rateMin = (job['rateMin'] as num?)?.toDouble() ?? 0;
+    final rateMax = (job['rateMax'] as num?)?.toDouble() ?? 0;
+    final applicationCount = job['applicationCount'] as int? ?? 0;
+    final postedAt = job['postedAt'];
+    String postedLabel = '';
+    if (postedAt != null && postedAt is Timestamp) {
+      final days = DateTime.now().difference(postedAt.toDate()).inDays;
+      postedLabel = days <= 0 ? 'Posted today' : 'Posted $days days ago';
+    }
+
     return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
       child: GestureDetector(
         onTap: () {
-          Navigator.of(context).pushNamed(
-            '/jobDetail',
-            arguments: {'jobRef': job.reference},
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => JobDetailPage(jobId: job['id'] as String),
+            ),
           );
         },
         child: Container(
@@ -181,7 +205,7 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                   children: [
                     Expanded(
                       child: Text(
-                        job.title,
+                        job['title'] as String? ?? 'Untitled',
                         style: theme.titleSmall.override(
                           font: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.w600,
@@ -197,11 +221,9 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                         borderRadius: BorderRadius.circular(20.0),
                       ),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
+                          horizontal: 8.0, vertical: 4.0),
                       child: Text(
-                        '\$${job.hourlyRate.toStringAsFixed(2)}/hr',
+                        '\$${rateMin.toStringAsFixed(0)}-\$${rateMax.toStringAsFixed(0)}/hr',
                         style: theme.labelSmall.override(
                           color: theme.primary,
                           fontWeight: FontWeight.w600,
@@ -212,14 +234,14 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                 ),
                 const SizedBox(height: 8.0),
                 Text(
-                  job.businessName,
+                  job['location'] as String? ?? '',
                   style: theme.labelMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 8.0),
                 Text(
-                  job.description,
+                  job['description'] as String? ?? '',
                   style: theme.bodySmall,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -229,13 +251,13 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${job.applicationsCount} applied',
+                      '$applicationCount applied',
                       style: theme.labelSmall.override(
                         color: theme.secondaryText,
                       ),
                     ),
                     Text(
-                      'Posted ${job.createdAt.difference(DateTime.now()).inDays} days ago',
+                      postedLabel,
                       style: theme.labelSmall.override(
                         color: theme.secondaryText,
                       ),

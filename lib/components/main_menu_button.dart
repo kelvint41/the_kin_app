@@ -204,6 +204,24 @@ void showMainMenuSheet(BuildContext context,
                         );
                       },
                     ),
+                    ListTile(
+                      leading:
+                          Icon(Icons.work_outline_rounded, color: theme.primaryText),
+                      title: Text('Job Board', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(JobBoardListingPage.routeName);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.volunteer_activism_outlined,
+                          color: theme.primaryText),
+                      title: Text('Community Events', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(EventsListingPage.routeName);
+                      },
+                    ),
                     ...extraItems,
                     Divider(
                       height: theme.designToken.spacing.md,

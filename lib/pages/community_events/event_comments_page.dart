@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
-import '/flutter_flow/flutter_flow_widgets.dart';
-import '/backend/backend.dart';
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/schema/users_record.dart';
 import '/services/community_events_service.dart';
 
 class EventCommentsPage extends StatefulWidget {
-  final DocumentReference eventRef;
+  final String eventId;
 
-  const EventCommentsPage({super.key, required this.eventRef});
+  const EventCommentsPage({super.key, required this.eventId});
 
   @override
   State<EventCommentsPage> createState() => _EventCommentsPageState();
 }
 
 class _EventCommentsPageState extends State<EventCommentsPage> {
-  final scaffoldKey = GlobalKey<ScaffoldState>();
-  final TextEditingController commentController = TextEditingController();
+  final commentController = TextEditingController();
 
   @override
   void dispose() {
@@ -31,7 +30,6 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        key: scaffoldKey,
         backgroundColor: theme.primaryBackground,
         appBar: AppBar(
           backgroundColor: theme.primary,
@@ -51,29 +49,22 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
         body: Column(
           children: [
             Expanded(
-              child: StreamBuilder<List<CommunityEventCommentsRecord>>(
-                stream: CommunityEventCommentsRecord.collection
-                    .where('event_ref', isEqualTo: widget.eventRef)
-                    .orderBy('created_at', descending: true)
-                    .snapshots()
-                    .map((snapshot) => snapshot.docs
-                        .map((doc) =>
-                            CommunityEventCommentsRecord.fromSnapshot(doc))
-                        .toList()),
+              child: StreamBuilder<List<Map<String, dynamic>>>(
+                stream:
+                    CommunityEventsService.getEventComments(widget.eventId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
                       child: CircularProgressIndicator(color: theme.primary),
                     );
                   }
-                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  final comments = snapshot.data ?? [];
+                  if (comments.isEmpty) {
                     return Center(
-                      child: Text('No comments yet',
-                          style: theme.bodyMedium),
+                      child:
+                          Text('No comments yet', style: theme.bodyMedium),
                     );
                   }
-
-                  final comments = snapshot.data!;
                   return ListView.builder(
                     padding: const EdgeInsets.all(16.0),
                     itemCount: comments.length,
@@ -91,15 +82,11 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                comment.authorName,
-                                style: theme.labelSmall.override(
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              _AuthorName(
+                                  authorId: comment['authorId'] as String?),
                               const SizedBox(height: 4.0),
                               Text(
-                                comment.commentText,
+                                comment['text'] as String? ?? '',
                                 style: theme.bodySmall,
                               ),
                             ],
@@ -115,9 +102,7 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: theme.secondaryBackground,
-                border: Border(
-                  top: BorderSide(color: theme.alternate),
-                ),
+                border: Border(top: BorderSide(color: theme.alternate)),
               ),
               child: Row(
                 children: [
@@ -147,8 +132,9 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
                     onPressed: () async {
                       if (commentController.text.isNotEmpty) {
                         await CommunityEventsService.addComment(
-                          eventRef: widget.eventRef,
-                          comment: commentController.text,
+                          eventId: widget.eventId,
+                          userId: currentUserUid,
+                          text: commentController.text,
                         );
                         commentController.clear();
                       }
@@ -162,6 +148,31 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AuthorName extends StatelessWidget {
+  final String? authorId;
+
+  const _AuthorName({required this.authorId});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    if (authorId == null) {
+      return Text('Member',
+          style: theme.labelSmall.override(fontWeight: FontWeight.w600));
+    }
+    return FutureBuilder<UsersRecord>(
+      future: UsersRecord.getDocumentOnce(UsersRecord.collection.doc(authorId)),
+      builder: (context, snapshot) {
+        final name = snapshot.data?.displayName;
+        return Text(
+          (name == null || name.isEmpty) ? 'Member' : name,
+          style: theme.labelSmall.override(fontWeight: FontWeight.w600),
+        );
+      },
     );
   }
 }
