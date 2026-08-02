@@ -90,7 +90,11 @@ class _KpiCardWidgetState extends State<KpiCardWidget> {
                   widget!.label,
                   'Total Users',
                 ),
-                maxLines: 1,
+                // 1 line at this card's fixed 140px width truncated longer
+                // labels like "Black-Owned" and "San Antonio Businesses"
+                // into unreadable ellipses ("Black-Ow...") even though they
+                // fit fine wrapped onto a second line.
+                maxLines: 2,
                 style: FlutterFlowTheme.of(context).labelSmall.override(
                       font: GoogleFonts.plusJakartaSans(
                         fontWeight:

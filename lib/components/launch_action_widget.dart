@@ -68,7 +68,12 @@ class _LaunchActionWidgetState extends State<LaunchActionWidget> {
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.all(24.0),
+        // Was EdgeInsets.all(24.0) - with three of these in an
+        // Expanded(flex:1) row, the label's real width was only ~70px,
+        // too narrow to fit even one word of "Executive Dashboard" without
+        // breaking mid-word ("Executiv"/"e"/"Dashboar"/"d"). Tighter
+        // padding gives the text enough room to wrap at the space instead.
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
         child: Container(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -81,6 +86,7 @@ class _LaunchActionWidgetState extends State<LaunchActionWidget> {
                   widget!.label,
                   'Explore Map',
                 ),
+                textAlign: TextAlign.center,
                 style: FlutterFlowTheme.of(context).labelMedium.override(
                       font: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.bold,

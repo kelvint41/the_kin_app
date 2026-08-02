@@ -199,7 +199,18 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
+        // Only the hero's own back/menu buttons were SafeArea-protected -
+        // once the page scrolls far enough that later content (e.g. "Active
+        // Promotion") becomes the top-most thing on screen, nothing stopped
+        // it from sliding in behind the status bar's time/battery icons,
+        // since those render with no background scrim of their own. This
+        // pinned strip sits above the scroll view at all times, so scrolled
+        // content always stops below it instead of colliding with it - the
+        // hero itself is unaffected and still bleeds under the status bar
+        // at rest.
+        body: Stack(
+          children: [
+            SingleChildScrollView(
           primary: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -1249,13 +1260,19 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                           CrossAxisAlignment.center,
                                       children: [
                                         Icon(
-                                          Icons.check_circle_rounded,
-                                          // Fixed dim gold, not primaryText.
-                                          // This row is deliberately muted -
-                                          // a feature the current tier
-                                          // doesn't include - but primaryText
-                                          // made it invisible in light mode
-                                          // instead of dim in both.
+                                          // Was check_circle_rounded, just
+                                          // dimmed - a checkmark means
+                                          // "included" regardless of its
+                                          // opacity, so a merely-dimmed
+                                          // checkmark next to two full-
+                                          // brightness ones read as
+                                          // inconsistent styling, not as
+                                          // "not included." A lock reads
+                                          // unambiguously either way, and
+                                          // matches the lock icon Business
+                                          // Insights already uses for
+                                          // gated features.
+                                          Icons.lock_outline_rounded,
                                           color: const Color(0x99D4AF37),
                                           size: 18.0,
                                         ),
@@ -1309,6 +1326,17 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
               ),
             ],
           ),
+        ),
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                height: MediaQuery.of(context).padding.top,
+                color: FlutterFlowTheme.of(context).primaryBackground,
+              ),
+            ),
+          ],
         ),
         bottomNavigationBar: const KinBottomNav2Widget(),
       ),

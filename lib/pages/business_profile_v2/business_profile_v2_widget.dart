@@ -1860,17 +1860,31 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 child: RatingBar.builder(
                                 onRatingUpdate: (newValue) => safeSetState(
                                     () => _model.ratingBarValue = newValue),
+                                // Filled stars were theme.primary (fixed dark
+                                // green) and unrated stars were accent1
+                                // (bright gold) - backwards, since the
+                                // brighter color drew the eye to the
+                                // *unselected* stars, and the dark green
+                                // filled stars were nearly invisible against
+                                // the dark-mode card. accentOnSurface is
+                                // built for exactly this - a foreground icon
+                                // color legible on secondaryBackground in
+                                // both themes - and alternate is the app's
+                                // existing muted/outline token for
+                                // unselected state.
                                 itemBuilder: (context, index) => Icon(
                                   Icons.star_rounded,
-                                  color: FlutterFlowTheme.of(context).primary,
+                                  color:
+                                      FlutterFlowTheme.of(context).accentOnSurface,
                                 ),
                                 direction: Axis.horizontal,
                                 initialRating: _model.ratingBarValue ??= 3.0,
                                 unratedColor:
-                                    FlutterFlowTheme.of(context).accent1,
+                                    FlutterFlowTheme.of(context).alternate,
                                 itemCount: 5,
                                 itemSize: 28.0,
-                                glowColor: FlutterFlowTheme.of(context).primary,
+                                glowColor:
+                                    FlutterFlowTheme.of(context).accentOnSurface,
                               ),
                               ),
                               Container(

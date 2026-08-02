@@ -312,7 +312,15 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
+        // Only the header block above is SafeArea-protected - once scrolled
+        // far enough that later content (e.g. the "Engagement Launchpad"
+        // cards) becomes the top-most thing on screen, it renders straight
+        // behind the status bar's time/battery icons with no scrim to
+        // separate them. This pinned strip stays above the scroll view at
+        // all times so scrolled content always stops below it.
+        body: Stack(
+          children: [
+            SingleChildScrollView(
           primary: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -801,6 +809,17 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
               ),
             ],
           ),
+        ),
+            Positioned(
+              top: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                height: MediaQuery.of(context).padding.top,
+                color: FlutterFlowTheme.of(context).primaryBackground,
+              ),
+            ),
+          ],
         ),
         // Without this the Directory tab was a dead end: no nav bar, and the
         // back arrow above was decorative, so the only way out was the
