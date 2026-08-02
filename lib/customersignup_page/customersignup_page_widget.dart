@@ -472,6 +472,26 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                                         .labelMedium
                                         .fontStyle,
                                   ),
+                          // Surfaces the requireComplexity rule in
+                          // authFormError up front, so people see it before
+                          // typing a password rather than only on rejection.
+                          helperText:
+                              'Uppercase, lowercase & a special character',
+                          helperStyle: FlutterFlowTheme.of(context)
+                              .labelSmall
+                              .override(
+                                font: GoogleFonts.plusJakartaSans(
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .labelSmall
+                                      .fontWeight,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .labelSmall
+                                      .fontStyle,
+                                ),
+                                color: FlutterFlowTheme.of(context)
+                                    .secondaryText,
+                                letterSpacing: 0.0,
+                              ),
                           enabledBorder: OutlineInputBorder(
                             borderSide: BorderSide(
                               color: Color(0x00000000),
@@ -554,6 +574,7 @@ class _CustomersignupPageWidgetState extends State<CustomersignupPageWidget> {
                           email: _model.emailFieldTextController.text,
                           password: _model.passwordFieldTextController.text,
                           minPasswordLength: 6,
+                          requireComplexity: true,
                         );
                         if (problem != null) {
                           ScaffoldMessenger.of(context).showSnackBar(

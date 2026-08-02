@@ -519,7 +519,12 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                           fontStyle:
                               FlutterFlowTheme.of(context).titleSmall.fontStyle,
                         ),
-                        color: FlutterFlowTheme.of(context).secondaryText,
+                        // Was secondaryText, a body-text token (near-black
+                        // in light mode) never meant for text on a colored
+                        // fill - on the dark green button it read as
+                        // near-illegible in light mode. onPrimary is white
+                        // in both themes and built for exactly this.
+                        color: FlutterFlowTheme.of(context).onPrimary,
                         letterSpacing: 0.0,
                         fontWeight:
                             FlutterFlowTheme.of(context).titleSmall.fontWeight,

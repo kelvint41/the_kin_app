@@ -21,6 +21,10 @@ library;
 // check is Firebase's own either way.
 final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 
+final _hasUppercase = RegExp(r'[A-Z]');
+final _hasLowercase = RegExp(r'[a-z]');
+final _hasSpecialChar = RegExp(r'[^A-Za-z0-9]');
+
 /// Returns the first problem with these credentials as a sentence to show
 /// the user, or null when the input is worth sending to Firebase.
 ///
@@ -31,11 +35,17 @@ final _emailPattern = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
 /// 1: an existing account's password only has to be non-empty to be worth
 /// checking, and second-guessing its length would be wrong for anyone whose
 /// password predates a rule change.
+///
+/// [requireComplexity] applies the same reasoning to case/special-character
+/// rules: pass true on sign-up, where it's a new password being chosen, and
+/// leave it false on sign-in, where enforcing a rule an existing password
+/// predates would lock people out of accounts that were valid when created.
 String? authFormError({
   String? name,
   required String email,
   required String password,
   int minPasswordLength = 1,
+  bool requireComplexity = false,
 }) {
   if (name != null && name.trim().isEmpty) {
     return 'Enter your name.';
@@ -52,6 +62,12 @@ String? authFormError({
   }
   if (password.length < minPasswordLength) {
     return 'Your password needs at least $minPasswordLength characters.';
+  }
+  if (requireComplexity &&
+      (!_hasUppercase.hasMatch(password) ||
+          !_hasLowercase.hasMatch(password) ||
+          !_hasSpecialChar.hasMatch(password))) {
+    return 'Your password needs an uppercase letter, a lowercase letter, and a special character.';
   }
   return null;
 }

@@ -286,6 +286,14 @@ exports.generateMarketingContent = onCall(
       );
     }
 
+    // Platform admins (users/{uid}.is_admin) aren't a business's owner in
+    // the entitlement/quota sense - they need to test and demo this feature
+    // without burning, or being blocked by, a business's real monthly
+    // allowance. Checked once, server-side, same trust boundary as
+    // request.auth above; the client can't claim this for itself.
+    const callerSnap = await db.doc(`users/${request.auth.uid}`).get();
+    const isAdmin = callerSnap.exists && callerSnap.data().is_admin === true;
+
     // Entitlement check happens here, server-side, before the AI is ever
     // invoked - the app only triggers the Gemini call if this returns
     // true. The client never sees or controls this decision.
@@ -296,7 +304,7 @@ exports.generateMarketingContent = onCall(
     // the normal upgrade flow - the same "don't risk granting broader
     // access than intended" reasoning _powerHourLimitsByTier documents for
     // its own default fallback.
-    const entitled = isEntitled(business.subscription_tier);
+    const entitled = isAdmin || isEntitled(business.subscription_tier);
     if (!entitled) {
       await logCall(db, {
         businessRef: businessSnap.ref,
@@ -322,15 +330,20 @@ exports.generateMarketingContent = onCall(
     // Quota is claimed after entitlement and before the model call, so an
     // exhausted allowance costs nothing. Rejections are logged the same way
     // not-entitled ones are, so hitting the cap is visible in the data
-    // rather than looking like silence.
-    const limits = await readLimits(db);
-    const quota = await reserveGeneration(
-      db,
-      businessSnap.ref,
-      business.subscription_tier,
-      startedAt,
-      limits,
-    );
+    // rather than looking like silence. Admins skip the reservation
+    // entirely rather than getting a raised limit, so their usage never
+    // shows up against - or takes a slot from - the business's own
+    // allowance; refundGeneration is skipped to match, since there is
+    // nothing to give back.
+    const quota = isAdmin
+      ? { reserved: true, used: 0, limit: null }
+      : await reserveGeneration(
+          db,
+          businessSnap.ref,
+          business.subscription_tier,
+          startedAt,
+          await readLimits(db),
+        );
     if (!quota.reserved) {
       await logCall(db, {
         businessRef: businessSnap.ref,
@@ -387,8 +400,11 @@ exports.generateMarketingContent = onCall(
       errorMessage = String(e && e.message ? e.message : e);
       // The reservation was claimed before the call; give it back, since
       // this failure is ours and not something the owner should pay for out
-      // of their monthly allowance.
-      await refundGeneration(db, businessSnap.ref, startedAt);
+      // of their monthly allowance. Admins never reserved a slot above, so
+      // there is nothing to refund.
+      if (!isAdmin) {
+        await refundGeneration(db, businessSnap.ref, startedAt);
+      }
     }
 
     const latencyMs = Date.now() - startedAt;

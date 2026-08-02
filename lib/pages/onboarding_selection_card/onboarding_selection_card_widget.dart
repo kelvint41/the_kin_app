@@ -224,7 +224,17 @@ class _OnboardingSelectionCardWidgetState
                                                           .headlineLarge
                                                           .fontStyle,
                                                 ),
-                                                color: Colors.white,
+                                                // Was Colors.white - fine on
+                                                // a dark hero, but this
+                                                // Scaffold's background is
+                                                // just primaryBackground, so
+                                                // in light mode the headline
+                                                // nearly vanished into the
+                                                // page. headlineLarge's
+                                                // default color is already
+                                                // theme.primaryText, so
+                                                // dropping the override
+                                                // makes it theme-adaptive.
                                                 letterSpacing: 0.0,
                                                 fontWeight: FontWeight.w800,
                                                 fontStyle:
