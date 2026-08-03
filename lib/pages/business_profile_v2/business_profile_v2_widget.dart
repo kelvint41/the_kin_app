@@ -827,11 +827,19 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 ),
                               ),
                             // Hidden while the social layer is unfinished;
-                            // the route is gated too (nav.dart). Dropping the
-                            // whole Expanded rather than disabling the button
-                            // lets Directions/Call redistribute the width
-                            // instead of leaving a gap.
-                            if (FeatureFlags.exchangeEnabled)
+                            // the route is gated too (nav.dart). Also hidden
+                            // for a business nobody has claimed yet - every
+                            // business is listed the moment an admin adds
+                            // it, but is_claimed only flips once a claim is
+                            // approved, and TheExchangeWidget itself refuses
+                            // this case too (see _buildUnclaimedState) so
+                            // hiding the button here is the courtesy, not
+                            // the enforcement. Dropping the whole Expanded
+                            // rather than disabling the button lets
+                            // Directions/Call redistribute the width instead
+                            // of leaving a gap.
+                            if (FeatureFlags.exchangeEnabled &&
+                                businessProfileV2BusinessesRecord.isClaimed)
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(

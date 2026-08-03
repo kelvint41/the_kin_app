@@ -343,6 +343,91 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     super.dispose();
   }
 
+  /// Shown instead of the feed when the Exchange is opened for a specific
+  /// business that no owner has claimed yet.
+  Widget _buildUnclaimedState(
+    BuildContext context,
+    BusinessesRecord business,
+  ) {
+    final theme = FlutterFlowTheme.of(context);
+    return Scaffold(
+      backgroundColor: theme.primaryBackground,
+      appBar: AppBar(
+        backgroundColor: theme.primary,
+        automaticallyImplyLeading: true,
+        title: Text(
+          'The Exchange',
+          style: theme.headlineMedium.override(
+            font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+            color: theme.info,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 8, 0),
+            child: MainMenuButton(),
+          ),
+        ],
+        centerTitle: false,
+        elevation: 0.0,
+      ),
+      bottomNavigationBar: KinBottomNav2Widget(),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.verified_outlined, size: 56.0, color: theme.primary),
+              const SizedBox(height: 20.0),
+              Text(
+                'Not claimed yet',
+                textAlign: TextAlign.center,
+                style: theme.headlineSmall,
+              ),
+              const SizedBox(height: 12.0),
+              Text(
+                '${business.businessName} hasn\'t been claimed by its owner. '
+                'The Exchange unlocks once they claim and verify the '
+                'business.',
+                textAlign: TextAlign.center,
+                style: theme.bodyMedium.override(color: theme.secondaryText),
+              ),
+              const SizedBox(height: 24.0),
+              FFButtonWidget(
+                onPressed: () => context.pushNamed(
+                  ClaimBusinessWidget.routeName,
+                  queryParameters: {
+                    'businessRef': serializeParam(
+                      business.reference,
+                      ParamType.DocumentReference,
+                    ),
+                  }.withoutNulls,
+                ),
+                text: 'Claim This Business',
+                icon: const Icon(Icons.verified_outlined, size: 18.0),
+                options: FFButtonOptions(
+                  width: double.infinity,
+                  height: 48.0,
+                  iconColor: theme.info,
+                  color: theme.primary,
+                  textStyle: theme.titleSmall.override(
+                    font: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.w600),
+                    color: theme.info,
+                  ),
+                  elevation: 0.0,
+                  borderRadius: BorderRadius.circular(
+                      theme.designToken.radius.sm),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // The Exchange is a per-business feed, but not every entry point knows
@@ -398,6 +483,25 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
         }
 
         final theExchangeBusinessesRecord = snapshot.data;
+
+        // A specific business was requested (a profile page's Exchange
+        // button, the shoutout carousel, a deep link) and it hasn't been
+        // claimed yet. Every business is listed the moment an admin adds it
+        // - is_claimed only flips once an owner's claim is approved - so
+        // without this an admin-added, never-claimed business (nobody
+        // accountable for what gets posted under its name) would get the
+        // exact same Exchange access as one with a verified owner behind it.
+        //
+        // This deliberately does NOT apply to the null-businessRef case
+        // (bottom nav / main menu, which falls back to the signed-in user's
+        // *own* owned_business above) - that business only has an owner_ref
+        // at all because a claim was already approved for it.
+        if (widget.businessRef != null &&
+            theExchangeBusinessesRecord != null &&
+            !theExchangeBusinessesRecord.isClaimed) {
+          return _buildUnclaimedState(context, theExchangeBusinessesRecord);
+        }
+
         final isVerifiedBusinessOwner = currentUserReference != null &&
             theExchangeBusinessesRecord?.ownerRef == currentUserReference &&
             (theExchangeBusinessesRecord?.isVerified ?? false);
