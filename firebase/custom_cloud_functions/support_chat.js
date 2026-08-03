@@ -6,6 +6,7 @@ if (!admin.apps.length) {
 }
 const { GoogleGenerativeAI, SchemaType } = require("@google/generative-ai");
 const { FieldValue } = require("firebase-admin/firestore");
+const { createNotification } = require("./notifications.js");
 
 // Same secret ai_marketing_orchestrator.js defines - Cloud Functions secrets
 // are looked up by name, so redeclaring it here rather than importing that
@@ -145,6 +146,54 @@ exports.sendSupportChatMessage = onCall(
       model: GEMINI_MODEL,
       created_at: FieldValue.serverTimestamp(),
     });
+
+    // Tell an admin something came in. Without this, support messages
+    // landed in support_chat_logs and nobody knew unless they thought to
+    // open the admin stats - a support inbox nobody is told about is a
+    // support inbox nobody reads.
+    //
+    // Deliberately the cheapest mechanism available, and it adds no new
+    // service: one small indexed query plus one Firestore write to the
+    // `notifications` inbox the app already has (NotificationsWidget
+    // renders it). No email provider, no FCM/push, no extra function
+    // invocation - this runs inside the call that was already happening.
+    // At Firestore's rates that is a rounding error, and it sits inside
+    // the free daily write allowance at any volume this app will see
+    // before there is revenue to pay for something better.
+    //
+    // Only questions and bug reports notify. `suggestion` and anything
+    // else stay in the log for later review - a suggestion is not
+    // something to interrupt anyone over, and notifying on everything is
+    // how an inbox becomes noise that gets ignored.
+    //
+    // Wrapped so a notification failure can never cost the user their
+    // reply: the support answer is already computed at this point.
+    if (result.category === "question" || result.category === "bug_report") {
+      try {
+        const adminsSnap = await db
+          .collection("users")
+          .where("is_admin", "==", true)
+          .limit(5)
+          .get();
+        await Promise.all(
+          adminsSnap.docs.map((adminDoc) =>
+            createNotification(db, {
+              userRef: adminDoc.ref,
+              type: "support_message",
+              title: result.category === "bug_report"
+                ? "New bug report in support"
+                : "New support question",
+              body: result.summary || trimmedMessage.slice(0, 140),
+              // Must match ExecutiveDashboardWidget.routeName exactly
+              // (underscore included) or the notification taps into nothing.
+              routeName: "Executive_Dashboard",
+            }),
+          ),
+        );
+      } catch (err) {
+        console.error("Support notification failed (reply still sent):", err);
+      }
+    }
 
     return {
       reply: result.reply,

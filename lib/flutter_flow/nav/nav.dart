@@ -19,6 +19,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import 'serialization_util.dart';
 
 import '/index.dart';
+import '/services/feature_flags.dart';
 
 export 'package:go_router/go_router.dart';
 export 'serialization_util.dart';
@@ -125,14 +126,26 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: TheExchangeWidget.routeName,
           path: TheExchangeWidget.routePath,
           requireAuth: true,
-          builder: (context, params) => TheExchangeWidget(
-            businessRef: params.getParam(
-              'businessRef',
-              ParamType.DocumentReference,
-              isList: false,
-              collectionNamePath: ['businesses'],
-            ),
-          ),
+          // Route-level gate, not just hidden buttons. Hiding an entry
+          // point stops taps; it does nothing about a deep link, a stale
+          // back-stack entry, or code that pushes the route without
+          // checking. This is what actually guarantees a non-admin can't
+          // reach the unfinished social layer.
+          builder: (context, params) => FeatureFlags.exchangeEnabled
+              ? TheExchangeWidget(
+                  businessRef: params.getParam(
+                    'businessRef',
+                    ParamType.DocumentReference,
+                    isList: false,
+                    collectionNamePath: ['businesses'],
+                  ),
+                )
+              : const ComingSoonPage(
+                  featureName: 'The Exchange',
+                  blurb:
+                      "The Exchange is where businesses and neighbours post "
+                      "what's happening. We're finishing it up.",
+                ),
         ),
         FFRoute(
           name: PrivacyPolicyPageWidget.routeName,
@@ -162,7 +175,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           name: NearbyFeedWidget.routeName,
           path: NearbyFeedWidget.routePath,
           requireAuth: true,
-          builder: (context, params) => NearbyFeedWidget(),
+          // Same gate as The Exchange: this renders the same
+          // `exchange_posts` content, aggregated across nearby businesses.
+          // Gating only The Exchange would leave the identical social feed
+          // one tap away on the bottom nav's Feed tab.
+          builder: (context, params) => FeatureFlags.exchangeEnabled
+              ? NearbyFeedWidget()
+              : const ComingSoonPage(
+                  featureName: 'The Feed',
+                  blurb:
+                      "Posts from businesses near you. We're finishing this "
+                      'one up alongside The Exchange.',
+                ),
         ),
         FFRoute(
           // Check-in requires a signed-in uid (recordVerifiedVisit), same

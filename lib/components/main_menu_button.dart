@@ -4,6 +4,7 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/services/kin_services.dart';
+import '/services/feature_flags.dart';
 import '/index.dart';
 import 'package:flutter/material.dart';
 
@@ -110,6 +111,10 @@ void showMainMenuSheet(BuildContext context,
                         context.pushNamed(GoogleMapPageWidget.routeName);
                       },
                     ),
+                    // Hidden while the social layer is unfinished. The
+                    // route is gated too (see nav.dart) - this just stops
+                    // anyone tapping into a Coming Soon screen.
+                    if (FeatureFlags.exchangeEnabled)
                     ListTile(
                       leading:
                           Icon(Icons.forum_outlined, color: theme.primaryText),

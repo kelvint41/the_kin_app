@@ -7,6 +7,7 @@ import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import '/services/feature_flags.dart';
 
 /// A single card the carousel can show - either a review left on this
 /// business, or a post pulled from the wider Exchange feed. One shape so
@@ -138,13 +139,20 @@ class _CommunityShoutoutCarouselState
       (data) => setState(() => _reviews = data),
       onError: (_) => setState(() => _reviews = const []),
     );
-    _postsSub = queryExchangePostsRecord(
-      queryBuilder: (q) => q.orderBy('timestamp', descending: true),
-      limit: 6,
-    ).listen(
-      (data) => setState(() => _posts = data),
-      onError: (_) => setState(() => _posts = const []),
-    );
+    // Reviews and check-in feed events keep flowing; only the Exchange
+    // posts are held back, so the carousel stays populated rather than
+    // going dark while the social layer is unfinished. Skipping the
+    // subscription outright (instead of filtering after the fact) also
+    // means no reads are billed for content that can't be shown.
+    if (FeatureFlags.exchangeEnabled) {
+      _postsSub = queryExchangePostsRecord(
+        queryBuilder: (q) => q.orderBy('timestamp', descending: true),
+        limit: 6,
+      ).listen(
+        (data) => setState(() => _posts = data),
+        onError: (_) => setState(() => _posts = const []),
+      );
+    }
     _feedEventsSub = queryKinFeedEventsRecord(
       queryBuilder: (q) => q.orderBy('timestamp', descending: true),
       limit: 10,
@@ -180,6 +188,10 @@ class _CommunityShoutoutCarouselState
   }
 
   void _openExchange(BuildContext context) {
+    // Only reachable when the flag is on: with it off no Exchange-sourced
+    // card is built, so there is nothing here to tap. The route is gated
+    // as well, so this can't be reached by a stale back-stack entry either.
+    if (!FeatureFlags.exchangeEnabled) return;
     context.pushNamed(
       TheExchangeWidget.routeName,
       queryParameters: {

@@ -16,6 +16,7 @@ import 'dart:ui';
 import '/custom_code/actions/index.dart' as actions;
 import '/flutter_flow/custom_functions.dart' as functions;
 import '/index.dart';
+import '/services/feature_flags.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -825,6 +826,12 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                   ),
                                 ),
                               ),
+                            // Hidden while the social layer is unfinished;
+                            // the route is gated too (nav.dart). Dropping the
+                            // whole Expanded rather than disabling the button
+                            // lets Directions/Call redistribute the width
+                            // instead of leaving a gap.
+                            if (FeatureFlags.exchangeEnabled)
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(

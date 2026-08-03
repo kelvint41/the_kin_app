@@ -49,3 +49,4 @@ export '/pages/job_board/job_management_page.dart' show JobManagementPage;
 export '/pages/community_events/events_listing_page.dart' show EventsListingPage;
 export '/pages/community_events/event_management_page.dart' show EventManagementPage;
 export '/pages/admin_submissions/admin_submissions_page.dart' show AdminSubmissionsPage;
+export '/pages/coming_soon/coming_soon_page.dart' show ComingSoonPage;

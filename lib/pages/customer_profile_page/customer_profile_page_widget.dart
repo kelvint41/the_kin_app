@@ -17,6 +17,7 @@ import '/services/engagement_stats.dart';
 import '/services/kin_services.dart';
 import 'dart:ui';
 import '/index.dart';
+import '/services/feature_flags.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -448,6 +449,9 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                             ),
                           ),
                         ),
+                        // Hidden while the social layer is unfinished; the
+                        // route is gated too (nav.dart).
+                        if (FeatureFlags.exchangeEnabled)
                         Expanded(
                           flex: 1,
                           child: InkWell(

@@ -2,6 +2,7 @@ import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/index.dart';
+import '/services/feature_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'kin_bottom_nav2_model.dart';
@@ -149,6 +150,11 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           onTap: () => context.pushNamed(GoogleMapPageWidget.routeName),
         );
       case KinNavPage.feed:
+        // The Feed renders the same exchange_posts content as The Exchange,
+        // so it's held back by the same flag. Swapped for the Quest tab
+        // rather than removed: the bar is a fixed four slots, and dropping
+        // one would leave a visible gap. Reuses the existing swap mechanic.
+        if (!FeatureFlags.exchangeEnabled) return _questTab(context);
         return _buildTab(
           context,
           icon: Icons.forum_rounded,
