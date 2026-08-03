@@ -32,6 +32,7 @@ Future initialize(
 
     // Configure based on platform
     PurchasesConfiguration configuration;
+    String platformKey;
     if (kIsWeb) {
       if (webKey.isEmpty) {
         print(
@@ -40,15 +41,39 @@ Future initialize(
         );
         return;
       }
-      configuration = PurchasesConfiguration(webKey);
+      platformKey = webKey;
     } else if (Platform.isIOS) {
-      configuration = PurchasesConfiguration(appStoreKey);
+      platformKey = appStoreKey;
     } else if (Platform.isAndroid) {
-      configuration = PurchasesConfiguration(playStoreKey);
+      platformKey = playStoreKey;
     } else {
       print("RevenueCat is not supported on this platform.");
       return;
     }
+
+    // Never hand RevenueCat a `test_` key. Its SDK treats a test key in a
+    // release build as a security problem and *terminates the app on
+    // launch* - which made the release APK unusable for testing anything
+    // at all, not just purchases. Debug builds were unaffected, so this
+    // only surfaced on the first real Android build.
+    //
+    // Skipping costs nothing: a test key has no offering behind it, so
+    // purchasePackage already found nothing and every upgrade button
+    // already no-opped. This just makes "payments aren't set up yet"
+    // degrade quietly instead of taking the whole app down with it.
+    // _isConfigured stays false, which callers already handle.
+    //
+    // Real keys arrive via --dart-define (see main.dart) once the products
+    // exist in App Store Connect / Play Console.
+    if (platformKey.isEmpty || platformKey.startsWith('test_')) {
+      print(
+        'RevenueCat has no production API key for this platform - '
+        'purchases are disabled. Pass REVENUECAT_APPLE_KEY / '
+        'REVENUECAT_GOOGLE_KEY at build time to enable them.',
+      );
+      return;
+    }
+    configuration = PurchasesConfiguration(platformKey);
 
     await Purchases.configure(configuration);
     _isConfigured = true;
