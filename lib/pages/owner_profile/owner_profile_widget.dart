@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
+import '/services/subscription_tiers.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/location_beacon_card_widget.dart';
@@ -1164,199 +1165,58 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                     stream: BusinessesRecord.getDocument(
                                         currentUserDocument!.ownedBusiness!),
                                     builder: (context, snapshot) {
-                                      final tierName = snapshot.hasData
+                                      final rawTierName = snapshot.hasData
                                           ? snapshot.data!.subscriptionTier
                                           : '';
-                                      return Text(
-                                        tierName.isEmpty
-                                            ? 'Community'
-                                            : tierName,
-                                        style: FlutterFlowTheme.of(context)
-                                            .headlineSmall
-                                            .override(
-                                              font: GoogleFonts.plusJakartaSans(
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .headlineSmall
-                                                        .fontStyle,
-                                              ),
-                                              // Fixed gold literal, not
-                                              // primaryText - this card's
-                                              // gradient is a fixed dark green
-                                              // in both themes (see the
-                                              // comment on it above), so a
-                                              // text token that inverts with
-                                              // the theme turned this near-
-                                              // black and unreadable in light
-                                              // mode.
-                                              color: const Color(0xFFD4AF37),
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.bold,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .headlineSmall
-                                                      .fontStyle,
-                                            ),
+                                      final tierName = rawTierName.isEmpty
+                                          ? 'Community'
+                                          : rawTierName;
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            tierName,
+                                            style: FlutterFlowTheme.of(context)
+                                                .headlineSmall
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(
+                                                    fontWeight:
+                                                        FontWeight.bold,
+                                                    fontStyle:
+                                                        FlutterFlowTheme.of(
+                                                                context)
+                                                            .headlineSmall
+                                                            .fontStyle,
+                                                  ),
+                                                  // Fixed gold literal, not
+                                                  // primaryText - this card's
+                                                  // gradient is a fixed dark
+                                                  // green in both themes (see
+                                                  // the comment on it above),
+                                                  // so a text token that
+                                                  // inverts with the theme
+                                                  // turned this near-black
+                                                  // and unreadable in light
+                                                  // mode.
+                                                  color:
+                                                      const Color(0xFFD4AF37),
+                                                  letterSpacing: 0.0,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontStyle:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .headlineSmall
+                                                          .fontStyle,
+                                                ),
+                                          ),
+                                          _tierFeatureList(context, tierName),
+                                        ].divide(SizedBox(height: 16.0)),
                                       );
                                     },
                                   ),
-                                ),
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle_rounded,
-                                          color: const Color(0xFFD4AF37),
-                                          size: 18.0,
-                                        ),
-                                        Text(
-                                          'Priority KINDEX Ranking',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font:
-                                                    GoogleFonts.plusJakartaSans(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                color:
-                                                    const Color(0xFFD4AF37),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                                lineHeight: 1.4,
-                                              ),
-                                        ),
-                                      ].divide(SizedBox(width: 8.0)),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.check_circle_rounded,
-                                          color: const Color(0xFFD4AF37),
-                                          size: 18.0,
-                                        ),
-                                        Text(
-                                          'Unlimited Active Promotions',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font:
-                                                    GoogleFonts.plusJakartaSans(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                color:
-                                                    const Color(0xFFD4AF37),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                                lineHeight: 1.4,
-                                              ),
-                                        ),
-                                      ].divide(SizedBox(width: 8.0)),
-                                    ),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          // Was check_circle_rounded, just
-                                          // dimmed - a checkmark means
-                                          // "included" regardless of its
-                                          // opacity, so a merely-dimmed
-                                          // checkmark next to two full-
-                                          // brightness ones read as
-                                          // inconsistent styling, not as
-                                          // "not included." A lock reads
-                                          // unambiguously either way, and
-                                          // matches the lock icon Business
-                                          // Insights already uses for
-                                          // gated features.
-                                          Icons.lock_outline_rounded,
-                                          color: const Color(0x99D4AF37),
-                                          size: 18.0,
-                                        ),
-                                        Text(
-                                          'Advanced Analytics Dashboard',
-                                          style: FlutterFlowTheme.of(context)
-                                              .bodyMedium
-                                              .override(
-                                                font:
-                                                    GoogleFonts.plusJakartaSans(
-                                                  fontWeight:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontWeight,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMedium
-                                                          .fontStyle,
-                                                ),
-                                                color: const Color(0x99D4AF37),
-                                                letterSpacing: 0.0,
-                                                fontWeight:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontWeight,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .fontStyle,
-                                                lineHeight: 1.4,
-                                              ),
-                                        ),
-                                      ].divide(SizedBox(width: 8.0)),
-                                    ),
-                                  ].divide(SizedBox(height: 8.0)),
                                 ),
                               ].divide(SizedBox(height: 24.0)),
                             ),
@@ -1495,6 +1355,82 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           },
         ),
     ];
+  }
+
+  /// The three benefit rows under "Your Membership Tier", each checked
+  /// against [tierName] rather than hardcoded.
+  ///
+  /// This used to render two checkmarks and one lock for every viewer
+  /// regardless of their actual tier - a Community owner saw the same
+  /// "included" checkmarks as an Elite one, and Elite (the tier meant to
+  /// include everything the others do, plus more) saw a lock on Advanced
+  /// Analytics it should never see. Minimum tiers below mirror the real
+  /// feature bullets on merchant_pricing_suite_widget.dart's tier cards:
+  /// priority carousel placement starts at Founder; Founder and Founding
+  /// Local both cap promotions at 1/month (their own bullet says so), so
+  /// "unlimited" starts where that cap disappears, at Premium Local;
+  /// "Advanced performance analytics & insights" is Premium Local's own
+  /// bullet verbatim.
+  Widget _tierFeatureList(BuildContext context, String tierName) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _tierFeatureRow(
+          context,
+          'Priority KINDEX Ranking',
+          tierAtLeast(tierName, 'Founder'),
+        ),
+        _tierFeatureRow(
+          context,
+          'Unlimited Active Promotions',
+          tierAtLeast(tierName, 'Premium Local'),
+        ),
+        _tierFeatureRow(
+          context,
+          'Advanced Analytics Dashboard',
+          tierAtLeast(tierName, 'Premium Local'),
+        ),
+      ].divide(SizedBox(height: 8.0)),
+    );
+  }
+
+  /// One benefit row: a bright checkmark when [included], a dimmed lock
+  /// when not - a lock reads unambiguously either way, unlike a merely-
+  /// dimmed checkmark, and matches the lock icon Business Insights already
+  /// uses for gated features.
+  Widget _tierFeatureRow(BuildContext context, String label, bool included) {
+    final color = included ? const Color(0xFFD4AF37) : const Color(0x99D4AF37);
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Icon(
+          included ? Icons.check_circle_rounded : Icons.lock_outline_rounded,
+          color: color,
+          size: 18.0,
+        ),
+        Text(
+          label,
+          style: FlutterFlowTheme.of(context).bodyMedium.override(
+                font: GoogleFonts.plusJakartaSans(
+                  fontWeight:
+                      FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                  fontStyle:
+                      FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                ),
+                color: color,
+                letterSpacing: 0.0,
+                fontWeight:
+                    FlutterFlowTheme.of(context).bodyMedium.fontWeight,
+                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
+                lineHeight: 1.4,
+              ),
+        ),
+      ].divide(SizedBox(width: 8.0)),
+    );
   }
 
   /// Entry point to the App Studio waitlist, offered to owners here - the
