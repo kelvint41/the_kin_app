@@ -96,7 +96,7 @@ class LocationBeaconPostWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  _formatTimeAgo(post.createdAt ?? DateTime.now()),
+                  _formatTimeAgo(post.timestamp ?? DateTime.now()),
                   style: FlutterFlowTheme.of(context).labelSmall.override(
                         font: GoogleFonts.plusJakartaSans(),
                         color: FlutterFlowTheme.of(context).secondaryText,

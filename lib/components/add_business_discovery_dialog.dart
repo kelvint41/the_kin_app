@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -78,6 +79,43 @@ class _AddBusinessDiscoveryDialogState
         : (_categoryController.value ?? _kDiscoveryCategories.first);
     if (otherCategory.isNotEmpty) {
       await KinServices.ensureBusinessCategoryExists(otherCategory);
+    }
+
+    // An admin adding a business is the review - they're typically standing
+    // in front of it with the owner's card. Skip the queue and publish, so
+    // the owner can be shown their live listing and claim it on the spot.
+    // Everyone else's submission still queues for review.
+    //
+    // Requires real coordinates: without them the listing has no geohash
+    // and would never appear on the map (see adminCreateBusiness), so a
+    // hand-typed address that was never resolved through the place picker
+    // falls back to the normal queue rather than publishing something
+    // invisible.
+    final isAdmin = currentUserDocument?.isAdmin == true;
+    final hasCoords = _latitude != null && _longitude != null;
+
+    if (isAdmin && hasCoords) {
+      final created = await KinServices.adminCreateBusiness(
+        businessName: name,
+        address: address,
+        category: effectiveCategory,
+        latitude: _latitude!,
+        longitude: _longitude!,
+      );
+      if (!mounted) return;
+      setState(() => _submitting = false);
+      if (!created.isSuccess) {
+        setState(() => _error = created.error);
+        return;
+      }
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$name is live on the map. They can claim it now.'),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
     }
 
     final result = await KinServices.submitBusinessDiscovery(

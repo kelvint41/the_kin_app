@@ -295,6 +295,10 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                       postText: postText,
                       timestamp: getCurrentTimestamp,
                       likesCount: 0,
+                      // Copied onto the post so the feed never has to read
+                      // another user's document to render a byline.
+                      authorName: currentUserDisplayName,
+                      authorPhoto: currentUserPhoto,
                     ),
                   );
                 } catch (e) {
@@ -623,44 +627,33 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                     final columnExchangePostsRecord =
                                         columnExchangePostsRecordList[
                                             columnIndex];
-                                    return StreamBuilder<UsersRecord>(
-                                      stream: UsersRecord.getDocument(
-                                          columnExchangePostsRecord.userRef!),
-                                      builder: (context, snapshot) {
-                                        // Customize what your widget looks like when it's loading.
-                                        if (!snapshot.hasData) {
-                                          return Center(
-                                            child: SizedBox(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              child: CircularProgressIndicator(
-                                                valueColor:
-                                                    AlwaysStoppedAnimation<
-                                                        Color>(
-                                                  FlutterFlowTheme.of(context)
-                                                      .primary,
-                                                ),
-                                              ),
-                                            ),
-                                          );
-                                        }
-
-                                        final feedItemUsersRecord =
-                                            snapshot.data!;
-
-                                        return ExchangeFeedItemWidget(
-                                          key: Key(
-                                              'Keyt40_${columnExchangePostsRecord.reference.id}'),
-                                          postRecord: columnExchangePostsRecord,
-                                          businessRef:
-                                              columnExchangePostsRecord
-                                                  .businessRef,
-                                          authorDisplayName:
-                                              feedItemUsersRecord.displayName,
-                                          authorPhotoUrl:
-                                              feedItemUsersRecord.photoUrl,
-                                        );
-                                      },
+                                    // No per-post user lookup. Reading
+                                    // users/{uid} for another user is denied
+                                    // by firestore.rules, so this used to
+                                    // render a spinner that never resolved -
+                                    // one per post, forever. The author's
+                                    // name and avatar now travel on the post
+                                    // itself (see ExchangePostsRecord).
+                                    //
+                                    // Posts written before that field existed
+                                    // fall back to 'Member' rather than a
+                                    // spinner: an unnamed byline is a far
+                                    // better failure than a feed that never
+                                    // finishes loading.
+                                    return ExchangeFeedItemWidget(
+                                      key: Key(
+                                          'Keyt40_${columnExchangePostsRecord.reference.id}'),
+                                      postRecord: columnExchangePostsRecord,
+                                      businessRef:
+                                          columnExchangePostsRecord.businessRef,
+                                      authorDisplayName:
+                                          columnExchangePostsRecord
+                                                  .authorName.isNotEmpty
+                                              ? columnExchangePostsRecord
+                                                  .authorName
+                                              : 'Member',
+                                      authorPhotoUrl: columnExchangePostsRecord
+                                          .authorPhoto,
                                     );
                                   }),
                                 );

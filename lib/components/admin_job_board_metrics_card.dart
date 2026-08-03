@@ -50,7 +50,7 @@ class AdminJobBoardMetricsCard extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.briefcase_outlined,
+                    Icons.work_outline_rounded,
                     color: theme.primary,
                     size: 24.0,
                   ),

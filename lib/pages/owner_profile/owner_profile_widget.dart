@@ -806,6 +806,12 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   },
                 ),
               ),
+              // Admin-only. This was visible to every business owner, which
+              // made curation of a "verified Black-owned" directory a task
+              // any owner could contribute to unreviewed. Adding a listing
+              // is now an operator action - customers still have their own
+              // path via KIN Quest search, which queues for review.
+              if (currentUserDocument?.isAdmin == true)
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
                 child: FFButtonWidget(

@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/auth/firebase_auth/google_auth.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/flutter_flow/geohash_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
@@ -1117,6 +1118,57 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not start your trial. Please try again.');
+    }
+  }
+
+  /// Creates a live, unclaimed listing immediately. Admin only.
+  ///
+  /// The normal discovery flows queue a `business_submissions` row for
+  /// review. An admin standing in front of the business with its card in
+  /// hand IS the review, so this writes straight to `businesses` - the
+  /// point is to add it while the owner is watching, then hand them the
+  /// claim flow on the spot.
+  ///
+  /// Sets `geohash`, which is what actually makes a listing appear on the
+  /// map: GoogleMapPageModel queries by geohash range, so a business
+  /// without one is invisible there no matter how good its coordinates
+  /// are. Nothing else in the app computes this at write time - it existed
+  /// only as a one-off backfill script - so any listing created without it
+  /// would silently never show up.
+  ///
+  /// `owner_ref` is deliberately left null: the business is unclaimed, so
+  /// the owner can claim it through the normal claim flow and prove they
+  /// own it. Admin-added is not the same as owner-verified.
+  static Future<ServiceResult<DocumentReference>> adminCreateBusiness({
+    required String businessName,
+    required String address,
+    required String category,
+    required double latitude,
+    required double longitude,
+    String city = '',
+  }) async {
+    try {
+      final ref = await FirebaseFirestore.instance.collection('businesses').add({
+        'business_name': businessName,
+        'address': address,
+        'category': category,
+        'city': city,
+        'business_location': GeoPoint(latitude, longitude),
+        'geohash': encodeGeohash(latitude, longitude),
+        // Verified as Black-owned by the admin who added it - that is the
+        // bar KIN lists against. Ownership is a separate question, settled
+        // by the claim flow.
+        'is_verified': true,
+        'owner_ref': null,
+        'subscription_tier': 'Community',
+        'is_premium': false,
+        'created_at': FieldValue.serverTimestamp(),
+        'added_by_admin': true,
+      });
+      return ServiceResult.success(ref);
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not add that business. Please try again.');
     }
   }
 

@@ -51,6 +51,26 @@ class ExchangePostsRecord extends FirestoreRecord {
   int get likesCount => _likesCount ?? 0;
   bool hasLikesCount() => _likesCount != null;
 
+  // "author_name" / "author_photo" fields. The post author's display name
+  // and avatar, copied onto the post when it is written.
+  //
+  // Denormalised deliberately. The feed used to stream users/{uid} for each
+  // post's author, but firestore.rules makes a user document readable only
+  // by that user - so every post by somebody else returned permission
+  // denied, the StreamBuilder never got data, and its `!hasData` branch
+  // rendered a spinner that never stopped. The feed showed a column of
+  // spinners, and got worse with every post added.
+  //
+  // Loosening the users rule instead would expose whole user documents to
+  // anyone reading the feed; a post only ever needed these two fields.
+  String? _authorName;
+  String get authorName => _authorName ?? '';
+  bool hasAuthorName() => _authorName != null;
+
+  String? _authorPhoto;
+  String get authorPhoto => _authorPhoto ?? '';
+  bool hasAuthorPhoto() => _authorPhoto != null;
+
   // "is_edited" field. Set true the first time the author edits post_text
   // after posting - lets the feed show an "(edited)" marker.
   bool? _isEdited;
@@ -71,6 +91,8 @@ class ExchangePostsRecord extends FirestoreRecord {
     _timestamp = snapshotData['timestamp'] as DateTime?;
     _likesCount = castToType<int>(snapshotData['likes_count']);
     _isEdited = snapshotData['is_edited'] as bool?;
+    _authorName = snapshotData['author_name'] as String?;
+    _authorPhoto = snapshotData['author_photo'] as String?;
     _editedAt = snapshotData['edited_at'] as DateTime?;
   }
 
@@ -116,6 +138,8 @@ Map<String, dynamic> createExchangePostsRecordData({
   String? postImage,
   DateTime? timestamp,
   int? likesCount,
+  String? authorName,
+  String? authorPhoto,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -126,6 +150,8 @@ Map<String, dynamic> createExchangePostsRecordData({
       'post_image': postImage,
       'timestamp': timestamp,
       'likes_count': likesCount,
+      'author_name': authorName,
+      'author_photo': authorPhoto,
     }.withoutNulls,
   );
 
