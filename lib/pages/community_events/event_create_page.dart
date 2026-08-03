@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/auth/firebase_auth/auth_util.dart';
+import '/components/image_upload_button.dart';
 import '/services/community_events_service.dart';
 
 class EventCreatePage extends StatefulWidget {
@@ -21,6 +22,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
   DateTime? selectedDate;
   String eventType = 'backpack_drive';
   bool isCreating = false;
+  String? _imageUrl;
 
   @override
   void dispose() {
@@ -43,6 +45,7 @@ class _EventCreatePageState extends State<EventCreatePage> {
         location: locationController.text,
         eventDate: selectedDate ?? DateTime.now().add(const Duration(days: 7)),
         businessLocation: null,
+        imageUrl: _imageUrl,
       );
       await CommunityEventsService.publishEvent(eventId);
       if (!mounted) return;
@@ -162,6 +165,41 @@ class _EventCreatePageState extends State<EventCreatePage> {
                       style: theme.bodyMedium,
                     ),
                   ),
+                ),
+                const SizedBox(height: 16.0),
+                Text('Flyer (optional)', style: theme.labelSmall),
+                const SizedBox(height: 8.0),
+                if (_imageUrl != null) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.network(
+                      _imageUrl!,
+                      height: 160.0,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                ],
+                Row(
+                  children: [
+                    ImageUploadButton(
+                      label: _imageUrl == null ? 'Add a flyer' : 'Replace flyer',
+                      icon: Icons.image_outlined,
+                      onUploaded: (url) async {
+                        setState(() => _imageUrl = url);
+                      },
+                    ),
+                    if (_imageUrl != null) ...[
+                      const SizedBox(width: 12.0),
+                      TextButton(
+                        onPressed: () => setState(() => _imageUrl = null),
+                        child: Text('Remove',
+                            style: theme.labelMedium
+                                .override(color: theme.error)),
+                      ),
+                    ],
+                  ],
                 ),
                 const SizedBox(height: 16.0),
                 DropdownButtonFormField<String>(

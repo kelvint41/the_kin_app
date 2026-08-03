@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/services/community_events_service.dart';
@@ -87,14 +88,25 @@ class _EventsListingPageState extends State<EventsListingPage>
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: theme.primary,
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const EventCreatePage()),
-          );
-        },
-        child: Icon(Icons.add, color: theme.info),
+      // Same fix as KinBottomNav2Widget's bottom inset: Android 15 (SDK 36,
+      // this app's target) draws edge-to-edge by default, and some ancestor
+      // in this tree zeroes out MediaQuery.padding for its descendants (see
+      // that widget's comment) - a FAB with no explicit bottom margin sat
+      // half-covered by the system nav bar, tappable but not fully visible.
+      // viewPadding reports the physical inset regardless of that zeroing.
+      floatingActionButton: Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewPaddingOf(context).bottom,
+        ),
+        child: FloatingActionButton(
+          backgroundColor: theme.primary,
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const EventCreatePage()),
+            );
+          },
+          child: Icon(Icons.add, color: theme.info),
+        ),
       ),
       body: TabBarView(
         controller: _tabController,
@@ -135,6 +147,7 @@ class _EventsListingPageState extends State<EventsListingPage>
       dateLabel = '${dt.month}/${dt.day}/${dt.year}';
     }
     final attendeeCount = event['attendeeCount'] as int? ?? 0;
+    final imageUrl = event['imageUrl'] as String?;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
@@ -153,46 +166,61 @@ class _EventsListingPageState extends State<EventsListingPage>
             borderRadius: BorderRadius.circular(12.0),
             border: Border.all(color: theme.alternate),
           ),
-          padding: const EdgeInsets.all(16.0),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                CommunityEventsService.eventTypeLabel(
-                    event['eventType'] as String? ?? 'other'),
-                style:
-                    theme.labelSmall.override(color: theme.secondaryText),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                event['title'] as String? ?? 'Untitled Event',
-                style:
-                    theme.titleSmall.override(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8.0),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today,
-                      size: 14, color: theme.secondaryText),
-                  const SizedBox(width: 4.0),
-                  Text(dateLabel, style: theme.labelSmall),
-                  const SizedBox(width: 16.0),
-                  Icon(Icons.location_on,
-                      size: 14, color: theme.secondaryText),
-                  const SizedBox(width: 4.0),
-                  Expanded(
-                    child: Text(
-                      event['location'] as String? ?? '',
-                      style: theme.labelSmall,
-                      overflow: TextOverflow.ellipsis,
+              if (imageUrl != null && imageUrl.isNotEmpty)
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  height: 140.0,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      CommunityEventsService.eventTypeLabel(
+                          event['eventType'] as String? ?? 'other'),
+                      style: theme.labelSmall
+                          .override(color: theme.secondaryText),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 4.0),
+                    Text(
+                      event['title'] as String? ?? 'Untitled Event',
+                      style: theme.titleSmall
+                          .override(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today,
+                            size: 14, color: theme.secondaryText),
+                        const SizedBox(width: 4.0),
+                        Text(dateLabel, style: theme.labelSmall),
+                        const SizedBox(width: 16.0),
+                        Icon(Icons.location_on,
+                            size: 14, color: theme.secondaryText),
+                        const SizedBox(width: 4.0),
+                        Expanded(
+                          child: Text(
+                            event['location'] as String? ?? '',
+                            style: theme.labelSmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text('$attendeeCount attending',
+                        style: theme.labelSmall
+                            .override(color: theme.secondaryText)),
+                  ],
+                ),
               ),
-              const SizedBox(height: 8.0),
-              Text('$attendeeCount attending',
-                  style:
-                      theme.labelSmall.override(color: theme.secondaryText)),
             ],
           ),
         ),

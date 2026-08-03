@@ -138,6 +138,15 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
             ),
             TabBar(
               controller: _tabController,
+              // 'Recently Posted' was clipping/overlapping the tab next to
+              // it - a non-scrollable TabBar divides its width evenly across
+              // all three tabs regardless of how long their labels are, and
+              // that label alone doesn't fit its third at the default text
+              // scale. Scrollable gives each tab its own natural width
+              // instead - the standard fix, and one that keeps the actual
+              // words intact rather than truncating them.
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
               labelColor: theme.primary,
               unselectedLabelColor: theme.secondaryText,
               indicatorColor: theme.primary,

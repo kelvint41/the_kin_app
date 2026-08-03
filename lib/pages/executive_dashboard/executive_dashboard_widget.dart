@@ -205,6 +205,16 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               automaticallyImplyLeading: false,
               title: Text(
                 'Executive Dashboard',
+                // The city dropdown in `actions` below used to demand
+                // unlimited width (a MainAxisSize.max Row wrapping an
+                // Expanded), squeezing the title down until it clipped
+                // with no ellipsis - Flutter's default Text has no
+                // automatic overflow handling. That's fixed at the source
+                // now (the dropdown has a fixed width instead), but a
+                // title this long deserves a graceful "..." rather than a
+                // hard clip if anything narrows the available space again.
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: FlutterFlowTheme.of(context).titleLarge.override(
                       font: GoogleFonts.plusJakartaSans(
                         fontWeight:
@@ -223,7 +233,14 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               actions: [
                 MainMenuButton(),
                 Row(
-                  mainAxisSize: MainAxisSize.max,
+                  // Was MainAxisSize.max wrapping an Expanded dropdown - that
+                  // combination tells this action to claim every pixel of
+                  // remaining AppBar width, leaving the title squeezed down
+                  // to whatever was left over. min sizes this action to
+                  // exactly what its two children need (the refresh button
+                  // plus the dropdown's own fixed width below), so the title
+                  // gets its rightful space back instead of fighting for it.
+                  mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -245,8 +262,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                         }
                       },
                     ),
-                    Expanded(
-                      flex: 1,
+                    SizedBox(
+                      width: 140.0,
                       child: FlutterFlowDropDown<String>(
                         controller: _model.dropdownValueController ??=
                             FormFieldController<String>(

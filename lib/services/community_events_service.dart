@@ -44,6 +44,10 @@ class CommunityEventsService {
     required DateTime eventDate,
     required GeoPoint? businessLocation,
     List<String> tags = const [],
+    // A flyer/promo image the organizer already has, uploaded via
+    // ImageUploadButton before this call - null when they skip it, same as
+    // every other optional field here.
+    String? imageUrl,
   }) async {
     try {
       final docRef = await _firestore.collection('community_events').add({
@@ -55,6 +59,7 @@ class CommunityEventsService {
         'eventDate': Timestamp.fromDate(eventDate),
         'businessLocation': businessLocation,
         'tags': tags,
+        'imageUrl': imageUrl,
         'status': 'draft',
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),

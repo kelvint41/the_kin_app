@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -70,9 +71,20 @@ class _EventDetailPageState extends State<EventDetailPage> {
           final attendeeCount = event['attendeeCount'] as int? ?? 0;
           final businessRef = event['businessRef'];
           final eventType = event['eventType'] as String? ?? 'other';
+          final imageUrl = event['imageUrl'] as String?;
 
           return SingleChildScrollView(
-            child: Padding(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (imageUrl != null && imageUrl.isNotEmpty)
+                  CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    height: 220.0,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,6 +216,8 @@ class _EventDetailPageState extends State<EventDetailPage> {
                   ],
                 ],
               ),
+            ),
+              ],
             ),
           );
         },
