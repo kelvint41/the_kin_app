@@ -30,6 +30,8 @@ class MerchantPricingSuiteModel
   late TierCardModel tierCardModel3;
   // Model for TierCard.
   late TierCardModel tierCardModel4;
+  // Model for TierCard.
+  late TierCardModel tierCardModel5;
 
   @override
   void initState(BuildContext context) {
@@ -37,6 +39,7 @@ class MerchantPricingSuiteModel
     tierCardModel2 = createModel(context, () => TierCardModel());
     tierCardModel3 = createModel(context, () => TierCardModel());
     tierCardModel4 = createModel(context, () => TierCardModel());
+    tierCardModel5 = createModel(context, () => TierCardModel());
   }
 
   @override
@@ -45,5 +48,6 @@ class MerchantPricingSuiteModel
     tierCardModel2.dispose();
     tierCardModel3.dispose();
     tierCardModel4.dispose();
+    tierCardModel5.dispose();
   }
 }

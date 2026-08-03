@@ -30,9 +30,10 @@ export 'merchant_pricing_suite_model.dart';
 // per platform. Until those are set, getOfferings returns nothing,
 // purchasePackage finds no package, and every upgrade button does nothing
 // on a real device as well as in the Simulator.
-// RevenueCat package identifiers. Pricing: Founding Local $59/mo ($588/yr),
-// Premium Local $99/mo ($950/yr), Elite $149/mo ($1,430/yr).
-// Annual packages include 20% discount (2.4 months free).
+// RevenueCat package identifiers. Pricing: Founder $29/mo ($288/yr),
+// Founding Local $59/mo ($588/yr), Premium Local $99/mo ($950/yr),
+// Elite $149/mo ($1,430/yr). Annual packages include 20% discount.
+const _kFounderMonthly = 'founder_monthly';
 const _kFoundingLocalMonthly = 'founding_local_monthly';
 const _kPremiumLocalMonthly = 'premium_local_monthly';
 const _kEliteMonthly = 'elite_monthly';
@@ -41,6 +42,7 @@ const _kEliteMonthly = 'elite_monthly';
 // Connect and Google Play and attaching to the same RevenueCat offering -
 // the stores treat monthly and annual as distinct products, not as one
 // product billed differently.
+const _kFounderYearly = 'founder_yearly';
 const _kFoundingLocalYearly = 'founding_local_yearly';
 const _kPremiumLocalYearly = 'premium_local_yearly';
 const _kEliteYearly = 'elite_yearly';
@@ -169,7 +171,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
         return "You've got 3 days left on your Founding Local trial. Right now "
             'you have your Verified Founding Member badge, 5 gallery photos, '
             'and basic analytics live on your profile. Keep them going for '
-            '\$19/mo — cancel anytime.';
+            '\$59/mo — cancel anytime.';
       case 'day13':
         return 'Your trial ends tomorrow. After that, your profile drops back '
             'to the free Community tier — no trust badge, limited photos, no '
@@ -548,6 +550,65 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   ),
                                 ),
                               ),
+                              InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  final businessRef =
+                                      currentUserDocument?.ownedBusiness;
+                                  if (businessRef == null) {
+                                    return;
+                                  }
+
+                                  final result =
+                                      await KinServices.upgradeBusinessTier(
+                                    businessRef: businessRef,
+                                    packageId: _packageFor(_kFounderMonthly, _kFounderYearly),
+                                    tierName: 'Founder',
+                                    isPremium: true,
+                                  );
+                                  if (!result.isSuccess) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text(result.error!)),
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  context.pushNamed(
+                                    BusinessProfileV2Widget.routeName,
+                                    queryParameters: {
+                                      'businessDocument': serializeParam(
+                                        businessRef,
+                                        ParamType.DocumentReference,
+                                      ),
+                                    }.withoutNulls,
+                                  );
+                                },
+                                child: wrapWithModel(
+                                  model: _model.tierCardModel2,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: TierCardWidget(
+                                    isPro: false,
+                                    isElite: false,
+                                    title: 'Founder',
+                                    badgeLabel: 'Founder Tier',
+                                    valueTag: 'Get visibility early.',
+                                    price: _priceFor(_kFounderMonthly, _kFounderYearly, '\$29', '\$288'),
+                                    isYearly: _yearly,
+                                    yearlyTeaser: _yearly ? null : 'or \$288/yr - save \$60',
+                                    f1: 'Weekly carousel rotations',
+                                    f2: 'Basic business profile analytics',
+                                    f3: 'Post 1 promotion per month on The Exchange',
+                                    f4: 'Community support',
+                                    beaconText: 'Upgrade',
+                                  ),
+                                ),
+                              ),
                               Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 8.0, 0.0, 16.0),
@@ -667,7 +728,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   );
                                 },
                                 child: wrapWithModel(
-                                  model: _model.tierCardModel2,
+                                  model: _model.tierCardModel3,
                                   updateCallback: () => safeSetState(() {}),
                                   child: TierCardWidget(
                                     isPro: false,
@@ -791,7 +852,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         );
                                       },
                                       child: wrapWithModel(
-                                        model: _model.tierCardModel3,
+                                        model: _model.tierCardModel4,
                                         updateCallback: () =>
                                             safeSetState(() {}),
                                         child: TierCardWidget(
@@ -855,7 +916,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   );
                                 },
                                 child: wrapWithModel(
-                                  model: _model.tierCardModel4,
+                                  model: _model.tierCardModel5,
                                   updateCallback: () => safeSetState(() {}),
                                   child: TierCardWidget(
                                     isPro: false,
