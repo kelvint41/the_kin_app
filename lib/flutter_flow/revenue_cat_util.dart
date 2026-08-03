@@ -202,10 +202,47 @@ Future login(String? uid) async {
   }
 }
 
+/// Whether this account currently has a store subscription that is still
+/// billing.
+///
+/// Distinct from "has an active entitlement": a cancelled subscription keeps
+/// its entitlement until the paid period ends. This asks the narrower
+/// question the cancel flow needs - is Apple/Google still going to charge
+/// them? - so the app never strips access from someone who is still paying.
+bool get hasBillingSubscription {
+  final info = _customerInfo;
+  if (info == null) return false;
+  return info.activeSubscriptions.isNotEmpty;
+}
+
+/// Where to send someone to cancel or change their subscription.
+///
+/// Neither Apple nor Google permits an app to cancel a subscription itself -
+/// it can only hand the user to the store's own subscription settings.
+/// RevenueCat returns the correct per-store URL for the signed-in user in
+/// `managementURL`; the platform defaults below cover the case where that is
+/// null (no store subscription yet, or RevenueCat unconfigured).
+String subscriptionManagementUrl() {
+  final fromRevenueCat = _customerInfo?.managementURL;
+  if (fromRevenueCat != null && fromRevenueCat.isNotEmpty) {
+    return fromRevenueCat;
+  }
+  if (!kIsWeb && Platform.isIOS) {
+    return 'https://apps.apple.com/account/subscriptions';
+  }
+  return 'https://play.google.com/store/account/subscriptions';
+}
+
 // https://docs.revenuecat.com/docs/restoring-purchases
-Future restorePurchases() async {
+//
+// Returns whether the restore actually turned up an entitlement, so the
+// caller can tell the user something true. This used to return nothing and
+// swallow every failure, which is fine for a silent background call but
+// useless behind a button - "Restore Purchases" that gives no feedback is
+// indistinguishable from one that is broken.
+Future<bool> restorePurchases() async {
   if (!_isConfigured) {
-    return;
+    return false;
   }
   // Note: On web, purchases are automatically restored by Web Billing.
   // This method is only needed for iOS/Android.
@@ -213,11 +250,14 @@ Future restorePurchases() async {
     print(
       'Restore purchases is not needed on web - Web Billing handles this automatically.',
     );
-    return;
+    return false;
   }
   try {
-    customerInfo = await Purchases.restorePurchases();
+    final info = await Purchases.restorePurchases();
+    customerInfo = info;
+    return info.entitlements.active.isNotEmpty;
   } on PlatformException catch (e) {
     print("Unable to restore purchases in RevenueCat: $e");
+    return false;
   }
 }

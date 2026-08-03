@@ -148,6 +148,11 @@ async function recomputeAll(db, now) {
   let batchCount = 0;
 
   for (const businessDoc of businessesSnap.docs) {
+    // Opt-out for businesses that shouldn't carry a Kindex at all - the
+    // operator's own business, which isn't competing in the Quest and whose
+    // score would just be noise on a leaderboard it shouldn't be on. Only an
+    // explicit `false` opts out, so every existing business is unaffected.
+    if (businessDoc.data().kindex_enabled === false) continue;
     const business = businessDoc.data();
     const reviews = reviewsByBusiness.get(businessDoc.id) || [];
     const verified = verifiedByBusiness.get(businessDoc.id) || new Set();

@@ -43,11 +43,10 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
           title: Text(
             widget.otherUserName,
             style: theme.headlineMedium.override(
-              font: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w600,
-              ),
-              color: theme.info
-            ),
+                font: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                ),
+                color: theme.info),
           ),
           centerTitle: false,
           elevation: 0.0,
@@ -77,8 +76,8 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
                     itemBuilder: (context, index) {
                       final message = messages[index];
                       final fromRef = message['fromRef'];
-                      final isOwn = fromRef != null &&
-                          fromRef.id == currentUserUid;
+                      final isOwn =
+                          fromRef != null && fromRef.id == currentUserUid;
                       return Align(
                         alignment: isOwn
                             ? Alignment.centerRight
@@ -105,54 +104,64 @@ class _JobMessagesPageState extends State<JobMessagesPage> {
                 },
               ),
             ),
+            // SafeArea inside the decorated container: the bar's background
+            // runs behind Android's navigation bar while the input row is
+            // inset above it. Without this the send button sits on top of
+            // Back/Home/Recents (the app targets SDK 36, so Android 15 draws
+            // it edge-to-edge). Same fix as KinBottomNav2Widget.
             Container(
-              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: theme.secondaryBackground,
                 border: Border(top: BorderSide(color: theme.alternate)),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: messageController,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        hintStyle: theme.labelSmall,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: theme.alternate),
-                          borderRadius: BorderRadius.circular(20.0),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: messageController,
+                          decoration: InputDecoration(
+                            hintText: 'Type a message...',
+                            hintStyle: theme.labelSmall,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: theme.alternate),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: theme.primary, width: 2.0),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                          ),
+                          style: theme.bodyMedium,
+                          minLines: 1,
+                          maxLines: 3,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: theme.primary, width: 2.0),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0),
                       ),
-                      style: theme.bodyMedium,
-                      minLines: 1,
-                      maxLines: 3,
-                    ),
+                      const SizedBox(width: 8.0),
+                      IconButton(
+                        onPressed: () async {
+                          if (messageController.text.isNotEmpty) {
+                            await JobBoardService.sendMessage(
+                              applicationId: widget.applicationId,
+                              fromUserId: currentUserUid,
+                              toUserId: widget.otherUserId,
+                              messageText: messageController.text,
+                            );
+                            messageController.clear();
+                          }
+                        },
+                        icon: const Icon(Icons.send),
+                        color: theme.primary,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8.0),
-                  IconButton(
-                    onPressed: () async {
-                      if (messageController.text.isNotEmpty) {
-                        await JobBoardService.sendMessage(
-                          applicationId: widget.applicationId,
-                          fromUserId: currentUserUid,
-                          toUserId: widget.otherUserId,
-                          messageText: messageController.text,
-                        );
-                        messageController.clear();
-                      }
-                    },
-                    icon: const Icon(Icons.send),
-                    color: theme.primary,
-                  ),
-                ],
+                ),
               ),
             ),
           ],

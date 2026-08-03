@@ -9,35 +9,120 @@ class JobBoardService {
 
   // ===== Job Posting Operations =====
 
-  /// Create a new job posting
+  /// How a posting expresses pay. Every posting must carry one - KIN's
+  /// promise is that every job on the board says what it pays, and the
+  /// moment a "negotiable" option exists it becomes the default and the
+  /// promise is gone.
+  ///
+  /// The type exists because a single min/max hourly pair can't describe a
+  /// salaried manager, a commission stylist, or a server on base + tips.
+  /// Same two numbers, relabelled by type.
+  static const payTypes = <String, String>{
+    'hourly': 'Hourly rate',
+    'salary': 'Annual salary',
+    'commission': 'Commission',
+    'base_tips': 'Base + tips',
+  };
+
+  /// Where the work happens. Drives whether a street address is required -
+  /// demanding one for a remote role makes no sense.
+  static const workLocations = <String, String>{
+    'on_site': 'On-site',
+    'hybrid': 'Hybrid',
+    'remote': 'Remote',
+  };
+
+  /// How a candidate reaches the business.
+  ///
+  /// Deliberately no resume upload anywhere in this flow. Resumes carry
+  /// legal name, home address, phone and work history; storing them would
+  /// put KIN on the hook for retention, deletion and breach handling for
+  /// data it has no need to hold. The owner receives applications through
+  /// their own channel instead.
+  static const applyMethods = <String, String>{
+    'in_app': 'Message in KIN',
+    'email': 'Email the business',
+    'website': 'Apply on their website',
+  };
+
+  /// Human-readable pay for a posting, e.g. "\$15-18/hr" or "\$45,000/yr".
+  ///
+  /// Shared by the browse card and the detail page so the two can't drift
+  /// into describing the same posting differently.
+  static String formatPay(Map<String, dynamic> job) {
+    final type = job['payType'] as String? ?? 'hourly';
+    final min = (job['rateMin'] as num?)?.toDouble() ?? 0;
+    final max = (job['rateMax'] as num?)?.toDouble() ?? 0;
+    final single = job['isSingleRate'] == true || max <= min;
+
+    String amount(double v) => type == 'salary'
+        ? '\$${v.round().toString().replaceAllMapped(
+              RegExp(r'(\d)(?=(\d{3})+$)'),
+              (m) => '${m[1]},',
+            )}'
+        : '\$${v.toStringAsFixed(v == v.roundToDouble() ? 0 : 2)}';
+
+    final range = single ? amount(min) : '${amount(min)}-${amount(max)}';
+    switch (type) {
+      case 'salary':
+        return '$range/yr';
+      case 'commission':
+        return '$range commission';
+      case 'base_tips':
+        return '$range/hr + tips';
+      default:
+        return '$range/hr';
+    }
+  }
+
+  /// Create a new job posting.
+  ///
+  /// [address] may be empty only when [workLocation] is 'remote'; the form
+  /// enforces that, and the security rules enforce the pay fields.
   static Future<String> createJobPosting({
     required String businessRef,
     required String title,
     required String description,
     required String jobType,
-    required String location,
+    required String workLocation,
+    required String address,
+    required String payType,
     required double rateMin,
     required double rateMax,
-    required List<String> tags,
-    required DateTime expiresAt,
+    required bool isSingleRate,
+    required String applyMethod,
+    String requirements = '',
+    String applyEmail = '',
+    String applyUrl = '',
+    List<String> tags = const [],
+    DateTime? expiresAt,
   }) async {
     try {
       final docRef = await _firestore.collection('job_postings').add({
         'businessRef': _firestore.collection('businesses').doc(businessRef),
         'title': title,
         'description': description,
+        'requirements': requirements,
         'jobType': jobType,
-        'location': location,
+        'workLocation': workLocation,
+        // Kept as `location` rather than renamed: the browse card, the
+        // detail page and the indexes all already read this field.
+        'location': address,
+        'payType': payType,
         'rateMin': rateMin,
         'rateMax': rateMax,
+        'isSingleRate': isSingleRate,
+        'applyMethod': applyMethod,
+        'applyEmail': applyEmail,
+        'applyUrl': applyUrl,
         'tags': tags,
         'postedAt': FieldValue.serverTimestamp(),
-        'expiresAt': Timestamp.fromDate(expiresAt),
+        'expiresAt': Timestamp.fromDate(
+            expiresAt ?? DateTime.now().add(const Duration(days: 30))),
         'status': 'active',
         'isDraft': false,
         'viewCount': 0,
         'applicationCount': 0,
-        'createdBy': _firestore.collection('users').doc('CURRENT_USER'),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 

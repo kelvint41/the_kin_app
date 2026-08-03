@@ -44,6 +44,39 @@ class _ActionBtnWidgetState extends State<ActionBtnWidget> {
     super.dispose();
   }
 
+  /// The circle below is a hardcoded dark disc in BOTH themes (it's the
+  /// brand look - dark puck, gold rim), so whatever sits inside it has to be
+  /// a light colour in both themes too. Callers were passing
+  /// `theme.primaryText`, which is bright gold in dark mode but a deep
+  /// brown-gold (0xFF7D5F16) in light mode - invisible on a 0xFF242424 disc.
+  /// That's why all four icons vanished in light mode and only light mode.
+  ///
+  /// Enforced here rather than at the call sites: the surface is this
+  /// widget's, so the contrast against it should be this widget's problem.
+  /// Fixing the four callers instead would leave the next one free to
+  /// reintroduce the same bug.
+  static const Color _onDarkDisc = Color(0xFFD4AF37);
+
+  /// Re-colours whatever icon the caller passed. Rebuilds an [Icon] with the
+  /// enforced colour (an explicit `color:` on the caller's Icon would
+  /// otherwise win over an ambient IconTheme), and falls back to IconTheme
+  /// for any other widget.
+  Widget _iconOnDisc() {
+    final provided = widget!.icon;
+    if (provided is Icon) {
+      return Icon(
+        provided.icon,
+        size: provided.size ?? 24.0,
+        color: _onDarkDisc,
+        semanticLabel: provided.semanticLabel,
+      );
+    }
+    return IconTheme(
+      data: const IconThemeData(color: _onDarkDisc, size: 24.0),
+      child: provided ?? const SizedBox.shrink(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -64,7 +97,7 @@ class _ActionBtnWidgetState extends State<ActionBtnWidget> {
             ),
           ),
           alignment: AlignmentDirectional(0.0, 0.0),
-          child: widget!.icon!,
+          child: _iconOnDisc(),
         ),
         Text(
           valueOrDefault<String>(
@@ -77,7 +110,12 @@ class _ActionBtnWidgetState extends State<ActionBtnWidget> {
                       FlutterFlowTheme.of(context).labelSmall.fontWeight,
                   fontStyle: FlutterFlowTheme.of(context).labelSmall.fontStyle,
                 ),
-                color: Colors.white,
+                // The label sits OUTSIDE the dark disc, on the card's
+                // secondaryBackground - which is near-white in light mode, so
+                // a hardcoded Colors.white made it invisible there too. Same
+                // bug as the icons, one widget over; theme-aware because this
+                // text is on a theme-aware surface, unlike the disc.
+                color: FlutterFlowTheme.of(context).primaryText,
                 letterSpacing: 0.0,
                 fontWeight: FlutterFlowTheme.of(context).labelSmall.fontWeight,
                 fontStyle: FlutterFlowTheme.of(context).labelSmall.fontStyle,

@@ -169,9 +169,16 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
 
   Widget _buildJobCard(BuildContext context, Map<String, dynamic> job) {
     final theme = FlutterFlowTheme.of(context);
-    final rateMin = (job['rateMin'] as num?)?.toDouble() ?? 0;
-    final rateMax = (job['rateMax'] as num?)?.toDouble() ?? 0;
     final applicationCount = job['applicationCount'] as int? ?? 0;
+    final workLocation = job['workLocation'] as String? ?? 'on_site';
+    // A remote role has no meaningful address, so show the mode instead of
+    // an empty line.
+    final locationLabel = workLocation == 'remote'
+        ? 'Remote'
+        : [
+            job['location'] as String? ?? '',
+            if (workLocation == 'hybrid') '(Hybrid)',
+          ].where((s) => s.isNotEmpty).join(' ');
     final postedAt = job['postedAt'];
     String postedLabel = '';
     if (postedAt != null && postedAt is Timestamp) {
@@ -223,7 +230,7 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8.0, vertical: 4.0),
                       child: Text(
-                        '\$${rateMin.toStringAsFixed(0)}-\$${rateMax.toStringAsFixed(0)}/hr',
+                        JobBoardService.formatPay(job),
                         style: theme.labelSmall.override(
                           color: theme.primary,
                           fontWeight: FontWeight.w600,
@@ -234,7 +241,7 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
                 ),
                 const SizedBox(height: 8.0),
                 Text(
-                  job['location'] as String? ?? '',
+                  locationLabel,
                   style: theme.labelMedium,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

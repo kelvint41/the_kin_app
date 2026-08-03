@@ -618,7 +618,25 @@ service cloud.firestore {
         && request.resource.data.title.size() > 0
         && request.resource.data.title.size() <= 120
         && request.resource.data.description is string
+        && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 5000
+        // Pay is mandatory and enforced here, not only in the form. "Every
+        // job on KIN says what it pays" is the board's whole promise, and a
+        // promise that only the client enforces isn't one.
+        && request.resource.data.payType is string
+        && request.resource.data.payType in
+           ['hourly', 'salary', 'commission', 'base_tips']
+        && request.resource.data.rateMin is number
+        && request.resource.data.rateMin > 0
+        && request.resource.data.rateMax is number
+        && request.resource.data.rateMax >= request.resource.data.rateMin
+        && request.resource.data.workLocation is string
+        && request.resource.data.workLocation in ['on_site', 'hybrid', 'remote']
+        // A street address is required unless the role is fully remote.
+        && (request.resource.data.workLocation == 'remote'
+            || request.resource.data.location.size() > 0)
+        && request.resource.data.applyMethod is string
+        && request.resource.data.applyMethod in ['in_app', 'email', 'website']
         && request.resource.data.viewCount == 0
         && request.resource.data.applicationCount == 0;
       // Owners edit/close/soft-delete their own postings. The counters stay

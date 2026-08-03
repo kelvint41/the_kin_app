@@ -143,6 +143,11 @@ async function processTrials(db, nowMillis) {
 
   for (const doc of activeSnap.docs) {
     const business = doc.data();
+    // Comped accounts (the operator's own business) are never downgraded -
+    // there is no subscription behind them to convert, so the day-14 branch
+    // below would silently strip their tier. Belt and braces alongside
+    // clearing trial_status on those docs.
+    if (business.admin_comp === true) continue;
     const startAt = business.trial_start_at;
     if (!startAt) continue; // malformed doc - don't let it crash the whole sweep
 

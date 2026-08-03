@@ -37,11 +37,10 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
           title: Text(
             'Discussion',
             style: theme.headlineMedium.override(
-              font: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.w600,
-              ),
-              color: theme.info
-            ),
+                font: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.w600,
+                ),
+                color: theme.info),
           ),
           centerTitle: false,
           elevation: 0.0,
@@ -50,8 +49,7 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
           children: [
             Expanded(
               child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream:
-                    CommunityEventsService.getEventComments(widget.eventId),
+                stream: CommunityEventsService.getEventComments(widget.eventId),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(
@@ -61,8 +59,7 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
                   final comments = snapshot.data ?? [];
                   if (comments.isEmpty) {
                     return Center(
-                      child:
-                          Text('No comments yet', style: theme.bodyMedium),
+                      child: Text('No comments yet', style: theme.bodyMedium),
                     );
                   }
                   return ListView.builder(
@@ -98,51 +95,58 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
                 },
               ),
             ),
+            // See JobMessagesPage for why SafeArea sits inside the decorated
+            // container - keeps the send button clear of Android's nav bar.
             Container(
-              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: theme.secondaryBackground,
                 border: Border(top: BorderSide(color: theme.alternate)),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: commentController,
-                      decoration: InputDecoration(
-                        hintText: 'Add a comment...',
-                        hintStyle: theme.labelSmall,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: theme.alternate),
-                          borderRadius: BorderRadius.circular(20.0),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: commentController,
+                          decoration: InputDecoration(
+                            hintText: 'Add a comment...',
+                            hintStyle: theme.labelSmall,
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: theme.alternate),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: theme.primary, width: 2.0),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                          ),
+                          style: theme.bodySmall,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: theme.primary, width: 2.0),
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        contentPadding:
-                            const EdgeInsets.symmetric(horizontal: 16.0),
                       ),
-                      style: theme.bodySmall,
-                    ),
+                      const SizedBox(width: 8.0),
+                      IconButton(
+                        onPressed: () async {
+                          if (commentController.text.isNotEmpty) {
+                            await CommunityEventsService.addComment(
+                              eventId: widget.eventId,
+                              userId: currentUserUid,
+                              text: commentController.text,
+                            );
+                            commentController.clear();
+                          }
+                        },
+                        icon: const Icon(Icons.send),
+                        color: theme.primary,
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8.0),
-                  IconButton(
-                    onPressed: () async {
-                      if (commentController.text.isNotEmpty) {
-                        await CommunityEventsService.addComment(
-                          eventId: widget.eventId,
-                          userId: currentUserUid,
-                          text: commentController.text,
-                        );
-                        commentController.clear();
-                      }
-                    },
-                    icon: const Icon(Icons.send),
-                    color: theme.primary,
-                  ),
-                ],
+                ),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/job_board_service.dart';
@@ -60,11 +61,18 @@ class _JobDetailPageState extends State<JobDetailPage> {
             );
           }
 
-          final rateMin = (job['rateMin'] as num?)?.toDouble() ?? 0;
-          final rateMax = (job['rateMax'] as num?)?.toDouble() ?? 0;
           final applicationCount = job['applicationCount'] as int? ?? 0;
           final viewCount = job['viewCount'] as int? ?? 0;
           final tags = (job['tags'] as List?)?.cast<String>() ?? const [];
+          final requirements = job['requirements'] as String? ?? '';
+          final workLocation = job['workLocation'] as String? ?? 'on_site';
+          final jobTypeLabel = _jobTypeLabel(job['jobType'] as String?);
+          final locationLabel = workLocation == 'remote'
+              ? 'Remote'
+              : [
+                  job['location'] as String? ?? '',
+                  if (workLocation == 'hybrid') '(Hybrid)',
+                ].where((s) => s.isNotEmpty).join(' ');
 
           return SingleChildScrollView(
             child: Padding(
@@ -78,7 +86,9 @@ class _JobDetailPageState extends State<JobDetailPage> {
                   ),
                   const SizedBox(height: 8.0),
                   Text(
-                    job['location'] as String? ?? '',
+                    [locationLabel, jobTypeLabel]
+                        .where((s) => s.isNotEmpty)
+                        .join(' · '),
                     style:
                         theme.bodyMedium.override(color: theme.secondaryText),
                   ),
@@ -91,7 +101,7 @@ class _JobDetailPageState extends State<JobDetailPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 12.0, vertical: 6.0),
                     child: Text(
-                      '\$${rateMin.toStringAsFixed(0)}-\$${rateMax.toStringAsFixed(0)}/hr',
+                      JobBoardService.formatPay(job),
                       style: theme.titleSmall.override(
                         color: theme.primary,
                         fontWeight: FontWeight.w600,
@@ -115,6 +125,14 @@ class _JobDetailPageState extends State<JobDetailPage> {
                     job['description'] as String? ?? '',
                     style: theme.bodyMedium,
                   ),
+                  if (requirements.isNotEmpty) ...[
+                    const SizedBox(height: 24.0),
+                    Text('Requirements',
+                        style: theme.titleSmall
+                            .override(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8.0),
+                    Text(requirements, style: theme.bodyMedium),
+                  ],
                   if (tags.isNotEmpty) ...[
                     const SizedBox(height: 24.0),
                     Text('Tags',
@@ -134,14 +152,8 @@ class _JobDetailPageState extends State<JobDetailPage> {
                   ],
                   const SizedBox(height: 32.0),
                   FFButtonWidget(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => JobApplyPage(jobId: widget.jobId),
-                        ),
-                      );
-                    },
-                    text: 'Apply Now',
+                    onPressed: () => _apply(job),
+                    text: _applyLabel(job['applyMethod'] as String?),
                     options: FFButtonOptions(
                       width: double.infinity,
                       height: 56.0,
@@ -162,6 +174,80 @@ class _JobDetailPageState extends State<JobDetailPage> {
           );
         },
       ),
+    );
+  }
+
+  static String _jobTypeLabel(String? raw) {
+    switch (raw) {
+      case 'full_time':
+        return 'Full-time';
+      case 'part_time':
+        return 'Part-time';
+      case 'contract':
+        return 'Contract';
+      case 'seasonal':
+        return 'Seasonal';
+      default:
+        return '';
+    }
+  }
+
+  static String _applyLabel(String? method) {
+    switch (method) {
+      case 'email':
+        return 'Email your application';
+      case 'website':
+        return 'Apply on their website';
+      default:
+        return 'Apply Now';
+    }
+  }
+
+  /// Sends the candidate wherever the owner asked to receive applications.
+  ///
+  /// For email and website the app hands off and stops: KIN takes no
+  /// resume and keeps no applicant file, so there is nothing to collect
+  /// here first. Only the in-app route stays inside the app, and that one
+  /// is a message thread, not a file upload.
+  Future<void> _apply(Map<String, dynamic> job) async {
+    final method = job['applyMethod'] as String? ?? 'in_app';
+
+    if (method == 'email') {
+      final email = (job['applyEmail'] as String? ?? '').trim();
+      if (email.isNotEmpty) {
+        final subject = Uri.encodeComponent(
+            'Application: ${job['title'] as String? ?? 'your opening'}');
+        final launched = await launchUrl(
+          Uri.parse('mailto:$email?subject=$subject'),
+          mode: LaunchMode.externalApplication,
+        );
+        if (launched || !mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Send your application to $email')),
+        );
+        return;
+      }
+    }
+
+    if (method == 'website') {
+      final url = (job['applyUrl'] as String? ?? '').trim();
+      final uri = Uri.tryParse(url);
+      if (uri != null && url.isNotEmpty) {
+        final launched =
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (launched || !mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Couldn't open that link.")),
+        );
+        return;
+      }
+    }
+
+    // in_app, or a malformed email/website posting - the message thread is
+    // always a working fallback rather than a dead button.
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => JobApplyPage(jobId: widget.jobId)),
     );
   }
 

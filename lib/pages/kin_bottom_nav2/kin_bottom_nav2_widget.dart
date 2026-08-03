@@ -139,8 +139,7 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           context,
           icon: Icons.home_rounded,
           label: 'Home',
-          onTap: () =>
-              context.pushNamed(CustomerProfilePageWidget.routeName),
+          onTap: () => context.pushNamed(CustomerProfilePageWidget.routeName),
         );
       case KinNavPage.directory:
         return _buildTab(
@@ -189,27 +188,47 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
 
   @override
   Widget build(BuildContext context) {
+    // The decoration is on the OUTER container and SafeArea is inside it, so
+    // the bar's background colour extends behind the system navigation bar
+    // (reading as one continuous bar) while the tappable row is inset above
+    // it.
+    //
+    // Without this the four tabs sat underneath Android's navigation bar:
+    // still tappable, but overlapping Back / Home / Recents, so aiming for
+    // "Loyalty" could just as easily send you home. Android 15 (the app
+    // targets SDK 36) draws every app edge-to-edge and makes insetting the
+    // app's job - a fixed-height bottom bar with no inset handling is
+    // exactly the case that regression is designed to catch.
+    //
+    // It never showed on the iOS simulator: the home indicator is a thin
+    // overlay Flutter already accounts for, not a reserved strip of system
+    // buttons. Physical-Android-only bug.
     return Container(
-      height: 90.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
-      child: Padding(
-        padding: EdgeInsetsDirectional.fromSTEB(
-            FlutterFlowTheme.of(context).designToken.spacing.lg,
-            0.0,
-            FlutterFlowTheme.of(context).designToken.spacing.lg,
-            0.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            _tabFor(context, KinNavPage.home),
-            _tabFor(context, KinNavPage.directory),
-            _tabFor(context, KinNavPage.feed),
-            _tabFor(context, KinNavPage.loyalty),
-          ],
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 90.0,
+          child: Padding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+                FlutterFlowTheme.of(context).designToken.spacing.lg,
+                0.0,
+                FlutterFlowTheme.of(context).designToken.spacing.lg,
+                0.0),
+            child: Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _tabFor(context, KinNavPage.home),
+                _tabFor(context, KinNavPage.directory),
+                _tabFor(context, KinNavPage.feed),
+                _tabFor(context, KinNavPage.loyalty),
+              ],
+            ),
+          ),
         ),
       ),
     );
