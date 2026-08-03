@@ -64,6 +64,9 @@ const mysteryRewardEngine = require("./mystery_reward_engine.js");
 exports.generateMysteryReward = mysteryRewardEngine.generateMysteryReward;
 exports.redeemReward = mysteryRewardEngine.redeemReward;
 
+const businessGeohashOnCreate = require("./business_geohash_on_create.js");
+exports.setBusinessGeohashOnCreate = businessGeohashOnCreate.setBusinessGeohashOnCreate;
+
 const exchangePostTools = require("./exchange_post_tools.js");
 exports.cleanUpPostText = exchangePostTools.cleanUpPostText;
 
