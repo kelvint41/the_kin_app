@@ -68,12 +68,29 @@ service cloud.firestore {
     // (email / display_name / owned_business) through createUsersRecordData,
     // whose map is `.withoutNulls`, so is_admin is simply absent from them
     // and neither clause below rejects a legitimate write.
+    // `scavenger_points` is frozen for the same reason and is the more
+    // exploitable of the two. It is the entire KIN Quest economy, awarded
+    // only by recordVerifiedVisit (visit_verification.js) after a
+    // server-side geofence check against the business's coordinates. With
+    // it merely absent from the denylist, that whole check was decorative:
+    // the owner of a document may update it, so any modified client could
+    // write `{scavenger_points: 999999}` straight to its own user doc and
+    // skip every visit. Admin SDK writes bypass these rules, so the Cloud
+    // Function keeps working unchanged.
+    //
+    // `owned_business` is deliberately NOT frozen - registerBusiness writes
+    // it from the client, and it is only a UI pointer. Actual authority
+    // over a business is `businesses.owner_ref`, which is rule-checked on
+    // every business, job_posting and community_event write, so pointing
+    // this field at someone else's business grants nothing.
     match /users/{document} {
       allow create: if request.auth.uid == document
-        && !('is_admin' in request.resource.data);
+        && !('is_admin' in request.resource.data)
+        && !('scavenger_points' in request.resource.data);
       allow read: if request.auth.uid == document;
       allow update: if request.auth.uid == document
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['is_admin']);
+        && !request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny(['is_admin', 'scavenger_points']);
       allow delete: if request.auth.uid == document;
     }
 

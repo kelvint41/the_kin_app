@@ -203,12 +203,21 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
     // It never showed on the iOS simulator: the home indicator is a thin
     // overlay Flutter already accounts for, not a reserved strip of system
     // buttons. Physical-Android-only bug.
+    // viewPadding rather than SafeArea/MediaQuery.padding. Both describe the
+    // same system inset, but `padding` is zeroed out for any subtree an
+    // ancestor has already "consumed" it for - and Scaffold does exactly
+    // that around its slots. When that happens SafeArea silently insets by
+    // nothing and the bar sits back under the navigation buttons, which is
+    // the half-covered state this is meant to fix. viewPadding always
+    // reports the physical inset, so it can't be neutralised that way.
+    final systemInset = MediaQuery.viewPaddingOf(context).bottom;
+
     return Container(
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
       ),
-      child: SafeArea(
-        top: false,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: systemInset),
         child: SizedBox(
           height: 90.0,
           child: Padding(

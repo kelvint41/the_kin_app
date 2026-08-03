@@ -8,6 +8,7 @@ if (!admin.apps.length) {
 const { FieldValue, GeoPoint } = require("firebase-admin/firestore");
 const { haversineMeters, isValidCoord } = require("./visit_verification.js")
   ._internals;
+const { encodeGeohash } = require("./geohash.js");
 
 /// Radius within which a submitted business is treated as a duplicate of an
 /// existing listing or pending submission. Wider than the visit-verification
@@ -336,3 +337,95 @@ exports.resolveBusinessSubmission = onCall(async (request) => {
 });
 
 exports._internals = { findsDuplicate, normalizeName };
+
+/**
+ * Approves or dismisses a queued business submission. Admin only.
+ *
+ * business_submissions was a queue with no exit: customers could drop a pin
+ * from KIN Quest search and the row landed here, but nothing in the app or
+ * the functions could ever promote one into `businesses`. Submissions
+ * accumulated and no submitted business could reach the map.
+ *
+ * On approve this creates the live listing itself rather than handing the
+ * client a payload to write, so the fields that matter can't be tampered
+ * with in transit - and so `geohash` is computed here. Without it the new
+ * business is invisible on the map (see geohash.js).
+ *
+ * `owner_ref` is deliberately left null: approving means "this is a real
+ * Black-owned business", not "this person owns it". Ownership is still
+ * settled by the claim flow.
+ */
+exports.resolveBusinessSubmissionReview = onCall(async (request) => {
+  const uid = request.auth && request.auth.uid;
+  if (!uid) {
+    throw new HttpsError("unauthenticated", "Sign in required.");
+  }
+
+  const db = admin.firestore();
+  const callerSnap = await db.doc(`users/${uid}`).get();
+  if (!callerSnap.exists || callerSnap.data().is_admin !== true) {
+    throw new HttpsError("permission-denied", "Admin access required.");
+  }
+
+  const { submissionId, action } = request.data || {};
+  if (typeof submissionId !== "string" || !submissionId.trim()) {
+    throw new HttpsError("invalid-argument", "submissionId is required.");
+  }
+  if (action !== "approve" && action !== "dismiss") {
+    throw new HttpsError("invalid-argument", "action must be approve or dismiss.");
+  }
+
+  const subRef = db.collection("business_submissions").doc(submissionId);
+  const subSnap = await subRef.get();
+  if (!subSnap.exists) {
+    throw new HttpsError("not-found", "That submission no longer exists.");
+  }
+  const sub = subSnap.data();
+
+  // Kept rather than deleted, same audit-trail reasoning as the rest of
+  // business_submissions.
+  if (action === "dismiss") {
+    await subRef.update({
+      review_status: "dismissed",
+      reviewed_by: db.doc(`users/${uid}`),
+      reviewed_at: FieldValue.serverTimestamp(),
+    });
+    return { success: true, action: "dismissed" };
+  }
+
+  if (sub.review_status === "approved" && sub.published_business_ref) {
+    // Idempotent: a double-tap shouldn't create a second listing.
+    return { success: true, action: "approved", businessId: sub.published_business_ref.id };
+  }
+
+  const loc = sub.business_location;
+  if (!loc || typeof loc.latitude !== "number") {
+    throw new HttpsError(
+      "failed-precondition",
+      "That submission has no coordinates, so it can't be placed on the map.",
+    );
+  }
+
+  const businessRef = await db.collection("businesses").add({
+    business_name: sub.business_name,
+    address: sub.address || "",
+    category: sub.category || "",
+    business_location: loc,
+    geohash: encodeGeohash(loc.latitude, loc.longitude),
+    is_verified: true,
+    owner_ref: null,
+    subscription_tier: "Community",
+    is_premium: false,
+    created_at: FieldValue.serverTimestamp(),
+    approved_from_submission: subRef,
+  });
+
+  await subRef.update({
+    review_status: "approved",
+    published_business_ref: businessRef,
+    reviewed_by: db.doc(`users/${uid}`),
+    reviewed_at: FieldValue.serverTimestamp(),
+  });
+
+  return { success: true, action: "approved", businessId: businessRef.id };
+});

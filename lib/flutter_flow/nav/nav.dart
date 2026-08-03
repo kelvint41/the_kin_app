@@ -335,6 +335,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           builder: (context, params) => EventManagementPage(),
         ),
+        FFRoute(
+          name: AdminSubmissionsPage.routeName,
+          path: AdminSubmissionsPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => AdminSubmissionsPage(),
+        ),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

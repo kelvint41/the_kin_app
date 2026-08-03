@@ -48,3 +48,4 @@ export '/pages/job_board/job_board_listing_page.dart' show JobBoardListingPage;
 export '/pages/job_board/job_management_page.dart' show JobManagementPage;
 export '/pages/community_events/events_listing_page.dart' show EventsListingPage;
 export '/pages/community_events/event_management_page.dart' show EventManagementPage;
+export '/pages/admin_submissions/admin_submissions_page.dart' show AdminSubmissionsPage;

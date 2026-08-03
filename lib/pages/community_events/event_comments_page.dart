@@ -102,10 +102,11 @@ class _EventCommentsPageState extends State<EventCommentsPage> {
                 color: theme.secondaryBackground,
                 border: Border(top: BorderSide(color: theme.alternate)),
               ),
-              child: SafeArea(
-                top: false,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                    16, 16, 16, 16 + MediaQuery.viewPaddingOf(context).bottom),
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.zero,
                   child: Row(
                     children: [
                       Expanded(

@@ -10,6 +10,7 @@ import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
 import '/components/main_menu_button.dart';
+import '/components/subscription_management_row.dart';
 import '/components/owner_roi_dashboard_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -1366,6 +1367,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ].divide(SizedBox(height: 16.0)),
                 ),
               ),
+              // Apple Guideline 3.1.2 requires a subscription app to link
+              // out to where a plan can be managed or cancelled, and to offer
+              // Restore Purchases. Both were built and left unmounted.
+              const SubscriptionManagementRow(),
               _appStudioPrompt(context),
               Container(
                 height: 24.0,

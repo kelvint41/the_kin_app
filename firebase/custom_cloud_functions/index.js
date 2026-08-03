@@ -55,6 +55,8 @@ exports.submitCustomerBusinessDiscovery =
   businessDiscovery.submitCustomerBusinessDiscovery;
 exports.findMatchingBusinessSubmission =
   businessDiscovery.findMatchingBusinessSubmission;
+exports.resolveBusinessSubmissionReview =
+  businessDiscovery.resolveBusinessSubmissionReview;
 exports.resolveBusinessSubmission =
   businessDiscovery.resolveBusinessSubmission;
 

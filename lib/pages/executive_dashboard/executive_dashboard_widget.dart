@@ -6,6 +6,7 @@ import '/components/main_menu_button.dart';
 import '/components/signup_item_widget.dart';
 import '/components/admin_beacon_metrics_card.dart';
 import '/components/admin_discovery_metrics_card.dart';
+import '/components/admin_job_board_metrics_card.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -528,6 +529,46 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 12.0),
                             child: AdminDiscoveryMetricsCard(),
+                          ),
+                          // Job Board Metrics. Built alongside the two cards
+                          // above but never mounted, so the numbers
+                          // calculateJobBoardMetrics writes hourly had
+                          // nowhere to surface.
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: AdminJobBoardMetricsCard(),
+                          ),
+                          // Entry point to the submission review queue.
+                          // business_submissions had no exit before this -
+                          // customer-added businesses queued forever with no
+                          // screen to approve them.
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: ListTile(
+                              tileColor: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              leading: Icon(Icons.fact_check_outlined,
+                                  color: FlutterFlowTheme.of(context).primary),
+                              title: Text('Review business submissions',
+                                  style:
+                                      FlutterFlowTheme.of(context).bodyMedium),
+                              subtitle: Text(
+                                'Approve or dismiss businesses added from KIN Quest',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelSmall
+                                    .override(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText),
+                              ),
+                              trailing: Icon(Icons.chevron_right_rounded,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText),
+                              onTap: () => context
+                                  .pushNamed(AdminSubmissionsPage.routeName),
+                            ),
                           ),
                           Container(
                             decoration: BoxDecoration(
