@@ -90,7 +90,7 @@ class _ReportBusinessSheetState extends State<_ReportBusinessSheet> {
         content: Text(
           result.isSuccess
               ? (widget.isAdmin
-                  ? '${widget.business.businessName} removed from KIN.'
+                  ? '${widget.business.businessName} removed from The KIN App.'
                   : 'Thanks - we\'ll review this listing.')
               : result.error!,
         ),
@@ -150,9 +150,9 @@ class _ReportBusinessSheetState extends State<_ReportBusinessSheet> {
                       ? 'This removes it from the map, Quest, search, and the '
                           'feed right away. You can restore it later if you '
                           'need to.'
-                      : 'KIN only lists Black-owned businesses. Tell us and '
-                          'we\'ll check it out - the listing stays up until '
-                          'someone reviews it.',
+                      : 'The KIN App only lists Black-owned businesses. Tell '
+                          'us and we\'ll check it out - the listing stays up '
+                          'until someone reviews it.',
                   style: theme.bodySmall.override(color: theme.secondaryText),
                 ),
                 if (!widget.isAdmin) ...[
@@ -180,7 +180,10 @@ class _ReportBusinessSheetState extends State<_ReportBusinessSheet> {
                 const SizedBox(height: 24.0),
                 Row(
                   children: [
+                    // Cancel gets the smaller share: "Remove from KIN App" is
+                    // a long label, and an even split clips it.
                     Expanded(
+                      flex: 2,
                       child: TextButton(
                         onPressed: submitting
                             ? null
@@ -190,6 +193,7 @@ class _ReportBusinessSheetState extends State<_ReportBusinessSheet> {
                     ),
                     const SizedBox(width: 12.0),
                     Expanded(
+                      flex: 3,
                       child: FilledButton(
                         onPressed: submitting ? null : _submit,
                         style: FilledButton.styleFrom(
@@ -202,8 +206,11 @@ class _ReportBusinessSheetState extends State<_ReportBusinessSheet> {
                           submitting
                               ? 'Working...'
                               : (widget.isAdmin
-                                  ? 'Remove from KIN'
+                                  ? 'Remove from KIN App'
                                   : 'Send report'),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.bodyMedium.override(color: theme.info),
                         ),
                       ),

@@ -18,6 +18,11 @@ class KinQuestSearchModel extends FlutterFlowModel<KinQuestSearchWidget> {
   Future<List<BusinessesRecord>> businesses() =>
       _businesses ??= QuestEligibility.questEligibleBusinesses();
 
+  /// Drops the memoized list so the next build refetches - needed after an
+  /// admin delists a business from the results, or the row they just
+  /// removed stays on screen and reads as a failed tap.
+  void refreshBusinesses() => _businesses = null;
+
   bool checkingIn = false;
 
   @override

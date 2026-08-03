@@ -1,6 +1,7 @@
 import '/backend/backend.dart';
 import '/components/add_traveler_discovery_dialog.dart';
 import '/components/main_menu_button.dart';
+import '/components/report_business_sheet.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -305,6 +306,21 @@ class _KinQuestSearchWidgetState extends State<KinQuestSearchWidget> {
                 ),
               ),
             ),
+          ),
+          // Same report/remove action as the Quest list. This screen needs it
+          // more, not less: searching by name is how you reach a specific
+          // listing you already know doesn't belong, without having to be
+          // standing next to it.
+          IconButton(
+            onPressed: () => showReportBusinessSheet(
+              context,
+              business: business,
+              onHidden: () => safeSetState(() => _model.refreshBusinesses()),
+            ),
+            icon: Icon(Icons.more_vert_rounded,
+                size: 18.0, color: theme.secondaryText),
+            visualDensity: VisualDensity.compact,
+            tooltip: 'Report this listing',
           ),
         ],
       ),
