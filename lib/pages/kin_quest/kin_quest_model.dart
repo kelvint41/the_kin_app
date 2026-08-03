@@ -24,6 +24,13 @@ class KinQuestModel extends FlutterFlowModel<KinQuestWidget> {
   Future<List<BusinessesRecord>> businesses() =>
       _businesses ??= QuestEligibility.questEligibleBusinesses();
 
+  /// Drops the memoized list so the next build refetches.
+  ///
+  /// Needed after an admin delists a business from this screen: the fetch is
+  /// one-shot, so without this the row they just removed would stay on
+  /// screen and read as a failed tap.
+  void refreshBusinesses() => _businesses = null;
+
   /// True while a check-in call is in flight, to disable the button and
   /// stop a double-tap firing two check-ins (the server already dedupes,
   /// but this avoids the round-trip and the flicker of two snackbars).

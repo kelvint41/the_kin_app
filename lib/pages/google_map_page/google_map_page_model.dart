@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/business_preview_card_widget.dart';
+import '/services/business_visibility.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -88,7 +89,7 @@ class GoogleMapPageModel extends FlutterFlowModel<GoogleMapPageWidget> {
         byPath[b.reference.path] = b;
       }
     }
-    return byPath.values.toList();
+    return BusinessVisibility.visible(byPath.values.toList());
   }
 
   /// Drops the memoized copy so the next build refetches even if the

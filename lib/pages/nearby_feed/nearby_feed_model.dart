@@ -1,5 +1,6 @@
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import '/services/business_visibility.dart';
 import 'nearby_feed_widget.dart' show NearbyFeedWidget;
 import 'package:flutter/material.dart';
 
@@ -21,8 +22,8 @@ class NearbyFeedModel extends FlutterFlowModel<NearbyFeedWidget> {
   /// page exists to show.
   Future<List<BusinessesRecord>>? _businesses;
 
-  Future<List<BusinessesRecord>> businesses() =>
-      _businesses ??= queryBusinessesRecordOnce();
+  Future<List<BusinessesRecord>> businesses() => _businesses ??=
+      queryBusinessesRecordOnce().then(BusinessVisibility.visible);
 
   @override
   void initState(BuildContext context) {}

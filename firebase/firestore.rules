@@ -33,12 +33,26 @@ service cloud.firestore {
         && !('trial_start_at' in request.resource.data)
         && !('trial_end_at' in request.resource.data);
       allow read: if true;
+      // The owner path, minus the system-managed fields. is_hidden and its
+      // audit fields are frozen here for a different reason than the
+      // kindex/trial fields: is_hidden is the delisting switch, so leaving
+      // it owner-writable would let a business that was removed for not
+      // being Black-owned simply put itself back.
       allow update: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid)
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
           'kindex_score', 'kindex_velocity',
           'has_used_trial', 'trial_start_at', 'trial_end_at',
-          'trial_reminder_day10_sent_at', 'trial_reminder_day13_sent_at'
+          'trial_reminder_day10_sent_at', 'trial_reminder_day13_sent_at',
+          'is_hidden', 'hidden_reason', 'hidden_at', 'hidden_by'
         ]);
+      // The admin delist/restore path. Only an admin may touch is_hidden,
+      // and only those four fields - so this can't be used to edit someone
+      // else's business content under cover of a moderation action.
+      allow update: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true
+        && request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['is_hidden', 'hidden_reason', 'hidden_at', 'hidden_by']);
       allow delete: if resource.data.owner_ref == /databases/$(database)/documents/users/$(request.auth.uid);
     }
 
@@ -556,6 +570,30 @@ service cloud.firestore {
     // the whole point is a count a client can't see or race against.
     match /system_counters/{document} {
       allow read, write: if false;
+    }
+
+    // "This isn't a Black-owned business" reports from customers.
+    //
+    // Write-only from the client, same posture as exchange_post_reports:
+    // filing one changes nothing anyone can see, and an admin reviews them
+    // out of band. That asymmetry is the whole design - a single tap from a
+    // stranger must not be able to delist a real Black-owned business, and
+    // a competitor must not be able to knock a rival off the map. Admins
+    // delist through businesses.is_hidden instead.
+    //
+    // Not readable by the reporter either: the list of who reported whom is
+    // exactly the thing that invites retaliation.
+    match /business_reports/{document} {
+      allow read: if false;
+      allow create: if request.auth != null
+        && request.resource.data.reporter_ref
+           == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.status == 'pending'
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 1000;
+      allow update, delete: if false;
     }
 
     // ===== Job Board =====

@@ -1,6 +1,7 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/main_menu_button.dart';
+import '/components/report_business_sheet.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -823,6 +824,7 @@ class _KinQuestWidgetState extends State<KinQuestWidget>
           ),
           SizedBox(width: 8.0),
           _checkInButton(theme, business, filled: true),
+          _reportButton(theme, business),
         ],
       ),
     );
@@ -863,8 +865,31 @@ class _KinQuestWidgetState extends State<KinQuestWidget>
             ),
           ),
           _checkInButton(theme, business, filled: false),
+          _reportButton(theme, business),
         ],
       ),
+    );
+  }
+
+  /// "This isn't a Black-owned business" - reachable from the Quest list
+  /// because that's where someone is standing in front of the place and can
+  /// actually tell. For an admin the same button removes it on the spot.
+  ///
+  /// Deliberately quiet: it sits next to Check In, not competing with it.
+  /// The common action is checking in; this is the exception.
+  Widget _reportButton(FlutterFlowTheme theme, BusinessesRecord business) {
+    return IconButton(
+      onPressed: () => showReportBusinessSheet(
+        context,
+        business: business,
+        // An admin removal should leave the list immediately, otherwise the
+        // row they just removed sits there looking like the tap failed.
+        onHidden: () => safeSetState(() => _model.refreshBusinesses()),
+      ),
+      icon: Icon(Icons.more_vert_rounded,
+          size: 18.0, color: theme.secondaryText),
+      visualDensity: VisualDensity.compact,
+      tooltip: 'Report this listing',
     );
   }
 

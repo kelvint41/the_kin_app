@@ -1579,6 +1579,81 @@ class KinServices {
     }
   }
 
+  /// Files a report that a listing doesn't belong on KIN - almost always
+  /// "this isn't a Black-owned business".
+  ///
+  /// Queued, never immediate. A report changes nothing a customer can see:
+  /// the business stays listed until an admin acts on it. That asymmetry is
+  /// the point - one tap from one stranger must not be able to delist a
+  /// real Black-owned business, and a competitor shouldn't be able to
+  /// knock a rival off the map. Same posture as [reportExchangePost].
+  ///
+  /// Admins get [hideBusiness] instead, which does take effect immediately.
+  static Future<ServiceResult<void>> reportBusinessListing({
+    required DocumentReference businessRef,
+    required DocumentReference reporterRef,
+    required String reason,
+    String? note,
+  }) async {
+    try {
+      await FirebaseFirestore.instance.collection('business_reports').add({
+        'business_ref': businessRef,
+        'reporter_ref': reporterRef,
+        'reason': reason,
+        'note': note ?? '',
+        'status': 'pending',
+        'created_at': FieldValue.serverTimestamp(),
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not send the report.');
+    }
+  }
+
+  /// Delists a business from every customer-facing surface. Admin only.
+  ///
+  /// Soft hide, not a delete. Two reasons: the bulk import can re-add a
+  /// deleted row on its next run, so the tombstone has to survive; and
+  /// removing the wrong business is one field away from being undone
+  /// ([restoreBusiness]) instead of unrecoverable.
+  ///
+  /// Enforced server-side too - firestore.rules only lets a user with
+  /// is_admin write these fields, so this isn't a client-side-only gate.
+  static Future<ServiceResult<void>> hideBusiness({
+    required DocumentReference businessRef,
+    required DocumentReference adminRef,
+    required String reason,
+  }) async {
+    try {
+      await businessRef.update({
+        'is_hidden': true,
+        'hidden_reason': reason,
+        'hidden_at': FieldValue.serverTimestamp(),
+        'hidden_by': adminRef,
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not remove this business.');
+    }
+  }
+
+  /// Puts a delisted business back. Admin only.
+  static Future<ServiceResult<void>> restoreBusiness({
+    required DocumentReference businessRef,
+  }) async {
+    try {
+      await businessRef.update({
+        'is_hidden': false,
+        'hidden_reason': '',
+        'hidden_at': null,
+        'hidden_by': null,
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not restore this business.');
+    }
+  }
+
   /// Generates one AI social media post concept (caption + 3 hashtags + CTA
   /// + image concept) for [businessRef], optionally guided by [theme] (e.g.
   /// "weekend brunch special").

@@ -360,6 +360,40 @@ class BusinessesRecord extends FirestoreRecord {
   bool? get questEligible => _questEligible;
   bool hasQuestEligible() => _questEligible != null;
 
+  // "is_hidden" field. Admin-only delisting switch - true removes the
+  // business from every customer-facing surface (map, Quest, Quest search,
+  // Nearby Feed).
+  //
+  // A soft hide rather than a delete: the bulk imports pulled in businesses
+  // that aren't Black-owned (Panifico Bakeshop being the known example),
+  // and KIN only lists verified Black-owned businesses. Keeping the doc
+  // means the delisting survives a future re-import instead of the same
+  // row silently coming back, and a mistake is one field away from being
+  // undone.
+  //
+  // Null on every pre-existing document, so this must be filtered
+  // client-side: `where('is_hidden', isEqualTo: false)` matches only docs
+  // where the field is present and false, which is none of them.
+  bool? _isHidden;
+  bool get isHidden => _isHidden ?? false;
+  bool hasIsHidden() => _isHidden != null;
+
+  // "hidden_reason" field. Why it was delisted, e.g. 'not_black_owned'.
+  String? _hiddenReason;
+  String get hiddenReason => _hiddenReason ?? '';
+  bool hasHiddenReason() => _hiddenReason != null;
+
+  // "hidden_at" field.
+  DateTime? _hiddenAt;
+  DateTime? get hiddenAt => _hiddenAt;
+  bool hasHiddenAt() => _hiddenAt != null;
+
+  // "hidden_by" field. The admin who delisted it - this is a destructive
+  // enough action to be worth an audit trail.
+  DocumentReference? _hiddenBy;
+  DocumentReference? get hiddenBy => _hiddenBy;
+  bool hasHiddenBy() => _hiddenBy != null;
+
   // "facebook_url" field.
   String? _facebookUrl;
   String get facebookUrl => _facebookUrl ?? '';
@@ -567,6 +601,10 @@ class BusinessesRecord extends FirestoreRecord {
     _instagramUrl = snapshotData['instagram_url'] as String?;
     _isVerified = snapshotData['is_verified'] as bool?;
     _questEligible = snapshotData['quest_eligible'] as bool?;
+    _isHidden = snapshotData['is_hidden'] as bool?;
+    _hiddenReason = snapshotData['hidden_reason'] as String?;
+    _hiddenAt = snapshotData['hidden_at'] as DateTime?;
+    _hiddenBy = snapshotData['hidden_by'] as DocumentReference?;
     _facebookUrl = snapshotData['facebook_url'] as String?;
     _tiktokUrl = snapshotData['tiktok_url'] as String?;
     _linkedinUrl = snapshotData['linkedin_url'] as String?;

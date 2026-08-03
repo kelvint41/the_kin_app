@@ -1,4 +1,5 @@
 import '/backend/backend.dart';
+import 'business_visibility.dart';
 
 /// Which businesses may appear in the KIN Quest.
 ///
@@ -63,16 +64,20 @@ class QuestEligibility {
     }).toList();
   }
 
-  /// Convenience: load every business, minus the Quest-excluded categories.
+  /// Convenience: every visible business, minus the Quest-excluded
+  /// categories.
   ///
   /// Both Quest surfaces (the list and the search) call this so they can't
-  /// drift apart on which businesses are in play.
+  /// drift apart on which businesses are in play. Admin-delisted businesses
+  /// are dropped first - a business that shouldn't be in KIN at all
+  /// certainly shouldn't be a check-in target.
   static Future<List<BusinessesRecord>> questEligibleBusinesses() async {
     final results = await Future.wait([
       queryBusinessesRecordOnce(),
       excludedCategoryNames(),
     ]);
-    final businesses = results[0] as List<BusinessesRecord>;
+    final businesses =
+        BusinessVisibility.visible(results[0] as List<BusinessesRecord>);
     final excluded = results[1] as Set<String>;
     return filterQuestEligible(businesses, excluded);
   }
