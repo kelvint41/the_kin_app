@@ -99,6 +99,20 @@ class GoogleMapPageModel extends FlutterFlowModel<GoogleMapPageWidget> {
     _queriedBounds = null;
   }
 
+  /// The whole directory, for the name search box.
+  ///
+  /// Deliberately not geohash-bounded like [businessesForViewport]: search is
+  /// the one way to reach a business that has no map pin at all (missing
+  /// coordinates, or simply somewhere the user hasn't panned to), so it can't
+  /// be limited to the visible region without defeating its own purpose.
+  /// 500-ish rows is cheap as a single fetch, memoized for the life of the
+  /// page rather than re-read per keystroke.
+  Future<List<BusinessesRecord>>? _allBusinesses;
+
+  Future<List<BusinessesRecord>> allBusinessesForSearch() =>
+      _allBusinesses ??=
+          queryBusinessesRecordOnce().then(BusinessVisibility.visible);
+
   /// Businesses on a paid plan, for the premium carousel - a small targeted
   /// query on `subscription_tier` (see kPaidSubscriptionTiers in
   /// premium_placement.dart), independent of the map viewport: a merchant

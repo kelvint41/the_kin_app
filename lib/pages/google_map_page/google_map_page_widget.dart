@@ -81,6 +81,50 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  final _searchController = TextEditingController();
+  String _searchQuery = '';
+  List<BusinessesRecord> _searchResults = [];
+  bool _searching = false;
+
+  /// Filters the whole directory (not just what's on screen) by name, so
+  /// this doubles as the way to reach a business that has no map pin at
+  /// all - e.g. a submission still missing coordinates - rather than only
+  /// helping with businesses already visible.
+  Future<void> _onSearchChanged(String value) async {
+    final query = value.trim();
+    safeSetState(() => _searchQuery = query);
+    if (query.isEmpty) {
+      safeSetState(() => _searchResults = []);
+      return;
+    }
+    safeSetState(() => _searching = true);
+    final all = await _model.allBusinessesForSearch();
+    if (!mounted) return;
+    final lower = query.toLowerCase();
+    final matches = all
+        .where((b) => b.businessName.toLowerCase().contains(lower))
+        .take(8)
+        .toList();
+    safeSetState(() {
+      _searchResults = matches;
+      _searching = false;
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    FocusScope.of(context).unfocus();
+    safeSetState(() {
+      _searchQuery = '';
+      _searchResults = [];
+    });
+  }
+
+  void _selectSearchResult(BusinessesRecord business) {
+    _clearSearch();
+    _openBusiness(business);
+  }
+
   /// The active category chip. Single-select: tapping a chip makes it the
   /// only active one, and tapping the active chip falls back to Near Me
   /// (no filter).
@@ -164,6 +208,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   @override
   void dispose() {
     _model.dispose();
+    _searchController.dispose();
 
     super.dispose();
   }
@@ -443,6 +488,128 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     );
   }
 
+  /// Search box for finding a business by name across the whole directory,
+  /// not just the current map viewport - see [GoogleMapPageModel.allBusinessesForSearch].
+  Widget _searchField(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Container(
+      height: 44.0,
+      decoration: BoxDecoration(
+        color: theme.secondaryBackground,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: theme.alternate, width: 1.0),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onChanged: _onSearchChanged,
+        style: theme.bodyMedium.override(
+          font: GoogleFonts.plusJakartaSans(),
+          color: theme.primaryText,
+          letterSpacing: 0.0,
+        ),
+        decoration: InputDecoration(
+          hintText: 'Search businesses by name',
+          hintStyle: theme.bodyMedium.override(
+            font: GoogleFonts.plusJakartaSans(),
+            color: theme.secondaryText,
+            letterSpacing: 0.0,
+          ),
+          prefixIcon: Icon(Icons.search_rounded,
+              color: theme.secondaryText, size: 20.0),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? InkWell(
+                  onTap: _clearSearch,
+                  child: Icon(Icons.close_rounded,
+                      color: theme.secondaryText, size: 20.0),
+                )
+              : null,
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 0.0),
+        ),
+      ),
+    );
+  }
+
+  /// Dropdown of name matches shown under the search field while
+  /// [_searchQuery] is non-empty. A business without a map pin (no
+  /// `business_location`) is flagged rather than hidden - the whole point of
+  /// searching the full directory is reaching businesses the map itself
+  /// can't show yet.
+  Widget _searchResultsList(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(top: 8.0),
+      constraints: const BoxConstraints(maxHeight: 320.0),
+      decoration: BoxDecoration(
+        color: theme.secondaryBackground,
+        borderRadius: BorderRadius.circular(8.0),
+        border: Border.all(color: theme.alternate, width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 12.0,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: _searching
+          ? Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: SizedBox(
+                  width: 20.0,
+                  height: 20.0,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.0,
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(theme.secondaryText),
+                  ),
+                ),
+              ),
+            )
+          : _searchResults.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    'No businesses match "$_searchQuery".',
+                    style: theme.bodySmall
+                        .override(color: theme.secondaryText),
+                  ),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.zero,
+                  itemCount: _searchResults.length,
+                  itemBuilder: (listContext, index) {
+                    final business = _searchResults[index];
+                    final hasPin = business.businessLocation != null;
+                    return ListTile(
+                      dense: true,
+                      leading: Icon(Icons.storefront_rounded,
+                          color: theme.primaryText, size: 20.0),
+                      title: Text(business.businessName,
+                          style: theme.bodyMedium
+                              .override(color: theme.primaryText)),
+                      subtitle: Text(
+                        hasPin
+                            ? business.category
+                            : 'Not on the map yet - view profile',
+                        style: theme.labelSmall.override(
+                          color:
+                              hasPin ? theme.secondaryText : theme.warning,
+                        ),
+                      ),
+                      trailing: Icon(Icons.chevron_right_rounded,
+                          color: theme.secondaryText),
+                      onTap: () => _selectSearchResult(business),
+                    );
+                  },
+                ),
+    );
+  }
+
   /// One category filter chip. The chips used to be a hand-unrolled set of
   /// five Containers with no tap handler at all, rebuilt once per business
   /// document by a `List.generate(businessList.length, ...)` over a second
@@ -672,6 +839,9 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                   const NotificationBellButton(),
                                 ].divide(SizedBox(width: 8.0)),
                               ),
+                              _searchField(context),
+                              if (_searchQuery.isNotEmpty)
+                                _searchResultsList(context),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
