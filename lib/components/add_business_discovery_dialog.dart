@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_place_picker.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/services/geocoding_service.dart';
 import '/services/kin_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -81,16 +82,31 @@ class _AddBusinessDiscoveryDialogState
       await KinServices.ensureBusinessCategoryExists(otherCategory);
     }
 
+    // The place picker's dropdown is the normal way to capture coordinates,
+    // but typing an address and moving on - the more natural way to treat a
+    // text field - leaves _latitude/_longitude null without any error, and
+    // that silently downgraded an admin's "live on the map" add into an
+    // unapprovable queue entry (resolveBusinessSubmissionReview refuses to
+    // publish a submission with no coordinates at all). Geocoding the typed
+    // address directly closes that gap regardless of whether the dropdown
+    // was used.
+    if (_latitude == null || _longitude == null) {
+      final geocoded = await GeocodingService.geocodeAddress(address);
+      if (geocoded != null) {
+        _latitude = geocoded.latitude;
+        _longitude = geocoded.longitude;
+      }
+    }
+
     // An admin adding a business is the review - they're typically standing
     // in front of it with the owner's card. Skip the queue and publish, so
     // the owner can be shown their live listing and claim it on the spot.
     // Everyone else's submission still queues for review.
     //
     // Requires real coordinates: without them the listing has no geohash
-    // and would never appear on the map (see adminCreateBusiness), so a
-    // hand-typed address that was never resolved through the place picker
-    // falls back to the normal queue rather than publishing something
-    // invisible.
+    // and would never appear on the map (see adminCreateBusiness). Only an
+    // address that fails to geocode at all (a typo, or a business not yet
+    // indexed anywhere) falls back to the normal queue now.
     final isAdmin = currentUserDocument?.isAdmin == true;
     final hasCoords = _latitude != null && _longitude != null;
 

@@ -5,6 +5,7 @@ import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_place_picker.dart';
 import '/flutter_flow/form_field_controller.dart';
+import '/services/geocoding_service.dart';
 import '/services/kin_services.dart';
 import '/services/nearby_feed.dart' show distanceKm;
 import 'package:flutter/material.dart';
@@ -105,7 +106,21 @@ class _AddTravelerDiscoveryDialogState
     if (!mounted) return;
 
     final hasGps = !(location.latitude == 0 && location.longitude == 0);
-    final hasPickedPlace = _placeLat != null && _placeLng != null;
+    var hasPickedPlace = _placeLat != null && _placeLng != null;
+
+    // Typing an address and moving on - rather than tapping the dropdown
+    // suggestion - used to fall straight through to the GPS fallback below,
+    // or to this hard failure if GPS was also off. Geocoding the typed text
+    // directly recovers the same case the picker would have resolved,
+    // without depending on that specific tap landing.
+    if (!hasPickedPlace) {
+      final geocoded = await GeocodingService.geocodeAddress(address);
+      if (geocoded != null) {
+        _placeLat = geocoded.latitude;
+        _placeLng = geocoded.longitude;
+        hasPickedPlace = true;
+      }
+    }
 
     // Location is no longer required, only *some* way to place the business.
     // Requiring GPS made it impossible to add a business you aren't standing
