@@ -147,8 +147,9 @@ exports.submitCustomerBusinessDiscovery = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "Sign in required.");
   }
 
-  const { businessName, address, category, latitude, longitude } =
-    request.data || {};
+  const {
+    businessName, address, category, latitude, longitude, verifiedOnSite,
+  } = request.data || {};
   if (typeof businessName !== "string" || !businessName.trim()) {
     throw new HttpsError("invalid-argument", "businessName is required.");
   }
@@ -192,6 +193,15 @@ exports.submitCustomerBusinessDiscovery = onCall(async (request) => {
     business_location: candidateCoords
       ? new GeoPoint(candidateCoords.lat, candidateCoords.lng)
       : null,
+    // Whether the submitter's own GPS put them at the business, or they
+    // vouched for it remotely (from a business card, a trip they took).
+    // Both are worth having, but KIN lists *verified* Black-owned
+    // businesses, so a review needs to be able to tell them apart - a
+    // remote submission is a lead, an on-site one is ground truth.
+    //
+    // Coerced rather than trusted: this arrives from the client, and an
+    // absent field must read as "not verified", never as verified.
+    verified_on_site: verifiedOnSite === true,
     created_at: FieldValue.serverTimestamp(),
   });
 

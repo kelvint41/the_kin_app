@@ -561,6 +561,14 @@ class KinServices {
     required String category,
     required double latitude,
     required double longitude,
+    /// True only when the submitter's own GPS put them at the business.
+    ///
+    /// A submission vouched for from a business card is still worth having,
+    /// but KIN lists *verified* Black-owned businesses, so it can't be
+    /// recorded as the same thing as someone confirming it on the ground.
+    /// The server re-derives nothing here - it just carries the flag onto
+    /// the submission for review.
+    bool verifiedOnSite = false,
   }) async {
     try {
       await FirebaseFunctions.instance
@@ -574,6 +582,7 @@ class KinServices {
         'category': category,
         'latitude': latitude,
         'longitude': longitude,
+        'verifiedOnSite': verifiedOnSite,
       });
       return const ServiceResult.success(null);
     } on FirebaseFunctionsException catch (e) {
