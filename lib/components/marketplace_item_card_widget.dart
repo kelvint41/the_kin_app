@@ -7,10 +7,10 @@ import '/index.dart';
 import '/services/kin_services.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'showcase_item_card_model.dart';
-export 'showcase_item_card_model.dart';
+import 'marketplace_item_card_model.dart';
+export 'marketplace_item_card_model.dart';
 
-/// A Showcase item card - used by both the "Popular near you" rail and the
+/// A Marketplace item card - used by both the "Popular near you" rail and the
 /// full grid. Resolves the parent business via a live stream (for its name
 /// and to route to BusinessProfileV2Widget on tap) rather than
 /// denormalizing the business name/photo onto the item doc, so a business
@@ -19,8 +19,8 @@ export 'showcase_item_card_model.dart';
 /// Reactions reuse kQuickReactions (the same five Exchange reactions) via
 /// a compact pill that opens a picker sheet - tapping a reaction there is
 /// its own tap target and does not trigger the card's navigation.
-class ShowcaseItemCardWidget extends StatefulWidget {
-  const ShowcaseItemCardWidget({
+class MarketplaceItemCardWidget extends StatefulWidget {
+  const MarketplaceItemCardWidget({
     super.key,
     required this.item,
     this.width = 150.0,
@@ -30,17 +30,17 @@ class ShowcaseItemCardWidget extends StatefulWidget {
   final double width;
 
   @override
-  State<ShowcaseItemCardWidget> createState() =>
-      _ShowcaseItemCardWidgetState();
+  State<MarketplaceItemCardWidget> createState() =>
+      _MarketplaceItemCardWidgetState();
 }
 
-class _ShowcaseItemCardWidgetState extends State<ShowcaseItemCardWidget> {
-  late ShowcaseItemCardModel _model;
+class _MarketplaceItemCardWidgetState extends State<MarketplaceItemCardWidget> {
+  late MarketplaceItemCardModel _model;
 
   @override
   void initState() {
     super.initState();
-    _model = createModel(context, () => ShowcaseItemCardModel());
+    _model = createModel(context, () => MarketplaceItemCardModel());
   }
 
   @override

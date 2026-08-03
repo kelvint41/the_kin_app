@@ -872,7 +872,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                 // it. Removed. Real pins all come from the `markers:`
                 // argument on the map above.
                 //
-                // Premium placement carousel: dynamic scrolling showcase
+                // Premium placement carousel: dynamic scrolling marketplace
                 // showing all paid-tier businesses with animation effects.
                 // Multiple businesses visible simultaneously (3-4 cards).
                 // Auto-scrolls continuously with smooth animations.

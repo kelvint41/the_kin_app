@@ -16,7 +16,7 @@ const _kDefaultCategories = [
   'Health & Wellness',
 ];
 
-/// Add/edit sheet for a Showcase item (My Items). [existing] null means
+/// Add/edit sheet for a Marketplace item (My Items). [existing] null means
 /// add; non-null means edit - the form pre-fills and submit calls
 /// KinServices.updateBusinessItem instead of createBusinessItem, and never
 /// touches interest_count or business_ref (both frozen by firestore.rules

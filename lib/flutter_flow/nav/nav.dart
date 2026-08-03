@@ -280,9 +280,9 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => GoogleMapPageWidget(),
         ),
         FFRoute(
-          name: ShowcaseWidget.routeName,
-          path: ShowcaseWidget.routePath,
-          builder: (context, params) => ShowcaseWidget(),
+          name: MarketplaceWidget.routeName,
+          path: MarketplaceWidget.routePath,
+          builder: (context, params) => MarketplaceWidget(),
         ),
         FFRoute(
           name: MyItemsWidget.routeName,

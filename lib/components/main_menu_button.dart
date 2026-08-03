@@ -52,7 +52,7 @@ class MainMenuButton extends StatelessWidget {
   }
 }
 
-/// The hamburger menu's bottom sheet: The Exchange / Showcase / My Business
+/// The hamburger menu's bottom sheet: The Exchange / Marketplace / My Business
 /// (or My Profile) / Business Insights (or The KIN Quest), then any
 /// page-specific [extraItems], then Sign Out (or Sign In). The Exchange
 /// requires a real businessRef, so it's the only item gated on actually
@@ -139,16 +139,16 @@ void showMainMenuSheet(BuildContext context,
                         );
                       },
                     ),
-                    // Always visible, not role-adaptive - Showcase is
+                    // Always visible, not role-adaptive - Marketplace is
                     // discovery for everyone, same as the map itself. No
-                    // auth required, matching ShowcaseWidget's public route.
+                    // auth required, matching MarketplaceWidget's public route.
                     ListTile(
                       leading: Icon(Icons.storefront_outlined,
                           color: theme.primaryText),
-                      title: Text('Showcase', style: theme.bodyLarge),
+                      title: Text('Marketplace', style: theme.bodyLarge),
                       onTap: () {
                         Navigator.pop(sheetContext);
-                        context.pushNamed(ShowcaseWidget.routeName);
+                        context.pushNamed(MarketplaceWidget.routeName);
                       },
                     ),
                     // Was unconditionally OwnerProfileWidget - every signed-in

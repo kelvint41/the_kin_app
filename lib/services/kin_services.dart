@@ -1288,8 +1288,8 @@ class KinServices {
     }
   }
 
-  /// Creates a Showcase item (Phase 1, discovery only - see memory
-  /// `showcase-feature-phased-commission`). `priceDisplay` is free text,
+  /// Creates a Marketplace item (Phase 1, discovery only - see memory
+  /// `marketplace-feature-phased-commission`). `priceDisplay` is free text,
   /// not a real chargeable amount, since there's no checkout yet.
   /// `interestCount` always starts at 0 - firestore.rules enforces this on
   /// create, so passing anything else here would just fail server-side.
@@ -1323,7 +1323,7 @@ class KinServices {
     }
   }
 
-  /// Edits a Showcase item's owner-writable fields. Never touches
+  /// Edits a Marketplace item's owner-writable fields. Never touches
   /// `interestCount` or moves it to a different business - both are
   /// frozen by firestore.rules on update, so a client attempt to change
   /// either is rejected server-side; this signature simply never offers
@@ -1354,7 +1354,7 @@ class KinServices {
     }
   }
 
-  /// Reacts to a Showcase item with one of `kQuickReactions`
+  /// Reacts to a Marketplace item with one of `kQuickReactions`
   /// (`lib/components/exchange_feed_item_widget.dart`) - same
   /// deterministic-doc-ID dedup pattern as Exchange post reactions, so a
   /// duplicate tap is a harmless no-op rejected by firestore.rules rather
@@ -1404,7 +1404,7 @@ class KinServices {
   /// heuristic (not real collaborative-filtering ML - the marketplace has
   /// near-zero items/users right now, so that would be over-building for a
   /// feature nobody's used yet). Looks up which categories [userRef] has
-  /// already reacted to Showcase items in, then returns other available
+  /// already reacted to Marketplace items in, then returns other available
   /// items in those same categories, ranked by interest_count, excluding
   /// anything already reacted to. Returns `[]` (not an error) when the
   /// user has no reaction history yet - the caller hides the carousel

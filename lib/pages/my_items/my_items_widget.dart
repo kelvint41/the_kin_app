@@ -12,7 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'my_items_model.dart';
 export 'my_items_model.dart';
 
-/// Owner-side Showcase item management: list, add, edit, delete. Self-guards
+/// Owner-side Marketplace item management: list, add, edit, delete. Self-guards
 /// on ownedBusiness the same way OwnerProfileWidget does - no separate auth
 /// check needed beyond the route's requireAuth.
 class MyItemsWidget extends StatefulWidget {
@@ -59,7 +59,7 @@ class _MyItemsWidgetState extends State<MyItemsWidget> {
       builder: (dialogContext) => AlertDialog(
         title: Text('Remove ${item.title}?'),
         content: Text(
-            'This removes it from the Showcase for everyone. This can\'t be undone.'),
+            'This removes it from the Marketplace for everyone. This can\'t be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
@@ -110,7 +110,7 @@ class _MyItemsWidgetState extends State<MyItemsWidget> {
                 child: Padding(
                   padding: EdgeInsets.all(32.0),
                   child: Text(
-                    'Set up your business first to add items to the Showcase.',
+                    'Set up your business first to add items to the Marketplace.',
                     textAlign: TextAlign.center,
                     style: theme.bodyMedium
                         .override(color: theme.secondaryText),
@@ -160,7 +160,7 @@ class _MyItemsWidgetState extends State<MyItemsWidget> {
                               padding: EdgeInsets.all(32.0),
                               child: Text(
                                 'Nothing here yet. Add an item to show it '
-                                'in the Showcase.',
+                                'in the Marketplace.',
                                 textAlign: TextAlign.center,
                                 style: theme.bodyMedium
                                     .override(color: theme.secondaryText),

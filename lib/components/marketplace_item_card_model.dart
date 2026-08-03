@@ -1,10 +1,11 @@
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'dart:ui';
-import 'showcase_widget.dart' show ShowcaseWidget;
+import 'marketplace_item_card_widget.dart' show MarketplaceItemCardWidget;
 import 'package:flutter/material.dart';
 
-class ShowcaseModel extends FlutterFlowModel<ShowcaseWidget> {
+class MarketplaceItemCardModel
+    extends FlutterFlowModel<MarketplaceItemCardWidget> {
   @override
   void initState(BuildContext context) {}
 

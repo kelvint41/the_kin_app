@@ -8,8 +8,8 @@ import '/backend/schema/util/schema_util.dart';
 import 'index.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 
-/// Phase 1 (discovery only) showcase item - a product/service a business
-/// posts, browsable in the Showcase rail/grid. `interest_count` is
+/// Phase 1 (discovery only) marketplace item - a product/service a business
+/// posts, browsable in the Marketplace rail/grid. `interest_count` is
 /// server-only (see firestore.rules and showcase_interest.js); everything
 /// else is owner-writable via KinServices.createBusinessItem/updateBusinessItem.
 /// `price_display` is deliberately free text, not a numeric chargeable

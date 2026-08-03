@@ -3,7 +3,7 @@ import '/backend/backend.dart';
 import '/components/launch_action_widget.dart';
 import '/components/main_menu_button.dart';
 import '/components/metric_card3_widget.dart';
-import '/components/showcase_item_card_widget.dart';
+import '/components/marketplace_item_card_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/image_upload_button.dart';
 import '/components/feedback_sheet_widget.dart';
@@ -883,7 +883,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
   /// KinServices.fetchRecommendedItems for the category-based heuristic.
   /// Hidden entirely (no loading spinner, no empty state) until there's
   /// something real to show, same "empty shelf beats fabricated content"
-  /// precedent as Showcase's "Popular near you" rail.
+  /// precedent as Marketplace's "Popular near you" rail.
   Widget _recommendedForYouCarousel(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     return FutureBuilder<List<BusinessItemsRecord>>(
@@ -910,7 +910,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: items
-                      .map((item) => ShowcaseItemCardWidget(item: item))
+                      .map((item) => MarketplaceItemCardWidget(item: item))
                       .toList()
                       .divide(SizedBox(width: 12.0)),
                 ),

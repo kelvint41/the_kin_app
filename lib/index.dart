@@ -31,7 +31,7 @@ export '/pages/business_setup_page/business_setup_page_widget.dart'
     show BusinessSetupPageWidget;
 export '/pages/google_map_page/google_map_page_widget.dart'
     show GoogleMapPageWidget;
-export '/pages/showcase/showcase_widget.dart' show ShowcaseWidget;
+export '/pages/marketplace/marketplace_widget.dart' show MarketplaceWidget;
 export '/pages/my_items/my_items_widget.dart' show MyItemsWidget;
 export '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart'
     show KinBottomNav2Widget, KinNavPage;
