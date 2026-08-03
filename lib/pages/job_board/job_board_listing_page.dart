@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import '/services/job_board_service.dart';
 import '/components/main_menu_button.dart';
+import 'job_create_page.dart';
 import 'job_detail_page.dart';
 
 class JobBoardListingPage extends StatefulWidget {
@@ -79,6 +81,28 @@ class _JobBoardListingPageState extends State<JobBoardListingPage>
             ),
           ),
           actions: [
+            // Posting was only reachable via Owner Profile's "Manage Jobs"
+            // menu item - a separate page from this one, so an owner
+            // browsing the Job Board itself (the natural place to expect
+            // it) had no way to add a listing without first knowing that
+            // other page existed. Mirrors JobManagementPage's own add
+            // button exactly (same icon/route), just reachable from here
+            // too. Hidden rather than disabled for anyone without a
+            // business - same as MainMenuButton's other role-gated items.
+            if (currentUserDocument?.ownedBusiness != null)
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => JobCreatePage(
+                        businessId: currentUserDocument!.ownedBusiness!.id,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                color: theme.info,
+              ),
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 8, 0),
               child: MainMenuButton(),
