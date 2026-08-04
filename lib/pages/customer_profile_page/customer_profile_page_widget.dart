@@ -156,10 +156,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
   /// moves with real engagement, shown once the first time a signed-in
   /// customer sees their own score here.
   final _kindexScoreKey = GlobalKey();
-  late final _walkthroughRunner = WalkthroughRunner(
-    walkthroughKey: 'kindex_explainer',
-    targetKeys: {'kindex_score': _kindexScoreKey},
-  );
+  late final WalkthroughRunner _walkthroughRunner;
 
   @override
   void initState() {
@@ -171,6 +168,17 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         ? Future.value(<BusinessItemsRecord>[])
         : KinServices.fetchRecommendedItems(userRef: currentUserReference!);
 
+    // Constructed here, not as a lazy `late final` initializer only
+    // touched inside the post-frame callback below - its constructor
+    // registers a ShowcaseView synchronously, which the Showcase widget
+    // wrapping the KINDEX Score card needs to already exist by the time
+    // this State's first build() runs. See WalkthroughRunner's
+    // constructor doc comment.
+    _walkthroughRunner = WalkthroughRunner(
+      walkthroughKey: 'kindex_explainer',
+      targetKeys: {'kindex_score': _kindexScoreKey},
+    );
+
     if (widget.scrollToMilestones) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToMilestones();
@@ -181,6 +189,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         context: context,
         userRef: currentUserReference,
         seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+        onStepsLoaded: () => safeSetState(() {}),
       ));
     });
   }
@@ -663,6 +672,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                         ),
                                         Showcase(
                                           key: _kindexScoreKey,
+                                          scope: _walkthroughRunner.walkthroughKey,
                                           title: _walkthroughRunner
                                                   .stepFor('kindex_score')
                                                   ?.title ??

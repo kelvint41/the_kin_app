@@ -97,10 +97,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   /// not in the tree until tapped open, so they can't be coach-marked
   /// directly; this points at the door instead of the room.
   final _menuButtonKey = GlobalKey();
-  late final _walkthroughRunner = WalkthroughRunner(
-    walkthroughKey: 'general_tour',
-    targetKeys: {'main_menu': _menuButtonKey},
-  );
+  late final WalkthroughRunner _walkthroughRunner;
 
   /// Filters the whole directory (not just what's on screen) by name, so
   /// this doubles as the way to reach a business that has no map pin at
@@ -199,6 +196,13 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => GoogleMapPageModel());
+    // Constructed here, not as a lazy `late final` initializer only
+    // touched inside the post-frame callback below - see
+    // WalkthroughRunner's constructor doc comment.
+    _walkthroughRunner = WalkthroughRunner(
+      walkthroughKey: 'general_tour',
+      targetKeys: {'main_menu': _menuButtonKey},
+    );
 
     // On page load action.
     SchedulerBinding.instance.addPostFrameCallback((_) async {
@@ -224,6 +228,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
         context: context,
         userRef: currentUserReference,
         seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+        onStepsLoaded: () => safeSetState(() {}),
       ));
     });
   }
@@ -861,6 +866,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                 children: [
                                   Showcase(
                                     key: _menuButtonKey,
+                                    scope: _walkthroughRunner.walkthroughKey,
                                     title: _walkthroughRunner
                                             .stepFor('main_menu')
                                             ?.title ??

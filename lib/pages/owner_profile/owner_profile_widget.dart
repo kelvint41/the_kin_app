@@ -112,20 +112,25 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
   /// of this, shown once the first time a signed-in owner sees their own
   /// score here.
   final _kindexScoreKey = GlobalKey();
-  late final _walkthroughRunner = WalkthroughRunner(
-    walkthroughKey: 'kindex_explainer',
-    targetKeys: {'kindex_score': _kindexScoreKey},
-  );
+  late final WalkthroughRunner _walkthroughRunner;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OwnerProfileModel());
+    // Constructed here, not as a lazy `late final` initializer only
+    // touched inside the post-frame callback below - see
+    // WalkthroughRunner's constructor doc comment.
+    _walkthroughRunner = WalkthroughRunner(
+      walkthroughKey: 'kindex_explainer',
+      targetKeys: {'kindex_score': _kindexScoreKey},
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_walkthroughRunner.maybeStart(
         context: context,
         userRef: currentUserReference,
         seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+        onStepsLoaded: () => safeSetState(() {}),
       ));
     });
   }
@@ -711,6 +716,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         // below is plain display too.
                                         return Showcase(
                                           key: _kindexScoreKey,
+                                          scope: _walkthroughRunner.walkthroughKey,
                                           title: _walkthroughRunner
                                                   .stepFor('kindex_score')
                                                   ?.title ??
