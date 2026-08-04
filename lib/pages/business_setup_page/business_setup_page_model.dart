@@ -1,7 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/section_header_widget.dart';
-import '/components/step_indicator3_widget.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_place_picker.dart';
@@ -22,8 +21,6 @@ import 'package:provider/provider.dart';
 class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
   ///  State fields for stateful widgets in this page.
 
-  // Model for StepIndicator.
-  late StepIndicator3Model stepIndicatorModel;
   // Model for SectionHeader.
   late SectionHeaderModel sectionHeaderModel1;
   // State field(s) for Dropdown widget.
@@ -70,14 +67,12 @@ class BusinessSetupPageModel extends FlutterFlowModel<BusinessSetupPageWidget> {
 
   @override
   void initState(BuildContext context) {
-    stepIndicatorModel = createModel(context, () => StepIndicator3Model());
     sectionHeaderModel1 = createModel(context, () => SectionHeaderModel());
     sectionHeaderModel2 = createModel(context, () => SectionHeaderModel());
   }
 
   @override
   void dispose() {
-    stepIndicatorModel.dispose();
     sectionHeaderModel1.dispose();
     sectionHeaderModel2.dispose();
     businessNameFocusNode?.dispose();

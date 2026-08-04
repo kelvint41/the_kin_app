@@ -820,6 +820,7 @@ class KinServices {
     String? email,
     String? website,
     String? description,
+    String? heroImageUrl,
   }) async {
     final ownerRef = currentUserReference;
     if (ownerRef == null) {
@@ -853,6 +854,7 @@ class KinServices {
         email: email,
         website: website,
         description: description,
+        heroImage: heroImageUrl,
         tickerSymbol: tickerResult.data,
         isVerified: false,
         isClaimed: true,

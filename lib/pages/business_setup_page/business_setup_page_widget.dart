@@ -1,7 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/section_header_widget.dart';
-import '/components/step_indicator3_widget.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -11,6 +10,8 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/flutter_flow/form_field_controller.dart';
 import '/flutter_flow/place.dart';
+import '/flutter_flow/upload_data.dart';
+import '/backend/firebase_storage/storage.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -83,6 +84,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
   bool _matchAccepted = false;
   bool _checkingForMatch = false;
 
+  String? _heroImageUrl;
+  bool _uploadingHeroImage = false;
+
   @override
   void initState() {
     super.initState();
@@ -126,6 +130,42 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
         if (result.isSuccess) _matchedSubmission = result.data;
       });
     });
+  }
+
+  /// Same pick+upload plumbing as [ImageUploadButton] - this page needed
+  /// the big drop-zone visual rather than that component's pill button, so
+  /// it calls the same underlying functions directly instead of forcing the
+  /// pill into this box's layout.
+  Future<void> _pickHeroImage() async {
+    final media = await selectMediaWithSourceBottomSheet(
+      context: context,
+      maxWidth: 1600.0,
+      maxHeight: 1600.0,
+      allowPhoto: true,
+    );
+    if (media == null || media.isEmpty) return;
+    if (!media.every((m) => validateFileFormat(m.storagePath, context))) {
+      return;
+    }
+
+    safeSetState(() => _uploadingHeroImage = true);
+    String? url;
+    try {
+      url = await uploadData(media.first.storagePath, media.first.bytes);
+    } catch (_) {
+      url = null;
+    } finally {
+      if (mounted) safeSetState(() => _uploadingHeroImage = false);
+    }
+
+    if (!mounted) return;
+    if (url == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload failed. Please try again.')),
+      );
+      return;
+    }
+    safeSetState(() => _heroImageUrl = url);
   }
 
   void _useMatchedSubmission() {
@@ -199,7 +239,8 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                   text: 'Use This',
                   options: FFButtonOptions(
                     height: 36.0,
-                    padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 0.0),
                     color: theme.accent1,
                     textStyle: theme.bodySmall.override(color: theme.primary),
                     elevation: 0.0,
@@ -238,16 +279,17 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
         // labelMedium/bodyMedium default to primaryText, which is styled for
         // light surfaces - on this field's dark green fill that made the
         // label, hint, and typed text all nearly invisible. accentOnSurface
-        // is what every other control on this page (the dropdowns, the
-        // business-type chips) already uses for text on this same fill.
+        // (a first attempt at this fix) turned out to have the same problem:
+        // it darkens for AA contrast against *light* backgrounds elsewhere in
+        // the app, which reads at ~2:1 on this dark green - illegible in
+        // light mode specifically. accent1 is the fixed brand gold (same
+        // value in both themes) and holds 5.8:1 here in both modes.
         labelStyle: FlutterFlowTheme.of(context).labelMedium.override(
-              color: FlutterFlowTheme.of(context).accentOnSurface,
+              color: FlutterFlowTheme.of(context).accent1,
             ),
         hintText: hintText,
         hintStyle: FlutterFlowTheme.of(context).labelMedium.override(
-              color: FlutterFlowTheme.of(context)
-                  .accentOnSurface
-                  .withAlpha(153),
+              color: FlutterFlowTheme.of(context).accent1.withAlpha(153),
             ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(
@@ -258,7 +300,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
         ),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: FlutterFlowTheme.of(context).accentOnSurface,
+            color: FlutterFlowTheme.of(context).accent1,
             width: 1.0,
           ),
           borderRadius: BorderRadius.circular(8.0),
@@ -274,9 +316,9 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
         fillColor: FlutterFlowTheme.of(context).primary,
       ),
       style: FlutterFlowTheme.of(context).bodyMedium.override(
-            color: FlutterFlowTheme.of(context).accentOnSurface,
+            color: FlutterFlowTheme.of(context).accent1,
           ),
-      cursorColor: FlutterFlowTheme.of(context).accentOnSurface,
+      cursorColor: FlutterFlowTheme.of(context).accent1,
     );
   }
 
@@ -378,508 +420,188 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        body: SingleChildScrollView(
-          primary: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: FlutterFlowTheme.of(context).primaryBackground,
-                  shape: BoxShape.rectangle,
-                ),
-                child: Padding(
-                  padding:
-                      EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 16.0),
-                  child: Container(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        FlutterFlowIconButton(
-                          borderRadius: 8.0,
-                          buttonSize: 40.0,
-                          fillColor: Colors.transparent,
-                          icon: Icon(
-                            Icons.close_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 24.0,
+        // The header row's close/title/preview icons used to render under
+        // the status bar and notch - the title was visibly clipped by it -
+        // because this body had no SafeArea, unlike _buildAccountRequiredState
+        // above which already wraps its body in one.
+        body: SafeArea(
+          child: SingleChildScrollView(
+            primary: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: FlutterFlowTheme.of(context).primaryBackground,
+                    shape: BoxShape.rectangle,
+                  ),
+                  child: Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 24.0, 16.0),
+                    child: Container(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          FlutterFlowIconButton(
+                            borderRadius: 8.0,
+                            buttonSize: 40.0,
+                            fillColor: Colors.transparent,
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 24.0,
+                            ),
+                            onPressed: () {
+                              context.safePop();
+                            },
                           ),
-                          onPressed: () {
-                            context.safePop();
-                          },
-                        ),
-                        Text(
-                          'Business Setup',
-                          style: FlutterFlowTheme.of(context)
-                              .titleMedium
-                              .override(
-                                font: GoogleFonts.plusJakartaSans(
+                          Text(
+                            'Business Setup',
+                            style: FlutterFlowTheme.of(context)
+                                .titleMedium
+                                .override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.w600,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleMedium
+                                        .fontStyle,
+                                  ),
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText,
+                                  letterSpacing: 0.0,
                                   fontWeight: FontWeight.w600,
                                   fontStyle: FlutterFlowTheme.of(context)
                                       .titleMedium
                                       .fontStyle,
+                                  lineHeight: 1.4,
                                 ),
-                                color:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.w600,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleMedium
-                                    .fontStyle,
-                                lineHeight: 1.4,
-                              ),
-                        ),
-                        Container(
-                          width: 40.0,
-                        ),
-                      ],
+                          ),
+                          FlutterFlowIconButton(
+                            borderRadius: 8.0,
+                            buttonSize: 40.0,
+                            fillColor: Colors.transparent,
+                            icon: Icon(
+                              Icons.visibility_rounded,
+                              color: FlutterFlowTheme.of(context).secondaryText,
+                              size: 24.0,
+                            ),
+                            onPressed: () {
+                              context.pushNamed(
+                                BusinessProfileV2Widget.routeName,
+                                queryParameters: {
+                                  'businessDocument': serializeParam(
+                                    currentUserDocument?.ownedBusiness,
+                                    ParamType.DocumentReference,
+                                  ),
+                                }.withoutNulls,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    wrapWithModel(
-                      model: _model.stepIndicatorModel,
-                      updateCallback: () => safeSetState(() {}),
-                      child: StepIndicator3Widget(
-                        currentStep: 1.0,
-                      ),
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        wrapWithModel(
-                          model: _model.sectionHeaderModel1,
-                          updateCallback: () => safeSetState(() {}),
-                          child: SectionHeaderWidget(
-                            title: 'Business Info',
-                            subtitle:
-                                'Let\'s start with the basics of your brand.',
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _matchedSubmissionBanner(
-                                FlutterFlowTheme.of(context)),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 16.0),
-                              child: _buildSetupTextField(
-                                controller:
-                                    _model.businessNameTextController ??=
-                                        TextEditingController(),
-                                focusNode: _model.businessNameFocusNode ??=
-                                    FocusNode(),
-                                labelText: 'Business Name',
-                                hintText: 'Enter your business name',
-                                onChanged: _onBusinessNameChanged,
-                              ),
-                            ),
-                            StreamBuilder<List<BusinessCategoriesRecord>>(
-                              stream: queryBusinessCategoriesRecord(
-                                queryBuilder: (q) =>
-                                    q.orderBy('display_name'),
-                              ),
-                              builder: (context, snapshot) {
-                                final categoryOptions = snapshot.hasData &&
-                                        snapshot.data!.isNotEmpty
-                                    ? snapshot.data!
-                                        .map((c) => c.displayName)
-                                        .toList()
-                                    : [
-                                        'Salon & Beauty',
-                                        'Restaurant & Food',
-                                        'Retail',
-                                        'Professional Services',
-                                        'Health & Wellness',
-                                        'Home Care & Health Services'
-                                      ];
-                                return FlutterFlowDropDown<String>(
-                                  controller:
-                                      _model.dropdownValueController ??=
-                                          FormFieldController<String>(
-                                    _model.dropdownValue ??=
-                                        categoryOptions.first,
-                                  ),
-                                  options: categoryOptions,
-                                  onChanged: (val) => safeSetState(
-                                      () => _model.dropdownValue = val),
-                                  width: 200.0,
-                                  height: 40.0,
-                                  textStyle: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyMedium
-                                                  .fontStyle,
-                                        ),
-                                        color: FlutterFlowTheme.of(context)
-                                            .accentOnSurface,
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .fontStyle,
-                                        lineHeight: 1.4,
-                                      ),
-                                  hintText: 'Salon & Beauty',
-                                  icon: Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: FlutterFlowTheme.of(context)
-                                        .accentOnSurface,
-                                    size: 24.0,
-                                  ),
-                                  fillColor:
-                                      FlutterFlowTheme.of(context).primary,
-                                  elevation: 2.0,
-                                  borderColor:
-                                      FlutterFlowTheme.of(context).alternate,
-                                  borderWidth: 1.0,
-                                  borderRadius: 14.0,
-                                  margin: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 0.0, 16.0, 0.0),
-                                  hidesUnderline: true,
-                                  isOverButton: false,
-                                  isSearchable: false,
-                                  isMultiSelect: false,
-                                  labelText: 'Business Category',
-                                  labelTextStyle: FlutterFlowTheme.of(context)
-                                      .labelMedium
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                          fontWeight:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontWeight,
-                                          fontStyle:
-                                              FlutterFlowTheme.of(context)
-                                                  .labelMedium
-                                                  .fontStyle,
-                                        ),
-                                        letterSpacing: 0.0,
-                                        fontWeight: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontWeight,
-                                        fontStyle: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .fontStyle,
-                                        lineHeight: 1.4,
-                                      ),
-                                );
-                              },
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 4.0, 16.0, 0.0),
-                              child: _model.showOtherCategoryField
-                                  ? _buildSetupTextField(
-                                      controller: _model
-                                              .otherCategoryTextController ??=
-                                          TextEditingController(),
-                                      focusNode:
-                                          _model.otherCategoryFocusNode ??=
-                                              FocusNode(),
-                                      labelText: "Don't see your category?",
-                                      hintText: 'Type a new one',
-                                    )
-                                  : InkWell(
-                                      splashColor: Colors.transparent,
-                                      focusColor: Colors.transparent,
-                                      hoverColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
-                                      onTap: () => safeSetState(() =>
-                                          _model.showOtherCategoryField =
-                                              true),
-                                      child: Text(
-                                        "Don't see your category?",
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelMedium
-                                            .override(
-                                              font: GoogleFonts
-                                                  .plusJakartaSans(),
-                                              color: FlutterFlowTheme.of(
-                                                      context)
-                                                  .accentOnSurface,
-                                              decoration:
-                                                  TextDecoration.underline,
-                                              letterSpacing: 0.0,
-                                            ),
-                                      ),
-                                    ),
-                            ),
-                            Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  16.0, 4.0, 16.0, 0.0),
-                              child: FlutterFlowDropDown<String>(
-                                controller: _model.businessTypeValueController ??=
-                                    FormFieldController<String>(
-                                        _model.businessType),
-                                options: const [
-                                  'Sole Proprietor',
-                                  'LLC',
-                                  'Corporation',
-                                  'Partnership',
-                                ],
-                                onChanged: (val) => safeSetState(
-                                    () => _model.businessType =
-                                        val ?? 'Sole Proprietor'),
-                                width: double.infinity,
-                                height: 40.0,
-                                textStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      font: GoogleFonts.plusJakartaSans(),
-                                      color: FlutterFlowTheme.of(context)
-                                          .accentOnSurface,
-                                      letterSpacing: 0.0,
-                                    ),
-                                hintText: 'Business Type',
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down_rounded,
-                                  color:
-                                      FlutterFlowTheme.of(context).accentOnSurface,
-                                  size: 24.0,
-                                ),
-                                fillColor: FlutterFlowTheme.of(context).primary,
-                                elevation: 2.0,
-                                borderColor:
-                                    FlutterFlowTheme.of(context).alternate,
-                                borderWidth: 1.0,
-                                borderRadius: 14.0,
-                                margin: EdgeInsetsDirectional.zero,
-                                hidesUnderline: true,
-                                isOverButton: false,
-                                isSearchable: false,
-                                isMultiSelect: false,
-                                labelText: 'Business Type',
-                                labelTextStyle: FlutterFlowTheme.of(context)
-                                    .labelMedium
-                                    .override(
-                                      font: GoogleFonts.plusJakartaSans(),
-                                      letterSpacing: 0.0,
-                                    ),
-                              ),
-                            ),
-                            _buildSetupTextField(
-                              controller: _model.phoneNumberTextController ??=
-                                  TextEditingController(),
-                              focusNode: _model.phoneNumberFocusNode ??=
-                                  FocusNode(),
-                              labelText: 'Phone Number',
-                              hintText: '(555) 555-5555',
-                              keyboardType: TextInputType.phone,
-                            ),
-                            _buildSetupTextField(
-                              controller: _model.emailTextController ??=
-                                  TextEditingController(),
-                              focusNode: _model.emailFocusNode ??= FocusNode(),
-                              labelText: 'Email',
-                              hintText: 'business@example.com',
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                            _buildSetupTextField(
-                              controller: _model.websiteTextController ??=
-                                  TextEditingController(),
-                              focusNode: _model.websiteFocusNode ??=
-                                  FocusNode(),
-                              labelText: 'Website',
-                              hintText: 'https://yourbusiness.com',
-                              keyboardType: TextInputType.url,
-                            ),
-                          ].divide(SizedBox(height: 16.0)),
-                        ),
-                      ].divide(SizedBox(height: 24.0)),
-                    ),
-                    Divider(
-                      height: 16.0,
-                      thickness: 1.0,
-                      indent: 0.0,
-                      endIndent: 0.0,
-                      color: FlutterFlowTheme.of(context).alternate,
-                    ),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        wrapWithModel(
-                          model: _model.sectionHeaderModel2,
-                          updateCallback: () => safeSetState(() {}),
-                          child: SectionHeaderWidget(
-                            title: 'Location & Details',
-                            subtitle:
-                                'Help customers find and learn about you.',
-                          ),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).primary,
-                            borderRadius: BorderRadius.circular(14.0),
-                            shape: BoxShape.rectangle,
-                            border: Border.all(
-                              color: FlutterFlowTheme.of(context).alternate,
-                              width: 1.0,
+                Padding(
+                  padding:
+                      EdgeInsetsDirectional.fromSTEB(24.0, 0.0, 24.0, 24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          wrapWithModel(
+                            model: _model.sectionHeaderModel1,
+                            updateCallback: () => safeSetState(() {}),
+                            child: SectionHeaderWidget(
+                              title: 'Business Info',
+                              subtitle:
+                                  'Let\'s start with the basics of your brand.',
                             ),
                           ),
-                          child: Stack(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Container(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.place_rounded,
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        size: 24.0,
-                                      ),
-                                      Icon(
-                                        Icons.arrow_forward_ios_rounded,
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                        size: 14.0,
-                                      ),
-                                    ].divide(SizedBox(width: 16.0)),
+                          // Grouped in its own panel, distinct from the page
+                          // background, so the run of dark-green fields reads
+                          // as one card instead of a loose stack sitting
+                          // directly on the page - the same visual grouping
+                          // the address/image/black-owned blocks below
+                          // already use.
+                          Container(
+                            padding: EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(20.0),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _matchedSubmissionBanner(
+                                    FlutterFlowTheme.of(context)),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 16.0),
+                                  child: _buildSetupTextField(
+                                    controller:
+                                        _model.businessNameTextController ??=
+                                            TextEditingController(),
+                                    focusNode: _model.businessNameFocusNode ??=
+                                        FocusNode(),
+                                    labelText: 'Business Name',
+                                    hintText: 'Enter your business name',
+                                    onChanged: _onBusinessNameChanged,
                                   ),
                                 ),
-                              ),
-                              Opacity(
-                                opacity: 0.0,
-                                child: Align(
-                                  alignment: AlignmentDirectional(-0.04, 0.28),
-                                  child: FlutterFlowPlacePicker(
-                                    iOSGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    androidGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    webGoogleMapsApiKey:
-                                        'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
-                                    onSelect: (place) async {
-                                      safeSetState(() =>
-                                          _model.placePickerValue = place);
-                                    },
-                                    defaultText: 'Select Location',
-                                    icon: Icon(
-                                      Icons.place,
-                                      color: FlutterFlowTheme.of(context).info,
-                                      size: 16.0,
-                                    ),
-                                    buttonOptions: FFButtonOptions(
-                                      width: 200.0,
+                                StreamBuilder<List<BusinessCategoriesRecord>>(
+                                  stream: queryBusinessCategoriesRecord(
+                                    queryBuilder: (q) =>
+                                        q.orderBy('display_name'),
+                                  ),
+                                  builder: (context, snapshot) {
+                                    final categoryOptions = snapshot.hasData &&
+                                            snapshot.data!.isNotEmpty
+                                        ? snapshot.data!
+                                            .map((c) => c.displayName)
+                                            .toList()
+                                        : [
+                                            'Salon & Beauty',
+                                            'Restaurant & Food',
+                                            'Retail',
+                                            'Professional Services',
+                                            'Health & Wellness',
+                                            'Home Care & Health Services'
+                                          ];
+                                    return FlutterFlowDropDown<String>(
+                                      controller:
+                                          _model.dropdownValueController ??=
+                                              FormFieldController<String>(
+                                        _model.dropdownValue ??=
+                                            categoryOptions.first,
+                                      ),
+                                      options: categoryOptions,
+                                      onChanged: (val) => safeSetState(
+                                          () => _model.dropdownValue = val),
+                                      // Was a fixed 200 while every other field
+                                      // in this section is full width - it read
+                                      // as a stray narrow box breaking the
+                                      // column's rhythm.
+                                      width: double.infinity,
                                       height: 40.0,
-                                      color:
-                                          FlutterFlowTheme.of(context).primary,
                                       textStyle: FlutterFlowTheme.of(context)
-                                          .titleSmall
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .titleSmall
-                                                      .fontStyle,
-                                            ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .info,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .titleSmall
-                                                    .fontStyle,
-                                          ),
-                                      elevation: 0.0,
-                                      borderSide: BorderSide(
-                                        color: Colors.transparent,
-                                        width: 1.0,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8.0),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Align(
-                                alignment: AlignmentDirectional(0.15, 0.5),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      'Business Address',
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelSmall
-                                          .override(
-                                            font: GoogleFonts.plusJakartaSans(
-                                              fontWeight:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelSmall
-                                                      .fontWeight,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelSmall
-                                                      .fontStyle,
-                                            ),
-                                            // secondaryText flips between
-                                            // near-black and light-gold with
-                                            // the app theme, but this button
-                                            // sits on a fixed dark green fill
-                                            // (theme.primary) either way - in
-                                            // light mode that made the label
-                                            // nearly invisible. accentOnSurface
-                                            // is defined per-theme to stay
-                                            // readable on this fixed surface.
-                                            color: FlutterFlowTheme.of(context)
-                                                .accentOnSurface,
-                                            letterSpacing: 0.0,
-                                            fontWeight:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontWeight,
-                                            fontStyle:
-                                                FlutterFlowTheme.of(context)
-                                                    .labelSmall
-                                                    .fontStyle,
-                                            lineHeight: 1.4,
-                                          ),
-                                    ),
-                                    Text(
-                                      'Search with Google Maps...',
-                                      style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
                                             font: GoogleFonts.plusJakartaSans(
@@ -893,8 +615,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                       .fontStyle,
                                             ),
                                             color: FlutterFlowTheme.of(context)
-                                                .accentOnSurface
-                                                .withAlpha(153),
+                                                .accent1,
                                             letterSpacing: 0.0,
                                             fontWeight:
                                                 FlutterFlowTheme.of(context)
@@ -906,367 +627,904 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                                                     .fontStyle,
                                             lineHeight: 1.4,
                                           ),
-                                    ),
-                                  ].divide(SizedBox(height: 4.0)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Business Image',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FlutterFlowTheme.of(context)
+                                      hintText: 'Salon & Beauty',
+                                      icon: Icon(
+                                        Icons.keyboard_arrow_down_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .accent1,
+                                        size: 24.0,
+                                      ),
+                                      fillColor:
+                                          FlutterFlowTheme.of(context).primary,
+                                      elevation: 2.0,
+                                      borderColor: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      borderWidth: 1.0,
+                                      borderRadius: 14.0,
+                                      margin: EdgeInsetsDirectional.zero,
+                                      hidesUnderline: true,
+                                      isOverButton: false,
+                                      isSearchable: false,
+                                      isMultiSelect: false,
+                                      labelText: 'Business Category',
+                                      labelTextStyle: FlutterFlowTheme.of(
+                                              context)
                                           .labelMedium
-                                          .fontWeight,
-                                      fontStyle: FlutterFlowTheme.of(context)
-                                          .labelMedium
-                                          .fontStyle,
-                                    ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelMedium
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
-                            ),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(24.0),
-                              child: Container(
-                                height: 160.0,
-                                decoration: BoxDecoration(
-                                  color: FlutterFlowTheme.of(context).primary,
-                                  borderRadius: BorderRadius.circular(24.0),
-                                  shape: BoxShape.rectangle,
-                                  border: Border.all(
-                                    color:
-                                        FlutterFlowTheme.of(context).alternate,
-                                    width: 1.0,
-                                  ),
-                                ),
-                                alignment: AlignmentDirectional(0.0, 0.0),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_a_photo_rounded,
-                                      color: FlutterFlowTheme.of(context)
-                                          .accentOnSurface,
-                                      size: 32.0,
-                                    ),
-                                    Text(
-                                      'Upload Logo or Hero Image',
-                                      style: FlutterFlowTheme.of(context)
-                                          .labelLarge
                                           .override(
                                             font: GoogleFonts.plusJakartaSans(
                                               fontWeight:
                                                   FlutterFlowTheme.of(context)
-                                                      .labelLarge
+                                                      .labelMedium
                                                       .fontWeight,
                                               fontStyle:
                                                   FlutterFlowTheme.of(context)
-                                                      .labelLarge
+                                                      .labelMedium
                                                       .fontStyle,
                                             ),
-                                            color: FlutterFlowTheme.of(context)
-                                                .accentOnSurface,
                                             letterSpacing: 0.0,
                                             fontWeight:
                                                 FlutterFlowTheme.of(context)
-                                                    .labelLarge
+                                                    .labelMedium
                                                     .fontWeight,
                                             fontStyle:
                                                 FlutterFlowTheme.of(context)
-                                                    .labelLarge
+                                                    .labelMedium
                                                     .fontStyle,
                                             lineHeight: 1.4,
                                           ),
-                                    ),
-                                  ].divide(SizedBox(height: 8.0)),
+                                    );
+                                  },
                                 ),
-                              ),
-                            ),
-                            _buildSetupTextField(
-                              controller: _model.descriptionTextController ??=
-                                  TextEditingController(),
-                              focusNode: _model.descriptionFocusNode ??=
-                                  FocusNode(),
-                              labelText: 'Business Description',
-                              hintText:
-                                  'Tell customers what makes your business special',
-                              maxLines: 4,
-                            ),
-                          ].divide(SizedBox(height: 8.0)),
-                        ),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: FlutterFlowTheme.of(context).primary,
-                            borderRadius: BorderRadius.circular(24.0),
-                            shape: BoxShape.rectangle,
-                            border: Border.all(
-                              color: Color(0x4D004225),
-                              width: 1.0,
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 4.0, 16.0, 0.0),
+                                  child: _model.showOtherCategoryField
+                                      ? _buildSetupTextField(
+                                          controller: _model
+                                                  .otherCategoryTextController ??=
+                                              TextEditingController(),
+                                          focusNode:
+                                              _model.otherCategoryFocusNode ??=
+                                                  FocusNode(),
+                                          labelText: "Don't see your category?",
+                                          hintText: 'Type a new one',
+                                        )
+                                      : InkWell(
+                                          splashColor: Colors.transparent,
+                                          focusColor: Colors.transparent,
+                                          hoverColor: Colors.transparent,
+                                          highlightColor: Colors.transparent,
+                                          onTap: () => safeSetState(() => _model
+                                              .showOtherCategoryField = true),
+                                          child: Text(
+                                            "Don't see your category?",
+                                            style: FlutterFlowTheme.of(context)
+                                                .labelMedium
+                                                .override(
+                                                  font: GoogleFonts
+                                                      .plusJakartaSans(),
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .accent1,
+                                                  decoration:
+                                                      TextDecoration.underline,
+                                                  letterSpacing: 0.0,
+                                                ),
+                                          ),
+                                        ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      16.0, 4.0, 16.0, 0.0),
+                                  child: FlutterFlowDropDown<String>(
+                                    controller:
+                                        _model.businessTypeValueController ??=
+                                            FormFieldController<String>(
+                                                _model.businessType),
+                                    options: const [
+                                      'Sole Proprietor',
+                                      'LLC',
+                                      'Corporation',
+                                      'Partnership',
+                                    ],
+                                    onChanged: (val) => safeSetState(() =>
+                                        _model.businessType =
+                                            val ?? 'Sole Proprietor'),
+                                    width: double.infinity,
+                                    height: 40.0,
+                                    textStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(),
+                                          color: FlutterFlowTheme.of(context)
+                                              .accent1,
+                                          letterSpacing: 0.0,
+                                        ),
+                                    hintText: 'Business Type',
+                                    icon: Icon(
+                                      Icons.keyboard_arrow_down_rounded,
+                                      color:
+                                          FlutterFlowTheme.of(context).accent1,
+                                      size: 24.0,
+                                    ),
+                                    fillColor:
+                                        FlutterFlowTheme.of(context).primary,
+                                    elevation: 2.0,
+                                    borderColor:
+                                        FlutterFlowTheme.of(context).alternate,
+                                    borderWidth: 1.0,
+                                    borderRadius: 14.0,
+                                    margin: EdgeInsetsDirectional.zero,
+                                    hidesUnderline: true,
+                                    isOverButton: false,
+                                    isSearchable: false,
+                                    isMultiSelect: false,
+                                    labelText: 'Business Type',
+                                    labelTextStyle: FlutterFlowTheme.of(context)
+                                        .labelMedium
+                                        .override(
+                                          font: GoogleFonts.plusJakartaSans(),
+                                          letterSpacing: 0.0,
+                                        ),
+                                  ),
+                                ),
+                                _buildSetupTextField(
+                                  controller:
+                                      _model.phoneNumberTextController ??=
+                                          TextEditingController(),
+                                  focusNode: _model.phoneNumberFocusNode ??=
+                                      FocusNode(),
+                                  labelText: 'Phone Number',
+                                  hintText: '(555) 555-5555',
+                                  keyboardType: TextInputType.phone,
+                                ),
+                                _buildSetupTextField(
+                                  controller: _model.emailTextController ??=
+                                      TextEditingController(),
+                                  focusNode: _model.emailFocusNode ??=
+                                      FocusNode(),
+                                  labelText: 'Email',
+                                  hintText: 'business@example.com',
+                                  keyboardType: TextInputType.emailAddress,
+                                ),
+                                _buildSetupTextField(
+                                  controller: _model.websiteTextController ??=
+                                      TextEditingController(),
+                                  focusNode: _model.websiteFocusNode ??=
+                                      FocusNode(),
+                                  labelText: 'Website',
+                                  hintText: 'https://yourbusiness.com',
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ].divide(SizedBox(height: 20.0)),
                             ),
                           ),
-                          child: Padding(
+                        ].divide(SizedBox(height: 24.0)),
+                      ),
+                      SizedBox(height: 8.0),
+                      Divider(
+                        height: 16.0,
+                        thickness: 1.0,
+                        indent: 0.0,
+                        endIndent: 0.0,
+                        color: FlutterFlowTheme.of(context).alternate,
+                      ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          wrapWithModel(
+                            model: _model.sectionHeaderModel2,
+                            updateCallback: () => safeSetState(() {}),
+                            child: SectionHeaderWidget(
+                              title: 'Location & Details',
+                              subtitle:
+                                  'Help customers find and learn about you.',
+                            ),
+                          ),
+                          // Same grouping panel as the Business Info section
+                          // above, for the same reason - these three blocks
+                          // (address, image/description, black-owned toggle)
+                          // read as one card instead of floating loose.
+                          Container(
                             padding: EdgeInsets.all(16.0),
-                            child: Container(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.workspace_premium_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .accentOnSurface,
-                                          size: 24.0,
-                                        ),
-                                        Expanded(
-                                          flex: 1,
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
+                            decoration: BoxDecoration(
+                              color: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              borderRadius: BorderRadius.circular(20.0),
+                              border: Border.all(
+                                color: FlutterFlowTheme.of(context).alternate,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    borderRadius: BorderRadius.circular(14.0),
+                                    shape: BoxShape.rectangle,
+                                    border: Border.all(
+                                      color: FlutterFlowTheme.of(context)
+                                          .alternate,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: Container(
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.max,
                                             mainAxisAlignment:
                                                 MainAxisAlignment.start,
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.center,
                                             children: [
-                                              Text(
-                                                'Black-owned business',
-                                                style:
+                                              Icon(
+                                                Icons.place_rounded,
+                                                color:
                                                     FlutterFlowTheme.of(context)
-                                                        .bodyLarge
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .plusJakartaSans(
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodyLarge
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .accentOnSurface,
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                          fontStyle:
-                                                              FlutterFlowTheme.of(
-                                                                      context)
-                                                                  .bodyLarge
-                                                                  .fontStyle,
-                                                          lineHeight: 1.4,
-                                                        ),
+                                                        .secondaryText,
+                                                size: 24.0,
                                               ),
-                                              Text(
-                                                'Display the Kin excellence badge on your profile',
-                                                style:
+                                              Icon(
+                                                Icons.arrow_forward_ios_rounded,
+                                                color:
                                                     FlutterFlowTheme.of(context)
-                                                        .bodySmall
-                                                        .override(
-                                                          font: GoogleFonts
-                                                              .playfairDisplay(
-                                                            fontWeight:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodySmall
-                                                                    .fontWeight,
-                                                            fontStyle:
-                                                                FlutterFlowTheme.of(
-                                                                        context)
-                                                                    .bodySmall
-                                                                    .fontStyle,
-                                                          ),
-                                                          color: FlutterFlowTheme
-                                                                  .of(context)
-                                                              .accentOnSurface,
-                                                          letterSpacing: 0.0,
+                                                        .secondaryText,
+                                                size: 14.0,
+                                              ),
+                                            ].divide(SizedBox(width: 16.0)),
+                                          ),
+                                        ),
+                                      ),
+                                      Align(
+                                        alignment:
+                                            AlignmentDirectional(0.15, 0.5),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Business Address',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelSmall
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .plusJakartaSans(
                                                           fontWeight:
                                                               FlutterFlowTheme.of(
                                                                       context)
-                                                                  .bodySmall
+                                                                  .labelSmall
                                                                   .fontWeight,
                                                           fontStyle:
                                                               FlutterFlowTheme.of(
                                                                       context)
-                                                                  .bodySmall
+                                                                  .labelSmall
                                                                   .fontStyle,
-                                                          lineHeight: 1.4,
                                                         ),
+                                                        // secondaryText flips between
+                                                        // near-black and light-gold with
+                                                        // the app theme, but this button
+                                                        // sits on a fixed dark green fill
+                                                        // (theme.primary) either way - in
+                                                        // light mode that made the label
+                                                        // nearly invisible. accent1 is the
+                                                        // fixed brand gold - same value in
+                                                        // both themes - so it stays readable
+                                                        // on this fixed surface regardless.
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .accent1,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelSmall
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .labelSmall
+                                                                .fontStyle,
+                                                        lineHeight: 1.4,
+                                                      ),
+                                            ),
+                                            Text(
+                                              _model.placePickerValue.address
+                                                      .isNotEmpty
+                                                  ? _model
+                                                      .placePickerValue.address
+                                                  : 'Search with Google Maps...',
+                                              style:
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .plusJakartaSans(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .bodyMedium
+                                                                  .fontStyle,
+                                                        ),
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .accent1
+                                                                .withAlpha(153),
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyMedium
+                                                                .fontStyle,
+                                                        lineHeight: 1.4,
+                                                      ),
+                                            ),
+                                          ].divide(SizedBox(height: 4.0)),
+                                        ),
+                                      ),
+                                      // Was Opacity(0)+Align at a small fixed
+                                      // 200x40 offset, so the real tap target
+                                      // (this picker's own internal button)
+                                      // sat in a different spot than the
+                                      // visible "Business Address" text/icon
+                                      // drawn below - most taps on the
+                                      // visible card missed it entirely.
+                                      // Positioned.fill + a matching
+                                      // double.infinity button makes the
+                                      // whole visible card the real hit
+                                      // target.
+                                      Positioned.fill(
+                                        child: Opacity(
+                                          opacity: 0.0,
+                                          child: FlutterFlowPlacePicker(
+                                            iOSGoogleMapsApiKey:
+                                                'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
+                                            androidGoogleMapsApiKey:
+                                                'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
+                                            webGoogleMapsApiKey:
+                                                'AIzaSyD1w4m7IaWva5Bxl9fsbsZgILC7R8wf_Go',
+                                            onSelect: (place) async {
+                                              safeSetState(() => _model
+                                                  .placePickerValue = place);
+                                            },
+                                            defaultText: 'Select Location',
+                                            icon: Icon(
+                                              Icons.place,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .info,
+                                              size: 16.0,
+                                            ),
+                                            buttonOptions: FFButtonOptions(
+                                              width: double.infinity,
+                                              height: double.infinity,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primary,
+                                              textStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .titleSmall
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .plusJakartaSans(
+                                                          fontWeight:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleSmall
+                                                                  .fontWeight,
+                                                          fontStyle:
+                                                              FlutterFlowTheme.of(
+                                                                      context)
+                                                                  .titleSmall
+                                                                  .fontStyle,
+                                                        ),
+                                                        color:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .info,
+                                                        letterSpacing: 0.0,
+                                                        fontWeight:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .titleSmall
+                                                                .fontWeight,
+                                                        fontStyle:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .titleSmall
+                                                                .fontStyle,
+                                                      ),
+                                              elevation: 0.0,
+                                              borderSide: BorderSide(
+                                                color: Colors.transparent,
+                                                width: 1.0,
                                               ),
-                                            ].divide(SizedBox(height: 4.0)),
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                            ),
                                           ),
                                         ),
-                                      ].divide(SizedBox(width: 16.0)),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Business Image',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                            lineHeight: 1.4,
+                                          ),
+                                    ),
+                                    // Was a static box with no onTap at all -
+                                    // nothing was ever wired to it, so
+                                    // businesses.hero_image (read on the
+                                    // profile/map card) went unset for
+                                    // every business created here. Reuses
+                                    // the same pick+upload plumbing as
+                                    // ImageUploadButton (see
+                                    // _pickHeroImage below).
+                                    InkWell(
+                                      onTap: _uploadingHeroImage
+                                          ? null
+                                          : _pickHeroImage,
+                                      borderRadius: BorderRadius.circular(24.0),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(24.0),
+                                        child: Container(
+                                          height: 160.0,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: FlutterFlowTheme.of(context)
+                                                .primary,
+                                            image: _heroImageUrl == null
+                                                ? null
+                                                : DecorationImage(
+                                                    image: NetworkImage(
+                                                        _heroImageUrl!),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                            borderRadius:
+                                                BorderRadius.circular(24.0),
+                                            shape: BoxShape.rectangle,
+                                            border: Border.all(
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .alternate,
+                                              width: 1.0,
+                                            ),
+                                          ),
+                                          alignment:
+                                              AlignmentDirectional(0.0, 0.0),
+                                          child: _uploadingHeroImage
+                                              ? CircularProgressIndicator(
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                          Color>(
+                                                    FlutterFlowTheme.of(context)
+                                                        .accent1,
+                                                  ),
+                                                )
+                                              : (_heroImageUrl != null
+                                                  ? Align(
+                                                      alignment:
+                                                          AlignmentDirectional(
+                                                              1.0, 1.0),
+                                                      child: Container(
+                                                        margin:
+                                                            EdgeInsets.all(8.0),
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                          horizontal: 10.0,
+                                                          vertical: 4.0,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors.black54,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      999.0),
+                                                        ),
+                                                        child: Text(
+                                                          'Change',
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .labelSmall
+                                                              .override(
+                                                                color: Colors
+                                                                    .white,
+                                                              ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .add_a_photo_rounded,
+                                                          color: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .accent1,
+                                                          size: 32.0,
+                                                        ),
+                                                        Text(
+                                                          'Upload Logo or Hero Image',
+                                                          style: FlutterFlowTheme
+                                                                  .of(context)
+                                                              .labelLarge
+                                                              .override(
+                                                                font: GoogleFonts
+                                                                    .plusJakartaSans(
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .labelLarge
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .labelLarge
+                                                                      .fontStyle,
+                                                                ),
+                                                                color: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .accent1,
+                                                                letterSpacing:
+                                                                    0.0,
+                                                                fontWeight: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelLarge
+                                                                    .fontWeight,
+                                                                fontStyle: FlutterFlowTheme.of(
+                                                                        context)
+                                                                    .labelLarge
+                                                                    .fontStyle,
+                                                                lineHeight: 1.4,
+                                                              ),
+                                                        ),
+                                                      ].divide(SizedBox(
+                                                          height: 8.0)),
+                                                    )),
+                                        ),
+                                      ),
+                                    ),
+                                    _buildSetupTextField(
+                                      controller:
+                                          _model.descriptionTextController ??=
+                                              TextEditingController(),
+                                      focusNode: _model.descriptionFocusNode ??=
+                                          FocusNode(),
+                                      labelText: 'Business Description',
+                                      hintText:
+                                          'Tell customers what makes your business special',
+                                      maxLines: 4,
+                                    ),
+                                  ].divide(SizedBox(height: 8.0)),
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    borderRadius: BorderRadius.circular(24.0),
+                                    shape: BoxShape.rectangle,
+                                    border: Border.all(
+                                      color: Color(0x4D004225),
+                                      width: 1.0,
                                     ),
                                   ),
-                                  Switch(
-                                    value: _model.isBlackOwned,
-                                    onChanged: (newValue) => safeSetState(
-                                        () => _model.isBlackOwned = newValue),
-                                    activeColor:
-                                        FlutterFlowTheme.of(context).primary,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Container(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .workspace_premium_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .accent1,
+                                                  size: 24.0,
+                                                ),
+                                                Expanded(
+                                                  flex: 1,
+                                                  child: Column(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Text(
+                                                        'Black-owned business',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodyLarge
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .plusJakartaSans(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w600,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodyLarge
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .accent1,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w600,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyLarge
+                                                                      .fontStyle,
+                                                                  lineHeight:
+                                                                      1.4,
+                                                                ),
+                                                      ),
+                                                      Text(
+                                                        'Display the Kin excellence badge on your profile',
+                                                        style:
+                                                            FlutterFlowTheme.of(
+                                                                    context)
+                                                                .bodySmall
+                                                                .override(
+                                                                  font: GoogleFonts
+                                                                      .playfairDisplay(
+                                                                    fontWeight: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodySmall
+                                                                        .fontWeight,
+                                                                    fontStyle: FlutterFlowTheme.of(
+                                                                            context)
+                                                                        .bodySmall
+                                                                        .fontStyle,
+                                                                  ),
+                                                                  color: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .accent1,
+                                                                  letterSpacing:
+                                                                      0.0,
+                                                                  fontWeight: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodySmall
+                                                                      .fontWeight,
+                                                                  fontStyle: FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodySmall
+                                                                      .fontStyle,
+                                                                  lineHeight:
+                                                                      1.4,
+                                                                ),
+                                                      ),
+                                                    ].divide(
+                                                        SizedBox(height: 4.0)),
+                                                  ),
+                                                ),
+                                              ].divide(SizedBox(width: 16.0)),
+                                            ),
+                                          ),
+                                          Switch(
+                                            value: _model.isBlackOwned,
+                                            onChanged: (newValue) =>
+                                                safeSetState(() => _model
+                                                    .isBlackOwned = newValue),
+                                            activeColor:
+                                                FlutterFlowTheme.of(context)
+                                                    .primary,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ].divide(SizedBox(height: 24.0)),
                             ),
                           ),
-                        ),
-                      ].divide(SizedBox(height: 24.0)),
-                    ),
-                    Container(
-                      height: 24.0,
-                    ),
-                    FFButtonWidget(
-                      onPressed: () async {
-                        final otherCategory =
-                            _model.otherCategoryTextController?.text.trim() ??
-                                '';
-                        final effectiveCategory = otherCategory.isNotEmpty
-                            ? otherCategory
-                            : _model.dropdownValue;
-                        if (otherCategory.isNotEmpty) {
-                          await KinServices.ensureBusinessCategoryExists(
-                              otherCategory);
-                        }
-                        final result = await KinServices.registerBusiness(
-                          category: effectiveCategory,
-                          businessType: _model.businessType,
-                          isBlackOwned: _model.isBlackOwned,
-                          place: _model.placePickerValue,
-                          businessName: _model.businessNameTextController?.text,
-                          phoneNumber: _model.phoneNumberTextController?.text,
-                          email: _model.emailTextController?.text,
-                          website: _model.websiteTextController?.text,
-                          description: _model.descriptionTextController?.text,
-                        );
-                        if (!result.isSuccess) {
-                          if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(result.error!)),
-                            );
-                          }
-                          return;
-                        }
-
-                        // Best-effort: the business is already registered at
-                        // this point, so a failure here shouldn't block the
-                        // owner - it just means the submission stays
-                        // unresolved for admin review to catch later.
-                        if (_matchAccepted && _matchedSubmission != null) {
-                          unawaited(KinServices.resolveBusinessSubmission(
-                            submissionId: _matchedSubmission!.submissionId,
-                            businessRef: result.data!,
-                          ));
-                        }
-
-                        context.pushNamed(OwnerProfileWidget.routeName);
-
-                        safeSetState(() {});
-                      },
-                      text: 'Register Now',
-                      options: FFButtonOptions(
-                        width: double.infinity,
-                        height: 65.0,
-                        padding: EdgeInsetsDirectional.fromSTEB(
-                            16.0, 0.0, 16.0, 0.0),
-                        iconPadding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle: FlutterFlowTheme.of(context)
-                            .titleSmall
-                            .override(
-                              font: GoogleFonts.plusJakartaSans(
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                              color:
-                                  FlutterFlowTheme.of(context).accentOnSurface,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontStyle,
-                            ),
-                        elevation: 0.0,
-                        borderRadius: BorderRadius.circular(8.0),
+                        ].divide(SizedBox(height: 24.0)),
                       ),
-                    ),
-                    Container(
-                      child: Padding(
-                        padding:
-                            EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 24.0),
-                        child: Container(
-                          child: Container(
-                            alignment: AlignmentDirectional(0.0, 0.0),
-                            child: Text(
-                              'By registering, you agree to our Terms of Service',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelSmall
-                                  .override(
+                      Container(
+                        height: 24.0,
+                      ),
+                      FFButtonWidget(
+                        onPressed: () async {
+                          final otherCategory =
+                              _model.otherCategoryTextController?.text.trim() ??
+                                  '';
+                          final effectiveCategory = otherCategory.isNotEmpty
+                              ? otherCategory
+                              : _model.dropdownValue;
+                          if (otherCategory.isNotEmpty) {
+                            await KinServices.ensureBusinessCategoryExists(
+                                otherCategory);
+                          }
+                          final result = await KinServices.registerBusiness(
+                            category: effectiveCategory,
+                            businessType: _model.businessType,
+                            isBlackOwned: _model.isBlackOwned,
+                            place: _model.placePickerValue,
+                            businessName:
+                                _model.businessNameTextController?.text,
+                            phoneNumber: _model.phoneNumberTextController?.text,
+                            email: _model.emailTextController?.text,
+                            website: _model.websiteTextController?.text,
+                            description: _model.descriptionTextController?.text,
+                            heroImageUrl: _heroImageUrl,
+                          );
+                          if (!result.isSuccess) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result.error!)),
+                              );
+                            }
+                            return;
+                          }
+
+                          // Best-effort: the business is already registered at
+                          // this point, so a failure here shouldn't block the
+                          // owner - it just means the submission stays
+                          // unresolved for admin review to catch later.
+                          if (_matchAccepted && _matchedSubmission != null) {
+                            unawaited(KinServices.resolveBusinessSubmission(
+                              submissionId: _matchedSubmission!.submissionId,
+                              businessRef: result.data!,
+                            ));
+                          }
+
+                          context.pushNamed(OwnerProfileWidget.routeName);
+
+                          safeSetState(() {});
+                        },
+                        text: 'Register Now',
+                        options: FFButtonOptions(
+                          width: double.infinity,
+                          height: 65.0,
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              16.0, 0.0, 16.0, 0.0),
+                          iconPadding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 0.0),
+                          color: FlutterFlowTheme.of(context).primary,
+                          textStyle:
+                              FlutterFlowTheme.of(context).titleSmall.override(
                                     font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontWeight,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context).accent1,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .titleSmall
+                                        .fontStyle,
+                                  ),
+                          elevation: 0.0,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      Container(
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              0.0, 0.0, 0.0, 24.0),
+                          child: Container(
+                            child: Container(
+                              alignment: AlignmentDirectional(0.0, 0.0),
+                              child: Text(
+                                'By registering, you agree to our Terms of Service',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelSmall
+                                    .override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FlutterFlowTheme.of(context)
+                                            .labelSmall
+                                            .fontWeight,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .labelSmall
+                                            .fontStyle,
+                                      ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
                                       fontWeight: FlutterFlowTheme.of(context)
                                           .labelSmall
                                           .fontWeight,
                                       fontStyle: FlutterFlowTheme.of(context)
                                           .labelSmall
                                           .fontStyle,
+                                      lineHeight: 1.4,
                                     ),
-                                    color: FlutterFlowTheme.of(context)
-                                        .secondaryText,
-                                    letterSpacing: 0.0,
-                                    fontWeight: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontWeight,
-                                    fontStyle: FlutterFlowTheme.of(context)
-                                        .labelSmall
-                                        .fontStyle,
-                                    lineHeight: 1.4,
-                                  ),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ].divide(SizedBox(height: 24.0)),
+                    ].divide(SizedBox(height: 24.0)),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

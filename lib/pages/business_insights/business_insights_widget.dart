@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/kindex_trend_indicator.dart';
 import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -7,6 +8,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/index.dart';
 import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
+import '/services/subscription_tiers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'business_insights_model.dart';
@@ -183,12 +185,80 @@ class _BusinessInsightsWidgetState extends State<BusinessInsightsWidget> {
                 },
               ),
               SizedBox(height: 28.0),
+              _sectionLabel(theme, 'Kindex Performance'),
+              SizedBox(height: 10.0),
+              StreamBuilder<BusinessesRecord>(
+                stream: BusinessesRecord.getDocument(businessRef),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(32.0),
+                        child: CircularProgressIndicator(
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(theme.primary),
+                        ),
+                      ),
+                    );
+                  }
+                  final business = snapshot.data!;
+                  final rawTier = business.subscriptionTier;
+                  final tierName = rawTier.isEmpty ? 'Community' : rawTier;
+                  if (!tierAtLeast(tierName, 'Premium Local')) {
+                    return _lockedCard(
+                      theme,
+                      'Your Kindex Score trend unlocks at Premium Local '
+                      'and above.',
+                    );
+                  }
+                  return Container(
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: theme.secondaryBackground,
+                      borderRadius: BorderRadius.circular(16.0),
+                      border: Border.all(color: theme.alternate, width: 1.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                business.kindexScore.round().toString(),
+                                style: theme.headlineSmall.override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.bold),
+                                  color: theme.primaryText,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4.0),
+                              Text(
+                                'Kindex Score',
+                                style: theme.labelSmall.override(
+                                  color: theme.secondaryText,
+                                  letterSpacing: 0.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        KindexTrendIndicator(
+                            velocity: business.kindexVelocity),
+                      ],
+                    ),
+                  );
+                },
+              ),
+              SizedBox(height: 28.0),
               _sectionLabel(theme, 'More Insights'),
               SizedBox(height: 10.0),
               _lockedCard(
                 theme,
-                'Revenue trends, Kindex history, and AI-generated weekly '
-                'summaries unlock as your plan grows.',
+                'Revenue trends and AI-generated weekly summaries are '
+                'still in development.',
               ),
             ],
           ),

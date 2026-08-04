@@ -1271,7 +1271,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       ),
       ListTile(
         leading: Icon(Icons.edit_rounded, color: theme.primaryText),
-        title: Text('Setup', style: theme.bodyLarge),
+        title: Text('Edit Business Profile', style: theme.bodyLarge),
         onTap: () {
           Navigator.pop(context);
           context.pushNamed(BusinessSetupPageWidget.routeName);
@@ -1296,22 +1296,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           },
         ),
       ),
-      ListTile(
-        leading: Icon(Icons.visibility_rounded, color: theme.primaryText),
-        title: Text('Preview', style: theme.bodyLarge),
-        onTap: () {
-          Navigator.pop(context);
-          context.pushNamed(
-            BusinessProfileV2Widget.routeName,
-            queryParameters: {
-              'businessDocument': serializeParam(
-                currentUserDocument?.ownedBusiness,
-                ParamType.DocumentReference,
-              ),
-            }.withoutNulls,
-          );
-        },
-      ),
+      // Preview now lives as the eye icon on the Setup page's own header,
+      // right next to where the profile is actually being edited - it no
+      // longer needs its own top-level row here.
       ListTile(
         leading: Icon(Icons.headset_mic_rounded, color: theme.primaryText),
         title: Text('Get Support', style: theme.bodyLarge),
@@ -1320,29 +1307,19 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           context.pushNamed(SupportChatWidget.routeName);
         },
       ),
+      // Collapses what used to be three separate top-level rows (My Items /
+      // Manage Jobs / Manage Events) into one - they're the same action
+      // (review/edit what I've posted) applied to three content types, so
+      // they read better as one entry point into a short sub-sheet than as
+      // three permanent rows competing with everything else in this menu.
       ListTile(
         leading: Icon(Icons.storefront_rounded, color: theme.primaryText),
-        title: Text('My Items', style: theme.bodyLarge),
+        title: Text('Manage My Listings', style: theme.bodyLarge),
+        trailing: Icon(Icons.chevron_right_rounded,
+            color: theme.secondaryText, size: 20.0),
         onTap: () {
           Navigator.pop(context);
-          context.pushNamed(MyItemsWidget.routeName);
-        },
-      ),
-      ListTile(
-        leading: Icon(Icons.work_outline_rounded, color: theme.primaryText),
-        title: Text('Manage Jobs', style: theme.bodyLarge),
-        onTap: () {
-          Navigator.pop(context);
-          context.pushNamed(JobManagementPage.routeName);
-        },
-      ),
-      ListTile(
-        leading: Icon(Icons.volunteer_activism_outlined,
-            color: theme.primaryText),
-        title: Text('Manage Events', style: theme.bodyLarge),
-        onTap: () {
-          Navigator.pop(context);
-          context.pushNamed(EventManagementPage.routeName);
+          _showManageListingsSheet(context);
         },
       ),
       if (currentUserDocument?.isAdmin == true)
@@ -1355,6 +1332,77 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           },
         ),
     ];
+  }
+
+  /// The "Manage My Listings" sub-sheet - My Items / Manage Jobs / Manage
+  /// Events, pulled out of the main hamburger sheet so they don't each take
+  /// a permanent top-level row. Same destinations and icons as before, just
+  /// one tap further in.
+  void _showManageListingsSheet(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.primaryBackground,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(theme.designToken.radius.lg),
+              topRight: Radius.circular(theme.designToken.radius.lg),
+            ),
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding:
+                  EdgeInsets.symmetric(vertical: theme.designToken.spacing.md),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.0,
+                    height: 4.0,
+                    margin: EdgeInsets.only(
+                        bottom: theme.designToken.spacing.md),
+                    decoration: BoxDecoration(
+                      color: theme.alternate,
+                      borderRadius: BorderRadius.circular(2.0),
+                    ),
+                  ),
+                  ListTile(
+                    leading:
+                        Icon(Icons.storefront_rounded, color: theme.primaryText),
+                    title: Text('My Items', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(MyItemsWidget.routeName);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.work_outline_rounded,
+                        color: theme.primaryText),
+                    title: Text('Manage Jobs', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(JobManagementPage.routeName);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.volunteer_activism_outlined,
+                        color: theme.primaryText),
+                    title: Text('Manage Events', style: theme.bodyLarge),
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      context.pushNamed(EventManagementPage.routeName);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
   /// The three benefit rows under "Your Membership Tier", each checked
