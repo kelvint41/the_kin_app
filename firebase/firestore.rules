@@ -475,6 +475,20 @@ service cloud.firestore {
       }
     }
 
+    // Written only by generateAppStudioLogos (Cloud Function, Admin SDK).
+    // app_studio_logo_limits holds the per-IP/per-email/global rate-limit
+    // counters that function reserves against before calling the image
+    // model - if a client could write here directly, it could reset or
+    // inflate its own quota. app_studio_logo_logs is observability only,
+    // same reasoning as ai_generation_logs above.
+    match /app_studio_logo_limits/{document} {
+      allow read, write: if false;
+    }
+
+    match /app_studio_logo_logs/{document} {
+      allow read, write: if false;
+    }
+
     // Written only by sendSupportChatMessage (Cloud Function, Admin SDK).
     // This is also the suggestions/comments intake mechanism - a
     // "suggestion" is just a message classified that way, not a separate

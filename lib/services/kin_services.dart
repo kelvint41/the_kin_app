@@ -1770,6 +1770,49 @@ class KinServices {
     }
   }
 
+  /// Generates a few AI logo preview images for an App Studio request, via
+  /// the `generateAppStudioLogos` callable. Unlike [generateMarketingContent]
+  /// this needs no signed-in business - App Studio is deliberately reachable
+  /// without an account - so [contactName]/[contactEmail]/[brief] travel
+  /// with every call instead of being read off a business doc server-side.
+  /// Rate limiting (per-IP, per-email, and a global daily cap) all happens
+  /// server-side; a 'resource-exhausted' rejection surfaces here as an
+  /// ordinary failure message, not a crash.
+  static Future<ServiceResult<List<String>>> generateAppStudioLogos({
+    required String contactName,
+    required String contactEmail,
+    required String brief,
+    String? businessName,
+    String? style,
+    String? colorPreference,
+  }) async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'generateAppStudioLogos',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 90)),
+      )
+          .call<Map<String, dynamic>>({
+        'contactName': contactName,
+        'contactEmail': contactEmail,
+        'brief': brief,
+        if (businessName != null && businessName.isNotEmpty)
+          'businessName': businessName,
+        if (style != null && style.isNotEmpty) 'style': style,
+        if (colorPreference != null && colorPreference.isNotEmpty)
+          'colorPreference': colorPreference,
+      });
+      final urls = List<String>.from(result.data['logoUrls'] as List);
+      return ServiceResult.success(urls);
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(
+          e.message ?? 'Could not generate logo previews.');
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not generate logo previews. Please try again.');
+    }
+  }
+
   /// Records what the owner did with an AI suggestion (used it as written,
   /// used it after editing, asked for another, or dismissed it) - the
   /// "user engagement with suggested posts" side of the AI analytics,

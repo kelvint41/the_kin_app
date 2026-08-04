@@ -195,10 +195,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
     final userRef = currentUserReference;
     if (userRef == null) {
       return const _MilestoneStats(
-          streakDays: 0,
-          reviewCount: 0,
-          kindexScore: null,
-          visitCount30d: 0);
+          streakDays: 0, reviewCount: 0, kindexScore: null, visitCount30d: 0);
     }
 
     Future<T> orDefault<T>(Future<T> future, T fallback) =>
@@ -322,230 +319,91 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         body: Stack(
           children: [
             SingleChildScrollView(
-          primary: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // The header was a 100x100 Container holding a 120x120 image,
-              // outside any SafeArea - so the logo overflowed its box and ran
-              // under the status bar and notch. The Stack now sizes to the
-              // logo, and SafeArea keeps it clear of the inset.
-              SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 0.0),
-                  child: Stack(
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    children: [
-                      // The page's own spec called for "a prominent circular
-                      // profile photo" and it was the KIN logo asset for
-                      // everyone - users.photo_url was only ever populated by
-                      // Google sign-in, and nothing in the app could set it,
-                      // so anyone who signed up with an email had no picture
-                      // and no way to add one.
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(999.0),
-                            child: SizedBox(
-                              width: 104.0,
-                              height: 104.0,
-                              child: BusinessImage(
-                                imageUrl: currentUserPhoto,
-                                width: 104.0,
-                                height: 104.0,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(
-                                0.0, 10.0, 0.0, 0.0),
-                            child: ImageUploadButton(
-                              label: currentUserPhoto.isEmpty
-                                  ? 'Add your photo'
-                                  : 'Change photo',
-                              onUploaded: (url) async {
-                                final ref = currentUserReference;
-                                if (ref == null) return;
-                                await ref.update({'photo_url': url});
-                                if (mounted) safeSetState(() {});
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional(1.0, -1.0),
-                        child: MainMenuButton(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              if (currentUserDocument?.displayName.isNotEmpty ?? false)
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
-                  child: Text(
-                    currentUserDocument!.displayName,
-                    textAlign: TextAlign.center,
-                    style: FlutterFlowTheme.of(context).headlineSmall,
-                  ),
-                ),
-              _bioSection(context),
-              Padding(
-                padding: EdgeInsets.all(24.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'Engagement Launchpad',
-                      style: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .fontStyle,
-                          ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(GoogleMapPageWidget.routeName);
-                            },
-                            child: wrapWithModel(
-                              model: _model.launchActionModel1,
-                              updateCallback: () => safeSetState(() {}),
-                              child: LaunchActionWidget(
-                                icon: Icon(
-                                  Icons.map_rounded,
-                                  color: Color(0xFFFFD700),
-                                  size: 28.0,
-                                ),
-                                label: 'Explore Map',
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Hidden while the social layer is unfinished; the
-                        // route is gated too (nav.dart).
-                        if (FeatureFlags.exchangeEnabled)
-                        Expanded(
-                          flex: 1,
-                          child: InkWell(
-                            splashColor: Colors.transparent,
-                            focusColor: Colors.transparent,
-                            hoverColor: Colors.transparent,
-                            highlightColor: Colors.transparent,
-                            onTap: () async {
-                              context.pushNamed(
-                                TheExchangeWidget.routeName,
-                                queryParameters: {
-                                  'businessRef': serializeParam(
-                                    widget!.businessRef,
-                                    ParamType.DocumentReference,
-                                  ),
-                                }.withoutNulls,
-                              );
-                            },
-                            child: wrapWithModel(
-                              model: _model.launchActionModel2,
-                              updateCallback: () => safeSetState(() {}),
-                              child: LaunchActionWidget(
-                                icon: Icon(
-                                  Icons.groups_rounded,
-                                  color: Color(0xFFFFD700),
-                                  size: 28.0,
-                                ),
-                                label: 'The Exchange',
-                              ),
-                            ),
-                          ),
-                        ),
-                        // Was a third card pointing at CommunityPrestigeWidget
-                        // - the v2/v3 rewards mockup, which reads nothing from
-                        // Firestore. This was its third entry point, after the
-                        // hamburger menu and the bottom nav's Loyalty tab.
-                        //
-                        // In its place, the admin route to the Executive
-                        // Dashboard. That page already existed and already
-                        // self-guards on isAdmin, but its only link lived deep
-                        // inside Owner Profile - which returns early for
-                        // anyone who doesn't own a business, so an admin
-                        // without one could not reach the dashboard at all,
-                        // and an admin with one had to scroll past Get
-                        // Support to find it. This puts it one tap from the
-                        // profile, and renders for nobody else.
-                        if (currentUserDocument?.isAdmin == true)
-                          Expanded(
-                            flex: 1,
-                            child: InkWell(
-                              splashColor: Colors.transparent,
-                              focusColor: Colors.transparent,
-                              hoverColor: Colors.transparent,
-                              highlightColor: Colors.transparent,
-                              onTap: () async {
-                                context.pushNamed(
-                                    ExecutiveDashboardWidget.routeName);
-                              },
-                              child: wrapWithModel(
-                                model: _model.launchActionModel3,
-                                updateCallback: () => safeSetState(() {}),
-                                child: LaunchActionWidget(
-                                  icon: Icon(
-                                    Icons.insights_rounded,
-                                    // Themed rather than the hardcoded
-                                    // 0xFFFFD700 the other two cards use, so
-                                    // it stays legible in light mode.
-                                    color: FlutterFlowTheme.of(context)
-                                        .accentOnSurface,
-                                    size: 28.0,
-                                  ),
-                                  label: 'Executive Dashboard',
-                                ),
-                              ),
-                            ),
-                          ),
-                      ].divide(SizedBox(width: 16.0)),
-                    ),
-                  ].divide(SizedBox(height: 16.0)),
-                ),
-              ),
-              Column(
-                key: _milestonesKey,
+              primary: false,
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Container(
+                  // The header was a 100x100 Container holding a 120x120 image,
+                  // outside any SafeArea - so the logo overflowed its box and ran
+                  // under the status bar and notch. The Stack now sizes to the
+                  // logo, and SafeArea keeps it clear of the inset.
+                  SafeArea(
+                    bottom: false,
                     child: Padding(
                       padding:
-                          EdgeInsetsDirectional.fromSTEB(24.0, 24.0, 0.0, 0.0),
-                      child: Container(
-                        child: Text(
-                          'Personal Milestones',
+                          EdgeInsetsDirectional.fromSTEB(8.0, 8.0, 8.0, 0.0),
+                      child: Stack(
+                        alignment: AlignmentDirectional(0.0, 0.0),
+                        children: [
+                          // The page's own spec called for "a prominent circular
+                          // profile photo" and it was the KIN logo asset for
+                          // everyone - users.photo_url was only ever populated by
+                          // Google sign-in, and nothing in the app could set it,
+                          // so anyone who signed up with an email had no picture
+                          // and no way to add one.
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(999.0),
+                                child: SizedBox(
+                                  width: 104.0,
+                                  height: 104.0,
+                                  child: BusinessImage(
+                                    imageUrl: currentUserPhoto,
+                                    width: 104.0,
+                                    height: 104.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsetsDirectional.fromSTEB(
+                                    0.0, 10.0, 0.0, 0.0),
+                                child: ImageUploadButton(
+                                  label: currentUserPhoto.isEmpty
+                                      ? 'Add your photo'
+                                      : 'Change photo',
+                                  onUploaded: (url) async {
+                                    final ref = currentUserReference;
+                                    if (ref == null) return;
+                                    await ref.update({'photo_url': url});
+                                    if (mounted) safeSetState(() {});
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional(1.0, -1.0),
+                            child: MainMenuButton(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (currentUserDocument?.displayName.isNotEmpty ?? false)
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+                      child: Text(
+                        currentUserDocument!.displayName,
+                        textAlign: TextAlign.center,
+                        style: FlutterFlowTheme.of(context).headlineSmall,
+                      ),
+                    ),
+                  _bioSection(context),
+                  Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Engagement Launchpad',
                           style: FlutterFlowTheme.of(context)
                               .titleSmall
                               .override(
@@ -564,238 +422,400 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                     .fontStyle,
                               ),
                         ),
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(24.0),
-                          child: Container(
-                            // These three were the literals '14 🔥',
-                            // '5 Reviews' and 'Top 5%', so every account saw
-                            // the same numbers regardless of what it had
-                            // done. They now come from the user's own
-                            // activity_logs, reviews and KindexScores rows.
-                            child: FutureBuilder<_MilestoneStats>(
-                              future: _statsFuture,
-                              builder: (context, snapshot) {
-                                final stats = snapshot.data;
-                                return Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    wrapWithModel(
-                                      model: _model.metricCardModel1,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: MetricCard3Widget(
-                                        icon: Icon(
-                                          Icons.local_fire_department_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          size: 20.0,
-                                        ),
-                                        tint: Color(0xFFFF8C00),
-                                        label: 'Support Streak',
-                                        value: stats == null
-                                            ? '--'
-                                            : '${stats.streakDays} 🔥',
-                                      ),
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: InkWell(
+                                splashColor: Colors.transparent,
+                                focusColor: Colors.transparent,
+                                hoverColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                                onTap: () async {
+                                  context
+                                      .pushNamed(GoogleMapPageWidget.routeName);
+                                },
+                                child: wrapWithModel(
+                                  model: _model.launchActionModel1,
+                                  updateCallback: () => safeSetState(() {}),
+                                  child: LaunchActionWidget(
+                                    icon: Icon(
+                                      Icons.map_rounded,
+                                      // Was a hardcoded bright yellow - this card
+                                      // fills with secondaryBackground (white in
+                                      // light mode), so that read at ~1.4:1 and
+                                      // was nearly invisible. Same fix as the
+                                      // Executive Dashboard card below.
+                                      color: FlutterFlowTheme.of(context)
+                                          .accentOnSurface,
+                                      size: 28.0,
                                     ),
-                                    wrapWithModel(
-                                      model: _model.metricCardModel2,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: MetricCard3Widget(
-                                        icon: Icon(
-                                          Icons.workspace_premium_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          size: 20.0,
-                                        ),
-                                        tint: Color(0xFFFFD700),
-                                        label: 'Milestones Unlocked',
-                                        value: stats == null
-                                            ? '--'
-                                            : reviewMilestoneLabel(
-                                                stats.reviewCount),
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.metricCardModel3,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: MetricCard3Widget(
-                                        icon: Icon(
-                                          Icons.volunteer_activism_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          size: 20.0,
-                                        ),
-                                        tint: Color(0xFFFFD700),
-                                        label: 'KINDEX Score',
-                                        value: stats == null
-                                            ? '--'
-                                            : impactScoreLabel(
-                                                stats.kindexScore),
-                                        isTrendingUp: stats?.isTrendingUp,
-                                        // The one card here that has a
-                                        // direction; streak and milestones
-                                        // are counts.
-                                        showTrend: true,
-                                      ),
-                                    ),
-                                    wrapWithModel(
-                                      model: _model.metricCardModel4,
-                                      updateCallback: () => safeSetState(() {}),
-                                      child: MetricCard3Widget(
-                                        icon: Icon(
-                                          Icons.storefront_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .primaryText,
-                                          size: 20.0,
-                                        ),
-                                        tint: Color(0xFFFFD700),
-                                        label: 'Visits (30d)',
-                                        value: stats == null
-                                            ? '--'
-                                            : '${stats.visitCount30d}',
-                                      ),
-                                    ),
-                                  ].divide(SizedBox(width: 16.0)),
-                                );
-                              },
+                                    label: 'Explore Map',
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            // Hidden while the social layer is unfinished; the
+                            // route is gated too (nav.dart).
+                            if (FeatureFlags.exchangeEnabled)
+                              Expanded(
+                                flex: 1,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    context.pushNamed(
+                                      TheExchangeWidget.routeName,
+                                      queryParameters: {
+                                        'businessRef': serializeParam(
+                                          widget!.businessRef,
+                                          ParamType.DocumentReference,
+                                        ),
+                                      }.withoutNulls,
+                                    );
+                                  },
+                                  child: wrapWithModel(
+                                    model: _model.launchActionModel2,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: LaunchActionWidget(
+                                      icon: Icon(
+                                        Icons.groups_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .accentOnSurface,
+                                        size: 28.0,
+                                      ),
+                                      label: 'The Exchange',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // Was a third card pointing at CommunityPrestigeWidget
+                            // - the v2/v3 rewards mockup, which reads nothing from
+                            // Firestore. This was its third entry point, after the
+                            // hamburger menu and the bottom nav's Loyalty tab.
+                            //
+                            // In its place, the admin route to the Executive
+                            // Dashboard. That page already existed and already
+                            // self-guards on isAdmin, but its only link lived deep
+                            // inside Owner Profile - which returns early for
+                            // anyone who doesn't own a business, so an admin
+                            // without one could not reach the dashboard at all,
+                            // and an admin with one had to scroll past Get
+                            // Support to find it. This puts it one tap from the
+                            // profile, and renders for nobody else.
+                            if (currentUserDocument?.isAdmin == true)
+                              Expanded(
+                                flex: 1,
+                                child: InkWell(
+                                  splashColor: Colors.transparent,
+                                  focusColor: Colors.transparent,
+                                  hoverColor: Colors.transparent,
+                                  highlightColor: Colors.transparent,
+                                  onTap: () async {
+                                    context.pushNamed(
+                                        ExecutiveDashboardWidget.routeName);
+                                  },
+                                  child: wrapWithModel(
+                                    model: _model.launchActionModel3,
+                                    updateCallback: () => safeSetState(() {}),
+                                    child: LaunchActionWidget(
+                                      icon: Icon(
+                                        Icons.insights_rounded,
+                                        color: FlutterFlowTheme.of(context)
+                                            .accentOnSurface,
+                                        size: 28.0,
+                                      ),
+                                      label: 'Executive Dashboard',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ].divide(SizedBox(width: 16.0)),
                         ),
-                      ],
+                      ].divide(SizedBox(height: 16.0)),
                     ),
                   ),
-                ].divide(SizedBox(height: 16.0)),
-              ),
-              Padding(
-                padding: EdgeInsets.all(24.0),
-                child: SingleChildScrollView(
-                  primary: false,
-                  child: Column(
+                  Column(
+                    key: _milestonesKey,
                     mainAxisSize: MainAxisSize.min,
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Exclusive Connection Stream',
-                            style: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .override(
-                                  font: GoogleFonts.plusJakartaSans(
+                      Container(
+                        child: Padding(
+                          padding: EdgeInsetsDirectional.fromSTEB(
+                              24.0, 24.0, 0.0, 0.0),
+                          child: Container(
+                            child: Text(
+                              'Personal Milestones',
+                              style: FlutterFlowTheme.of(context)
+                                  .titleSmall
+                                  .override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                                    color: FlutterFlowTheme.of(context)
+                                        .secondaryText,
+                                    letterSpacing: 0.0,
                                     fontWeight: FontWeight.bold,
                                     fontStyle: FlutterFlowTheme.of(context)
                                         .titleSmall
                                         .fontStyle,
                                   ),
-                                  color: FlutterFlowTheme.of(context)
-                                      .secondaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
+                            ),
                           ),
-                          Icon(
-                            Icons.verified_user_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 18.0,
-                          ),
-                        ],
+                        ),
                       ),
-                      // These three cards were hardcoded offers attributed to
-                      // The Iron Cactus, Pearl Brewery and Estate Coffee Co.
-                      // Those are real San Antonio businesses, and the deals
-                      // were invented - so the page was publishing
-                      // promotional claims on their behalf that they never
-                      // made. Now driven by exchange_promotions, with an
-                      // empty state when there is nothing live.
-                      FutureBuilder<List<_PromoView>>(
-                        future: _promosFuture,
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24.0),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 28.0,
-                                  height: 28.0,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.0,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                    ),
-                                  ),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.all(24.0),
+                              child: Container(
+                                // These three were the literals '14 🔥',
+                                // '5 Reviews' and 'Top 5%', so every account saw
+                                // the same numbers regardless of what it had
+                                // done. They now come from the user's own
+                                // activity_logs, reviews and KindexScores rows.
+                                child: FutureBuilder<_MilestoneStats>(
+                                  future: _statsFuture,
+                                  builder: (context, snapshot) {
+                                    final stats = snapshot.data;
+                                    return Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        wrapWithModel(
+                                          model: _model.metricCardModel1,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard3Widget(
+                                            icon: Icon(
+                                              Icons
+                                                  .local_fire_department_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
+                                            ),
+                                            tint: Color(0xFFFF8C00),
+                                            label: 'Support Streak',
+                                            value: stats == null
+                                                ? '--'
+                                                : '${stats.streakDays} 🔥',
+                                          ),
+                                        ),
+                                        wrapWithModel(
+                                          model: _model.metricCardModel2,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard3Widget(
+                                            icon: Icon(
+                                              Icons.workspace_premium_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
+                                            ),
+                                            tint: Color(0xFFFFD700),
+                                            label: 'Milestones Unlocked',
+                                            value: stats == null
+                                                ? '--'
+                                                : reviewMilestoneLabel(
+                                                    stats.reviewCount),
+                                          ),
+                                        ),
+                                        wrapWithModel(
+                                          model: _model.metricCardModel3,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard3Widget(
+                                            icon: Icon(
+                                              Icons.volunteer_activism_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
+                                            ),
+                                            tint: Color(0xFFFFD700),
+                                            label: 'KINDEX Score',
+                                            value: stats == null
+                                                ? '--'
+                                                : impactScoreLabel(
+                                                    stats.kindexScore),
+                                            isTrendingUp: stats?.isTrendingUp,
+                                            // The one card here that has a
+                                            // direction; streak and milestones
+                                            // are counts.
+                                            showTrend: true,
+                                          ),
+                                        ),
+                                        wrapWithModel(
+                                          model: _model.metricCardModel4,
+                                          updateCallback: () =>
+                                              safeSetState(() {}),
+                                          child: MetricCard3Widget(
+                                            icon: Icon(
+                                              Icons.storefront_rounded,
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .primaryText,
+                                              size: 20.0,
+                                            ),
+                                            tint: Color(0xFFFFD700),
+                                            label: 'Visits (30d)',
+                                            value: stats == null
+                                                ? '--'
+                                                : '${stats.visitCount30d}',
+                                          ),
+                                        ),
+                                      ].divide(SizedBox(width: 16.0)),
+                                    );
+                                  },
                                 ),
                               ),
-                            );
-                          }
-
-                          final promos = snapshot.data!;
-                          if (promos.isEmpty) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24.0),
-                              child: Text(
-                                'No live offers right now. Check back after '
-                                'you visit a few more local businesses.',
-                                textAlign: TextAlign.center,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .override(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryText,
-                                    ),
-                              ),
-                            );
-                          }
-
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: promos
-                                .map((promo) => PromoCardWidget(
-                                      initial:
-                                          businessInitials(promo.businessName),
-                                      business: promo.businessName,
-                                      time: promo.countdown,
-                                      deal: promo.deal,
-                                    ))
-                                .toList()
-                                .divide(SizedBox(height: 16.0)),
-                          );
-                        },
+                            ),
+                          ],
+                        ),
                       ),
                     ].divide(SizedBox(height: 16.0)),
                   ),
-                ),
+                  Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: SingleChildScrollView(
+                      primary: false,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Exclusive Connection Stream',
+                                style: FlutterFlowTheme.of(context)
+                                    .titleSmall
+                                    .override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold,
+                                        fontStyle: FlutterFlowTheme.of(context)
+                                            .titleSmall
+                                            .fontStyle,
+                                      ),
+                                      color: FlutterFlowTheme.of(context)
+                                          .secondaryText,
+                                      letterSpacing: 0.0,
+                                      fontWeight: FontWeight.bold,
+                                      fontStyle: FlutterFlowTheme.of(context)
+                                          .titleSmall
+                                          .fontStyle,
+                                    ),
+                              ),
+                              Icon(
+                                Icons.verified_user_rounded,
+                                color:
+                                    FlutterFlowTheme.of(context).secondaryText,
+                                size: 18.0,
+                              ),
+                            ],
+                          ),
+                          // These three cards were hardcoded offers attributed to
+                          // The Iron Cactus, Pearl Brewery and Estate Coffee Co.
+                          // Those are real San Antonio businesses, and the deals
+                          // were invented - so the page was publishing
+                          // promotional claims on their behalf that they never
+                          // made. Now driven by exchange_promotions, with an
+                          // empty state when there is nothing live.
+                          FutureBuilder<List<_PromoView>>(
+                            future: _promosFuture,
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                                  child: Center(
+                                    child: SizedBox(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2.0,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                          FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              final promos = snapshot.data!;
+                              if (promos.isEmpty) {
+                                return Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 24.0),
+                                  child: Text(
+                                    'No live offers right now. Check back after '
+                                    'you visit a few more local businesses.',
+                                    textAlign: TextAlign.center,
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                        ),
+                                  ),
+                                );
+                              }
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: promos
+                                    .map((promo) => PromoCardWidget(
+                                          initial: businessInitials(
+                                              promo.businessName),
+                                          business: promo.businessName,
+                                          time: promo.countdown,
+                                          deal: promo.deal,
+                                        ))
+                                    .toList()
+                                    .divide(SizedBox(height: 16.0)),
+                              );
+                            },
+                          ),
+                        ].divide(SizedBox(height: 16.0)),
+                      ),
+                    ),
+                  ),
+                  _recommendedForYouCarousel(context),
+                  _shareKinPrompt(context),
+                  _supportChatPrompt(context),
+                  _feedbackPrompt(context),
+                  Container(
+                    height: 40.0,
+                  ),
+                ],
               ),
-              _recommendedForYouCarousel(context),
-              _shareKinPrompt(context),
-              _supportChatPrompt(context),
-              _feedbackPrompt(context),
-              Container(
-                height: 40.0,
-              ),
-            ],
-          ),
-        ),
+            ),
             Positioned(
               top: 0.0,
               left: 0.0,
@@ -816,9 +836,8 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         // above), so which base tab the nav bar swaps out for Hunt depends
         // on which one brought the user here.
         bottomNavigationBar: KinBottomNav2Widget(
-          currentPage: widget.scrollToMilestones
-              ? KinNavPage.loyalty
-              : KinNavPage.home,
+          currentPage:
+              widget.scrollToMilestones ? KinNavPage.loyalty : KinNavPage.home,
         ),
       ),
     );
@@ -899,7 +918,8 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
               Text(
                 'Recommended for you',
                 style: theme.labelLarge.override(
-                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  font:
+                      GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
                   color: theme.secondaryText,
                   letterSpacing: 0.0,
                   fontWeight: FontWeight.bold,

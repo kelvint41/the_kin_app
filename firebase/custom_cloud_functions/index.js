@@ -35,6 +35,9 @@ const aiMarketingOrchestrator = require("./ai_marketing_orchestrator.js");
 exports.generateMarketingContent = aiMarketingOrchestrator.generateMarketingContent;
 exports.logAiSuggestionEngagement = aiMarketingOrchestrator.logAiSuggestionEngagement;
 
+const appStudioLogoGenerator = require("./app_studio_logo_generator.js");
+exports.generateAppStudioLogos = appStudioLogoGenerator.generateAppStudioLogos;
+
 // Read side of the same logs, for the Executive Dashboard. Separate file
 // because it shares no state with the orchestrator - only the collection -
 // and because the orchestrator holds the Gemini secret binding, which a
