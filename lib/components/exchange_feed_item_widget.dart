@@ -1,8 +1,12 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/create_promotion_sheet.dart';
 import '/components/edit_exchange_post_sheet.dart';
 import '/components/exchange_profile_sheet.dart';
+import '/pages/business_profile_v2/business_profile_v2_widget.dart';
 import '/services/engagement_stats.dart';
+import '/services/exchange_post_types.dart';
+import '/services/kindex_tiers.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -295,7 +299,34 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                         ),
                       ),
                     ),
-                    if (widget.postRecord.userRef == currentUserReference)
+                    if (widget.postRecord.userRef == currentUserReference) ...[
+                      // Only on a post tagged to the author's own business -
+                      // a customer's untagged post has nothing to promote.
+                      if (widget.postRecord.businessRef != null)
+                        Tooltip(
+                          message: 'Promote in Story Rail',
+                          child: InkWell(
+                            onTap: () => showModalBottomSheet(
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              context: context,
+                              builder: (context) => Padding(
+                                padding: MediaQuery.viewInsetsOf(context),
+                                child: CreatePromotionSheet(
+                                  businessRef: widget.postRecord.businessRef!,
+                                  initialTitle: widget.postRecord.postText,
+                                  initialBody: widget.postRecord.postText,
+                                  initialImageUrl: widget.postRecord.postImage,
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(4.0),
+                              child: Icon(Icons.campaign_outlined,
+                                  color: theme.secondaryText, size: 18.0),
+                            ),
+                          ),
+                        ),
                       InkWell(
                         onTap: () => showModalBottomSheet(
                           isScrollControlled: true,
@@ -313,6 +344,7 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                               color: theme.secondaryText, size: 18.0),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),
@@ -344,6 +376,21 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     memCacheHeight:
                         (220.0 * MediaQuery.devicePixelRatioOf(context))
                             .round(),
+                  ),
+                ),
+              if (exchangePostTypeForKey(widget.postRecord.postType) !=
+                      null &&
+                  widget.postRecord.businessRef != null)
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                      theme.designToken.spacing.lg,
+                      0.0,
+                      theme.designToken.spacing.lg,
+                      theme.designToken.spacing.sm),
+                  child: _PostTypeCtaRow(
+                    postType:
+                        exchangePostTypeForKey(widget.postRecord.postType)!,
+                    businessRef: widget.postRecord.businessRef!,
                   ),
                 ),
               Padding(
@@ -435,11 +482,16 @@ class _KindexScoreBadge extends StatelessWidget {
           return SizedBox.shrink();
         }
         final scoreRecord = KindexScoresRecord.fromSnapshot(snapshot.data!);
+        // Tier drives the badge's color and, above the 300 baseline, an
+        // appended label - null at baseline keeps the original plain-gold
+        // look rather than badging every brand-new account.
+        final tier = kindexTierForScore(scoreRecord.score);
+        final accentColor = tier?.color ?? Color(0xFFFFD700);
         return Container(
           decoration: BoxDecoration(
-            color: Color(0x1AFFD700),
+            color: accentColor.withAlpha(0x1A),
             borderRadius: BorderRadius.circular(theme.designToken.radius.full),
-            border: Border.all(color: Color(0x4DFFD700), width: 1.0),
+            border: Border.all(color: accentColor.withAlpha(0x4D), width: 1.0),
           ),
           child: Padding(
             padding: EdgeInsetsDirectional.fromSTEB(6.0, 2.0, 6.0, 2.0),
@@ -460,17 +512,130 @@ class _KindexScoreBadge extends StatelessWidget {
                   style: theme.labelSmall.override(
                     font: GoogleFonts.plusJakartaSans(
                         fontWeight: FontWeight.bold),
-                    color: Color(0xFFFFD700),
+                    color: accentColor,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.0,
                     fontSize: 11.0,
                   ),
                 ),
+                // Bounded and ellipsized rather than left to grow freely -
+                // this badge sits in a Row next to a Flexible name that can
+                // already shrink to fit; an unbounded tier label here could
+                // still overflow the row on a narrow phone with a long
+                // display name, so it truncates instead.
+                if (tier != null) ...[
+                  Text(
+                    ' · ',
+                    style: theme.labelSmall.override(
+                      color: accentColor.withAlpha(0xAA),
+                      fontSize: 11.0,
+                    ),
+                  ),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 84.0),
+                    child: Text(
+                      tier.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.labelSmall.override(
+                        font: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold),
+                        color: accentColor,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.0,
+                        fontSize: 11.0,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// The category label + explicit CTA button rendered on a post whose
+/// author picked a tag in the "New Post" composer (see
+/// exchange_post_types.dart). ctaType decides what tapping the button
+/// does - 'view_business' is free (the ref is already in hand);
+/// 'get_directions' needs one extra read of the business doc for its
+/// address/coordinates, done lazily only when tapped rather than for
+/// every tagged post the feed renders.
+class _PostTypeCtaRow extends StatelessWidget {
+  const _PostTypeCtaRow({required this.postType, required this.businessRef});
+
+  final ExchangePostType postType;
+  final DocumentReference businessRef;
+
+  Future<void> _handleTap(BuildContext context) async {
+    if (postType.ctaType == 'view_business') {
+      context.pushNamed(
+        BusinessProfileV2Widget.routeName,
+        queryParameters: {
+          'businessDocument': serializeParam(
+            businessRef,
+            ParamType.DocumentReference,
+          ),
+        }.withoutNulls,
+      );
+      return;
+    }
+    if (postType.ctaType == 'get_directions') {
+      final business = await BusinessesRecord.getDocumentOnce(businessRef);
+      await launchMap(
+        location: business.businessLocation,
+        address: business.address,
+        title: business.businessName,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Row(
+      children: [
+        Icon(postType.icon, size: 14.0, color: theme.accentOnSurface),
+        SizedBox(width: 4.0),
+        Expanded(
+          child: Text(
+            postType.label,
+            overflow: TextOverflow.ellipsis,
+            style: theme.labelSmall.override(
+              font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+              color: theme.accentOnSurface,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.0,
+            ),
+          ),
+        ),
+        InkWell(
+          splashColor: Colors.transparent,
+          focusColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          onTap: () => _handleTap(context),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                postType.ctaLabel,
+                style: theme.labelSmall.override(
+                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                  color: theme.primary,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.0,
+                ),
+              ),
+              SizedBox(width: 2.0),
+              Icon(Icons.arrow_forward_rounded, size: 14.0, color: theme.primary),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

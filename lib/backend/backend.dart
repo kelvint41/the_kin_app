@@ -20,6 +20,7 @@ import 'schema/activity_logs_record.dart';
 import 'schema/analytics_daily_record.dart';
 import 'schema/legal_metadata_record.dart';
 import 'schema/exchange_promotions_record.dart';
+import 'schema/exchange_prompts_record.dart';
 import 'schema/connections_record.dart';
 import 'schema/tier_privileges_record.dart';
 import 'schema/entitlements_record.dart';
@@ -54,6 +55,7 @@ export 'schema/activity_logs_record.dart';
 export 'schema/analytics_daily_record.dart';
 export 'schema/legal_metadata_record.dart';
 export 'schema/exchange_promotions_record.dart';
+export 'schema/exchange_prompts_record.dart';
 export 'schema/connections_record.dart';
 export 'schema/tier_privileges_record.dart';
 export 'schema/entitlements_record.dart';
@@ -585,6 +587,43 @@ Future<List<ExchangePromotionsRecord>> queryExchangePromotionsRecordOnce({
     queryCollectionOnce(
       ExchangePromotionsRecord.collection,
       ExchangePromotionsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query ExchangePromptsRecords (as a Stream and as a Future).
+Future<int> queryExchangePromptsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      ExchangePromptsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<ExchangePromptsRecord>> queryExchangePromptsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      ExchangePromptsRecord.collection,
+      ExchangePromptsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<ExchangePromptsRecord>> queryExchangePromptsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      ExchangePromptsRecord.collection,
+      ExchangePromptsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

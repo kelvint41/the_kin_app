@@ -82,6 +82,22 @@ class ExchangePostsRecord extends FirestoreRecord {
   DateTime? get editedAt => _editedAt;
   bool hasEditedAt() => _editedAt != null;
 
+  // "post_type" field. One of ExchangePostType.key (see
+  // exchange_post_types.dart), e.g. 'new_inventory'/'flash_offer' - set
+  // only from the verified-owner "New Post" composer's optional chip
+  // picker. Empty/missing means a plain post, same as before this field
+  // existed.
+  String? _postType;
+  String get postType => _postType ?? '';
+  bool hasPostType() => _postType != null;
+
+  // "cta_type" field. Set alongside post_type, from the same
+  // ExchangePostType - not independently choosable, so the two never
+  // disagree about which action a post's CTA button performs.
+  String? _ctaType;
+  String get ctaType => _ctaType ?? '';
+  bool hasCtaType() => _ctaType != null;
+
   void _initializeFields() {
     _postId = snapshotData['post_id'] as String?;
     _userRef = snapshotData['user_ref'] as DocumentReference?;
@@ -94,6 +110,8 @@ class ExchangePostsRecord extends FirestoreRecord {
     _authorName = snapshotData['author_name'] as String?;
     _authorPhoto = snapshotData['author_photo'] as String?;
     _editedAt = snapshotData['edited_at'] as DateTime?;
+    _postType = snapshotData['post_type'] as String?;
+    _ctaType = snapshotData['cta_type'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -140,6 +158,8 @@ Map<String, dynamic> createExchangePostsRecordData({
   int? likesCount,
   String? authorName,
   String? authorPhoto,
+  String? postType,
+  String? ctaType,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -152,6 +172,8 @@ Map<String, dynamic> createExchangePostsRecordData({
       'likes_count': likesCount,
       'author_name': authorName,
       'author_photo': authorPhoto,
+      'post_type': postType,
+      'cta_type': ctaType,
     }.withoutNulls,
   );
 
@@ -170,7 +192,9 @@ class ExchangePostsRecordDocumentEquality
         e1?.postText == e2?.postText &&
         e1?.postImage == e2?.postImage &&
         e1?.timestamp == e2?.timestamp &&
-        e1?.likesCount == e2?.likesCount;
+        e1?.likesCount == e2?.likesCount &&
+        e1?.postType == e2?.postType &&
+        e1?.ctaType == e2?.ctaType;
   }
 
   @override
@@ -181,7 +205,9 @@ class ExchangePostsRecordDocumentEquality
         e?.postText,
         e?.postImage,
         e?.timestamp,
-        e?.likesCount
+        e?.likesCount,
+        e?.postType,
+        e?.ctaType,
       ]);
 
   @override

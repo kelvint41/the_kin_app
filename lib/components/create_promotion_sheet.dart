@@ -12,17 +12,40 @@ import 'package:google_fonts/google_fonts.dart';
 /// write path anywhere in the app until this sheet. Same bottom-sheet
 /// convention as EditExchangePostSheet/AiMarketingSheetWidget.
 class CreatePromotionSheet extends StatefulWidget {
-  const CreatePromotionSheet({super.key, required this.businessRef});
+  const CreatePromotionSheet({
+    super.key,
+    required this.businessRef,
+    this.initialTitle,
+    this.initialBody,
+    this.initialImageUrl,
+  });
 
   final DocumentReference businessRef;
+
+  /// Pre-fill for the "Promote in Story Rail" 1-tap path on an owner's own
+  /// Exchange post (see ExchangeFeedItemWidget) - null for the plain
+  /// "Add Promo" entry point, which starts blank as before.
+  final String? initialTitle;
+  final String? initialBody;
+  final String? initialImageUrl;
 
   @override
   State<CreatePromotionSheet> createState() => _CreatePromotionSheetState();
 }
 
+/// Truncates [text] to [maxLength], matching the field's own maxLength so
+/// a long Exchange post doesn't get silently rejected by the
+/// TextFormField the moment the sheet opens.
+String _truncated(String? text, int maxLength) {
+  final trimmed = (text ?? '').trim();
+  return trimmed.length > maxLength ? trimmed.substring(0, maxLength) : trimmed;
+}
+
 class _CreatePromotionSheetState extends State<CreatePromotionSheet> {
-  final _titleController = TextEditingController();
-  final _bodyController = TextEditingController();
+  late final _titleController =
+      TextEditingController(text: _truncated(widget.initialTitle, 80));
+  late final _bodyController =
+      TextEditingController(text: _truncated(widget.initialBody, 200));
 
   // 24h default: long enough to cover a single business day, short enough
   // that the rail doesn't fill up with stale offers from an owner who
@@ -60,6 +83,12 @@ class _CreatePromotionSheetState extends State<CreatePromotionSheet> {
         businessRef: widget.businessRef,
         title: title,
         body: _bodyController.text.trim(),
+        // Was never passed here at all, regardless of entry point - the
+        // schema and _PromoStoryTile's rendering (the_exchange_widget.dart)
+        // both support an image, but nothing ever wrote one. Matters more
+        // now that the 1-tap converter can carry an Exchange post's photo
+        // straight into the promo rail.
+        imageUrl: widget.initialImageUrl,
         createdAt: getCurrentTimestamp,
         expiresAt: DateTime.now().add(_selectedDuration),
       ));

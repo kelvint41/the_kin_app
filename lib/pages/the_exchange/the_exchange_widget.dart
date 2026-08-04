@@ -7,6 +7,7 @@ import '/components/exchange_feed_item_widget.dart';
 import '/components/kindex_spotlight_widget.dart';
 import '/components/main_menu_button.dart';
 import '/components/promo_card_widget.dart';
+import '/services/exchange_post_types.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -254,86 +255,140 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     if (!await _ensureConductAccepted()) return;
     if (!context.mounted) return;
     final theme = FlutterFlowTheme.of(context);
+    // Chip selection only makes sense here - this dialog is reached only
+    // via isVerifiedBusinessOwner's add_box_outlined button, unlike the
+    // persistent bottom composer which any signed-in user (including a
+    // customer with no business) can use. Local to this call, not _model,
+    // since it resets every time the dialog opens.
+    ExchangePostType? selectedType;
     await showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.secondaryBackground,
-          title: Text('New Post', style: theme.headlineSmall),
-          content: TextFormField(
-            controller: _model.postTextController,
-            focusNode: _model.postTextFieldFocusNode,
-            autofocus: true,
-            maxLines: 4,
-            style: theme.bodyMedium.override(color: theme.primaryText),
-            decoration: InputDecoration(
-              hintText: 'What\'s happening at your business?',
-              hintStyle: theme.bodyMedium.override(color: theme.hint),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text('Cancel',
-                  style: theme.bodyMedium
-                      .override(color: theme.secondaryText)),
-            ),
-            TextButton(
-              onPressed: () async {
-                final postText =
-                    _model.postTextController!.text.trim();
-                if (postText.isEmpty || currentUserReference == null) {
-                  return;
-                }
-                final exchangePostsRecordReference =
-                    ExchangePostsRecord.collection.doc();
-                try {
-                  await exchangePostsRecordReference.set(
-                    createExchangePostsRecordData(
-                      postId: exchangePostsRecordReference.id,
-                      userRef: currentUserReference,
-                      businessRef: businessRef,
-                      postText: postText,
-                      timestamp: getCurrentTimestamp,
-                      likesCount: 0,
-                      // Copied onto the post so the feed never has to read
-                      // another user's document to render a byline.
-                      authorName: currentUserDisplayName,
-                      authorPhoto: currentUserPhoto,
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              backgroundColor: theme.secondaryBackground,
+              title: Text('New Post', style: theme.headlineSmall),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextFormField(
+                      controller: _model.postTextController,
+                      focusNode: _model.postTextFieldFocusNode,
+                      autofocus: true,
+                      maxLines: 4,
+                      style: theme.bodyMedium.override(color: theme.primaryText),
+                      decoration: InputDecoration(
+                        hintText: 'What\'s happening at your business?',
+                        hintStyle: theme.bodyMedium.override(color: theme.hint),
+                      ),
                     ),
-                  );
-                } catch (e) {
-                  if (dialogContext.mounted) {
-                    ScaffoldMessenger.of(dialogContext).showSnackBar(
-                      SnackBar(content: Text('Could not post: $e')),
-                    );
-                  }
-                  return;
-                }
-                try {
-                  await UserEngagementEventsRecord.collection.doc().set(
-                        createUserEngagementEventsRecordData(
+                    SizedBox(height: theme.designToken.spacing.sm),
+                    Text(
+                      'Tag this post (optional)',
+                      style: theme.labelSmall
+                          .override(color: theme.secondaryText),
+                    ),
+                    SizedBox(height: theme.designToken.spacing.xs),
+                    Wrap(
+                      spacing: theme.designToken.spacing.xs,
+                      runSpacing: theme.designToken.spacing.xs,
+                      children: kExchangePostTypes.map((type) {
+                        final isSelected = selectedType?.key == type.key;
+                        return ChoiceChip(
+                          avatar: Icon(type.icon,
+                              size: 16.0,
+                              color: isSelected
+                                  ? theme.onPrimary
+                                  : theme.secondaryText),
+                          label: Text(type.label),
+                          selected: isSelected,
+                          onSelected: (selected) => setDialogState(() {
+                            selectedType = selected ? type : null;
+                          }),
+                          selectedColor: theme.primary,
+                          backgroundColor: theme.primaryBackground,
+                          side: BorderSide(color: theme.alternate),
+                          labelStyle: theme.labelSmall.override(
+                            color: isSelected
+                                ? theme.onPrimary
+                                : theme.primaryText,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text('Cancel',
+                      style: theme.bodyMedium
+                          .override(color: theme.secondaryText)),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final postText =
+                        _model.postTextController!.text.trim();
+                    if (postText.isEmpty || currentUserReference == null) {
+                      return;
+                    }
+                    final exchangePostsRecordReference =
+                        ExchangePostsRecord.collection.doc();
+                    try {
+                      await exchangePostsRecordReference.set(
+                        createExchangePostsRecordData(
+                          postId: exchangePostsRecordReference.id,
                           userRef: currentUserReference,
                           businessRef: businessRef,
-                          targetRef: exchangePostsRecordReference,
-                          eventType: 'post',
-                          createdAt: getCurrentTimestamp,
+                          postText: postText,
+                          timestamp: getCurrentTimestamp,
+                          likesCount: 0,
+                          // Copied onto the post so the feed never has to read
+                          // another user's document to render a byline.
+                          authorName: currentUserDisplayName,
+                          authorPhoto: currentUserPhoto,
+                          postType: selectedType?.key,
+                          ctaType: selectedType?.ctaType,
                         ),
                       );
-                } catch (_) {}
-                unawaited(KinServices
-                    .incrementExchangePostCount(currentUserReference!));
-                _model.postTextController?.clear();
-                if (dialogContext.mounted) {
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: Text('Post',
-                  style: theme.bodyMedium.override(
-                      color: theme.primaryText,
-                      fontWeight: FontWeight.bold)),
-            ),
-          ],
+                    } catch (e) {
+                      if (dialogContext.mounted) {
+                        ScaffoldMessenger.of(dialogContext).showSnackBar(
+                          SnackBar(content: Text('Could not post: $e')),
+                        );
+                      }
+                      return;
+                    }
+                    try {
+                      await UserEngagementEventsRecord.collection.doc().set(
+                            createUserEngagementEventsRecordData(
+                              userRef: currentUserReference,
+                              businessRef: businessRef,
+                              targetRef: exchangePostsRecordReference,
+                              eventType: 'post',
+                              createdAt: getCurrentTimestamp,
+                            ),
+                          );
+                    } catch (_) {}
+                    unawaited(KinServices
+                        .incrementExchangePostCount(currentUserReference!));
+                    _model.postTextController?.clear();
+                    if (dialogContext.mounted) {
+                      Navigator.pop(dialogContext);
+                    }
+                  },
+                  child: Text('Post',
+                      style: theme.bodyMedium.override(
+                          color: theme.primaryText,
+                          fontWeight: FontWeight.bold)),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -650,6 +705,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                             ),
                           ),
                           _buildTermsBanner(),
+                          const _DailyPromptBanner(),
                           KindexSpotlightWidget(),
                           Padding(
                             padding: EdgeInsetsDirectional.fromSTEB(
@@ -1337,6 +1393,118 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                   ),
                 ),
               ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Pinned "Daily Founder Topic" banner above the feed. Looks for today's
+/// exchange_prompts doc first (activeDate matching the calendar day);
+/// falls back to the most recent pinned==true doc if there's no match for
+/// today, so a gap in the admin's daily schedule shows an evergreen
+/// prompt instead of nothing. Renders nothing (not a loading spinner) if
+/// neither query turns anything up - a missing prompt should be invisible,
+/// not a placeholder the feed has to explain.
+class _DailyPromptBanner extends StatefulWidget {
+  const _DailyPromptBanner();
+
+  @override
+  State<_DailyPromptBanner> createState() => _DailyPromptBannerState();
+}
+
+class _DailyPromptBannerState extends State<_DailyPromptBanner> {
+  late final Future<ExchangePromptsRecord?> _future = _loadTodayPrompt();
+
+  Future<ExchangePromptsRecord?> _loadTodayPrompt() async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+    try {
+      final todaySnap = await ExchangePromptsRecord.collection
+          .where('active_date', isGreaterThanOrEqualTo: startOfDay)
+          .where('active_date', isLessThan: endOfDay)
+          .limit(1)
+          .get();
+      if (todaySnap.docs.isNotEmpty) {
+        return ExchangePromptsRecord.fromSnapshot(todaySnap.docs.first);
+      }
+      // Fallback query needs a composite index (pinned equality + orderBy
+      // on a different field) - Firestore throws FAILED_PRECONDITION with
+      // a console link the first time this runs until that index exists.
+      // Caught below like any other failure: the banner just doesn't show.
+      final pinnedSnap = await ExchangePromptsRecord.collection
+          .where('pinned', isEqualTo: true)
+          .orderBy('active_date', descending: true)
+          .limit(1)
+          .get();
+      if (pinnedSnap.docs.isNotEmpty) {
+        return ExchangePromptsRecord.fromSnapshot(pinnedSnap.docs.first);
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return FutureBuilder<ExchangePromptsRecord?>(
+      future: _future,
+      builder: (context, snapshot) {
+        final prompt = snapshot.data;
+        if (prompt == null || prompt.text.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: EdgeInsetsDirectional.fromSTEB(
+              theme.designToken.spacing.lg,
+              0.0,
+              theme.designToken.spacing.lg,
+              theme.designToken.spacing.md),
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.secondaryBackground,
+              borderRadius: BorderRadius.circular(theme.designToken.radius.md),
+              border: Border.all(color: theme.accent1.withValues(alpha: 0.35)),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(theme.designToken.spacing.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(Icons.push_pin_rounded,
+                      size: 18.0, color: theme.accentOnSurface),
+                  SizedBox(width: theme.designToken.spacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'TODAY\'S TOPIC',
+                          style: theme.labelSmall.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold),
+                            color: theme.accentOnSurface,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        SizedBox(height: 4.0),
+                        Text(
+                          prompt.text,
+                          style: theme.bodyMedium.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: theme.primaryText,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
