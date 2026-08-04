@@ -1,0 +1,39 @@
+diff --git a/lib/services/premium_placement.dart b/lib/services/premium_placement.dart
+index 7e8a38a0..bfc5d036 100644
+--- a/lib/services/premium_placement.dart
++++ b/lib/services/premium_placement.dart
+@@ -10,20 +10,27 @@ import '/backend/backend.dart';
+ 
+ /// The `businesses.subscription_tier` values that count as a paid plan.
+ ///
+-/// These are the exact strings the live upgrade flow writes - see
+-/// `KinServices.upgradeBusinessTier` (called from
+-/// merchant_pricing_suite_widget.dart) and the tier cards on that page.
++/// Two live paths write this field:
++/// - A real purchase, via `KinServices.upgradeBusinessTier` (called from
++///   the tier cards in merchant_pricing_suite_widget.dart), which writes
++///   `'Founder'`, `'Founding Local'`, `'Premium Local'`, or `'Elite'`.
++/// - A free month granted by the mystery-reward system
++///   (firebase/custom_cloud_functions/mystery_reward_engine.js), which
++///   writes `'Founding Local'`, `'Pro Growth'`, or `'Elite Growth'` -
++///   note `'Pro Growth'`/`'Elite Growth'` don't match any purchasable
++///   tier name; they only ever come from a redeemed reward.
++///
+ /// The free tier is written as `'Community'` by
+ /// `KinServices.registerBusiness`/`downgradeToCommunity`, and bulk-imported
+ /// directory rows carry the legacy value `'Free'`; neither is eligible, and
+ /// neither needs to be listed here because this is an allow-list.
+-///
+-/// `'Pro Growth'` is included because it is the tier *above* Founding
+-/// Local - a merchant paying more than a Founding Local should not lose
+-/// the placement that the cheaper paid plan grants.
+ const Set<String> kPaidSubscriptionTiers = {
++  'Founder',
+   'Founding Local',
++  'Premium Local',
++  'Elite',
+   'Pro Growth',
++  'Elite Growth',
+ };
+ 
+ /// How many businesses the carousel shows at once.
