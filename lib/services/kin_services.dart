@@ -907,6 +907,19 @@ class KinServices {
     String? heroImageUrl,
   }) async {
     try {
+      // setBusinessGeohashOnCreate (business_geohash_on_create.js) only ever
+      // fires once, on document creation - it never revisits a business
+      // whose address changes afterward. Without recomputing here, editing
+      // an address would leave the old geohash in place: business_location
+      // shows the new pin correctly everywhere that reads lat/lng directly,
+      // but GoogleMapPageModel's geohash-range query still finds the
+      // business at its old spot (or not at all, once the viewport no
+      // longer overlaps that stale range). Guarded the same way
+      // adminCreateBusiness/businessCoords() treat (0,0): that's the
+      // "no real location" sentinel, not a place on Earth worth geohashing.
+      final hasRealLocation =
+          !(place.latLng.latitude == 0 && place.latLng.longitude == 0);
+
       await businessRef.update({
         'business_name': businessName,
         'phone_number': phoneNumber,
@@ -920,6 +933,8 @@ class KinServices {
         'state': place.state,
         'zip_code_postcode': place.zipCode,
         'business_location': place.latLng.toGeoPoint(),
+        if (hasRealLocation)
+          'geohash': encodeGeohash(place.latLng.latitude, place.latLng.longitude),
         if (category != null) 'category': category,
         if (heroImageUrl != null) 'hero_image': heroImageUrl,
       });
