@@ -94,14 +94,28 @@ Future initialize(
   }
 }
 
-// Purchase a package.
-Future<bool> purchasePackage(String package) async {
+/// Looks up a package by its offering rather than assuming a single
+/// "current" offering. This app runs 4 separate Offerings, one per tier
+/// (founder / founding_local / premium_local / elite), each holding
+/// "monthly" and "annual" packages - not one offering with 8 flat package
+/// ids, so `offerings.current` is the wrong lookup for tier-specific
+/// pricing/purchase.
+Package? _packageFor(String offeringId, String packageId) {
+  try {
+    return _offerings?.all[offeringId]?.getPackage(packageId);
+  } catch (_) {
+    return null;
+  }
+}
+
+// Purchase a package from a specific tier's offering.
+Future<bool> purchasePackage(String offeringId, String packageId) async {
   if (!_isConfigured) {
     print('RevenueCat is not configured. Cannot purchase package.');
     return false;
   }
   try {
-    final revenueCatPackage = offerings?.current?.getPackage(package);
+    final revenueCatPackage = _packageFor(offeringId, packageId);
     if (revenueCatPackage == null) {
       return false;
     }
@@ -120,8 +134,8 @@ List<String> get activeEntitlementIds => _customerInfo != null
         .toList()
     : [];
 
-/// The real, localised store price for [packageId], or null when offerings
-/// aren't loaded.
+/// The real, localised store price for [packageId] within [offeringId], or
+/// null when offerings aren't loaded.
 ///
 /// The pricing page displayed hardcoded strings - `price: '\$59'` and so on -
 /// while the amount actually charged came from App Store Connect and Google
@@ -134,9 +148,9 @@ List<String> get activeEntitlementIds => _customerInfo != null
 /// the platform. Callers fall back to their literal when it returns null,
 /// which is the case before offerings load and on any device with no store
 /// connection - the Simulator included.
-String? storePriceFor(String packageId) {
+String? storePriceFor(String offeringId, String packageId) {
   try {
-    return _offerings?.current?.getPackage(packageId)?.storeProduct.priceString;
+    return _packageFor(offeringId, packageId)?.storeProduct.priceString;
   } catch (_) {
     return null;
   }

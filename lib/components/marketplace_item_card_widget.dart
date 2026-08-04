@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/business_image_widget.dart';
 import '/components/exchange_feed_item_widget.dart' show kQuickReactions;
@@ -23,7 +24,11 @@ class MarketplaceItemCardWidget extends StatefulWidget {
   const MarketplaceItemCardWidget({
     super.key,
     required this.item,
-    this.width = 150.0,
+    // Was 150.0 - the "Popular near you" row (the only caller that doesn't
+    // override this) truncated '$businessName · $priceDisplay' down to just
+    // "$..." with no digits, while "Browse all items" passes width:
+    // double.infinity and renders the identical string in full.
+    this.width = 200.0,
   });
 
   final BusinessItemsRecord item;
@@ -47,6 +52,34 @@ class _MarketplaceItemCardWidgetState extends State<MarketplaceItemCardWidget> {
   void dispose() {
     _model.dispose();
     super.dispose();
+  }
+
+  /// The public grid had no way to remove your own listing at all - item
+  /// management otherwise only exists in My Items, an extra hop away.
+  /// Mirrors the confirm-then-delete shape used there.
+  Future<void> _confirmDelete(BuildContext context) async {
+    final theme = FlutterFlowTheme.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Remove ${widget.item.title}?'),
+        content: Text(
+            'This removes it from the Marketplace for everyone. This can\'t be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text('Remove', style: TextStyle(color: theme.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      await widget.item.reference.delete();
+    }
   }
 
   void _openReactionPicker(BuildContext context, DocumentReference businessRef) {
@@ -157,11 +190,40 @@ class _MarketplaceItemCardWidgetState extends State<MarketplaceItemCardWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                BusinessImage(
-                  imageUrl: item.photoUrl,
-                  width: widget.width,
-                  height: 84.0,
-                  fit: BoxFit.cover,
+                Stack(
+                  children: [
+                    BusinessImage(
+                      imageUrl: item.photoUrl,
+                      width: widget.width,
+                      height: 84.0,
+                      fit: BoxFit.cover,
+                    ),
+                    // Only the owner sees this - management otherwise lives
+                    // exclusively in My Items, an extra hop from here.
+                    if (business.ownerRef == currentUserReference)
+                      Positioned(
+                        top: 4.0,
+                        right: 4.0,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(999.0),
+                          onTap: () => _confirmDelete(context),
+                          child: Container(
+                            width: 28.0,
+                            height: 28.0,
+                            decoration: BoxDecoration(
+                              color: Color(0xE6FFFFFF),
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.delete_outline_rounded,
+                              size: 16.0,
+                              color: theme.error,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
                 Padding(
                   padding: EdgeInsets.all(8.0),

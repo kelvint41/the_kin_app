@@ -44,10 +44,23 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
   bool _sending = false;
   String? _error;
 
+  // Asked once per chat session (this page has no cross-session state to
+  // begin with - _conversationId is freshly generated every time this
+  // widget is created) rather than pulled from the user's profile display
+  // name, which is frequently empty - this is what actually got the admin
+  // dashboard a name to show against a conversation.
+  String? _visitorName;
+  bool get _needsName => _visitorName == null;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SupportChatModel());
+    _turns.add(SupportChatTurn(
+      role: 'assistant',
+      text: "Hi! Before we get started, what's your first name? "
+          "(Last name's optional.)",
+    ));
   }
 
   @override
@@ -62,6 +75,25 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
     final text = _inputController.text.trim();
     if (text.isEmpty || _sending) return;
 
+    if (_needsName) {
+      // No AI call for this turn - capturing a name doesn't need a model,
+      // and burning a Gemini call on it would only slow down the one
+      // thing every visitor has to get through before they can actually
+      // ask their question.
+      final name = text.split(RegExp(r'\s+')).first;
+      safeSetState(() {
+        _turns.add(SupportChatTurn(role: 'user', text: text));
+        _visitorName = name;
+        _inputController.clear();
+        _turns.add(SupportChatTurn(
+          role: 'assistant',
+          text: 'Thanks, $name! What can I help with?',
+        ));
+      });
+      _scrollToEnd();
+      return;
+    }
+
     safeSetState(() {
       _turns.add(SupportChatTurn(role: 'user', text: text));
       _inputController.clear();
@@ -73,6 +105,7 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
     final result = await KinServices.sendSupportChatMessage(
       message: text,
       conversationId: _conversationId,
+      visitorName: _visitorName,
       // Prior turns only - the message just added isn't context for
       // itself.
       history: _turns.sublist(0, _turns.length - 1),
@@ -131,17 +164,15 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
         child: Column(
           children: [
             Expanded(
-              child: _turns.isEmpty
-                  ? _emptyState(theme)
-                  : ListView.builder(
-                      controller: _scrollController,
-                      padding: EdgeInsets.all(16.0),
-                      itemCount: _turns.length + (_sending ? 1 : 0),
-                      itemBuilder: (context, i) {
-                        if (i >= _turns.length) return _typingBubble(theme);
-                        return _bubble(theme, _turns[i]);
-                      },
-                    ),
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: EdgeInsets.all(16.0),
+                itemCount: _turns.length + (_sending ? 1 : 0),
+                itemBuilder: (context, i) {
+                  if (i >= _turns.length) return _typingBubble(theme);
+                  return _bubble(theme, _turns[i]);
+                },
+              ),
             ),
             if (_error != null)
               Padding(
@@ -160,27 +191,6 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
       ),
     );
   }
-
-  Widget _emptyState(FlutterFlowTheme theme) => Center(
-        child: Padding(
-          padding: EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.headset_mic_rounded, size: 40.0, color: theme.primary),
-              SizedBox(height: 12.0),
-              Text(
-                'Ask a question, report a problem, or leave a suggestion',
-                textAlign: TextAlign.center,
-                style: theme.bodyMedium.override(
-                  color: theme.secondaryText,
-                  lineHeight: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
 
   Widget _bubble(FlutterFlowTheme theme, SupportChatTurn turn) {
     final isUser = turn.role == 'user';
@@ -246,7 +256,7 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
-                  hintText: 'Type a message...',
+                  hintText: _needsName ? 'Your first name...' : 'Type a message...',
                   hintStyle: theme.bodySmall.override(color: theme.hint),
                   filled: true,
                   fillColor: theme.secondaryBackground,

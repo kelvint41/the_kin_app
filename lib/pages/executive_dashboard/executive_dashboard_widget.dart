@@ -269,7 +269,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             FormFieldController<String>(
                           _model.dropdownValue ??= 'San Antonio',
                         ),
-                        options: ['San Antonio', 'Houston', 'Atlanta'],
+                        options: ['San Antonio', 'Houston', 'Dallas', 'Atlanta'],
                         onChanged: (val) =>
                             safeSetState(() => _model.dropdownValue = val),
                         height: 40.0,

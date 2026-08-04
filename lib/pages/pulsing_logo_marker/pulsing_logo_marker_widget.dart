@@ -139,6 +139,12 @@ class _PulsingLogoMarkerWidgetState extends State<PulsingLogoMarkerWidget> {
                               'https://dimg.dreamflow.cloud/v1/image/Kinship%20Botanicals%20logo%2C%20elegant%20gold%20and%20black%20floral%20typography%2C%20minimalist%20and%20premium%2C%20high-end%20aesthetic',
                             ),
                             fit: BoxFit.cover,
+                            memCacheWidth: (44.0 *
+                                    MediaQuery.devicePixelRatioOf(context))
+                                .round(),
+                            memCacheHeight: (44.0 *
+                                    MediaQuery.devicePixelRatioOf(context))
+                                .round(),
                           ),
                         ),
                       ),

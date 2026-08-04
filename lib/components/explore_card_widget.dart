@@ -84,6 +84,8 @@ class _ExploreCardWidgetState extends State<ExploreCardWidget> {
                 ),
                 fit: BoxFit.cover,
                 alignment: Alignment(0.0, 0.0),
+                memCacheHeight:
+                    (120.0 * MediaQuery.devicePixelRatioOf(context)).round(),
               ),
             ),
             Container(

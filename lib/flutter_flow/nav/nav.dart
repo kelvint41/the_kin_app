@@ -220,6 +220,12 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => BusinessInsightsWidget(),
         ),
         FFRoute(
+          name: GrowthToolsPageWidget.routeName,
+          path: GrowthToolsPageWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => GrowthToolsPageWidget(),
+        ),
+        FFRoute(
           name: NotificationsWidget.routeName,
           path: NotificationsWidget.routePath,
           requireAuth: true,

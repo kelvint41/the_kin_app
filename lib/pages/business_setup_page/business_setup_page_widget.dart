@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/kin_back_button.dart';
 import '/components/section_header_widget.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -87,10 +88,75 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
   String? _heroImageUrl;
   bool _uploadingHeroImage = false;
 
+  // Whether this is editing the owner's already-claimed business rather
+  // than registering a new one. The two used to be the same form with no
+  // way to tell them apart - it always started blank and always called
+  // registerBusiness, so re-submitting it as an "edit" silently created a
+  // second business and abandoned the first. _existingBusiness being
+  // non-null is what now branches submit toward updateBusinessProfile
+  // instead, and _loadingExisting keeps the form off-screen until
+  // pre-fill has actually happened, so the fields are never briefly blank
+  // before jumping to real values.
+  BusinessesRecord? _existingBusiness;
+  bool _loadingExisting = true;
+  bool get _isEditing => _existingBusiness != null;
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => BusinessSetupPageModel());
+    _loadExisting();
+  }
+
+  Future<void> _loadExisting() async {
+    final ownedBusiness = currentUserDocument?.ownedBusiness;
+    if (ownedBusiness == null) {
+      safeSetState(() => _loadingExisting = false);
+      return;
+    }
+    final business = await BusinessesRecord.getDocumentOnce(ownedBusiness);
+    _prefillFrom(business);
+    safeSetState(() {
+      _existingBusiness = business;
+      _loadingExisting = false;
+    });
+  }
+
+  /// Populates every form controller/field from [business] before the form
+  /// ever renders, so each field's own `??=` lazy-init (e.g.
+  /// `_model.businessNameTextController ??= TextEditingController()`, at
+  /// that field's own build site) finds a controller already sitting here
+  /// with real text instead of creating a blank one.
+  void _prefillFrom(BusinessesRecord business) {
+    _model.businessNameTextController =
+        TextEditingController(text: business.businessName);
+    _model.businessNameFocusNode = FocusNode();
+    _model.phoneNumberTextController =
+        TextEditingController(text: business.phoneNumber);
+    _model.phoneNumberFocusNode = FocusNode();
+    _model.emailTextController =
+        TextEditingController(text: business.email);
+    _model.emailFocusNode = FocusNode();
+    _model.websiteTextController =
+        TextEditingController(text: business.website);
+    _model.websiteFocusNode = FocusNode();
+    _model.descriptionTextController =
+        TextEditingController(text: business.description);
+    _model.descriptionFocusNode = FocusNode();
+    if (business.businessType.isNotEmpty) {
+      _model.businessType = business.businessType;
+    }
+    _model.isBlackOwned = business.isBlackOwned;
+    _model.dropdownValue =
+        business.category.isNotEmpty ? business.category : null;
+    _model.placePickerValue = FFPlace(
+      address: business.address,
+      city: business.city,
+      state: business.state,
+      zipCode: business.zipCodePostcode,
+      latLng: business.businessLocation ?? const LatLng(0.0, 0.0),
+    );
+    _heroImageUrl = business.heroImage.isNotEmpty ? business.heroImage : null;
   }
 
   @override
@@ -105,9 +171,12 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
   /// KinServices.findMatchingBusinessSubmission) every time the business
   /// name changes - the "someone already found your business" moment.
   /// Resets any previous match/dismissal, since a changed name means a
-  /// stale match no longer applies.
+  /// stale match no longer applies. Skipped entirely while editing an
+  /// already-claimed business - that prompt only makes sense the first
+  /// time a business is registered.
   void _onBusinessNameChanged(String name) {
     _matchDebounce?.cancel();
+    if (_isEditing) return;
     if (_matchAccepted) return; // Already claimed one - don't re-check.
     safeSetState(() {
       _matchedSubmission = null;
@@ -412,6 +481,21 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
       return _buildAccountRequiredState(context);
     }
 
+    // Keeps the form off-screen until pre-fill (_loadExisting) has run, so
+    // an owner editing their listing never sees it flash blank before
+    // their real values land.
+    if (_loadingExisting) {
+      return Scaffold(
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        body: Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(
+                FlutterFlowTheme.of(context).primary),
+          ),
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -446,21 +530,13 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          FlutterFlowIconButton(
-                            borderRadius: 8.0,
-                            buttonSize: 40.0,
-                            fillColor: Colors.transparent,
-                            icon: Icon(
-                              Icons.close_rounded,
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              size: 24.0,
-                            ),
-                            onPressed: () {
-                              context.safePop();
-                            },
-                          ),
+                          // Was a close "X" - same safePop() underneath as
+                          // every other back control, just styled
+                          // differently. Standardized on the one back-arrow
+                          // treatment the rest of the app uses.
+                          KinBackButton(),
                           Text(
-                            'Business Setup',
+                            _isEditing ? 'Edit Business Profile' : 'Business Setup',
                             style: FlutterFlowTheme.of(context)
                                 .titleMedium
                                 .override(
@@ -1415,6 +1491,43 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
                             await KinServices.ensureBusinessCategoryExists(
                                 otherCategory);
                           }
+
+                          if (_isEditing) {
+                            final result =
+                                await KinServices.updateBusinessProfile(
+                              businessRef: _existingBusiness!.reference,
+                              category: effectiveCategory,
+                              businessType: _model.businessType,
+                              isBlackOwned: _model.isBlackOwned,
+                              place: _model.placePickerValue,
+                              businessName:
+                                  _model.businessNameTextController?.text ??
+                                      '',
+                              phoneNumber:
+                                  _model.phoneNumberTextController?.text ??
+                                      '',
+                              email: _model.emailTextController?.text ?? '',
+                              website:
+                                  _model.websiteTextController?.text ?? '',
+                              description:
+                                  _model.descriptionTextController?.text ??
+                                      '',
+                              heroImageUrl: _heroImageUrl,
+                            );
+                            if (!mounted) return;
+                            if (!result.isSuccess) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(result.error!)),
+                              );
+                              return;
+                            }
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Changes saved.')),
+                            );
+                            context.safePop();
+                            return;
+                          }
+
                           final result = await KinServices.registerBusiness(
                             category: effectiveCategory,
                             businessType: _model.businessType,
@@ -1452,7 +1565,7 @@ class _BusinessSetupPageWidgetState extends State<BusinessSetupPageWidget> {
 
                           safeSetState(() {});
                         },
-                        text: 'Register Now',
+                        text: _isEditing ? 'Save Changes' : 'Register Now',
                         options: FFButtonOptions(
                           width: double.infinity,
                           height: 65.0,

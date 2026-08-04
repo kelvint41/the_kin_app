@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/kindex_trend_indicator.dart';
 import '/components/main_menu_button.dart';
+import '/components/support_bubble_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -108,6 +109,7 @@ class _BusinessInsightsWidgetState extends State<BusinessInsightsWidget> {
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: theme.primaryBackground,
+      floatingActionButton: const SupportBubbleWidget(),
       appBar: AppBar(
         backgroundColor: theme.primaryBackground,
         automaticallyImplyLeading: false,

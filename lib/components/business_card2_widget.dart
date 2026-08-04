@@ -91,6 +91,8 @@ class _BusinessCard2WidgetState extends State<BusinessCard2Widget> {
                 ),
                 fit: BoxFit.cover,
                 alignment: Alignment(0.0, 0.0),
+                memCacheHeight:
+                    (120.0 * MediaQuery.devicePixelRatioOf(context)).round(),
               ),
             ),
             Padding(

@@ -121,7 +121,11 @@ class _ClaimBusinessWidgetState extends State<ClaimBusinessWidget> {
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primary,
-          automaticallyImplyLeading: false,
+          // Was false with only the hamburger for a way out - this screen
+          // is reached by pushNamed from a business profile, so there was
+          // always a real route to pop, just no control to do it with.
+          automaticallyImplyLeading: true,
+          foregroundColor: FlutterFlowTheme.of(context).info,
           title: Text(
             'Claim Your Business',
             style: FlutterFlowTheme.of(context).headlineSmall.override(

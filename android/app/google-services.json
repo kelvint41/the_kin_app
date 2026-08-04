@@ -7,6 +7,50 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:905088387635:android:6f36ede1527ccb4f9bf146",
+        "android_client_info": {
+          "package_name": "com.kinvestguidance.thekinapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905088387635-va3tsl5cn4d75qti2c3j96jviuvhed4p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kinvestguidance.thekinapp",
+            "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "905088387635-qe8va58ns9s1ot8i4rgsvogalo54uujv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABwDDGwg6Y7e33cm00lIuZLmwWkSXyBFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905088387635-qe8va58ns9s1ot8i4rgsvogalo54uujv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "905088387635-ihulf15h2ljnep3nc3diordrm7oihkrl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.thekinapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:905088387635:android:e770f9cf3fefe5d79bf146",
         "android_client_info": {
           "package_name": "com.mycompany.thekinapp"
@@ -19,6 +63,50 @@
           "android_info": {
             "package_name": "com.mycompany.thekinapp",
             "certificate_hash": "9bbb3186b2189ef16d8f272bdab59362c395cbb4"
+          }
+        },
+        {
+          "client_id": "905088387635-qe8va58ns9s1ot8i4rgsvogalo54uujv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABwDDGwg6Y7e33cm00lIuZLmwWkSXyBFA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "905088387635-qe8va58ns9s1ot8i4rgsvogalo54uujv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "905088387635-ihulf15h2ljnep3nc3diordrm7oihkrl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.mycompany.thekinapp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:905088387635:android:8b5fcfc83e176b569bf146",
+        "android_client_info": {
+          "package_name": "com.thekinapp.kin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "905088387635-ojr6qen7nq3f5ej1hh7ssp2m227j5g8v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.thekinapp.kin",
+            "certificate_hash": "1cbbb1cdea5281a86d746685ce9087908b634ce9"
           }
         },
         {

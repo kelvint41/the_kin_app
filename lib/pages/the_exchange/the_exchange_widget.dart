@@ -355,6 +355,11 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
       appBar: AppBar(
         backgroundColor: theme.primary,
         automaticallyImplyLeading: true,
+        // The default back arrow was left to Flutter's own light/dark
+        // guess against a solid brand-green bar - explicit here so it's a
+        // deliberate choice, matching the title text's color, rather than
+        // whatever Material happens to compute.
+        foregroundColor: theme.info,
         title: Text(
           'The Exchange',
           style: theme.headlineMedium.override(
@@ -1036,6 +1041,16 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                           imageUrl:
                                               'https://dimg.dreamflow.cloud/v1/image/modern%20professional%20black%20woman%20headshot',
                                           fit: BoxFit.cover,
+                                          memCacheWidth: (44.0 *
+                                                  MediaQuery
+                                                      .devicePixelRatioOf(
+                                                          context))
+                                              .round(),
+                                          memCacheHeight: (44.0 *
+                                                  MediaQuery
+                                                      .devicePixelRatioOf(
+                                                          context))
+                                              .round(),
                                         ),
                                       ),
                                     ),
@@ -1390,6 +1405,14 @@ class _PromoStoryTile extends StatelessWidget {
                                 fadeOutDuration: Duration(milliseconds: 0),
                                 imageUrl: promo.imageUrl,
                                 fit: BoxFit.cover,
+                                memCacheWidth: (72.0 *
+                                        MediaQuery.devicePixelRatioOf(
+                                            context))
+                                    .round(),
+                                memCacheHeight: (72.0 *
+                                        MediaQuery.devicePixelRatioOf(
+                                            context))
+                                    .round(),
                               )
                             : Container(
                                 color: theme.secondaryBackground,

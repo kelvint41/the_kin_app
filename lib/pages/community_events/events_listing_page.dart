@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/auth/firebase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/services/community_events_service.dart';
 import '/components/main_menu_button.dart';
@@ -58,7 +59,11 @@ class _EventsListingPageState extends State<EventsListingPage>
         backgroundColor: theme.primary,
         automaticallyImplyLeading: true,
         title: Text(
-          'Community Events',
+          // Was 'Community Events' - truncated to "Community Eve..." next
+          // to the back arrow and MainMenuButton. The hamburger menu entry
+          // that links here keeps the full name; this header doesn't need
+          // to repeat it in full any more than Discovery Map's does.
+          'Events',
           style: theme.headlineMedium.override(
             font: GoogleFonts.plusJakartaSans(
               fontWeight: FontWeight.w600,
@@ -94,20 +99,27 @@ class _EventsListingPageState extends State<EventsListingPage>
       // that widget's comment) - a FAB with no explicit bottom margin sat
       // half-covered by the system nav bar, tappable but not fully visible.
       // viewPadding reports the physical inset regardless of that zeroing.
-      floatingActionButton: Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.viewPaddingOf(context).bottom,
-        ),
-        child: FloatingActionButton(
-          backgroundColor: theme.primary,
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const EventCreatePage()),
-            );
-          },
-          child: Icon(Icons.add, color: theme.info),
-        ),
-      ),
+      // Hidden rather than shown-then-silently-failing: creating an event
+      // needs a business (event_create_page.dart's _submit no-ops with no
+      // businessId), so a customer previously saw a working-looking "+" that
+      // did nothing on submit after they filled out the whole form. Same
+      // gate as Job Board's own add button.
+      floatingActionButton: currentUserDocument?.ownedBusiness == null
+          ? null
+          : Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.viewPaddingOf(context).bottom,
+              ),
+              child: FloatingActionButton(
+                backgroundColor: theme.primary,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const EventCreatePage()),
+                  );
+                },
+                child: Icon(Icons.add, color: theme.info),
+              ),
+            ),
       body: TabBarView(
         controller: _tabController,
         children: List.generate(4, (tabIndex) {
@@ -176,6 +188,9 @@ class _EventsListingPageState extends State<EventsListingPage>
                   height: 140.0,
                   width: double.infinity,
                   fit: BoxFit.cover,
+                  memCacheHeight:
+                      (140.0 * MediaQuery.devicePixelRatioOf(context))
+                          .round(),
                 ),
               Padding(
                 padding: const EdgeInsets.all(16.0),

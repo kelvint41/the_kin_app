@@ -88,6 +88,10 @@ class _FeaturedCardWidgetState extends State<FeaturedCardWidget> {
                 ),
                 fit: BoxFit.cover,
                 alignment: Alignment(0.0, 0.0),
+                memCacheWidth:
+                    (260.0 * MediaQuery.devicePixelRatioOf(context)).round(),
+                memCacheHeight:
+                    (140.0 * MediaQuery.devicePixelRatioOf(context)).round(),
               ),
             ),
             Container(

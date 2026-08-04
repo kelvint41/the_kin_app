@@ -9,10 +9,13 @@ const { applyNightlyMovement } = dynamics;
 
 const WINDOW_DAYS = 7;
 
-// Customers have no tier system and no starting baseline - kindex_engine.js
-// has always begun a new customer at `scoreData.score || 0` - so the decay
-// floor is 0, not the business side's 500/850.
-const CUSTOMER_BASELINE = 0;
+// Mirrors the business side's tier-baseline model (business_kindex_nightly.js
+// STANDARD_BASELINE/PREMIUM_BASELINE = 500/850) rather than the old
+// no-baseline-at-all customer behavior, where kindex_engine.js began a new
+// customer at `scoreData.score || 0` and nothing ever floored or capped it -
+// which is why customers could show single- and double-digit scores.
+const CUSTOMER_BASELINE = 300;
+const CUSTOMER_MAX = 850;
 
 const WEIGHTS_DOC = { collection: "kindex_config", doc: "scoring_weights" };
 const WEIGHTS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -128,6 +131,8 @@ async function recomputeAll(db, now) {
   let batch = db.batch();
   let batchCount = 0;
 
+  const frozen = config.customer_scoring_frozen;
+
   for (const scoreDoc of scoresSnap.docs) {
     const scoreData = scoreDoc.data();
     const events = eventsByUser.get(scoreDoc.id) || [];
@@ -136,9 +141,34 @@ async function recomputeAll(db, now) {
     const scoreBefore =
       typeof scoreData.score === "number" ? scoreData.score : CUSTOMER_BASELINE;
 
+    if (frozen) {
+      // Every customer sits at exactly CUSTOMER_BASELINE, real activity
+      // this window included - not just floored, held. No history row: a
+      // reset to a fixed point isn't a movement worth charting alongside
+      // real target-seeking/decay once unfrozen.
+      if (scoreBefore !== CUSTOMER_BASELINE) {
+        batch.update(scoreDoc.ref, {
+          score: CUSTOMER_BASELINE,
+          is_trending_up: null,
+          last_recomputed_at: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        batchCount += 1;
+        updated += 1;
+        if (batchCount >= 400) {
+          await batch.commit();
+          batch = db.batch();
+          batchCount = 0;
+        }
+      }
+      continue;
+    }
+
     const outcome = applyNightlyMovement({
       hasActivity: qualifying.countedEvents > 0,
-      target: Math.max(CUSTOMER_BASELINE, qualifying.total),
+      target: Math.min(
+        CUSTOMER_MAX,
+        Math.max(CUSTOMER_BASELINE, qualifying.total),
+      ),
       scoreBefore,
       floor: CUSTOMER_BASELINE,
       lastActivityMs: scoreData.last_activity_at
@@ -228,5 +258,6 @@ exports._internals = {
   recomputeAll,
   resetWeightsCache,
   CUSTOMER_BASELINE,
+  CUSTOMER_MAX,
   WINDOW_DAYS,
 };

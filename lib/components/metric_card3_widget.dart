@@ -74,7 +74,10 @@ class _MetricCard3WidgetState extends State<MetricCard3Widget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180.0,
+      // Was 180.0 - fit "Support Streak" but truncated both the label and
+      // the value on the "Milestones Unlocked" card ("Milestones Unlo..." /
+      // "16 Revie...") since that card's real content runs longer.
+      width: 220.0,
       decoration: BoxDecoration(
         color: FlutterFlowTheme.of(context).secondaryBackground,
         borderRadius: BorderRadius.circular(24.0),

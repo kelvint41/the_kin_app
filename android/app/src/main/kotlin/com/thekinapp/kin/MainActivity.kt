@@ -1,4 +1,4 @@
-package com.mycompany.thekinapp
+package com.thekinapp.kin
 
 import io.flutter.embedding.android.FlutterActivity
 

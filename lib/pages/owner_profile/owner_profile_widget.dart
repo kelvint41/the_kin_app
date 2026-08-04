@@ -1,18 +1,14 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
-import '/services/kin_services.dart';
-import '/services/subscription_tiers.dart';
+import '/components/kin_back_button.dart';
 import '/components/metric_card4_widget.dart';
-import '/components/power_hour_panel_widget.dart';
-import '/components/location_beacon_card_widget.dart';
 import '/components/mystery_reward_panel_widget.dart';
 import '/components/add_business_discovery_dialog.dart';
 import '/components/review_item_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/community_shoutout_carousel.dart';
 import '/components/main_menu_button.dart';
-import '/components/subscription_management_row.dart';
-import '/components/owner_roi_dashboard_widget.dart';
+import '/components/support_bubble_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -129,13 +125,14 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       return Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
-        // No AppBar on this page normally (the hero header below draws its
-        // own back button over the business image), but this early-return
-        // branch skips that header entirely, which left this exact state -
-        // no owned business yet - with no way back at all.
+        // No AppBar on this page normally (the hero header below has its
+        // own back button, floating over the business image), but this
+        // early-return branch skips that header entirely, which left this
+        // exact state - no owned business yet - with no way back at all.
         appBar: AppBar(
           backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
           automaticallyImplyLeading: false,
+          leading: KinBackButton(),
           actions: [
             Padding(
               padding: const EdgeInsets.only(right: 12.0),
@@ -192,6 +189,10 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+        // Get Support existed only as a hamburger-menu row - easy to miss
+        // for an owner who hasn't dug through the menu. This is the same
+        // destination, just always reachable without that.
+        floatingActionButton: const SupportBubbleWidget(),
         // Only the hero's own back/menu buttons were SafeArea-protected -
         // once the page scrolls far enough that later content (e.g. "Active
         // Promotion") becomes the top-most thing on screen, nothing stopped
@@ -415,24 +416,87 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                         ),
                       ),
                     ),
+                    // The other of the two buttons the comment above
+                    // describes as "invisible and completely unreachable" -
+                    // the hamburger got fixed, this one never got added.
+                    Align(
+                      alignment: AlignmentDirectional(-1.0, -1.0),
+                      child: SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: KinBackButton(floating: true),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              // ROI Dashboard - Prominently displayed to drive tier upgrades
+              // Was the ROI Dashboard, shown unconditionally every visit.
+              // Promote, Power Hour, listing management, and the
+              // ROI/upgrade dashboard itself all moved to Growth Tools -
+              // this main screen now stays focused on the three things an
+              // owner actually needs at a glance (profile info, KINdex
+              // score, job applicant messages), same as
+              // GrowthToolsPageWidget's own doc comment describes.
               Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(16.0, 24.0, 16.0, 24.0),
-                child: StreamBuilder<BusinessesRecord>(
-                  stream: BusinessesRecord.getDocument(
-                      currentUserDocument!.ownedBusiness!),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData) {
-                      return SizedBox.shrink();
-                    }
-                    return OwnerROIDashboardWidget(
-                      businessId: snapshot.data!.reference.id,
-                      currentTier: snapshot.data!.subscriptionTier ?? 'free',
-                    );
-                  },
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16.0),
+                  onTap: () =>
+                      context.pushNamed(GrowthToolsPageWidget.routeName),
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      borderRadius: BorderRadius.circular(16.0),
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).alternate,
+                          width: 1.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.trending_up_rounded,
+                            color: FlutterFlowTheme.of(context).accentOnSurface,
+                            size: 22.0),
+                        Expanded(
+                          child: Padding(
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Growth Tools',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                Text(
+                                  'Promote, Power Hour, your plan, and '
+                                  'listing management.',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded,
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            size: 20.0),
+                      ],
+                    ),
+                  ),
                 ),
               ),
               Padding(
@@ -763,6 +827,72 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ],
                 ),
               ),
+              // Job Board Messages - the only owner-facing messaging that
+              // exists today is applicant conversations tied to a specific
+              // job posting (JobMessagesPage requires an applicationId), so
+              // this opens Job Management rather than inventing a general
+              // inbox that doesn't exist yet - see JobManagementPage for
+              // where individual conversations are actually reached.
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 0.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16.0),
+                  onTap: () =>
+                      context.pushNamed(JobManagementPage.routeName),
+                  child: Container(
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      borderRadius: BorderRadius.circular(16.0),
+                      border: Border.all(
+                          color: FlutterFlowTheme.of(context).alternate,
+                          width: 1.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.mail_outline_rounded,
+                            color: FlutterFlowTheme.of(context).accentOnSurface,
+                            size: 22.0),
+                        Expanded(
+                          child: Padding(
+                            padding:
+                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Job Board Messages',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(
+                                            fontWeight: FontWeight.bold),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                Text(
+                                  'Conversations with job applicants.',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodySmall
+                                      .override(
+                                        font: GoogleFonts.plusJakartaSans(),
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right_rounded,
+                            color: FlutterFlowTheme.of(context).secondaryText,
+                            size: 20.0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
                 child: Column(
@@ -844,124 +974,8 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.bolt_rounded,
-                          color: FlutterFlowTheme.of(context).primaryText,
-                          size: 18.0,
-                        ),
-                        Text(
-                          'Active Promotion',
-                          style: FlutterFlowTheme.of(context)
-                              .titleSmall
-                              .override(
-                                font: GoogleFonts.plusJakartaSans(
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FlutterFlowTheme.of(context)
-                                      .titleSmall
-                                      .fontStyle,
-                                ),
-                                color: FlutterFlowTheme.of(context).primaryText,
-                                letterSpacing: 0.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .titleSmall
-                                    .fontStyle,
-                              ),
-                        ),
-                      ].divide(SizedBox(width: 4.0)),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
-                        borderRadius: BorderRadius.circular(24.0),
-                        shape: BoxShape.rectangle,
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(24.0),
-                        child: StreamBuilder<BusinessesRecord>(
-                          stream: BusinessesRecord.getDocument(
-                              currentUserDocument!.ownedBusiness!),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return Center(
-                                child: SizedBox(
-                                  width: 24.0,
-                                  height: 24.0,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).secondaryText,
-                                    ),
-                                  ),
-                                ),
-                              );
-                            }
-                            final powerHourBusinessesRecord = snapshot.data!;
-                            return PowerHourPanelWidget(
-                              businessRef: powerHourBusinessesRecord.reference,
-                              hasFlashBeacon:
-                                  powerHourBusinessesRecord.hasFlashBeacon,
-                              flashBeaconExpiresAt: powerHourBusinessesRecord
-                                  .flashBeaconExpiresAt,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
-                      child: StreamBuilder<BusinessesRecord>(
-                        stream: BusinessesRecord.getDocument(
-                            currentUserDocument!.ownedBusiness!),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return SizedBox(
-                              height: 120.0,
-                              child: Center(
-                                child: SizedBox(
-                                  width: 24.0,
-                                  height: 24.0,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      FlutterFlowTheme.of(context).secondaryText,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                          final beaconBusinessesRecord = snapshot.data!;
-                          return LocationBeaconCardWidget(
-                            businessRef:
-                                beaconBusinessesRecord.reference,
-                            businessName:
-                                beaconBusinessesRecord.businessName,
-                            isMobileVendor:
-                                beaconBusinessesRecord.isMobileVendor,
-                            currentLocation:
-                                beaconBusinessesRecord.currentLocation,
-                            expiresAt: beaconBusinessesRecord
-                                .currentLocationExpiresAt,
-                            isActive: beaconBusinessesRecord
-                                .mobileLocationActive,
-                          );
-                        },
-                      ),
-                    ),
-                  ].divide(SizedBox(height: 16.0)),
-                ),
-              ),
+              // Active Promotion (Power Hour + Location Beacon) moved to
+              // Growth Tools - see the note on the card above.
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
                 child: Column(
@@ -1038,200 +1052,9 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                   ].divide(SizedBox(height: 16.0)),
                 ),
               ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Your Membership Tier',
-                      style: FlutterFlowTheme.of(context).titleSmall.override(
-                            font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .titleSmall
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .titleSmall
-                                .fontStyle,
-                          ),
-                    ),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed(
-                          MerchantPricingSuiteWidget.routeName,
-                          queryParameters: {
-                            'businessRef': serializeParam(
-                              currentUserDocument?.ownedBusiness,
-                              ParamType.DocumentReference,
-                            ),
-                          }.withoutNulls,
-                        );
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            // Was [secondaryBackground, primary]: in light mode that
-                              // runs white to dark green, so this card's text
-                              // was legible at one end and invisible at the
-                              // other. Two stops of the same green instead -
-                              // it is the premium tier card and reads as one
-                              // dark surface in both themes, which also means
-                              // its contents can assume a dark background.
-                              colors: [
-                              FlutterFlowTheme.of(context).primary,
-                              const Color(0xFF06251B)
-                            ],
-                            stops: [0.0, 1.0],
-                            begin: AlignmentDirectional(1.0, 1.0),
-                            end: AlignmentDirectional(-1.0, -1.0),
-                          ),
-                          borderRadius: BorderRadius.circular(24.0),
-                          shape: BoxShape.rectangle,
-                          border: Border.all(
-                            color: FlutterFlowTheme.of(context)
-                                .accent1
-                                .withAlpha(51),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(24.0),
-                          child: Container(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: FlutterFlowTheme.of(context)
-                                        .accent1
-                                        .withAlpha(51),
-                                    borderRadius: BorderRadius.circular(9999.0),
-                                    shape: BoxShape.rectangle,
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsetsDirectional.fromSTEB(
-                                        16.0, 4.0, 16.0, 4.0),
-                                    child: Container(
-                                      child: Text(
-                                        'CURRENT PLAN',
-                                        style: FlutterFlowTheme.of(context)
-                                            .labelSmall
-                                            .override(
-                                              font: GoogleFonts.plusJakartaSans(
-                                                fontWeight: FontWeight.bold,
-                                                fontStyle:
-                                                    FlutterFlowTheme.of(context)
-                                                        .labelSmall
-                                                        .fontStyle,
-                                              ),
-                                              // Fixed gold, not primaryText -
-                                              // same fixed-dark-card reasoning
-                                              // as the tier name below.
-                                              color: const Color(0xFFD4AF37),
-                                              letterSpacing: 0.0,
-                                              fontWeight: FontWeight.bold,
-                                              fontStyle:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelSmall
-                                                      .fontStyle,
-                                              lineHeight: 1.4,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                // Was currentUserDocument?.subscriptionStatus -
-                                // a users/{uid} field nothing in the app ever
-                                // writes (upgradeBusinessTier only sets
-                                // subscription_tier on the *business* doc), so
-                                // this always rendered as an empty string. The
-                                // real tier name lives on the business.
-                                AuthUserStreamWidget(
-                                  builder: (context) =>
-                                      StreamBuilder<BusinessesRecord>(
-                                    stream: BusinessesRecord.getDocument(
-                                        currentUserDocument!.ownedBusiness!),
-                                    builder: (context, snapshot) {
-                                      final rawTierName = snapshot.hasData
-                                          ? snapshot.data!.subscriptionTier
-                                          : '';
-                                      final tierName = rawTierName.isEmpty
-                                          ? 'Community'
-                                          : rawTierName;
-                                      return Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            tierName,
-                                            style: FlutterFlowTheme.of(context)
-                                                .headlineSmall
-                                                .override(
-                                                  font: GoogleFonts
-                                                      .plusJakartaSans(
-                                                    fontWeight:
-                                                        FontWeight.bold,
-                                                    fontStyle:
-                                                        FlutterFlowTheme.of(
-                                                                context)
-                                                            .headlineSmall
-                                                            .fontStyle,
-                                                  ),
-                                                  // Fixed gold literal, not
-                                                  // primaryText - this card's
-                                                  // gradient is a fixed dark
-                                                  // green in both themes (see
-                                                  // the comment on it above),
-                                                  // so a text token that
-                                                  // inverts with the theme
-                                                  // turned this near-black
-                                                  // and unreadable in light
-                                                  // mode.
-                                                  color:
-                                                      const Color(0xFFD4AF37),
-                                                  letterSpacing: 0.0,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontStyle:
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .headlineSmall
-                                                          .fontStyle,
-                                                ),
-                                          ),
-                                          _tierFeatureList(context, tierName),
-                                        ].divide(SizedBox(height: 16.0)),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ].divide(SizedBox(height: 24.0)),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ].divide(SizedBox(height: 16.0)),
-                ),
-              ),
-              // Apple Guideline 3.1.2 requires a subscription app to link
-              // out to where a plan can be managed or cancelled, and to offer
-              // Restore Purchases. Both were built and left unmounted.
-              const SubscriptionManagementRow(),
-              _appStudioPrompt(context),
+              // "Your Membership Tier", SubscriptionManagementRow, and the
+              // App Studio prompt all moved to Growth Tools alongside the
+              // ROI Dashboard - see the Growth Tools card above.
               Container(
                 height: 24.0,
               ),
@@ -1255,10 +1078,11 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
   }
 
   /// Owner-specific actions appended to the hamburger sheet via
-  /// [MainMenuButton]'s `extraItems` - used to be a six-button icon row
-  /// sitting directly above the bottom nav bar, which read as a second,
-  /// competing nav bar right next to the real one. Same six actions, same
-  /// destinations, just presented as menu items instead.
+  /// [MainMenuButton]'s `extraItems`. Promote and Manage My Listings used
+  /// to live here too - both moved to GrowthToolsPageWidget along with
+  /// everything else under its "growth/management, not a daily glance"
+  /// umbrella, so they're reached from the Growth Tools card on the main
+  /// screen now instead of a second path through this menu.
   List<Widget> _ownerMenuItems(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     return [
@@ -1277,25 +1101,6 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           context.pushNamed(BusinessSetupPageWidget.routeName);
         },
       ),
-      Builder(
-        builder: (builderContext) => ListTile(
-          leading: Icon(Icons.share_rounded, color: theme.primaryText),
-          title: Text('Promote', style: theme.bodyLarge),
-          onTap: () async {
-            Navigator.pop(context);
-            final ownedBusiness = currentUserDocument?.ownedBusiness;
-            if (ownedBusiness == null) return;
-            final business =
-                await BusinessesRecord.getDocumentOnce(ownedBusiness);
-            await KinServices.shareApp(
-              text: 'Check out ${business.businessName} on '
-                  'KIN! Download the app: $kPlayStoreUrl',
-              sharePositionOrigin: getWidgetBoundingBox(builderContext),
-              businessRef: ownedBusiness,
-            );
-          },
-        ),
-      ),
       // Preview now lives as the eye icon on the Setup page's own header,
       // right next to where the profile is actually being edited - it no
       // longer needs its own top-level row here.
@@ -1307,19 +1112,12 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
           context.pushNamed(SupportChatWidget.routeName);
         },
       ),
-      // Collapses what used to be three separate top-level rows (My Items /
-      // Manage Jobs / Manage Events) into one - they're the same action
-      // (review/edit what I've posted) applied to three content types, so
-      // they read better as one entry point into a short sub-sheet than as
-      // three permanent rows competing with everything else in this menu.
       ListTile(
-        leading: Icon(Icons.storefront_rounded, color: theme.primaryText),
-        title: Text('Manage My Listings', style: theme.bodyLarge),
-        trailing: Icon(Icons.chevron_right_rounded,
-            color: theme.secondaryText, size: 20.0),
+        leading: Icon(Icons.trending_up_rounded, color: theme.primaryText),
+        title: Text('Growth Tools', style: theme.bodyLarge),
         onTap: () {
           Navigator.pop(context);
-          _showManageListingsSheet(context);
+          context.pushNamed(GrowthToolsPageWidget.routeName);
         },
       ),
       if (currentUserDocument?.isAdmin == true)
@@ -1334,209 +1132,4 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
     ];
   }
 
-  /// The "Manage My Listings" sub-sheet - My Items / Manage Jobs / Manage
-  /// Events, pulled out of the main hamburger sheet so they don't each take
-  /// a permanent top-level row. Same destinations and icons as before, just
-  /// one tap further in.
-  void _showManageListingsSheet(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetContext) {
-        return Container(
-          decoration: BoxDecoration(
-            color: theme.primaryBackground,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(theme.designToken.radius.lg),
-              topRight: Radius.circular(theme.designToken.radius.lg),
-            ),
-          ),
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: theme.designToken.spacing.md),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40.0,
-                    height: 4.0,
-                    margin: EdgeInsets.only(
-                        bottom: theme.designToken.spacing.md),
-                    decoration: BoxDecoration(
-                      color: theme.alternate,
-                      borderRadius: BorderRadius.circular(2.0),
-                    ),
-                  ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.storefront_rounded, color: theme.primaryText),
-                    title: Text('My Items', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(MyItemsWidget.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.work_outline_rounded,
-                        color: theme.primaryText),
-                    title: Text('Manage Jobs', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(JobManagementPage.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.volunteer_activism_outlined,
-                        color: theme.primaryText),
-                    title: Text('Manage Events', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(EventManagementPage.routeName);
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  /// The three benefit rows under "Your Membership Tier", each checked
-  /// against [tierName] rather than hardcoded.
-  ///
-  /// This used to render two checkmarks and one lock for every viewer
-  /// regardless of their actual tier - a Community owner saw the same
-  /// "included" checkmarks as an Elite one, and Elite (the tier meant to
-  /// include everything the others do, plus more) saw a lock on Advanced
-  /// Analytics it should never see. Minimum tiers below mirror the real
-  /// feature bullets on merchant_pricing_suite_widget.dart's tier cards:
-  /// priority carousel placement starts at Founder; Founder and Founding
-  /// Local both cap promotions at 1/month (their own bullet says so), so
-  /// "unlimited" starts where that cap disappears, at Premium Local;
-  /// "Advanced performance analytics & insights" is Premium Local's own
-  /// bullet verbatim.
-  Widget _tierFeatureList(BuildContext context, String tierName) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _tierFeatureRow(
-          context,
-          'Priority KINDEX Ranking',
-          tierAtLeast(tierName, 'Founder'),
-        ),
-        _tierFeatureRow(
-          context,
-          'Unlimited Active Promotions',
-          tierAtLeast(tierName, 'Premium Local'),
-        ),
-        _tierFeatureRow(
-          context,
-          'Advanced Analytics Dashboard',
-          tierAtLeast(tierName, 'Premium Local'),
-        ),
-      ].divide(SizedBox(height: 8.0)),
-    );
-  }
-
-  /// One benefit row: a bright checkmark when [included], a dimmed lock
-  /// when not - a lock reads unambiguously either way, unlike a merely-
-  /// dimmed checkmark, and matches the lock icon Business Insights already
-  /// uses for gated features.
-  Widget _tierFeatureRow(BuildContext context, String label, bool included) {
-    final color = included ? const Color(0xFFD4AF37) : const Color(0x99D4AF37);
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Icon(
-          included ? Icons.check_circle_rounded : Icons.lock_outline_rounded,
-          color: color,
-          size: 18.0,
-        ),
-        Text(
-          label,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                font: GoogleFonts.plusJakartaSans(
-                  fontWeight:
-                      FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                  fontStyle:
-                      FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                ),
-                color: color,
-                letterSpacing: 0.0,
-                fontWeight:
-                    FlutterFlowTheme.of(context).bodyMedium.fontWeight,
-                fontStyle: FlutterFlowTheme.of(context).bodyMedium.fontStyle,
-                lineHeight: 1.4,
-              ),
-        ),
-      ].divide(SizedBox(width: 8.0)),
-    );
-  }
-
-  /// Entry point to the App Studio waitlist, offered to owners here - the
-  /// people this offer is actually for. Was briefly on Customer Profile
-  /// (removed per explicit request, commit 673c31ad) and never existed on
-  /// Owner Profile until now; same card content/behavior as the original.
-  Widget _appStudioPrompt(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(24.0, 16.0, 24.0, 0.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () => context.pushNamed(AppStudioPageWidget.routeName),
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: theme.alternate, width: 1.0),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.auto_awesome_mosaic_rounded,
-                  color: theme.accentOnSurface, size: 22.0),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Need an app for your business?',
-                        style: theme.bodyMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'KIN App Studio - coming soon. Join the list.',
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded,
-                  color: theme.secondaryText, size: 20.0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

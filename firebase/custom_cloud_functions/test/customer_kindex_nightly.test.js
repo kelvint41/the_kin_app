@@ -2,7 +2,15 @@
 //
 // Mirrors the business-side rules: capped nightly movement toward a
 // windowed target, escalating inactivity decay with a floor, and a dedup
-// rule so repeat engagement with one business can't be farmed.
+// rule so repeat engagement with one business can't be farmed. Baseline is
+// 300 and the cap is 850 (business_kindex_nightly.js's Standard/Premium
+// tier numbers), matching the tier-baseline model rather than the old
+// no-baseline-at-all customer behavior.
+//
+// customer_scoring_frozen defaults to true pre-launch (see
+// kindex_scoring_dynamics.js), so every test below that exercises real
+// target-seeking/decay explicitly sets it to false in beforeEach - the
+// frozen tests near the bottom are the only ones that rely on the default.
 
 const assert = require("node:assert/strict");
 const { test, beforeEach } = require("node:test");
@@ -15,6 +23,7 @@ if (!admin.apps.length) {
 const customerNightly = require("../customer_kindex_nightly.js");
 const { qualifyingPointsForCustomer, recomputeAll, resetWeightsCache } =
   customerNightly._internals;
+const { resetConfigCache } = require("../kindex_scoring_dynamics.js");
 
 const db = admin.firestore();
 
@@ -37,6 +46,14 @@ async function clear(collection) {
   await Promise.all(snap.docs.map((d) => d.ref.delete()));
 }
 
+async function setFrozen(frozen) {
+  await db
+    .collection("kindex_config")
+    .doc("scoring_dynamics")
+    .set({ customer_scoring_frozen: frozen }, { merge: true });
+  resetConfigCache();
+}
+
 beforeEach(async () => {
   await Promise.all([
     clear("KindexScores"),
@@ -45,6 +62,9 @@ beforeEach(async () => {
   ]);
   await db.collection("kindex_config").doc("scoring_weights").set(WEIGHTS);
   resetWeightsCache();
+  // Unfrozen by default in this suite - the frozen behavior itself gets
+  // its own tests further down, which override this explicitly.
+  await setFrozen(false);
 });
 
 const daysAgo = (n) =>
@@ -151,10 +171,17 @@ test("unknown event types score nothing", () => {
   assert.equal(result.countedEvents, 0);
 });
 
-// --- Smoothing ---------------------------------------------------------
+// --- Smoothing -----------------------------------------------------------
+// Targets below the 300 baseline clamp up to 300 (Math.max(baseline,
+// qualifying.total)), so a customer starting at 0 always has a large gap
+// to close regardless of how few points their events are worth - these
+// cases are indistinguishable from "far from target" and move by the
+// capped amount rather than reaching a small target exactly.
 
 test("customer score moves toward its target, capped per night", async () => {
-  // Target 50 (5 businesses x call_tap), from 0 - capped at 20.
+  // 10 businesses x call_tap = 50 qualifying points, clamped up to the
+  // 300 baseline as the target - either way the gap from 0 exceeds the
+  // cap, so this moves by exactly max_nightly_change.
   const events = [];
   for (let i = 0; i < 10; i += 1) {
     events.push({ type: "call_tap", business: `biz${i}` });
@@ -164,11 +191,36 @@ test("customer score moves toward its target, capped per night", async () => {
 });
 
 test("a small gap closes exactly, without overshooting", async () => {
+  // Seeded near the target rather than at 0, so the gap itself (5) is
+  // what's under test, not the baseline clamp.
   const ref = await seedCustomer({
-    score: 0,
+    score: 295,
     events: [{ type: "call_tap", business: "bizA" }],
   });
-  assert.equal(await scoreAfter(ref), 5);
+  assert.equal(await scoreAfter(ref), 300);
+});
+
+test("qualifying points above the cap still target 850, not higher", async () => {
+  // A local weight override rather than piling up hundreds of events to
+  // organically clear 850 - one call_tap worth 900 points is well past
+  // the cap either way, and isolated to this test via its own doc write.
+  await db
+    .collection("kindex_config")
+    .doc("scoring_weights")
+    .set({ call_tap: 900 });
+  resetWeightsCache();
+
+  const ref = await seedCustomer({
+    score: 840,
+    events: [{ type: "call_tap", business: "bizA" }],
+  });
+  // Target clamps to 850 (900 points -> min(850, max(300,900))=850), a
+  // 10-point gap from 840 that closes exactly, under the 20-point cap.
+  assert.equal(await scoreAfter(ref), 850);
+
+  // A second run confirms it holds at the cap rather than creeping past
+  // it - target stays 850, current is already there, no movement.
+  assert.equal(await scoreAfter(ref), 850);
 });
 
 test("only events already marked processed are counted", async () => {
@@ -179,7 +231,8 @@ test("only events already marked processed are counted", async () => {
       { type: "post", status: "rejected" },
     ],
   });
-  assert.equal(await scoreAfter(ref), 0);
+  // No qualifying activity -> decay branch -> floors at the 300 baseline.
+  assert.equal(await scoreAfter(ref), 300);
 });
 
 test("events outside the 7-day window are excluded", async () => {
@@ -187,51 +240,53 @@ test("events outside the 7-day window are excluded", async () => {
     score: 0,
     events: [{ type: "post", daysAgo: 10 }],
   });
-  assert.equal(await scoreAfter(ref), 0);
+  assert.equal(await scoreAfter(ref), 300);
 });
 
 // --- Decay -------------------------------------------------------------
+// Seeded well above the 300 floor so decay is observable rather than
+// immediately swallowed by the floor clamp.
 
 test("customer decay escalates across consecutive inactive weeks", async () => {
-  const w1 = await seedCustomer({ score: 100, lastActivityDaysAgo: 7 });
-  assert.equal(await scoreAfter(w1), 90);
+  const w1 = await seedCustomer({ score: 600, lastActivityDaysAgo: 7 });
+  assert.equal(await scoreAfter(w1), 590);
 
   const w2 = await seedCustomer({
-    score: 90,
+    score: 590,
     lastActivityDaysAgo: 14,
     decayedThroughWeek: 1,
   });
-  assert.equal(await scoreAfter(w2), 70);
+  assert.equal(await scoreAfter(w2), 570);
 
   const w3 = await seedCustomer({
-    score: 70,
+    score: 570,
     lastActivityDaysAgo: 21,
     decayedThroughWeek: 2,
   });
-  assert.equal(await scoreAfter(w3), 45);
+  assert.equal(await scoreAfter(w3), 545);
 });
 
-test("customer decay floors at 0, not at a business baseline", async () => {
-  // Customers have no tier baseline - kindex_engine has always started them
-  // at 0 - so 0 is the floor.
+test("customer decay floors at 300, matching the business tier-baseline model", async () => {
   const ref = await seedCustomer({
-    score: 5,
+    score: 305,
     lastActivityDaysAgo: 21,
     decayedThroughWeek: 2,
   });
-  assert.equal(await scoreAfter(ref), 0);
+  // Decay owed (25 for week 3) would take this to 280, but the 300
+  // baseline floor holds it there instead.
+  assert.equal(await scoreAfter(ref), 300);
 });
 
 test("customer decay is not charged twice for the same week", async () => {
-  const ref = await seedCustomer({ score: 100, lastActivityDaysAgo: 7 });
+  const ref = await seedCustomer({ score: 500, lastActivityDaysAgo: 7 });
   await recomputeAll(db, Date.now());
   await recomputeAll(db, Date.now());
-  assert.equal((await ref.get()).data().score, 90);
+  assert.equal((await ref.get()).data().score, 490);
 });
 
 test("new activity resets a customer's inactivity streak", async () => {
   const ref = await seedCustomer({
-    score: 100,
+    score: 500,
     lastActivityDaysAgo: 21,
     decayedThroughWeek: 2,
     events: [{ type: "call_tap", business: "bizA" }],
@@ -240,13 +295,14 @@ test("new activity resets a customer's inactivity streak", async () => {
   const data = (await ref.get()).data();
   assert.equal(data.inactivity_weeks, 0);
   assert.equal(data.decayed_through_week, 0);
-  // Target 5 from 100, capped at 20 -> 80. No decay charged.
-  assert.equal(data.score, 80);
+  // Target clamps to 300 (5 points -> max(300,5)=300) from 500, capped at
+  // 20 -> 480. No decay charged.
+  assert.equal(data.score, 480);
 });
 
 test("a customer never seen active is not decayed on first run", async () => {
-  const ref = await seedCustomer({ score: 100 });
-  assert.equal(await scoreAfter(ref), 100);
+  const ref = await seedCustomer({ score: 500 });
+  assert.equal(await scoreAfter(ref), 500);
   assert.ok((await ref.get()).data().last_activity_at);
 });
 
@@ -260,7 +316,7 @@ test("is_trending_up reflects real score movement", async () => {
   await recomputeAll(db, Date.now());
   assert.equal((await up.get()).data().is_trending_up, true);
 
-  const down = await seedCustomer({ score: 100, lastActivityDaysAgo: 7 });
+  const down = await seedCustomer({ score: 500, lastActivityDaysAgo: 7 });
   await recomputeAll(db, Date.now());
   assert.equal((await down.get()).data().is_trending_up, false);
 });
@@ -281,7 +337,62 @@ test("a history row is written per customer per run", async () => {
   assert.equal(rows.size, 1);
   const row = rows.docs[0].data();
   assert.equal(row.score_before, 0);
-  assert.equal(row.score_after, 10);
+  // Target clamps to 300 (10 points -> max(300,10)=300), gap from 0
+  // exceeds the 20-point cap, so this moves by exactly 20 rather than
+  // reaching 10.
+  assert.equal(row.score_after, 20);
   assert.equal(row.distinct_businesses_engaged, 2);
   assert.ok(ref);
+});
+
+// --- Frozen (pre-launch) -------------------------------------------------
+
+test("frozen holds every customer at exactly the baseline, real activity included", async () => {
+  await setFrozen(true);
+  const ref = await seedCustomer({
+    score: 12,
+    events: [{ type: "call_tap", business: "bizA" }],
+  });
+  assert.equal(await scoreAfter(ref), 300);
+});
+
+test("frozen does not decay an inactive customer below the baseline", async () => {
+  await setFrozen(true);
+  const ref = await seedCustomer({
+    score: 300,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+  });
+  assert.equal(await scoreAfter(ref), 300);
+});
+
+test("frozen leaves is_trending_up null rather than implying movement", async () => {
+  await setFrozen(true);
+  const ref = await seedCustomer({ score: 12 });
+  await recomputeAll(db, Date.now());
+  assert.equal((await ref.get()).data().is_trending_up, null);
+});
+
+test("frozen writes no history row for a plain reset to baseline", async () => {
+  await setFrozen(true);
+  const ref = await seedCustomer({ score: 12 });
+  await recomputeAll(db, Date.now());
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("entity_type", "==", "customer")
+    .get();
+  assert.equal(rows.size, 0);
+  assert.ok(ref);
+});
+
+test("frozen is a no-op for a customer already at baseline", async () => {
+  await setFrozen(true);
+  const ref = await seedCustomer({ score: 300 });
+  const before = (await ref.get()).data();
+  await recomputeAll(db, Date.now());
+  const after = (await ref.get()).data();
+  assert.equal(after.score, 300);
+  // last_recomputed_at should be untouched - proves the update was
+  // skipped entirely, not just a same-value write.
+  assert.equal(after.last_recomputed_at, before.last_recomputed_at);
 });

@@ -83,6 +83,9 @@ class _EventDetailPageState extends State<EventDetailPage> {
                     height: 220.0,
                     width: double.infinity,
                     fit: BoxFit.cover,
+                    memCacheHeight:
+                        (220.0 * MediaQuery.devicePixelRatioOf(context))
+                            .round(),
                   ),
                 Padding(
               padding: const EdgeInsets.all(20.0),

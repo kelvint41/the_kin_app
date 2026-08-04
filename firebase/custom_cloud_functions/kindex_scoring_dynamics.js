@@ -29,6 +29,12 @@ const DEFAULTS = {
   // escalate - the spec's default for simplicity.
   business_decay_escalates: false,
   customer_decay_escalates: false,
+  // Pre-launch: every customer sits at exactly CUSTOMER_BASELINE
+  // (customer_kindex_nightly.js) with no movement in either direction,
+  // real activity included. Flip to false in kindex_config/scoring_dynamics
+  // at launch to turn normal target-seeking/decay back on - no redeploy
+  // needed, same live-tunable pattern as every other value here.
+  customer_scoring_frozen: true,
 };
 
 let cached = null;

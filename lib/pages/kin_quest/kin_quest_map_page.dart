@@ -301,7 +301,10 @@ class _KinQuestMapPageState extends State<KinQuestMapPage> {
         backgroundColor: FlutterFlowTheme.of(context).primary,
         elevation: 0.0,
         title: Text(
-          'KIN Quest Discovery Map',
+          // Was 'KIN Quest Discovery Map' - too long for a centered AppBar
+          // title (truncated to "KIN Quest Discovery M..."), and redundant
+          // with "The KIN Quest" already shown as the page title one row above.
+          'Discovery Map',
           style: FlutterFlowTheme.of(context).headlineSmall.override(
             color: Colors.white,
           ),

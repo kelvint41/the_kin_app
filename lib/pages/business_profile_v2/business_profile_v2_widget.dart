@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/kin_back_button.dart';
 import '/components/main_menu_button.dart';
 import '/components/kindex_trend_indicator.dart';
 import '/components/visit_check_in_widget.dart';
@@ -219,6 +220,13 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               automaticallyImplyLeading: false,
+              // Had no way back except the hamburger - this page is always
+              // reached by pushNamed (map pin, search, a card elsewhere),
+              // so there was always a real route being stranded.
+              leading: Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
+                child: KinBackButton(floating: true),
+              ),
               actions: [Padding(
                 padding: EdgeInsets.only(right: 16.0),
                 child: MainMenuButton(),
@@ -632,6 +640,14 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
+                            // Unguarded before this: a business with no
+                            // address still rendered the button and
+                            // launchMap ran with an empty query, opening the
+                            // device's map app at null-island. Gated like
+                            // the phone button below so it's hidden instead
+                            // of broken.
+                            if (businessProfileV2BusinessesRecord
+                                .address.isNotEmpty)
                             Expanded(
                               child: Padding(
                                 padding: EdgeInsetsDirectional.fromSTEB(
@@ -1555,6 +1571,133 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                 RegExp(r'^https?://'), '')
                                             .replaceFirst('www.', '')
                                             .replaceFirst(RegExp(r'/$'), ''),
+                                        style: FlutterFlowTheme.of(context)
+                                            .bodyMedium
+                                            .override(
+                                              font: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .accentOnSurface,
+                                              letterSpacing: 0.0,
+                                              fontWeight: FontWeight.w500,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ].divide(SizedBox(width: 16.0)),
+                          ),
+                        // Same hidden-when-empty treatment as Call/Website
+                        // above - there was no email CTA on this page at
+                        // all despite `email` already being a populated
+                        // field on the business record.
+                        if (businessProfileV2BusinessesRecord
+                            .email.isNotEmpty)
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Container(
+                                width: 44.0,
+                                height: 44.0,
+                                decoration: BoxDecoration(
+                                  color: FlutterFlowTheme.of(context).accent1,
+                                  borderRadius: BorderRadius.circular(12.0),
+                                ),
+                                child: Align(
+                                  alignment: AlignmentDirectional(0.0, 0.0),
+                                  child: Icon(
+                                    Icons.email_rounded,
+                                    color: FlutterFlowTheme.of(context).primary,
+                                    size: 22.0,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.max,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Email',
+                                      style: FlutterFlowTheme.of(context)
+                                          .labelMedium
+                                          .override(
+                                            font: GoogleFonts.plusJakartaSans(
+                                              fontWeight:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontWeight,
+                                              fontStyle:
+                                                  FlutterFlowTheme.of(context)
+                                                      .labelMedium
+                                                      .fontStyle,
+                                            ),
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            fontSize: 12.0,
+                                            letterSpacing: 0.0,
+                                            fontWeight:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontWeight,
+                                            fontStyle:
+                                                FlutterFlowTheme.of(context)
+                                                    .labelMedium
+                                                    .fontStyle,
+                                          ),
+                                    ),
+                                    InkWell(
+                                      splashColor: Colors.transparent,
+                                      focusColor: Colors.transparent,
+                                      hoverColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                      onTap: () async {
+                                        final email =
+                                            businessProfileV2BusinessesRecord
+                                                .email;
+                                        // Mirrors the Call button: no mail
+                                        // client handles mailto: on the iOS
+                                        // Simulator or a desktop build, so
+                                        // the tap falls back to clipboard
+                                        // instead of silently doing nothing.
+                                        try {
+                                          await launchURL('mailto:$email');
+                                        } catch (_) {
+                                          await Clipboard.setData(
+                                              ClipboardData(text: email));
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                              content: Text(
+                                                  "No email app found. "
+                                                  "$email copied instead."),
+                                            ));
+                                          }
+                                        }
+                                        await ActivityLogsRecord.collection
+                                            .doc()
+                                            .set(createActivityLogsRecordData(
+                                              eventType: 'email_tap',
+                                              userRef: currentUserReference,
+                                              businessRef:
+                                                  businessProfileV2BusinessesRecord
+                                                      .reference,
+                                              city:
+                                                  businessProfileV2BusinessesRecord
+                                                      .city,
+                                              sessionId:
+                                                  FFAppState().sessionId,
+                                              timestamp: getCurrentTimestamp,
+                                            ));
+                                      },
+                                      child: Text(
+                                        businessProfileV2BusinessesRecord
+                                            .email,
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(

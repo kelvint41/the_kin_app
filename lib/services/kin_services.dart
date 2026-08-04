@@ -11,11 +11,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:share_plus/share_plus.dart';
 
-/// Placeholder until the app is actually published - update this one
-/// constant once android/app/build.gradle's applicationId is set to the
-/// real package name and the Play Store listing goes live.
+/// Real package name as of the applicationId rename; still a placeholder
+/// in the sense that this URL won't resolve to anything until the Play
+/// Store listing actually goes live.
 const String kPlayStoreUrl =
-    'https://play.google.com/store/apps/details?id=com.mycompany.thekinapp';
+    'https://play.google.com/store/apps/details?id=com.thekinapp.kin';
 
 /// Result of a [KinServices] call. Callers branch on [isSuccess] instead of
 /// catching exceptions themselves - every service method below already
@@ -541,7 +541,8 @@ class KinServices {
       });
       return const ServiceResult.success(null);
     } on FirebaseFunctionsException catch (e) {
-      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+      return ServiceResult.failure(
+          e.message ?? 'Could not submit that business.');
     } catch (_) {
       return const ServiceResult.failure(
           'Could not submit that business. Please try again.');
@@ -562,6 +563,7 @@ class KinServices {
     required String category,
     required double latitude,
     required double longitude,
+
     /// True only when the submitter's own GPS put them at the business.
     ///
     /// A submission vouched for from a business card is still worth having,
@@ -587,7 +589,8 @@ class KinServices {
       });
       return const ServiceResult.success(null);
     } on FirebaseFunctionsException catch (e) {
-      return ServiceResult.failure(e.message ?? 'Could not submit that business.');
+      return ServiceResult.failure(
+          e.message ?? 'Could not submit that business.');
     } catch (_) {
       return const ServiceResult.failure(
           'Could not submit that business. Please try again.');
@@ -676,7 +679,8 @@ class KinServices {
       final rewardType = result.data['rewardType'] as String? ?? '';
       return ServiceResult.success(rewardType);
     } on FirebaseFunctionsException catch (e) {
-      return ServiceResult.failure(e.message ?? 'Could not redeem this reward.');
+      return ServiceResult.failure(
+          e.message ?? 'Could not redeem this reward.');
     } catch (_) {
       return const ServiceResult.failure(
           'Could not redeem this reward. Please try again.');
@@ -699,7 +703,8 @@ class KinServices {
       final cleanedText = result.data['cleanedText'] as String? ?? postText;
       return ServiceResult.success(cleanedText);
     } on FirebaseFunctionsException catch (e) {
-      return ServiceResult.failure(e.message ?? 'Could not clean up this post.');
+      return ServiceResult.failure(
+          e.message ?? 'Could not clean up this post.');
     } catch (_) {
       return const ServiceResult.failure(
           'Could not clean up this post. Please try again.');
@@ -789,7 +794,8 @@ class KinServices {
       // too; this check exists to give a clear message instead of a bare
       // permission-denied.
       final currentEdits =
-          (existing.data() as Map<String, dynamic>?)?['edit_count'] as int? ?? 0;
+          (existing.data() as Map<String, dynamic>?)?['edit_count'] as int? ??
+              0;
       if (currentEdits >= 2) {
         return const ServiceResult.failure(
             "You've reached the edit limit for this review.");
@@ -870,6 +876,57 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not register your business. Please try again.');
+    }
+  }
+
+  /// Updates an already-claimed business's own listing fields in place.
+  /// Used by: Business Setup Page, when opened for an owner who already has
+  /// [UsersRecord.ownedBusiness] set ("Edit Business Profile" in the owner
+  /// menu).
+  ///
+  /// Deliberately writes an explicit, hand-picked field map rather than
+  /// reusing [registerBusiness]'s createBusinessesRecordData(...) call: that
+  /// helper's map includes every one of its ~60 named parameters, and any
+  /// left at their default null - everything registerBusiness itself
+  /// doesn't set, like owner_ref, is_verified, subscription_tier,
+  /// ticker_symbol, kindex_score - would come through as an explicit null.
+  /// set() treats that as "not provided, fine for a new doc"; update()
+  /// treats it as "clear this field," which would have wiped every one of
+  /// those on the very first edit.
+  static Future<ServiceResult<void>> updateBusinessProfile({
+    required DocumentReference businessRef,
+    String? category,
+    required String businessType,
+    required bool isBlackOwned,
+    required FFPlace place,
+    required String businessName,
+    required String phoneNumber,
+    required String email,
+    required String website,
+    required String description,
+    String? heroImageUrl,
+  }) async {
+    try {
+      await businessRef.update({
+        'business_name': businessName,
+        'phone_number': phoneNumber,
+        'email': email,
+        'website': website,
+        'description': description,
+        'business_type': businessType,
+        'is_black_owned': isBlackOwned,
+        'address': place.address,
+        'city': place.city,
+        'state': place.state,
+        'zip_code_postcode': place.zipCode,
+        'business_location': place.latLng.toGeoPoint(),
+        if (category != null) 'category': category,
+        if (heroImageUrl != null) 'hero_image': heroImageUrl,
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure(
+          'Could not save your changes. Please try again.');
     }
   }
 
@@ -1036,8 +1093,7 @@ class KinServices {
 
     try {
       final business = await BusinessesRecord.getDocumentOnce(businessRef);
-      final postText =
-          '🚨 We\'re live at $location! Come find us! 🚐';
+      final postText = '🚨 We\'re live at $location! Come find us! 🚐';
 
       await FirebaseFirestore.instance.collection('exchange_posts').add({
         'user_ref': userRef,
@@ -1059,17 +1115,24 @@ class KinServices {
 
   /// Purchases/activates a subscription tier for a business via RevenueCat,
   /// then updates the business record only on a confirmed purchase.
+  /// [offeringId] is one of the 4 RevenueCat Offering identifiers
+  /// (founder / founding_local / premium_local / elite); each holds a
+  /// "monthly" and an "annual" package, selected by [isYearly].
   /// Used by: Merchant Pricing Suite -> each tier card's action button.
   static Future<ServiceResult<void>> upgradeBusinessTier({
     required DocumentReference businessRef,
-    required String packageId,
+    required String offeringId,
+    required bool isYearly,
     required String tierName,
     required bool isPremium,
     bool isPriorityPinned = false,
     bool hasFlashBeacon = false,
   }) async {
     try {
-      final purchased = await revenue_cat.purchasePackage(packageId);
+      final purchased = await revenue_cat.purchasePackage(
+        offeringId,
+        isYearly ? 'annual' : 'monthly',
+      );
       if (!purchased) {
         return const ServiceResult.failure(
             'Purchase could not be completed. Please try again.');
@@ -1150,7 +1213,8 @@ class KinServices {
     String city = '',
   }) async {
     try {
-      final ref = await FirebaseFirestore.instance.collection('businesses').add({
+      final ref =
+          await FirebaseFirestore.instance.collection('businesses').add({
         'business_name': businessName,
         'address': address,
         'category': category,
@@ -1195,6 +1259,49 @@ class KinServices {
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure('Could not update your plan.');
+    }
+  }
+
+  /// The RevenueCat entitlement that backs each purchasable tier - matches
+  /// the 4 Offering identifiers 1:1, per how they're configured in the
+  /// RevenueCat dashboard. Deliberately does not include "Pro Growth" /
+  /// "Elite Growth" (mystery-reward comp grants, a different mechanism -
+  /// see mystery_reward_engine.js) or "Community" (free, nothing to check).
+  static const _paidTierEntitlements = {
+    'Founder': 'founder',
+    'Founding Local': 'founding_local',
+    'Premium Local': 'premium_local',
+    'Elite': 'elite',
+  };
+
+  /// Re-checks a business's paid tier against RevenueCat's actual entitlement
+  /// state and downgrades to Community if the store no longer shows it
+  /// active - the case a lapsed, refunded, or cancelled-and-expired
+  /// subscription would otherwise leave stuck at whatever tier the last
+  /// successful purchase wrote, since nothing else re-verifies it.
+  /// Used by: main.dart's auth-state listener, on every login/app load.
+  ///
+  /// Skips a business whose trial_status is 'active': that premium state
+  /// came from startFoundingLocalTrial, a free trial with no RevenueCat
+  /// purchase behind it, so there is no entitlement to check yet.
+  static Future<void> reconcileSubscriptionEntitlement(
+    DocumentReference businessRef,
+  ) async {
+    try {
+      final business = await BusinessesRecord.getDocumentOnce(businessRef);
+      if (business.trialStatus == 'active') {
+        return;
+      }
+      final entitlementId = _paidTierEntitlements[business.subscriptionTier];
+      if (entitlementId == null) {
+        return;
+      }
+      final active = await revenue_cat.isEntitled(entitlementId);
+      if (active == false) {
+        await downgradeToCommunity(businessRef: businessRef);
+      }
+    } catch (_) {
+      // Best-effort - a failed check should never block login/app startup.
     }
   }
 
@@ -1430,8 +1537,8 @@ class KinServices {
       if (reactedItemRefs.isEmpty) return [];
 
       final reactedItems = await Future.wait(
-        reactedItemRefs.map((ref) => BusinessItemsRecord.getDocumentOnce(ref)
-            .catchError((_) => null)),
+        reactedItemRefs.map((ref) =>
+            BusinessItemsRecord.getDocumentOnce(ref).catchError((_) => null)),
       );
       final reactedItemIds = reactedItemRefs.map((r) => r.id).toSet();
       final categories = reactedItems
@@ -1487,8 +1594,7 @@ class KinServices {
           now.difference(business.powerHourLastReset!).inDays >= 30;
       final currentUsage = windowExpired ? 0 : business.powerHourUsageCount;
 
-      if (limits.monthlyLimit != null &&
-          currentUsage >= limits.monthlyLimit!) {
+      if (limits.monthlyLimit != null && currentUsage >= limits.monthlyLimit!) {
         return ServiceResult.failure(
             _powerHourLimitMessage(business.subscriptionTier));
       }
@@ -1901,8 +2007,7 @@ class KinServices {
       return ServiceResult.failure(
           e.message ?? 'Could not load AI marketing stats.');
     } catch (_) {
-      return const ServiceResult.failure(
-          'Could not load AI marketing stats.');
+      return const ServiceResult.failure('Could not load AI marketing stats.');
     }
   }
 
@@ -1914,6 +2019,7 @@ class KinServices {
   static Future<ServiceResult<SupportChatTurn>> sendSupportChatMessage({
     required String message,
     String? conversationId,
+    String? visitorName,
     List<SupportChatTurn> history = const [],
   }) async {
     try {
@@ -1925,6 +2031,7 @@ class KinServices {
           .call<Map<String, dynamic>>({
         'message': message,
         if (conversationId != null) 'conversationId': conversationId,
+        if (visitorName != null) 'visitorName': visitorName,
         'history': history.map((t) => t.toJson()).toList(),
       });
       final reply = result.data['reply'] as String? ?? '';
@@ -1948,8 +2055,9 @@ class KinServices {
           .call<Map<String, dynamic>>();
       final data = result.data;
       final byCategory = {
-        for (final entry
-            in (data['byCategory'] as Map? ?? const {}).entries.cast<MapEntry>())
+        for (final entry in (data['byCategory'] as Map? ?? const {})
+            .entries
+            .cast<MapEntry>())
           entry.key as String: (entry.value as num).toInt(),
       };
       final recent = (data['recent'] as List? ?? const [])
@@ -1974,8 +2082,7 @@ class KinServices {
       return ServiceResult.failure(
           e.message ?? 'Could not load support chat stats.');
     } catch (_) {
-      return const ServiceResult.failure(
-          'Could not load support chat stats.');
+      return const ServiceResult.failure('Could not load support chat stats.');
     }
   }
 

@@ -174,6 +174,12 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                             'https://dimg.dreamflow.cloud/v1/image/modern%20professional%20black%20woman%20headshot',
                           ),
                           fit: BoxFit.cover,
+                          memCacheWidth: (40.0 *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round(),
+                          memCacheHeight: (40.0 *
+                                  MediaQuery.devicePixelRatioOf(context))
+                              .round(),
                         ),
                       ),
                     ),
@@ -272,6 +278,9 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     width: double.infinity,
                     height: 220.0,
                     fit: BoxFit.cover,
+                    memCacheHeight:
+                        (220.0 * MediaQuery.devicePixelRatioOf(context))
+                            .round(),
                   ),
                 ),
               Padding(

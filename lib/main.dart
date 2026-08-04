@@ -17,6 +17,7 @@ import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
+import '/services/kin_services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'flutter_flow/nav/nav.dart';
@@ -244,8 +245,16 @@ class _MyAppState extends State<MyApp> {
           .toList();
   late Stream<BaseAuthUser> userStream;
 
-  final authUserSub = authenticatedUserStream.listen((user) {
-    revenue_cat.login(user?.uid);
+  final authUserSub = authenticatedUserStream.listen((user) async {
+    await revenue_cat.login(user?.uid);
+    // Gate paid features on the store's actual entitlement state, not just
+    // whatever the last successful purchase wrote to Firestore - closes the
+    // gap where a lapsed/refunded subscription otherwise stays "premium"
+    // forever because nothing else re-checks it.
+    final businessRef = user?.ownedBusiness;
+    if (businessRef != null) {
+      await KinServices.reconcileSubscriptionEntitlement(businessRef);
+    }
   });
 
   @override

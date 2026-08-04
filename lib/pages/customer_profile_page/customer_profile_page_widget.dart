@@ -810,6 +810,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                   _shareKinPrompt(context),
                   _supportChatPrompt(context),
                   _feedbackPrompt(context),
+                  _accountSection(context),
                   Container(
                     height: 40.0,
                   ),
@@ -1134,6 +1135,67 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
               ),
               Icon(Icons.chevron_right_rounded,
                   color: theme.secondaryText, size: 20.0),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// This is the only screen a logged-in customer reliably reaches - there
+  /// is no separate Settings page - so it's where the store-required
+  /// account deletion control lives. Styled in the error color rather than
+  /// matching [_feedbackPrompt]/[_supportChatPrompt] above: those are
+  /// invitations, this is a warning, and it should read as one at a
+  /// glance rather than blend in as just another utility row.
+  Widget _accountSection(BuildContext context) {
+    final theme = FlutterFlowTheme.of(context);
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16.0),
+        onTap: () => confirmDeleteAccount(context),
+        child: Container(
+          padding: EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: theme.secondaryBackground,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: theme.error, width: 1.0),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.delete_outline_rounded,
+                  color: theme.error, size: 22.0),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Delete Account',
+                        style: theme.bodyMedium.override(
+                          font: GoogleFonts.plusJakartaSans(
+                              fontWeight: FontWeight.bold),
+                          color: theme.error,
+                          letterSpacing: 0.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Permanently delete your account and data.',
+                        style: theme.bodySmall.override(
+                          font: GoogleFonts.plusJakartaSans(),
+                          color: theme.secondaryText,
+                          letterSpacing: 0.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: theme.error, size: 20.0),
             ],
           ),
         ),

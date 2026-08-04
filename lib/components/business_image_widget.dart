@@ -70,6 +70,13 @@ class BusinessImage extends StatelessWidget {
     if (!isLoadable(imageUrl)) {
       return _fallback(context);
     }
+    // Caches the decoded bitmap at display size (scaled for device pixel
+    // ratio) instead of full source resolution, which is often several MB
+    // for an owner-uploaded photo shown in a 44x44 thumbnail.
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    int? cacheDim(double? d) =>
+        (d == null || !d.isFinite) ? null : (d * dpr).round();
+
     return CachedNetworkImage(
       fadeInDuration: Duration.zero,
       fadeOutDuration: Duration.zero,
@@ -78,6 +85,8 @@ class BusinessImage extends StatelessWidget {
       height: height,
       fit: fit,
       alignment: alignment,
+      memCacheWidth: cacheDim(width),
+      memCacheHeight: cacheDim(height),
       errorWidget: (context, _, __) => _fallback(context),
       placeholder: (context, _) => Container(
         width: width,

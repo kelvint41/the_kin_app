@@ -86,6 +86,10 @@ class _BusinessItemWidgetState extends State<BusinessItemWidget> {
                   height: 44.0,
                   fit: BoxFit.cover,
                   alignment: Alignment(0.0, 0.0),
+                  memCacheWidth:
+                      (44.0 * MediaQuery.devicePixelRatioOf(context)).round(),
+                  memCacheHeight:
+                      (44.0 * MediaQuery.devicePixelRatioOf(context)).round(),
                 ),
               ),
               Expanded(

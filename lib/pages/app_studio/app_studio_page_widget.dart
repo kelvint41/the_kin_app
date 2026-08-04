@@ -102,6 +102,11 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
   List<String> _logoPreviewUrls = [];
   String? _logoPreviewError;
 
+  // Asked once per page visit rather than persisted - re-generating after a
+  // first accepted disclosure isn't a new decision, but leaving the app and
+  // coming back to Studio later is.
+  bool _aiConsentGiven = false;
+
   static const int _minDescriptionLength = 150;
 
   @override
@@ -183,8 +188,49 @@ class _AppStudioPageWidgetState extends State<AppStudioPageWidget> {
   /// couldn't be sent anyway.
   bool get _canGeneratePreviews => _hasValidContact && _hasValidBrief;
 
+  /// Discloses that the brief/business name/style inputs are about to be
+  /// sent to a third-party AI image model before any of them leave the
+  /// device. Required before [_generateLogoPreviews] is allowed to call
+  /// [KinServices.generateAppStudioLogos].
+  Future<bool> _confirmAiConsent() async {
+    if (_aiConsentGiven) return true;
+    final theme = FlutterFlowTheme.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: theme.secondaryBackground,
+        title: Text('Generate logo previews with AI?', style: theme.titleMedium),
+        content: Text(
+          'The business name, brief, and style/color preferences you\'ve '
+          'entered will be sent to a third-party AI image model (Google '
+          'Imagen) to generate logo previews. Please don\'t include '
+          'anything you don\'t want processed by an external AI service.',
+          style: theme.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text('Cancel', style: theme.bodyMedium),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              'Continue',
+              style: theme.bodyMedium.override(color: theme.primary),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return false;
+    _aiConsentGiven = true;
+    return true;
+  }
+
   Future<void> _generateLogoPreviews() async {
     if (!_canGeneratePreviews || _generatingLogos) return;
+    if (!await _confirmAiConsent()) return;
+    if (!mounted) return;
     setState(() {
       _generatingLogos = true;
       _logoPreviewError = null;

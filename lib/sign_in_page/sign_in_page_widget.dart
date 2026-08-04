@@ -1,11 +1,12 @@
 import '/auth/firebase_auth/auth_util.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
+import '/components/kin_back_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/services/form_validation.dart';
 import 'dart:ui';
 import '/index.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -99,8 +100,17 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
           bottom: false,
           child: Padding(
           padding: EdgeInsets.all(32.0),
+          // The page had no scroll wrapper at all - on a shorter screen or
+          // a larger system font size, the back button, heading, two text
+          // fields, button, and links plus eight 32px gaps between them
+          // don't all fit, which overflowed vertically (a different bug
+          // from the horizontal Row overflow fixed above in the "Don't
+          // have an account" link). mainAxisSize must be min here - max
+          // would try to fill the now-unbounded height a scroll view
+          // gives its child, which throws rather than overflows.
+          child: SingleChildScrollView(
           child: Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -109,40 +119,15 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 44.0,
-                    height: 44.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(9999.0),
-                      shape: BoxShape.rectangle,
-                      border: Border.all(
-                        color: Color(0xFF0B4632),
-                        width: 2.0,
-                      ),
-                    ),
-                    alignment: AlignmentDirectional(0.0, 0.0),
-                    child: FlutterFlowIconButton(
-                      borderRadius: 8.0,
-                      buttonSize: 40.0,
-                      fillColor: Colors.transparent,
-                      icon: Icon(
-                        Icons.arrow_back_rounded,
-                        color: FlutterFlowTheme.of(context).secondaryText,
-                        size: 24.0,
-                      ),
-                      onPressed: () async {
-                        // safePop rather than pushing onboarding: pushing
-                        // grew the stack on every back tap, so repeatedly
-                        // moving between here and onboarding left an
-                        // unbounded history behind the user. safePop also
-                        // covers the case this page is the only route -
-                        // arriving here from sign-out replaces the stack -
-                        // by going to '/', which renders onboarding while
-                        // logged out.
-                        context.safePop();
-                      },
-                    ),
-                  ),
+                  // safePop rather than pushing onboarding: pushing grew
+                  // the stack on every back tap, so repeatedly moving
+                  // between here and onboarding left an unbounded history
+                  // behind the user. safePop also covers the case this page
+                  // is the only route - arriving here from sign-out
+                  // replaces the stack - by going to '/', which renders
+                  // onboarding while logged out. (KinBackButton's default
+                  // onPressed already does this.)
+                  KinBackButton(),
                 ],
               ),
               Column(
@@ -537,57 +522,62 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
               Container(
                 decoration: BoxDecoration(),
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text(
-                      'Don\'t have an account?',
-                      style: FlutterFlowTheme.of(context).bodyMedium.override(
-                            font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                            ),
-                            color: FlutterFlowTheme.of(context).secondary,
-                            letterSpacing: 0.0,
-                            fontWeight: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontWeight,
-                            fontStyle: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .fontStyle,
-                            lineHeight: 1.4,
-                          ),
-                    ),
-                    InkWell(
-                      splashColor: Colors.transparent,
-                      focusColor: Colors.transparent,
-                      hoverColor: Colors.transparent,
-                      highlightColor: Colors.transparent,
-                      onTap: () async {
-                        context.pushNamed(CustomersignupPageWidget.routeName);
-                      },
-                      child: Text(
-                        '   Click Here!',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              font: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              letterSpacing: 0.0,
-                              fontWeight: FontWeight.bold,
-                              fontStyle: FontStyle.italic,
-                              decoration: TextDecoration.underline,
-                            ),
+                // Was a Row of two Text widgets, which can't wrap between
+                // each other and overflowed (yellow/black stripes) on
+                // narrower screens or larger font scale. A single RichText
+                // wraps naturally, like the signup page's reverse link does.
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Don\'t have an account? ',
+                        style:
+                            FlutterFlowTheme.of(context).bodyMedium.override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontWeight,
+                                    fontStyle: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .fontStyle,
+                                  ),
+                                  color: FlutterFlowTheme.of(context).secondary,
+                                  letterSpacing: 0.0,
+                                  fontWeight: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontWeight,
+                                  fontStyle: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .fontStyle,
+                                  lineHeight: 1.4,
+                                ),
                       ),
-                    ),
-                  ],
+                      TextSpan(
+                        text: 'Click Here!',
+                        style:
+                            FlutterFlowTheme.of(context).bodyMedium.override(
+                                  font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                  letterSpacing: 0.0,
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                  decoration: TextDecoration.underline,
+                                ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => context
+                              .pushNamed(CustomersignupPageWidget.routeName),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Spacer(),
+              // Was Spacer(), which pushed this box to the bottom of the
+              // screen - that only works inside a bounded-height flex
+              // parent, and this Column now scrolls (unbounded height), so
+              // it's a fixed gap instead.
+              SizedBox(height: 40.0),
               Container(
                 child: Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 24.0),
@@ -615,6 +605,7 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
               ),
             ].divide(SizedBox(height: 32.0)),
           ),
+        ),
         ),
         ),
       ),

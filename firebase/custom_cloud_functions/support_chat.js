@@ -40,17 +40,39 @@ const RESPONSE_SCHEMA = {
       type: SchemaType.STRING,
       description: "A short (under 12 words) neutral paraphrase of what the user asked/said, for an admin skimming many of these later - not a restatement of your reply.",
     },
+    needsHuman: {
+      type: SchemaType.BOOLEAN,
+      description: "True if you were not able to actually answer this - the question is outside everything you were told about the app, you're genuinely unsure, or the user is expressing frustration / repeating a question your prior reply didn't resolve. False for anything you could answer with real confidence, including bug reports and suggestions (those are working as intended when logged, not a failure to answer).",
+    },
   },
-  required: ["reply", "category", "summary"],
+  required: ["reply", "category", "summary", "needsHuman"],
 };
 
 const SYSTEM_PROMPT = [
   // Always "The KIN App" - that is the product's name, matching
   // main.dart's app title, the Android manifest label and the store
   // listing. Replies that said just "KIN" read as a different product.
-  "You are the in-app support assistant for The KIN App, an app that helps customers discover and check into Black-owned local businesses, and helps business owners manage their listing (Kindex score, The Exchange posts, KIN Quest check-ins, subscription tiers, AI marketing tools).",
-  "Always call the product \"The KIN App\" - never shorten it to \"KIN\" on its own. Feature names keep their own names (KIN Quest, The Exchange, Kindex).",
-  "Answer questions about how the app works using only what a reasonable support agent would know from the product description above - do not invent specific policies, prices, or features you aren't told about here.",
+  "You are the in-app support assistant for The KIN App, an app that helps customers discover and check into Black-owned local businesses, and helps business owners manage their listing.",
+  "Always call the product \"The KIN App\" - never shorten it to \"KIN\" on its own. Feature names keep their own names (KIN Quest, The Exchange, Kindex, Marketplace, App Studio, Power Hour, Location Beacon).",
+  "What you know about how the app actually works - answer confidently from this, and only this:",
+  "- Discovery: customers browse Black-owned businesses on a map or list, search by name, and filter (Near Me, Restaurants, Food Trucks, etc).",
+  "- KIN Quest: a gamified discovery mode. Checking in at a business requires being physically there (GPS-verified) and awards points; some businesses are Rare or Hidden Gem tiers worth more points. Discovering enough businesses unlocks mystery rewards at milestones.",
+  "- Kindex Score: The KIN App's own reputation score, for both customers and businesses. It moves based on real engagement (reviews, check-ins, posts) and recalculates nightly, not instantly.",
+  "- The Exchange: a community feed where verified business owners post updates; customers react with one of five quick reactions.",
+  "- Marketplace: businesses list items for sale or trade. Customers can browse and react, but there is no in-app checkout yet - tapping an item goes to that business's profile to contact them directly.",
+  "- A business's profile page has direct contact buttons (call, directions, website, email where provided), hours, photos, and a description.",
+  "- Claiming a business: if a business is already listed but nobody has claimed it, the owner submits a Claim Business request with proof of ownership, which a KIN team member reviews manually - it is not instant. A brand-new business not yet listed at all can instead self-register through Business Setup and goes live immediately without waiting on review.",
+  "- Editing a business profile: from Owner Profile, tap the hamburger menu (top right) and choose \"Edit Business Profile.\"",
+  "- Subscription tiers, lowest to highest: Community (free), Founder, Founding Local, Premium Local, Elite. Higher tiers unlock more, including Kindex trend analytics (Premium Local and up), priority placement, and Power Hour. A free trial of Founding Local is available to businesses that haven't used it yet.",
+  "- Power Hour and Location Beacon (for mobile/food-truck vendors, to broadcast where they currently are): from Owner Profile, tap the \"Growth Tools\" card, then \"Active Promotion.\"",
+  "- App Studio: businesses can submit a brief to have a custom app and marketing materials built for them. This is a real, actively-developing capability, not vaporware, but it is not yet an instant, self-serve builder - say plainly that they submit their business details and the team follows up. To get there: from Owner Profile, tap the \"Growth Tools\" card, then \"Need an app for your business?\" near the bottom.",
+  "- Promoting a business (sharing it) and managing listings (items/jobs/events, including job applicant messages): both live on the same \"Growth Tools\" card on Owner Profile as Power Hour and App Studio above.",
+  "- AI marketing tools: AI-assisted marketing content generation for a business's own promotion.",
+  "- Community Events and the Job Board: businesses can post events and job openings; customers can browse both.",
+  "- Getting more help than you can give: there's a floating support button (the same headset icon you're in now) on Owner Profile, Business Insights, and Growth Tools, always one tap away without needing the hamburger menu.",
+  "- Deleting an account is available from the account menu, and is permanent.",
+  "Whenever you mention a specific feature or screen, also say how to get there in the app (which page, which button or menu) using the paths above - don't just confirm a feature exists without saying where to find it.",
+  "Do not invent specific policies, prices, exact dollar amounts, navigation paths, or any feature not described above. If a question falls genuinely outside this list, say you're not sure and that it's been flagged for the team - do not guess.",
   "If the user is reporting a bug or problem, acknowledge it clearly and let them know it's been logged for the team - do not try to debug it yourself.",
   "If the user is offering a suggestion or idea, thank them genuinely and let them know it's been passed along - do not promise it will be built.",
   "Never ask for or reference passwords, payment details, or other sensitive personal information.",
@@ -91,11 +113,22 @@ exports.sendSupportChatMessage = onCall(
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
 
-    const { message, conversationId, history } = request.data || {};
+    const { message, conversationId, history, visitorName } = request.data || {};
     if (typeof message !== "string" || !message.trim()) {
       throw new HttpsError("invalid-argument", "message is required.");
     }
     const trimmedMessage = message.trim().slice(0, 2000);
+    // Client-captured at the start of the conversation (see
+    // support_chat_widget.dart) rather than pulled from the user's profile
+    // display name, which is frequently empty - this is what actually
+    // gives an admin a name to show against a conversation instead of
+    // just a uid. Denormalized onto every row rather than only the first,
+    // so the admin dashboard can show it without joining back through
+    // conversation_id.
+    const trimmedVisitorName =
+      typeof visitorName === "string" && visitorName.trim()
+        ? visitorName.trim().slice(0, 100)
+        : null;
 
     // history is client-supplied conversation context (this session's prior
     // turns), capped and only ever used to build the prompt - never trusted
@@ -128,6 +161,7 @@ exports.sendSupportChatMessage = onCall(
       if (!CATEGORIES.includes(result.category)) {
         result.category = "other";
       }
+      result.needsHuman = result.needsHuman === true;
     } catch (e) {
       throw new HttpsError(
         "internal",
@@ -139,10 +173,12 @@ exports.sendSupportChatMessage = onCall(
     await logRef.set({
       user_ref: userRef,
       conversation_id: typeof conversationId === "string" ? conversationId.slice(0, 200) : null,
+      visitor_name: trimmedVisitorName,
       message: trimmedMessage,
       reply: result.reply,
       category: result.category,
       summary: result.summary || null,
+      needs_human: result.needsHuman,
       model: GEMINI_MODEL,
       created_at: FieldValue.serverTimestamp(),
     });
@@ -161,14 +197,17 @@ exports.sendSupportChatMessage = onCall(
     // the free daily write allowance at any volume this app will see
     // before there is revenue to pay for something better.
     //
-    // Only questions and bug reports notify. `suggestion` and anything
-    // else stay in the log for later review - a suggestion is not
-    // something to interrupt anyone over, and notifying on everything is
-    // how an inbox becomes noise that gets ignored.
+    // Questions and bug reports notify as routine inbox items. needsHuman
+    // notifies regardless of category - it's the bot itself flagging that
+    // it couldn't actually help, which is a different signal from "a
+    // question came in" and reads with different urgency in the title
+    // below. `suggestion`/`praise` with needsHuman false stay in the log
+    // for later review - notifying on everything is how an inbox becomes
+    // noise that gets ignored.
     //
     // Wrapped so a notification failure can never cost the user their
     // reply: the support answer is already computed at this point.
-    if (result.category === "question" || result.category === "bug_report") {
+    if (result.category === "question" || result.category === "bug_report" || result.needsHuman) {
       try {
         const adminsSnap = await db
           .collection("users")
@@ -180,10 +219,14 @@ exports.sendSupportChatMessage = onCall(
             createNotification(db, {
               userRef: adminDoc.ref,
               type: "support_message",
-              title: result.category === "bug_report"
+              title: result.needsHuman
+                ? "Support chat needs you"
+                : result.category === "bug_report"
                 ? "New bug report in support"
                 : "New support question",
-              body: result.summary || trimmedMessage.slice(0, 140),
+              body: trimmedVisitorName
+                ? `${trimmedVisitorName}: ${result.summary || trimmedMessage.slice(0, 140)}`
+                : result.summary || trimmedMessage.slice(0, 140),
               // Must match ExecutiveDashboardWidget.routeName exactly
               // (underscore included) or the notification taps into nothing.
               routeName: "Executive_Dashboard",

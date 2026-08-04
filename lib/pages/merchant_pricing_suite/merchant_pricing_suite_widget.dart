@@ -2,9 +2,9 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/tier_card_widget.dart';
 import '/components/main_menu_button.dart';
+import '/components/kin_back_button.dart';
 import '/services/kin_services.dart';
 import '/flutter_flow/flutter_flow_animations.dart';
-import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -21,31 +21,20 @@ import 'package:provider/provider.dart';
 import 'merchant_pricing_suite_model.dart';
 export 'merchant_pricing_suite_model.dart';
 
-// TODO: Replace with the real RevenueCat package identifiers once the
-// corresponding products are configured in the RevenueCat dashboard.
-//
-// Note the app currently initialises RevenueCat with the literal
-// "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN" for BOTH platforms (see main.dart),
-// which is not a real SDK key - real ones start appl_ and goog_ and differ
-// per platform. Until those are set, getOfferings returns nothing,
-// purchasePackage finds no package, and every upgrade button does nothing
-// on a real device as well as in the Simulator.
-// RevenueCat package identifiers. Pricing: Founder $29/mo ($288/yr),
+// RevenueCat Offering identifiers - one Offering per tier, each holding a
+// "monthly" and an "annual" Package. Pricing: Founder $29/mo ($288/yr),
 // Founding Local $59/mo ($588/yr), Premium Local $99/mo ($950/yr),
 // Elite $149/mo ($1,430/yr). Annual packages include 20% discount.
-const _kFounderMonthly = 'founder_monthly';
-const _kFoundingLocalMonthly = 'founding_local_monthly';
-const _kPremiumLocalMonthly = 'premium_local_monthly';
-const _kEliteMonthly = 'elite_monthly';
-
-// Annual equivalents. These need creating as separate products in App Store
-// Connect and Google Play and attaching to the same RevenueCat offering -
-// the stores treat monthly and annual as distinct products, not as one
-// product billed differently.
-const _kFounderYearly = 'founder_yearly';
-const _kFoundingLocalYearly = 'founding_local_yearly';
-const _kPremiumLocalYearly = 'premium_local_yearly';
-const _kEliteYearly = 'elite_yearly';
+//
+// Note the app falls back to the literal "test_nlIQSnnGvtvhLZnWwgHRKoDnhsN"
+// SDK key for both platforms when REVENUECAT_APPLE_KEY/REVENUECAT_GOOGLE_KEY
+// aren't passed at build time (see main.dart) - that's not a real SDK key,
+// so getOfferings returns nothing and every upgrade button no-ops until
+// real keys are supplied.
+const _kFounderOffering = 'founder';
+const _kFoundingLocalOffering = 'founding_local';
+const _kPremiumLocalOffering = 'premium_local';
+const _kEliteOffering = 'elite';
 
 /// Create a high-fidelity mobile pricing subscription page for a premium
 /// local discovery app.
@@ -107,6 +96,15 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
     super.initState();
     _model = createModel(context, () => MerchantPricingSuiteModel());
 
+    // Re-fetch offerings when the paywall actually opens rather than relying
+    // solely on the background load kicked off at app launch - so a stale
+    // dashboard change (a repriced package, a paused offering) shows up
+    // without requiring an app restart. Cards already render sensible
+    // literal fallback prices while this is in flight.
+    revenue_cat.loadOfferings().then((_) {
+      if (mounted) safeSetState(() {});
+    });
+
     animationsMap.addAll({
       'tierCardOnPageLoadAnimation1': AnimationInfo(
         trigger: AnimationTrigger.onPageLoad,
@@ -146,8 +144,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
   /// nothing to bill either way, and it keeps no toggle.
   bool _yearly = false;
 
-  String _packageFor(String monthly, String yearly) =>
-      _yearly ? yearly : monthly;
+  String get _packageId => _yearly ? 'annual' : 'monthly';
 
   /// Guards against a double-tap firing two startFoundingLocalTrial calls
   /// before the first round-trip lands. The callable itself is the real
@@ -200,6 +197,27 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
     return 'Start your 14-day trial';
   }
 
+  /// Mirrors SubscriptionManagementRow's restore flow (Owner Profile page) -
+  /// duplicated here rather than shared because someone deciding whether to
+  /// buy, right here on the paywall, is exactly who needs "I already paid
+  /// for this on another device/a reinstall" surfaced without having to
+  /// find it elsewhere first.
+  bool _restoring = false;
+
+  Future<void> _restorePurchases() async {
+    safeSetState(() => _restoring = true);
+    final restored = await revenue_cat.restorePurchases();
+    if (!mounted) return;
+    safeSetState(() => _restoring = false);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(restored
+            ? 'Your subscription has been restored.'
+            : 'No previous purchases found for this account.'),
+      ),
+    );
+  }
+
   Future<void> _startTrial(DocumentReference businessRef) async {
     if (_startingTrial) return;
     safeSetState(() => _startingTrial = true);
@@ -221,9 +239,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
 
   /// The store's own localised price for the selected billing period,
   /// falling back to the literal when offerings have not loaded.
-  String _priceFor(String monthly, String yearly, String fallbackMonthly,
-          String fallbackYearly) =>
-      revenue_cat.storePriceFor(_packageFor(monthly, yearly)) ??
+  String _priceFor(
+          String offeringId, String fallbackMonthly, String fallbackYearly) =>
+      revenue_cat.storePriceFor(offeringId, _packageId) ??
       (_yearly ? fallbackYearly : fallbackMonthly);
 
   /// Monthly / Yearly switch.
@@ -338,20 +356,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
             appBar: AppBar(
               backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
               automaticallyImplyLeading: true,
-              leading: FlutterFlowIconButton(
-                borderColor: Colors.transparent,
-                borderRadius: 30.0,
-                borderWidth: 1.0,
-                buttonSize: 60.0,
-                icon: Icon(
-                  Icons.arrow_back_rounded,
-                  color: FlutterFlowTheme.of(context).primaryText,
-                  size: 30.0,
-                ),
-                onPressed: () {
-                  context.pop();
-                },
-              ),
+              // Was a one-off 60px button, twice the size of the back
+              // control everywhere else in the app.
+              leading: KinBackButton(),
               actions: [
                 MainMenuButton(),
               ],
@@ -565,7 +572,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _packageFor(_kFounderMonthly, _kFounderYearly),
+                                    offeringId: _kFounderOffering,
+                                    isYearly: _yearly,
                                     tierName: 'Founder',
                                     isPremium: true,
                                   );
@@ -598,7 +606,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     title: 'Founder',
                                     badgeLabel: 'Founder Tier',
                                     valueTag: 'Get visibility early.',
-                                    price: _priceFor(_kFounderMonthly, _kFounderYearly, '\$29', '\$288'),
+                                    price: _priceFor(_kFounderOffering, '\$29', '\$288'),
                                     isYearly: _yearly,
                                     yearlyTeaser: _yearly ? null : 'or \$288/yr - save \$60',
                                     f1: 'Weekly carousel rotations',
@@ -703,7 +711,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _packageFor(_kFoundingLocalMonthly, _kFoundingLocalYearly),
+                                    offeringId: _kFoundingLocalOffering,
+                                    isYearly: _yearly,
                                     tierName: 'Founding Local',
                                     isPremium: true,
                                   );
@@ -736,7 +745,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     title: 'Founding Local',
                                     badgeLabel: 'Entry-Level Tier',
                                     valueTag: 'Get discovered by your community.',
-                                    price: _priceFor(_kFoundingLocalMonthly, _kFoundingLocalYearly, '\$59', '\$588'),
+                                    price: _priceFor(_kFoundingLocalOffering, '\$59', '\$588'),
                                     isYearly: _yearly,
                                     yearlyTeaser: _yearly ? null : 'or \$588/yr - save \$120',
                                     f1: 'Verified Founding Member trust badge',
@@ -761,9 +770,9 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         ? () async => await KinServices
                                             .upgradeBusinessTier(
                                               businessRef: businessRef,
-                                              packageId: _packageFor(
-                                                  _kFoundingLocalMonthly,
-                                                  _kFoundingLocalYearly),
+                                              offeringId:
+                                                  _kFoundingLocalOffering,
+                                              isYearly: _yearly,
                                               tierName: 'Founding Local',
                                               isPremium: true,
                                             )
@@ -826,7 +835,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                         final result = await KinServices
                                             .upgradeBusinessTier(
                                           businessRef: businessRef,
-                                          packageId: _packageFor(_kPremiumLocalMonthly, _kPremiumLocalYearly),
+                                          offeringId: _kPremiumLocalOffering,
+                                          isYearly: _yearly,
                                           tierName: 'Premium Local',
                                           isPremium: true,
                                         );
@@ -861,7 +871,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                           title: 'Premium Local',
                                           badgeLabel: 'Premium Business Tier',
                                           valueTag: 'Get featured with location beacons.',
-                                          price: _priceFor(_kPremiumLocalMonthly, _kPremiumLocalYearly, '\$99', '\$950'),
+                                          price: _priceFor(_kPremiumLocalOffering, '\$99', '\$950'),
                                           isYearly: _yearly,
                                           yearlyTeaser: _yearly ? null : 'or \$950/yr - save \$238',
                                           f1: 'Premium interactive map carousel placement',
@@ -889,7 +899,8 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                   final result =
                                       await KinServices.upgradeBusinessTier(
                                     businessRef: businessRef,
-                                    packageId: _packageFor(_kEliteMonthly, _kEliteYearly),
+                                    offeringId: _kEliteOffering,
+                                    isYearly: _yearly,
                                     tierName: 'Elite',
                                     isPremium: true,
                                     isPriorityPinned: true,
@@ -924,7 +935,7 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     title: 'Elite',
                                     badgeLabel: 'Premium Flagship Tier',
                                     valueTag: 'Always featured, maximum visibility.',
-                                    price: _priceFor(_kEliteMonthly, _kEliteYearly, '\$149', '\$1430'),
+                                    price: _priceFor(_kEliteOffering, '\$149', '\$1430'),
                                     isYearly: _yearly,
                                     yearlyTeaser: _yearly ? null : 'or \$1,430/yr - save \$358',
                                     f1: 'Always featured on carousel (daily visibility)',
@@ -1116,6 +1127,26 @@ class _MerchantPricingSuiteWidgetState extends State<MerchantPricingSuiteWidget>
                                     ),
                                   ),
                                 ].divide(SizedBox(height: 4.0)),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: TextButton(
+                                  onPressed:
+                                      _restoring ? null : _restorePurchases,
+                                  child: Text(
+                                    _restoring
+                                        ? 'Restoring...'
+                                        : 'Restore Purchases',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodySmall
+                                        .override(
+                                          color: FlutterFlowTheme.of(context)
+                                              .secondaryText,
+                                          decoration:
+                                              TextDecoration.underline,
+                                        ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
