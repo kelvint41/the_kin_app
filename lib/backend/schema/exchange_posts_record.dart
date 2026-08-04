@@ -98,6 +98,33 @@ class ExchangePostsRecord extends FirestoreRecord {
   String get ctaType => _ctaType ?? '';
   bool hasCtaType() => _ctaType != null;
 
+  // "reaction_counts" field. Keyed by KinReaction.eventType (see
+  // kQuickReactions in exchange_feed_item_widget.dart), incremented by
+  // exchange_reaction_counts.js. Never written client-side - absent until
+  // the first reaction lands, then only ever grows via the Cloud
+  // Function's transaction.
+  Map<String, dynamic>? _reactionCounts;
+  Map<String, dynamic> get reactionCounts => _reactionCounts ?? const {};
+  bool hasReactionCounts() => _reactionCounts != null;
+
+  /// Count for one reaction type, coerced from whatever numeric type
+  /// Firestore returns. Missing/never-reacted-to reads as 0 rather than
+  /// null, so callers never need their own fallback.
+  int reactionCount(String eventType) =>
+      (reactionCounts[eventType] as num?)?.toInt() ?? 0;
+
+  // "notable_reaction" field. {name, event_type} - stamped by
+  // exchange_reaction_counts.js when a high-KINdex member reacts Backed
+  // or Spotlight. Last notable reactor only, overwritten by the next one
+  // rather than accumulated, to avoid write contention on a popular
+  // post's single document.
+  Map<String, dynamic>? _notableReaction;
+  bool hasNotableReaction() => _notableReaction != null;
+  String get notableReactionName =>
+      (_notableReaction?['name'] as String?) ?? '';
+  String get notableReactionEventType =>
+      (_notableReaction?['event_type'] as String?) ?? '';
+
   void _initializeFields() {
     _postId = snapshotData['post_id'] as String?;
     _userRef = snapshotData['user_ref'] as DocumentReference?;
@@ -112,6 +139,9 @@ class ExchangePostsRecord extends FirestoreRecord {
     _editedAt = snapshotData['edited_at'] as DateTime?;
     _postType = snapshotData['post_type'] as String?;
     _ctaType = snapshotData['cta_type'] as String?;
+    _reactionCounts = snapshotData['reaction_counts'] as Map<String, dynamic>?;
+    _notableReaction =
+        snapshotData['notable_reaction'] as Map<String, dynamic>?;
   }
 
   static CollectionReference get collection =>

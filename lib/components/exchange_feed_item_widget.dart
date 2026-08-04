@@ -9,6 +9,7 @@ import '/services/exchange_post_types.dart';
 import '/services/kindex_tiers.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -65,6 +66,22 @@ const kQuickReactions = <KinReaction>[
       'react_proud', 'Proud', Icons.military_tech_rounded, _goldColor),
 ];
 
+/// Reaction types that can earn notable_reaction amplification server-side
+/// (see exchange_reaction_counts.js) - a vouch and the app's own name for
+/// itself, mirrored here so the client only ever renders the highlight
+/// line for the same two types the Cloud Function actually stamps.
+const _kAmplifyingEventTypes = {'react_backed', 'react_spotlight'};
+
+/// Leading phrase for the amplification line, per eventType - the caller
+/// appends 'by {name}' itself (e.g. 'Backed by {name}'). Falls back to a
+/// generic phrase for any other value rather than throwing, though in
+/// practice only _kAmplifyingEventTypes reach this.
+String _amplifyingLabel(String eventType) => switch (eventType) {
+      'react_backed' => 'Backed',
+      'react_spotlight' => 'Spotlighted',
+      _ => 'Noticed',
+    };
+
 Color _successColor(FlutterFlowTheme theme) => theme.success;
 Color _goldColor(FlutterFlowTheme theme) => theme.accentOnSurface;
 Color _accent3Color(FlutterFlowTheme theme) =>
@@ -94,17 +111,19 @@ class ExchangeFeedItemWidget extends StatefulWidget {
 class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
   late ExchangeFeedItemModel _model;
 
-  // Session-local only, mirroring RefinedPostWidget's _hasLiked: the
-  // deterministic doc id below is the real source of truth for dedup
-  // (a duplicate create is rejected server-side and silently ignored).
+  // Restored on load from UserEngagementEvents (see _restoreReactedState)
+  // and updated optimistically on tap - the deterministic doc id below is
+  // the real source of truth for dedup either way (a duplicate create is
+  // rejected server-side and silently ignored), this is just what the UI
+  // reads to decide each icon's active state.
   final Set<String> _reactedEmoji = {};
 
-  Future<void> _handleReaction(String emoji, String eventType) async {
+  Future<void> _handleReaction(String eventType) async {
     final userRef = currentUserReference;
-    if (userRef == null || _reactedEmoji.contains(emoji)) {
+    if (userRef == null || _reactedEmoji.contains(eventType)) {
       return;
     }
-    setState(() => _reactedEmoji.add(emoji));
+    setState(() => _reactedEmoji.add(eventType));
     final reactionRef = UserEngagementEventsRecord.collection.doc(
       '${userRef.id}_${widget.postRecord.reference.id}_$eventType',
     );
@@ -121,10 +140,48 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
     }
   }
 
+  /// Restores which of this post's 5 reactions the signed-in user already
+  /// made, in previous sessions included - _reactedEmoji used to start
+  /// empty on every rebuild, so a reaction only looked "active" until the
+  /// app restarted even though the UserEngagementEvents doc (the actual
+  /// dedup record) was still there the whole time.
+  ///
+  /// A single whereIn on the 5 deterministic doc IDs rather than 5
+  /// separate reads/queries - cheap because the ID itself already encodes
+  /// user+post+type, so no filtering by those fields is needed, just an
+  /// existence check.
+  Future<void> _restoreReactedState() async {
+    final userRef = currentUserReference;
+    if (userRef == null) return;
+    final ids = kQuickReactions
+        .map((reaction) =>
+            '${userRef.id}_${widget.postRecord.reference.id}_${reaction.eventType}')
+        .toList();
+    try {
+      final snapshot = await UserEngagementEventsRecord.collection
+          .where(FieldPath.documentId, whereIn: ids)
+          .get();
+      if (!mounted) return;
+      setState(() {
+        for (final doc in snapshot.docs) {
+          final eventType = doc.data() is Map
+              ? (doc.data() as Map)['event_type'] as String?
+              : null;
+          if (eventType != null) _reactedEmoji.add(eventType);
+        }
+      });
+    } catch (_) {
+      // Leave state as-is - same fail-open behavior as _handleReaction's
+      // own try/catch. A missed restore just means those icons render
+      // un-highlighted until the next reaction attempt, not a crash.
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => ExchangeFeedItemModel());
+    unawaited(_restoreReactedState());
   }
 
   @override
@@ -393,6 +450,37 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     businessRef: widget.postRecord.businessRef!,
                   ),
                 ),
+              if (widget.postRecord.hasNotableReaction() &&
+                  _kAmplifyingEventTypes
+                      .contains(widget.postRecord.notableReactionEventType))
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                      theme.designToken.spacing.lg,
+                      0.0,
+                      theme.designToken.spacing.lg,
+                      theme.designToken.spacing.xs),
+                  child: Row(
+                    children: [
+                      Icon(Icons.bolt_rounded,
+                          size: 14.0, color: Color(0xFFFFD700)),
+                      SizedBox(width: 4.0),
+                      Expanded(
+                        child: Text(
+                          '${_amplifyingLabel(widget.postRecord.notableReactionEventType)} '
+                          'by ${widget.postRecord.notableReactionName}',
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.labelSmall.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.w600),
+                            color: Color(0xFFFFD700),
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(
                     theme.designToken.spacing.lg,
@@ -405,13 +493,14 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     final isActive =
                         _reactedEmoji.contains(reaction.eventType);
                     final activeColor = reaction.activeColor(theme);
+                    final count =
+                        widget.postRecord.reactionCount(reaction.eventType);
                     return InkWell(
                       splashColor: Colors.transparent,
                       focusColor: Colors.transparent,
                       hoverColor: Colors.transparent,
                       highlightColor: Colors.transparent,
-                      onTap: () => _handleReaction(
-                          reaction.eventType, reaction.eventType),
+                      onTap: () => _handleReaction(reaction.eventType),
                       child: AnimatedScale(
                         scale: isActive ? 1.15 : 1.0,
                         duration: Duration(milliseconds: 150),
@@ -433,7 +522,15 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                                 padding: EdgeInsetsDirectional.fromSTEB(
                                     0.0, 2.0, 0.0, 0.0),
                                 child: Text(
-                                  reaction.label,
+                                  // Persisted tally alongside the label once
+                                  // someone has reacted - reaction_counts
+                                  // only exists once exchange_reaction_counts.js
+                                  // has processed at least one event for this
+                                  // post/type, so a fresh post with no reads
+                                  // yet just shows the plain label as before.
+                                  count > 0
+                                      ? '${reaction.label} · $count'
+                                      : reaction.label,
                                   style: theme.labelSmall.override(
                                     font: GoogleFonts.plusJakartaSans(
                                       fontWeight: isActive
