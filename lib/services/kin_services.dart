@@ -1740,6 +1740,30 @@ class KinServices {
     }
   }
 
+  /// Bumps `exchange_profiles/{uid}.post_count` after a successful Exchange
+  /// post write. The field has existed since ExchangeProfilesRecord was
+  /// hand-authored but nothing ever incremented it, so every profile read
+  /// 0 regardless of how active the member actually was.
+  ///
+  /// Fire-and-forget by design (callers wrap this in `unawaited`): the post
+  /// itself is already written by the time this runs, so a failure here
+  /// should never surface as a failed post. `set` with `merge` rather than
+  /// `update` because acceptExchangeConduct is the only other writer of
+  /// this doc and also uses merge - either could in principle run first.
+  static Future<void> incrementExchangePostCount(
+      DocumentReference userRef) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('exchange_profiles')
+          .doc(userRef.id)
+          .set({
+        'post_count': FieldValue.increment(1),
+      }, SetOptions(merge: true));
+    } catch (_) {
+      // Best-effort - see doc comment above.
+    }
+  }
+
   /// Files a report against an Exchange post.
   ///
   /// Reports are write-only from the client (see firestore.rules) - an

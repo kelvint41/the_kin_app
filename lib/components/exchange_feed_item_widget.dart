@@ -1,6 +1,8 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/components/edit_exchange_post_sheet.dart';
+import '/components/exchange_profile_sheet.dart';
+import '/services/engagement_stats.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -127,6 +129,25 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
     super.dispose();
   }
 
+  /// Opens the tapped author's ExchangeProfileSheet. Only reachable when
+  /// postRecord.userRef is non-null (both avatar and name InkWells are
+  /// disabled otherwise), so the ! here is safe.
+  void _openProfile(BuildContext context) {
+    showModalBottomSheet(
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      context: context,
+      builder: (context) => Padding(
+        padding: MediaQuery.viewInsetsOf(context),
+        child: ExchangeProfileSheet(
+          userRef: widget.postRecord.userRef!,
+          fallbackName: widget.authorDisplayName,
+          fallbackPhotoUrl: widget.authorPhotoUrl,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
@@ -155,37 +176,78 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    ClipRRect(
+                    InkWell(
+                      splashColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
+                      onTap: widget.postRecord.userRef == null
+                          ? null
+                          : () => _openProfile(context),
                       borderRadius:
                           BorderRadius.circular(theme.designToken.radius.full),
-                      child: Container(
-                        width: 40.0,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(
-                              theme.designToken.radius.full),
-                          border: Border.all(color: theme.divider, width: 1.0),
-                        ),
-                        child: CachedNetworkImage(
-                          fadeInDuration: Duration(milliseconds: 0),
-                          fadeOutDuration: Duration(milliseconds: 0),
-                          imageUrl: valueOrDefault<String>(
-                            widget.authorPhotoUrl,
-                            'https://dimg.dreamflow.cloud/v1/image/modern%20professional%20black%20woman%20headshot',
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(
+                            theme.designToken.radius.full),
+                        child: Container(
+                          width: 40.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(
+                                theme.designToken.radius.full),
+                            border:
+                                Border.all(color: theme.divider, width: 1.0),
                           ),
-                          fit: BoxFit.cover,
-                          memCacheWidth: (40.0 *
-                                  MediaQuery.devicePixelRatioOf(context))
-                              .round(),
-                          memCacheHeight: (40.0 *
-                                  MediaQuery.devicePixelRatioOf(context))
-                              .round(),
+                          // Was always the same hardcoded stock photo
+                          // whenever authorPhotoUrl was null/empty (every
+                          // post written before authorPhoto existed, plus
+                          // any author who never set one) - now a real
+                          // initials fallback instead of a stranger's face.
+                          child: (widget.authorPhotoUrl ?? '').isNotEmpty
+                              ? CachedNetworkImage(
+                                  fadeInDuration: Duration(milliseconds: 0),
+                                  fadeOutDuration: Duration(milliseconds: 0),
+                                  imageUrl: widget.authorPhotoUrl!,
+                                  fit: BoxFit.cover,
+                                  memCacheWidth: (40.0 *
+                                          MediaQuery.devicePixelRatioOf(
+                                              context))
+                                      .round(),
+                                  memCacheHeight: (40.0 *
+                                          MediaQuery.devicePixelRatioOf(
+                                              context))
+                                      .round(),
+                                )
+                              : Container(
+                                  color: theme.secondaryBackground,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    businessInitials(valueOrDefault<String>(
+                                        widget.authorDisplayName,
+                                        'KIN Member')),
+                                    style: theme.bodyMedium.override(
+                                      font: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.bold),
+                                      color: theme.primaryText,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.0,
+                                    ),
+                                  ),
+                                ),
                         ),
                       ),
                     ),
                     SizedBox(width: theme.designToken.spacing.sm),
                     Expanded(
-                      child: Column(
+                      child: InkWell(
+                        splashColor: Colors.transparent,
+                        focusColor: Colors.transparent,
+                        hoverColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onTap: widget.postRecord.userRef == null
+                            ? null
+                            : () => _openProfile(context),
+                        child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -230,6 +292,7 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                             ),
                           ),
                         ],
+                        ),
                       ),
                     ),
                     if (widget.postRecord.userRef == currentUserReference)

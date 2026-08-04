@@ -13,6 +13,7 @@ import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
 import '/index.dart';
+import 'dart:async';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -320,6 +321,8 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                         ),
                       );
                 } catch (_) {}
+                unawaited(KinServices
+                    .incrementExchangePostCount(currentUserReference!));
                 _model.postTextController?.clear();
                 if (dialogContext.mounted) {
                   Navigator.pop(dialogContext);
@@ -1033,25 +1036,59 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             width: 1.0,
                                           ),
                                         ),
-                                        child: CachedNetworkImage(
-                                          fadeInDuration:
-                                              Duration(milliseconds: 0),
-                                          fadeOutDuration:
-                                              Duration(milliseconds: 0),
-                                          imageUrl:
-                                              'https://dimg.dreamflow.cloud/v1/image/modern%20professional%20black%20woman%20headshot',
-                                          fit: BoxFit.cover,
-                                          memCacheWidth: (44.0 *
-                                                  MediaQuery
-                                                      .devicePixelRatioOf(
-                                                          context))
-                                              .round(),
-                                          memCacheHeight: (44.0 *
-                                                  MediaQuery
-                                                      .devicePixelRatioOf(
-                                                          context))
-                                              .round(),
-                                        ),
+                                        // Was a hardcoded stock photo
+                                        // regardless of whether the
+                                        // signed-in user has a real photo -
+                                        // not a fallback, just always wrong.
+                                        // Now shows currentUserPhoto when
+                                        // set, and the same initials-on-flat-
+                                        // color fallback _PromoStoryTile uses
+                                        // below when it isn't.
+                                        child: currentUserPhoto.isNotEmpty
+                                            ? CachedNetworkImage(
+                                                fadeInDuration:
+                                                    Duration(milliseconds: 0),
+                                                fadeOutDuration:
+                                                    Duration(milliseconds: 0),
+                                                imageUrl: currentUserPhoto,
+                                                fit: BoxFit.cover,
+                                                memCacheWidth: (44.0 *
+                                                        MediaQuery
+                                                            .devicePixelRatioOf(
+                                                                context))
+                                                    .round(),
+                                                memCacheHeight: (44.0 *
+                                                        MediaQuery
+                                                            .devicePixelRatioOf(
+                                                                context))
+                                                    .round(),
+                                              )
+                                            : Container(
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryBackground,
+                                                alignment: Alignment.center,
+                                                child: Text(
+                                                  businessInitials(
+                                                      currentUserDisplayName),
+                                                  style: FlutterFlowTheme.of(
+                                                          context)
+                                                      .bodyMedium
+                                                      .override(
+                                                        font: GoogleFonts
+                                                            .plusJakartaSans(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                        color: FlutterFlowTheme
+                                                                .of(context)
+                                                            .primaryText,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        letterSpacing: 0.0,
+                                                      ),
+                                                ),
+                                              ),
                                       ),
                                     ),
                                     Expanded(
@@ -1214,8 +1251,21 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                             postText: composerText,
                                             timestamp: getCurrentTimestamp,
                                             likesCount: 0,
+                                            // This composer used to omit
+                                            // both - _showNewPostDialog set
+                                            // them, this one didn't, so a
+                                            // post from here rendered with
+                                            // ExchangeFeedItemWidget's
+                                            // 'Member' fallback and the
+                                            // default headshot regardless of
+                                            // who actually posted.
+                                            authorName: currentUserDisplayName,
+                                            authorPhoto: currentUserPhoto,
                                           ),
                                         );
+                                        unawaited(KinServices
+                                            .incrementExchangePostCount(
+                                                currentUserReference!));
                                         try {
                                           await UserEngagementEventsRecord
                                               .collection
