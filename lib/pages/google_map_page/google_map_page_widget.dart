@@ -12,6 +12,8 @@ import '/services/business_category_filter.dart';
 import '/services/kin_services.dart';
 import '/services/premium_placement.dart';
 import '/services/seasonal_theme.dart';
+import '/services/walkthrough_runner.dart';
+import 'dart:async';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'google_map_page_model.dart';
 export 'google_map_page_model.dart';
 
@@ -85,6 +88,19 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
   String _searchQuery = '';
   List<BusinessesRecord> _searchResults = [];
   bool _searching = false;
+
+  /// Anchors the hamburger menu button for the 'general_tour' walkthrough
+  /// (see WalkthroughRunner) - this is where the Discover/Community/
+  /// Quest/Profile grouping (showMainMenuSheet, main_menu_button.dart)
+  /// actually lives, so it's the one accurate, always-mounted target for
+  /// a first-run tour. The menu's own contents are a modal bottom sheet -
+  /// not in the tree until tapped open, so they can't be coach-marked
+  /// directly; this points at the door instead of the room.
+  final _menuButtonKey = GlobalKey();
+  late final _walkthroughRunner = WalkthroughRunner(
+    walkthroughKey: 'general_tour',
+    targetKeys: {'main_menu': _menuButtonKey},
+  );
 
   /// Filters the whole directory (not just what's on screen) by name, so
   /// this doubles as the way to reach a business that has no map pin at
@@ -203,10 +219,18 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
             timestamp: getCurrentTimestamp,
           ));
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_walkthroughRunner.maybeStart(
+        context: context,
+        userRef: currentUserReference,
+        seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+      ));
+    });
   }
 
   @override
   void dispose() {
+    _walkthroughRunner.dispose();
     _model.dispose();
     _searchController.dispose();
 
@@ -835,7 +859,21 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  const MainMenuButton(),
+                                  Showcase(
+                                    key: _menuButtonKey,
+                                    title: _walkthroughRunner
+                                            .stepFor('main_menu')
+                                            ?.title ??
+                                        'Everything starts here',
+                                    description: _walkthroughRunner
+                                            .stepFor('main_menu')
+                                            ?.body ??
+                                        'Tap the menu to find Discover, '
+                                        'Community, Quest, and Profile - '
+                                        'the whole app is organized under '
+                                        'these four.',
+                                    child: const MainMenuButton(),
+                                  ),
                                   const NotificationBellButton(),
                                 ].divide(SizedBox(width: 8.0)),
                               ),

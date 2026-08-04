@@ -56,6 +56,7 @@ export 'schema/analytics_daily_record.dart';
 export 'schema/legal_metadata_record.dart';
 export 'schema/exchange_promotions_record.dart';
 export 'schema/exchange_prompts_record.dart';
+export 'schema/onboarding_walkthroughs_record.dart';
 export 'schema/connections_record.dart';
 export 'schema/tier_privileges_record.dart';
 export 'schema/entitlements_record.dart';

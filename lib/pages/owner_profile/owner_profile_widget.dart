@@ -13,6 +13,8 @@ import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/services/walkthrough_runner.dart';
+import 'dart:async';
 import 'dart:ui';
 import '/index.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -20,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'owner_profile_model.dart';
 export 'owner_profile_model.dart';
 
@@ -104,14 +107,32 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
+  /// Anchors the KINDEX Score card for the 'kindex_explainer' walkthrough
+  /// (see WalkthroughRunner) - same content as CustomerProfilePage's copy
+  /// of this, shown once the first time a signed-in owner sees their own
+  /// score here.
+  final _kindexScoreKey = GlobalKey();
+  late final _walkthroughRunner = WalkthroughRunner(
+    walkthroughKey: 'kindex_explainer',
+    targetKeys: {'kindex_score': _kindexScoreKey},
+  );
+
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => OwnerProfileModel());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_walkthroughRunner.maybeStart(
+        context: context,
+        userRef: currentUserReference,
+        seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+      ));
+    });
   }
 
   @override
   void dispose() {
+    _walkthroughRunner.dispose();
     _model.dispose();
 
     super.dispose();
@@ -688,26 +709,42 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                                         // score details" destination exists
                                         // yet, and the sibling Check-Ins card
                                         // below is plain display too.
-                                        return wrapWithModel(
-                                          model: _model.metricCardModel2,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: MetricCard4Widget(
-                                            icon: Icon(
-                                              Icons.trending_up_rounded,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              size: 20.0,
+                                        return Showcase(
+                                          key: _kindexScoreKey,
+                                          title: _walkthroughRunner
+                                                  .stepFor('kindex_score')
+                                                  ?.title ??
+                                              'KINDEX Score',
+                                          description: _walkthroughRunner
+                                                  .stepFor('kindex_score')
+                                                  ?.body ??
+                                              'Your business\'s KINDEX score '
+                                              'reflects real customer '
+                                              'engagement - it grows with '
+                                              'activity and can decrease over '
+                                              'time if it goes quiet, so keep '
+                                              'engaging to keep it climbing.',
+                                          child: wrapWithModel(
+                                            model: _model.metricCardModel2,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: MetricCard4Widget(
+                                              icon: Icon(
+                                                Icons.trending_up_rounded,
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .primaryText,
+                                                size: 20.0,
+                                              ),
+                                              value: formatNumber(
+                                                metricCardBusinessesRecord
+                                                    .kindexScore,
+                                                formatType: FormatType.decimal,
+                                                decimalType:
+                                                    DecimalType.periodDecimal,
+                                              ),
+                                              label: 'KINDEX Score',
                                             ),
-                                            value: formatNumber(
-                                              metricCardBusinessesRecord
-                                                  .kindexScore,
-                                              formatType: FormatType.decimal,
-                                              decimalType:
-                                                  DecimalType.periodDecimal,
-                                            ),
-                                            label: 'KINDEX Score',
                                           ),
                                         );
                                       },

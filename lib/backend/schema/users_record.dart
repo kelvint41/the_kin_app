@@ -116,6 +116,14 @@ class UsersRecord extends FirestoreRecord {
   String get bio => _bio ?? '';
   bool hasBio() => _bio != null;
 
+  // "seen_walkthroughs" field. Keys from onboarding_walkthroughs (see
+  // WalkthroughService) this user has already completed or dismissed -
+  // appended via arrayUnion, checked before a walkthrough auto-starts so
+  // it only ever shows once per key.
+  List<String>? _seenWalkthroughs;
+  List<String> get seenWalkthroughs => _seenWalkthroughs ?? const [];
+  bool hasSeenWalkthroughs() => _seenWalkthroughs != null;
+
   void _initializeFields() {
     _email = snapshotData['email'] as String?;
     _displayName = snapshotData['display_name'] as String?;
@@ -135,6 +143,7 @@ class UsersRecord extends FirestoreRecord {
     _scavengerPoints = castToType<int>(snapshotData['scavenger_points']);
     _kinQuestTermsAcceptedAt =
         snapshotData['kin_quest_terms_accepted_at'] as DateTime?;
+    _seenWalkthroughs = getDataList(snapshotData['seen_walkthroughs']);
     _bio = snapshotData['bio'] as String?;
   }
 

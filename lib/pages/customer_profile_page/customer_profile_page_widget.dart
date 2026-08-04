@@ -18,10 +18,13 @@ import '/services/kin_services.dart';
 import 'dart:ui';
 import '/index.dart';
 import '/services/feature_flags.dart';
+import '/services/walkthrough_runner.dart';
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'customer_profile_page_model.dart';
 export 'customer_profile_page_model.dart';
 
@@ -148,6 +151,16 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
   /// Anchors the "Personal Milestones" block for [_scrollToMilestones].
   final _milestonesKey = GlobalKey();
 
+  /// Anchors the KINDEX Score card for the 'kindex_explainer' walkthrough
+  /// (see WalkthroughRunner) - explains what the score means and that it
+  /// moves with real engagement, shown once the first time a signed-in
+  /// customer sees their own score here.
+  final _kindexScoreKey = GlobalKey();
+  late final _walkthroughRunner = WalkthroughRunner(
+    walkthroughKey: 'kindex_explainer',
+    targetKeys: {'kindex_score': _kindexScoreKey},
+  );
+
   @override
   void initState() {
     super.initState();
@@ -163,6 +176,13 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
         _scrollToMilestones();
       });
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_walkthroughRunner.maybeStart(
+        context: context,
+        userRef: currentUserReference,
+        seenWalkthroughs: currentUserDocument?.seenWalkthroughs ?? const [],
+      ));
+    });
   }
 
   /// Brings the milestones block into view once the first frame has laid
@@ -295,6 +315,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
 
   @override
   void dispose() {
+    _walkthroughRunner.dispose();
     _model.dispose();
 
     super.dispose();
@@ -640,29 +661,47 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                                     stats.reviewCount),
                                           ),
                                         ),
-                                        wrapWithModel(
-                                          model: _model.metricCardModel3,
-                                          updateCallback: () =>
-                                              safeSetState(() {}),
-                                          child: MetricCard3Widget(
-                                            icon: Icon(
-                                              Icons.volunteer_activism_rounded,
-                                              color:
-                                                  FlutterFlowTheme.of(context)
-                                                      .primaryText,
-                                              size: 20.0,
+                                        Showcase(
+                                          key: _kindexScoreKey,
+                                          title: _walkthroughRunner
+                                                  .stepFor('kindex_score')
+                                                  ?.title ??
+                                              'KINDEX Score',
+                                          description: _walkthroughRunner
+                                                  .stepFor('kindex_score')
+                                                  ?.body ??
+                                              'Your KINDEX score reflects real '
+                                              'engagement with Black-owned '
+                                              'businesses - it grows with '
+                                              'activity and can decrease over '
+                                              'time if you go quiet, so keep '
+                                              'showing up to keep it climbing.',
+                                          child: wrapWithModel(
+                                            model: _model.metricCardModel3,
+                                            updateCallback: () =>
+                                                safeSetState(() {}),
+                                            child: MetricCard3Widget(
+                                              icon: Icon(
+                                                Icons
+                                                    .volunteer_activism_rounded,
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .primaryText,
+                                                size: 20.0,
+                                              ),
+                                              tint: Color(0xFFFFD700),
+                                              label: 'KINDEX Score',
+                                              value: stats == null
+                                                  ? '--'
+                                                  : impactScoreLabel(
+                                                      stats.kindexScore),
+                                              isTrendingUp:
+                                                  stats?.isTrendingUp,
+                                              // The one card here that has a
+                                              // direction; streak and
+                                              // milestones are counts.
+                                              showTrend: true,
                                             ),
-                                            tint: Color(0xFFFFD700),
-                                            label: 'KINDEX Score',
-                                            value: stats == null
-                                                ? '--'
-                                                : impactScoreLabel(
-                                                    stats.kindexScore),
-                                            isTrendingUp: stats?.isTrendingUp,
-                                            // The one card here that has a
-                                            // direction; streak and milestones
-                                            // are counts.
-                                            showTrend: true,
                                           ),
                                         ),
                                         wrapWithModel(
