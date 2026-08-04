@@ -19,7 +19,7 @@ import 'package:google_fonts/google_fonts.dart';
 /// pulled out of Owner Profile's main screen into their own page.
 ///
 /// Owner Profile used to put all of this - plus Profile Info and the
-/// KINdex Score an owner actually needs at a glance every visit - on one
+/// KINDEX Score an owner actually needs at a glance every visit - on one
 /// long scroll. Everything here is either a growth/promotion action
 /// (Promote, Power Hour, upgrading tiers) or listing management (My
 /// Items/Jobs/Events), not something an owner needs to see every time they

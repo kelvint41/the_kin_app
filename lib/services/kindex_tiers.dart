@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A KINdex score tier: a display label and accent color, derived purely
+/// A KINDEX score tier: a display label and accent color, derived purely
 /// from a score - see [kindexTierForScore].
 class KindexTier {
   const KindexTier(this.label, this.color);
@@ -9,9 +9,9 @@ class KindexTier {
   final Color color;
 }
 
-/// Score-band tiers spanning the documented KINdex range: 300 is the
+/// Score-band tiers spanning the documented KINDEX range: 300 is the
 /// baseline every business/customer starts at, 850 is the cap (see the
-/// KINdex scoring rebuild in kindex_scoring_dynamics.js /
+/// KINDEX scoring rebuild in kindex_scoring_dynamics.js /
 /// customer_kindex_nightly.js - frozen pre-launch, so these thresholds are
 /// safe to hardcode against the current score distribution).
 ///
@@ -25,7 +25,7 @@ class KindexTier {
 ///
 /// Ordered highest-first so [kindexTierForScore] returns on first match.
 const _kKindexTiers = <(int min, KindexTier tier)>[
-  (810, KindexTier('KINdex Elite', Color(0xFFFFD700))), // gold
+  (810, KindexTier('KINDEX Elite', Color(0xFFFFD700))), // gold
   (720, KindexTier('Founding Backer', Color(0xFFC0C0C0))), // silver
   (580, KindexTier('Trusted Neighbor', Color(0xFFCD7F32))), // bronze
   (440, KindexTier('Rising Voice', Color(0xFF6B8F71))), // muted green

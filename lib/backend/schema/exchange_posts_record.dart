@@ -114,7 +114,7 @@ class ExchangePostsRecord extends FirestoreRecord {
       (reactionCounts[eventType] as num?)?.toInt() ?? 0;
 
   // "notable_reaction" field. {name, event_type} - stamped by
-  // exchange_reaction_counts.js when a high-KINdex member reacts Backed
+  // exchange_reaction_counts.js when a high-KINDEX member reacts Backed
   // or Spotlight. Last notable reactor only, overwritten by the next one
   // rather than accumulated, to avoid write contention on a popular
   // post's single document.

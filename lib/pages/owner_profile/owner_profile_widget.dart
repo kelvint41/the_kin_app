@@ -435,7 +435,7 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
               // Promote, Power Hour, listing management, and the
               // ROI/upgrade dashboard itself all moved to Growth Tools -
               // this main screen now stays focused on the three things an
-              // owner actually needs at a glance (profile info, KINdex
+              // owner actually needs at a glance (profile info, KINDEX
               // score, job applicant messages), same as
               // GrowthToolsPageWidget's own doc comment describes.
               Padding(
