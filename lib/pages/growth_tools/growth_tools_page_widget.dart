@@ -2,6 +2,7 @@ import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/services/kin_services.dart';
 import '/services/subscription_tiers.dart';
+import '/components/compact_action_list_widget.dart';
 import '/components/kin_back_button.dart';
 import '/components/support_bubble_widget.dart';
 import '/components/power_hour_panel_widget.dart';
@@ -318,53 +319,14 @@ class GrowthToolsPageWidget extends StatelessWidget {
               // to open from its hamburger menu.
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 0.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
-                  onTap: () => _showManageListingsSheet(context),
-                  child: Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: theme.secondaryBackground,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: theme.alternate, width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.storefront_rounded,
-                            color: theme.accentOnSurface, size: 22.0),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Manage My Listings',
-                                  style: theme.bodyMedium.override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                        fontWeight: FontWeight.bold),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Items, jobs, and events you\'ve posted.',
-                                  style: theme.bodySmall.override(
-                                    font: GoogleFonts.plusJakartaSans(),
-                                    color: theme.secondaryText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.chevron_right_rounded,
-                            color: theme.secondaryText, size: 20.0),
-                      ],
-                    ),
+                child: CompactActionListWidget(items: [
+                  CompactActionRowData(
+                    icon: Icons.storefront_rounded,
+                    title: 'Manage My Listings',
+                    subtitle: 'Items, jobs, and events you\'ve posted.',
+                    onTap: () => _showManageListingsSheet(context),
                   ),
-                ),
+                ]),
               ),
               // Your Membership Tier.
               Padding(
@@ -478,54 +440,15 @@ class GrowthToolsPageWidget extends StatelessWidget {
               const SubscriptionManagementRow(),
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(24.0, 16.0, 24.0, 0.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
-                  onTap: () =>
-                      context.pushNamed(AppStudioPageWidget.routeName),
-                  child: Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: theme.secondaryBackground,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: theme.alternate, width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.auto_awesome_mosaic_rounded,
-                            color: theme.accentOnSurface, size: 22.0),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Need an app for your business?',
-                                  style: theme.bodyMedium.override(
-                                    font: GoogleFonts.plusJakartaSans(
-                                        fontWeight: FontWeight.bold),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'Submit a brief through App Studio.',
-                                  style: theme.bodySmall.override(
-                                    font: GoogleFonts.plusJakartaSans(),
-                                    color: theme.secondaryText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.chevron_right_rounded,
-                            color: theme.secondaryText, size: 20.0),
-                      ],
-                    ),
+                child: CompactActionListWidget(items: [
+                  CompactActionRowData(
+                    icon: Icons.auto_awesome_mosaic_rounded,
+                    title: 'Need an app for your business?',
+                    subtitle: 'Submit a brief through App Studio.',
+                    onTap: () =>
+                        context.pushNamed(AppStudioPageWidget.routeName),
                   ),
-                ),
+                ]),
               ),
               Container(height: 24.0),
             ],

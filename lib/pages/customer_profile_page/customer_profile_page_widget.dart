@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/compact_action_list_widget.dart';
 import '/components/launch_action_widget.dart';
 import '/components/main_menu_button.dart';
 import '/components/metric_card3_widget.dart';
@@ -856,10 +857,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                     ),
                   ),
                   _recommendedForYouCarousel(context),
-                  _shareKinPrompt(context),
-                  _supportChatPrompt(context),
-                  _feedbackPrompt(context),
-                  _accountSection(context),
+                  _profileActionsCard(context),
                   Container(
                     height: 40.0,
                   ),
@@ -992,261 +990,74 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
     );
   }
 
-  /// Customers' only invite/share mechanism - owners already have one via
-  /// Owner Profile's "Promote" button. Reuses the same [KinServices.shareApp]
-  /// -> UserEngagementEvent -> kindex_engine.js pipeline with generic text
-  /// and no businessRef; that pipeline already scores by user, not by
-  /// caller, so it needs no changes to pick this up.
-  Widget _shareKinPrompt(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
+  /// Share KIN, Get Support, feedback, and account deletion - formerly four
+  /// separate full-width bordered boxes stacked one after another, which is
+  /// what actually made this page feel dense (four borders/backgrounds/
+  /// corner-radii/16px-padding blocks in a row). Grouped into one
+  /// [CompactActionListWidget] card instead - same rows, same tap targets,
+  /// a fraction of the chrome. See that widget's doc comment for the full
+  /// rationale.
+  ///
+  /// Per-row notes carried over from the original methods:
+  /// - Share KIN is customers' only invite/share mechanism (owners have
+  ///   their own via Owner Profile's "Promote" button); reuses
+  ///   [KinServices.shareApp] -> UserEngagementEvent -> kindex_engine.js,
+  ///   which already scores by user rather than caller.
+  /// - Get Support opens [SupportChatWidget] (in-line answers) rather than
+  ///   folding into the feedback row below, which writes to a different
+  ///   collection (bug_reports vs support_chat_logs) for a different
+  ///   intent (flag something for the team vs. get an answer now).
+  /// - Delete Account is styled destructive (isDestructive: true) rather
+  ///   than matching the others - this is the only screen a logged-in
+  ///   customer reliably reaches, so it's where the store-required
+  ///   deletion control lives, and it should read as a warning at a
+  ///   glance rather than blend in as just another row.
+  Widget _profileActionsCard(BuildContext context) {
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
       child: Builder(
-        builder: (context) => InkWell(
-          borderRadius: BorderRadius.circular(16.0),
-          onTap: () async {
-            await KinServices.shareApp(
-              text: 'Discover Black-owned businesses near you with KIN. '
-                  'Download the app: $kPlayStoreUrl',
-              sharePositionOrigin: getWidgetBoundingBox(context),
-            );
-          },
-          child: Container(
-            padding: EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: theme.secondaryBackground,
-              borderRadius: BorderRadius.circular(16.0),
-              border: Border.all(color: theme.alternate, width: 1.0),
+        // Nested context so getWidgetBoundingBox below anchors the share
+        // sheet to this card rather than the page root.
+        builder: (context) => CompactActionListWidget(
+          items: [
+            CompactActionRowData(
+              icon: Icons.share_rounded,
+              title: 'Share KIN',
+              subtitle: 'Invite friends to discover Black-owned businesses.',
+              onTap: () async {
+                await KinServices.shareApp(
+                  text: 'Discover Black-owned businesses near you with KIN. '
+                      'Download the app: $kPlayStoreUrl',
+                  sharePositionOrigin: getWidgetBoundingBox(context),
+                );
+              },
             ),
-            child: Row(
-              children: [
-                Icon(Icons.share_rounded,
-                    color: theme.accentOnSurface, size: 22.0),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Share KIN',
-                          style: theme.bodyMedium.override(
-                            font: GoogleFonts.plusJakartaSans(
-                                fontWeight: FontWeight.bold),
-                            letterSpacing: 0.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'Invite friends to discover Black-owned businesses.',
-                          style: theme.bodySmall.override(
-                            font: GoogleFonts.plusJakartaSans(),
-                            color: theme.secondaryText,
-                            letterSpacing: 0.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded,
-                    color: theme.secondaryText, size: 20.0),
-              ],
+            CompactActionRowData(
+              icon: Icons.headset_mic_rounded,
+              title: 'Get Support',
+              subtitle: 'Ask a question and get an answer right away.',
+              onTap: () => context.pushNamed(SupportChatWidget.routeName),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Entry point to [SupportChatWidget] - answers questions in-line rather
-  /// than the one-way "send it and wait" shape of [_feedbackPrompt] below.
-  /// Kept as a separate row rather than folded into that one: the two
-  /// write to different collections (support_chat_logs vs bug_reports) and
-  /// serve different intents (get an answer now vs. flag something for the
-  /// team to see later).
-  Widget _supportChatPrompt(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () => context.pushNamed(SupportChatWidget.routeName),
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: theme.alternate, width: 1.0),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.headset_mic_rounded,
-                  color: theme.accentOnSurface, size: 22.0),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Get Support',
-                        style: theme.bodyMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Ask a question and get an answer right away.',
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+            CompactActionRowData(
+              icon: Icons.campaign_rounded,
+              title: 'Something off, or an idea?',
+              subtitle: 'Tell us - it goes straight to the team.',
+              onTap: () => showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) =>
+                    FeedbackSheetWidget(originPage: 'CustomerProfilePage'),
               ),
-              Icon(Icons.chevron_right_rounded,
-                  color: theme.secondaryText, size: 20.0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Entry point to [FeedbackSheetWidget].
-  ///
-  /// Sits at the foot of the profile rather than in the Engagement
-  /// Launchpad at the top. The launchpad is for things people came here to
-  /// do; feedback is what they reach for once something has already
-  /// annoyed them, and a prompt at the end of a scroll catches that
-  /// without competing with the actions above it.
-  Widget _feedbackPrompt(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () => showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (_) =>
-              FeedbackSheetWidget(originPage: 'CustomerProfilePage'),
-        ),
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: theme.alternate, width: 1.0),
-          ),
-          child: Row(
-            children: [
-              // accentOnSurface rather than `primary` - the dark brand
-              // green all but disappears against this card in dark mode.
-              Icon(Icons.campaign_rounded,
-                  color: theme.accentOnSurface, size: 22.0),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Something off, or an idea?',
-                        style: theme.bodyMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Tell us - it goes straight to the team.',
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded,
-                  color: theme.secondaryText, size: 20.0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// This is the only screen a logged-in customer reliably reaches - there
-  /// is no separate Settings page - so it's where the store-required
-  /// account deletion control lives. Styled in the error color rather than
-  /// matching [_feedbackPrompt]/[_supportChatPrompt] above: those are
-  /// invitations, this is a warning, and it should read as one at a
-  /// glance rather than blend in as just another utility row.
-  Widget _accountSection(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
-    return Padding(
-      padding: EdgeInsetsDirectional.fromSTEB(24.0, 8.0, 24.0, 0.0),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16.0),
-        onTap: () => confirmDeleteAccount(context),
-        child: Container(
-          padding: EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: theme.secondaryBackground,
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: theme.error, width: 1.0),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.delete_outline_rounded,
-                  color: theme.error, size: 22.0),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Delete Account',
-                        style: theme.bodyMedium.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          color: theme.error,
-                          letterSpacing: 0.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'Permanently delete your account and data.',
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: theme.error, size: 20.0),
-            ],
-          ),
+            ),
+            CompactActionRowData(
+              icon: Icons.delete_outline_rounded,
+              title: 'Delete Account',
+              subtitle: 'Permanently delete your account and data.',
+              onTap: () => confirmDeleteAccount(context),
+              isDestructive: true,
+            ),
+          ],
         ),
       ),
     );

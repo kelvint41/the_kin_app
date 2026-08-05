@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/compact_action_list_widget.dart';
 import '/components/kin_back_button.dart';
 import '/components/metric_card4_widget.dart';
 import '/components/mystery_reward_panel_widget.dart';
@@ -466,64 +467,16 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
               // GrowthToolsPageWidget's own doc comment describes.
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
-                  onTap: () =>
-                      context.pushNamed(GrowthToolsPageWidget.routeName),
-                  child: Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).alternate,
-                          width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.trending_up_rounded,
-                            color: FlutterFlowTheme.of(context).accentOnSurface,
-                            size: 22.0),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Growth Tools',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  'Promote, Power Hour, your plan, and '
-                                  'listing management.',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.chevron_right_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 20.0),
-                      ],
-                    ),
+                child: CompactActionListWidget(items: [
+                  CompactActionRowData(
+                    icon: Icons.trending_up_rounded,
+                    title: 'Growth Tools',
+                    subtitle:
+                        'Promote, Power Hour, your plan, and listing management.',
+                    onTap: () =>
+                        context.pushNamed(GrowthToolsPageWidget.routeName),
                   ),
-                ),
+                ]),
               ),
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
@@ -878,63 +831,15 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
               // where individual conversations are actually reached.
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 20.0, 0.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16.0),
-                  onTap: () =>
-                      context.pushNamed(JobManagementPage.routeName),
-                  child: Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: FlutterFlowTheme.of(context).secondaryBackground,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(
-                          color: FlutterFlowTheme.of(context).alternate,
-                          width: 1.0),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.mail_outline_rounded,
-                            color: FlutterFlowTheme.of(context).accentOnSurface,
-                            size: 22.0),
-                        Expanded(
-                          child: Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(12, 0, 8, 0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Job Board Messages',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(
-                                            fontWeight: FontWeight.bold),
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                                Text(
-                                  'Conversations with job applicants.',
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodySmall
-                                      .override(
-                                        font: GoogleFonts.plusJakartaSans(),
-                                        color: FlutterFlowTheme.of(context)
-                                            .secondaryText,
-                                      ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.chevron_right_rounded,
-                            color: FlutterFlowTheme.of(context).secondaryText,
-                            size: 20.0),
-                      ],
-                    ),
+                child: CompactActionListWidget(items: [
+                  CompactActionRowData(
+                    icon: Icons.mail_outline_rounded,
+                    title: 'Job Board Messages',
+                    subtitle: 'Conversations with job applicants.',
+                    onTap: () =>
+                        context.pushNamed(JobManagementPage.routeName),
                   ),
-                ),
+                ]),
               ),
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 12.0),
