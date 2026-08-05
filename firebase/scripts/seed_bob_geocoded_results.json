@@ -1,0 +1,286 @@
+{
+  "mode": "commit",
+  "created": [
+    {
+      "docId": "uXIUd0dvbKx4vL4L8p2s",
+      "ticker_symbol": "PICQU",
+      "business_name": "Picquet Studios"
+    },
+    {
+      "docId": "kjEctkQKepSvGZoC7WXL",
+      "ticker_symbol": "GLOBA",
+      "business_name": "Global Logistics Technicians"
+    },
+    {
+      "docId": "HgtQgV1jqFQ9xWMTA4Fl",
+      "ticker_symbol": "SILOT",
+      "business_name": "Silotech Group, Inc."
+    },
+    {
+      "docId": "aRV2P4dSjuVZGHtX9guv",
+      "ticker_symbol": "CNGEN",
+      "business_name": "CNG Engineering, PLLC"
+    },
+    {
+      "docId": "1BsktM0OFfyyGJgBgAEN",
+      "ticker_symbol": "APPDD",
+      "business_name": "Appddiction Studio, LLC"
+    },
+    {
+      "docId": "Z7UVIx2J2tYCaTvWtC6C",
+      "ticker_symbol": "AMERI",
+      "business_name": "American Abatement, LLC"
+    },
+    {
+      "docId": "Yw9OD0KkWiwHz0qlH1do",
+      "ticker_symbol": "STRKS",
+      "business_name": "STRK Solutions Limited, LLC"
+    },
+    {
+      "docId": "hauFhIRn5uORJcNbRZW3",
+      "ticker_symbol": "STRAI",
+      "business_name": "Straight Line Management, LLC"
+    },
+    {
+      "docId": "Rdi2PTFxSBzPu7Ar0VVq",
+      "ticker_symbol": "C2AGR",
+      "business_name": "C2A Group Services, Inc."
+    },
+    {
+      "docId": "2S0yOV2itiPeq7pDIYK1",
+      "ticker_symbol": "BTLTE",
+      "business_name": "BTL Technologies, Inc."
+    },
+    {
+      "docId": "pw5EUne8uuTMPopNIVnX",
+      "ticker_symbol": "FOSTE",
+      "business_name": "Foster CM Group, Inc."
+    },
+    {
+      "docId": "ycz6otb75BFCWRwsMojv",
+      "ticker_symbol": "WISDO",
+      "business_name": "Wisdom Pumps, LLC"
+    },
+    {
+      "docId": "DFytXvzC4angIyOCANl4",
+      "ticker_symbol": "NOVEM",
+      "business_name": "Novemplus Realty, LLC"
+    },
+    {
+      "docId": "jNzY10DUy9uIndTw7FIC",
+      "ticker_symbol": "MIKOR",
+      "business_name": "Mikore, Inc."
+    },
+    {
+      "docId": "jfNfkK4q6Y2bql9BBofC",
+      "ticker_symbol": "MJWME",
+      "business_name": "MJW Medical Solutions, Inc."
+    },
+    {
+      "docId": "EPAjNpzeMIEaYsxJGUrq",
+      "ticker_symbol": "MAJES",
+      "business_name": "Majestic Events by Maria, LLC"
+    },
+    {
+      "docId": "8txyRQkEpbGVVzSHmrfi",
+      "ticker_symbol": "YOUNG",
+      "business_name": "Young Professional Resources"
+    },
+    {
+      "docId": "rj6xlq3lEjSKnrqfpgWT",
+      "ticker_symbol": "LMTAT",
+      "business_name": "LM Tatum, PLLC"
+    },
+    {
+      "docId": "gdsLEDSXm0B6ybhjzd17",
+      "ticker_symbol": "PREMI",
+      "business_name": "Premier Workforce Training, LLC"
+    },
+    {
+      "docId": "lvbudXqcnuASASoTWW9M",
+      "ticker_symbol": "SALAZ",
+      "business_name": "Salazar Solutions, LLC"
+    },
+    {
+      "docId": "UxpBkWXrUDD2giJBLArK",
+      "ticker_symbol": "ONMAR",
+      "business_name": "On The Mark Moving, LLC"
+    },
+    {
+      "docId": "iLDGmCNvBgcAqwbdDxIv",
+      "ticker_symbol": "CONSO",
+      "business_name": "Consolidated Installation Support, LLC"
+    },
+    {
+      "docId": "hZ6rLOCcqKdW7aA7xCwR",
+      "ticker_symbol": "GETRI",
+      "business_name": "Get Right City, LLC"
+    },
+    {
+      "docId": "JF5oyUOkvZnudk5zvqUL",
+      "ticker_symbol": "HAYNE",
+      "business_name": "Haynes Marketing & Associates, LLC"
+    },
+    {
+      "docId": "MmlKAwRv8Q9EMsS65fY3",
+      "ticker_symbol": "VIRTU",
+      "business_name": "Virtus Executive & Healthcare Placement, LLC"
+    },
+    {
+      "docId": "6Eoxw9u1zBfNFXNuBhQ2",
+      "ticker_symbol": "SANAN",
+      "business_name": "San Antonio Ballet School, LLC"
+    },
+    {
+      "docId": "ve93ZJlI0HpUHLfYBKEp",
+      "ticker_symbol": "HELLO",
+      "business_name": "Hello Beauty Supply, LLC"
+    },
+    {
+      "docId": "qi5JPcRh3NN5FC4EyUNq",
+      "ticker_symbol": "FUNMI",
+      "business_name": "Funmise, LLC"
+    },
+    {
+      "docId": "i63hI6L7eg6ytfrF1veZ",
+      "ticker_symbol": "BARIO",
+      "business_name": "Bario Aviation, Inc."
+    },
+    {
+      "docId": "dP3xeiSToRb6VyYvFuN9",
+      "ticker_symbol": "MILLE",
+      "business_name": "Millennium Steel of Texas, LP"
+    },
+    {
+      "docId": "y7yKAki0Pb49p30qGXrh",
+      "ticker_symbol": "USAWA",
+      "business_name": "USAWA Wellness Services, PLLC"
+    },
+    {
+      "docId": "HR52oyOZtnhCqkCyKxbS",
+      "ticker_symbol": "TACIT",
+      "business_name": "Tacit Growth Strategies, LLC"
+    },
+    {
+      "docId": "6wVTN1R3IhxRwpj5g6Fq",
+      "ticker_symbol": "OLIVE",
+      "business_name": "Olive Branch Staffing"
+    },
+    {
+      "docId": "L6Oupnk63osprO35kPS3",
+      "ticker_symbol": "DEFEN",
+      "business_name": "Defense Consulting Services, LLC"
+    },
+    {
+      "docId": "F4DSY7F5hjxeU3YQpFwv",
+      "ticker_symbol": "AEROL",
+      "business_name": "Aerolinked, LLC"
+    },
+    {
+      "docId": "20fpa6LsfujL7A0cIUPW",
+      "ticker_symbol": "PROJE",
+      "business_name": "Projectized Solutions, LLC"
+    },
+    {
+      "docId": "noLKQ2qoiTwT5AueJUkG",
+      "ticker_symbol": "MVHLC",
+      "business_name": "MVHL Consulting, LLC"
+    },
+    {
+      "docId": "4SdJCdCsFNsKMYDdp8EQ",
+      "ticker_symbol": "COPEL",
+      "business_name": "Copeland Contracting Company, Inc."
+    },
+    {
+      "docId": "RaU9Zw2us3zvJUNFM49R",
+      "ticker_symbol": "DB3UN",
+      "business_name": "DB3 Unlimited Services, LLC"
+    },
+    {
+      "docId": "dVLcM2EUPlLskQ9aXqHo",
+      "ticker_symbol": "COMMO",
+      "business_name": "Commonwealth Computer Company, Inc."
+    },
+    {
+      "docId": "kBqiamqSGGiylxFqbVn4",
+      "ticker_symbol": "ALAMO",
+      "business_name": "Alamo Kitchens, LLC"
+    },
+    {
+      "docId": "SqWW4ZZIl7lFdvUKa4K5",
+      "ticker_symbol": "SIGMA",
+      "business_name": "Sigma Professional Services, LLC"
+    },
+    {
+      "docId": "dkqfj4rZO5xMNboGYHPH",
+      "ticker_symbol": "COMFO",
+      "business_name": "Comfort Cleaning, LLC"
+    },
+    {
+      "docId": "1lKHj1QYqBdAtGEQtKoF",
+      "ticker_symbol": "TODAY",
+      "business_name": "Today's Solutions, LLC"
+    },
+    {
+      "docId": "ifR6mSwKGQ8tKs7FAXF2",
+      "ticker_symbol": "CONFI",
+      "business_name": "Confidential Search Solutions, LLC"
+    },
+    {
+      "docId": "nupmmddkv7YI4M5R7COo",
+      "ticker_symbol": "AVIST",
+      "business_name": "Avista Products"
+    },
+    {
+      "docId": "SLipbNNP6HzQA9OH4A9c",
+      "ticker_symbol": "LIMIT",
+      "business_name": "Limitless Creations, Inc."
+    },
+    {
+      "docId": "zbwzdsLyiqoM7gg3yDLI",
+      "ticker_symbol": "BTDEP",
+      "business_name": "B & T Dependable Services"
+    },
+    {
+      "docId": "cSO9G70pbsN9bm8sy8Zu",
+      "ticker_symbol": "BPCON",
+      "business_name": "BP Construction Company"
+    },
+    {
+      "docId": "6nUKufxW6R0Sc1NypEZp",
+      "ticker_symbol": "ALLPO",
+      "business_name": "All Points Inspection Services, Inc."
+    },
+    {
+      "docId": "i2LvPOPc4gChq85S50Mh",
+      "ticker_symbol": "ANYTH",
+      "business_name": "Anything Goes Enterprises, LLC"
+    },
+    {
+      "docId": "6HZQqRkF08FGcUlBGE8D",
+      "ticker_symbol": "GET2T",
+      "business_name": "Get2Ten Consulting, Inc."
+    },
+    {
+      "docId": "Zc9CkVabt732lQie5Hpq",
+      "ticker_symbol": "AFFOR",
+      "business_name": "Affordable Venture Home Healthcare, LLC"
+    },
+    {
+      "docId": "mDBstKO8mTniX3Fw1oTT",
+      "ticker_symbol": "ADREA",
+      "business_name": "A Dreamweaver Florist & Special Events"
+    },
+    {
+      "docId": "z7FzZ2wG3vCNQaKDo8jR",
+      "ticker_symbol": "SAMSC",
+      "business_name": "Sams Contracting Consulting and Training, LLC"
+    },
+    {
+      "docId": "hDpRgLVgEerRNZzG3LuZ",
+      "ticker_symbol": "1IGRO",
+      "business_name": "1I Group, LLC"
+    }
+  ],
+  "already_exists": []
+}
