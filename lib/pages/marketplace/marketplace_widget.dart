@@ -176,7 +176,7 @@ class _MarketplaceWidgetState extends State<MarketplaceWidget> {
                       crossAxisCount: 2,
                       mainAxisSpacing: 12.0,
                       crossAxisSpacing: 12.0,
-                      childAspectRatio: 0.78,
+                      childAspectRatio: 0.72,
                     ),
                     itemCount: items.length,
                     itemBuilder: (context, index) => MarketplaceItemCardWidget(

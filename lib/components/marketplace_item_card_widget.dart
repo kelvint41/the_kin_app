@@ -181,116 +181,148 @@ class _MarketplaceItemCardWidgetState extends State<MarketplaceItemCardWidget> {
           child: Container(
             width: widget.width,
             decoration: BoxDecoration(
-              color: theme.secondaryBackground,
-              borderRadius: BorderRadius.circular(12.0),
-              border: Border.all(color: theme.alternate, width: 1.0),
+              borderRadius: BorderRadius.circular(16.0),
             ),
             clipBehavior: Clip.antiAlias,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Stack(
-                  children: [
-                    BusinessImage(
-                      imageUrl: item.photoUrl,
-                      width: widget.width,
-                      height: 84.0,
-                      fit: BoxFit.cover,
-                    ),
-                    // Only the owner sees this - management otherwise lives
-                    // exclusively in My Items, an extra hop from here.
-                    if (business.ownerRef == currentUserReference)
-                      Positioned(
-                        top: 4.0,
-                        right: 4.0,
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(999.0),
-                          onTap: () => _confirmDelete(context),
-                          child: Container(
-                            width: 28.0,
-                            height: 28.0,
-                            decoration: BoxDecoration(
-                              color: Color(0xE6FFFFFF),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Icon(
-                              Icons.delete_outline_rounded,
-                              size: 16.0,
-                              color: theme.error,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        item.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(
-                              fontWeight: FontWeight.bold),
-                          fontWeight: FontWeight.bold,
-                          color: theme.primaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                      Text(
-                        '${business.businessName} · ${item.priceDisplay}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.labelSmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
-                      ),
-                      SizedBox(height: 6.0),
-                      InkWell(
-                        onTap: () =>
-                            _openReactionPicker(context, item.businessRef!),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 4.0),
-                          decoration: BoxDecoration(
-                            color: theme.primaryBackground,
-                            borderRadius: BorderRadius.circular(999.0),
-                            border: Border.all(
-                                color: theme.alternate, width: 1.0),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.diversity_3_rounded,
-                                size: 13.0,
-                                color: theme.accentOnSurface,
-                              ),
-                              SizedBox(width: 4.0),
-                              Text(
-                                '${item.interestCount}',
-                                style: theme.labelSmall.override(
-                                  font: GoogleFonts.plusJakartaSans(),
-                                  color: theme.secondaryText,
-                                  letterSpacing: 0.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+            // A no-op once a parent (the grid) already imposes a tight
+            // height via childAspectRatio - only takes effect where height
+            // is otherwise unconstrained, i.e. the horizontal "Popular near
+            // you" rail, so one card definition serves both without a
+            // separate height parameter.
+            child: AspectRatio(
+              aspectRatio: 0.72,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Full-bleed photo - the card *is* the image, not a
+                  // thumbnail with a caption underneath.
+                  BusinessImage(
+                    imageUrl: item.photoUrl,
+                    width: widget.width,
+                    height: double.infinity,
+                    fit: BoxFit.cover,
                   ),
-                ),
-              ],
+                  // Scrim only over the lower half, so the photo reads
+                  // clearly at the top and the overlaid text stays legible
+                  // at the bottom regardless of what's in the shot.
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.5, 1.0],
+                          colors: [
+                            Colors.transparent,
+                            Color(0xCC000000),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Only the owner sees this - management otherwise lives
+                  // exclusively in My Items, an extra hop from here. Top
+                  // left so it never collides with the reaction pill.
+                  if (business.ownerRef == currentUserReference)
+                    Positioned(
+                      top: 8.0,
+                      left: 8.0,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(999.0),
+                        onTap: () => _confirmDelete(context),
+                        child: Container(
+                          width: 28.0,
+                          height: 28.0,
+                          decoration: BoxDecoration(
+                            color: Color(0xE6FFFFFF),
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.delete_outline_rounded,
+                            size: 16.0,
+                            color: theme.error,
+                          ),
+                        ),
+                      ),
+                    ),
+                  // The reaction pill, pinned over the photo like a
+                  // favorite/like count rather than living in a separate
+                  // text block - matches the full-bleed reference layout.
+                  Positioned(
+                    top: 8.0,
+                    right: 8.0,
+                    child: InkWell(
+                      onTap: () =>
+                          _openReactionPicker(context, item.businessRef!),
+                      borderRadius: BorderRadius.circular(999.0),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          color: Color(0x99000000),
+                          borderRadius: BorderRadius.circular(999.0),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.diversity_3_rounded,
+                              size: 13.0,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 4.0),
+                            Text(
+                              '${item.interestCount}',
+                              style: theme.labelSmall.override(
+                                font: GoogleFonts.plusJakartaSans(),
+                                color: Colors.white,
+                                letterSpacing: 0.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Title + business/price overlaid directly on the scrim,
+                  // always white - this is styled against the gradient it
+                  // sits on, not the app's light/dark theme.
+                  Positioned(
+                    left: 10.0,
+                    right: 10.0,
+                    bottom: 10.0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          item.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.bodyMedium.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold),
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                        Text(
+                          '${business.businessName} · ${item.priceDisplay}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.labelSmall.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: Color(0xE6FFFFFF),
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
