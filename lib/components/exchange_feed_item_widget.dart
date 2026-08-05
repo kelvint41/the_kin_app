@@ -5,8 +5,8 @@ import '/components/edit_exchange_post_sheet.dart';
 import '/components/exchange_profile_sheet.dart';
 import '/pages/business_profile_v2/business_profile_v2_widget.dart';
 import '/services/engagement_stats.dart';
+import '/components/kindex_tier_badge_widget.dart';
 import '/services/exchange_post_types.dart';
-import '/services/kindex_tiers.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import 'dart:async';
@@ -570,7 +570,6 @@ class _KindexScoreBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = FlutterFlowTheme.of(context);
     final scoreRef = KindexScoresRecord.collection.doc(userRef.id);
     return StreamBuilder<DocumentSnapshot>(
       stream: scoreRef.snapshots(),
@@ -579,75 +578,10 @@ class _KindexScoreBadge extends StatelessWidget {
           return SizedBox.shrink();
         }
         final scoreRecord = KindexScoresRecord.fromSnapshot(snapshot.data!);
-        // Tier drives the badge's color and, above the 300 baseline, an
-        // appended label - null at baseline keeps the original plain-gold
-        // look rather than badging every brand-new account.
-        final tier = kindexTierForScore(scoreRecord.score);
-        final accentColor = tier?.color ?? Color(0xFFFFD700);
-        return Container(
-          decoration: BoxDecoration(
-            color: accentColor.withAlpha(0x1A),
-            borderRadius: BorderRadius.circular(theme.designToken.radius.full),
-            border: Border.all(color: accentColor.withAlpha(0x4D), width: 1.0),
-          ),
-          child: Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(6.0, 2.0, 6.0, 2.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  scoreRecord.isTrendingUp
-                      ? Icons.arrow_upward_rounded
-                      : Icons.arrow_downward_rounded,
-                  color: scoreRecord.isTrendingUp
-                      ? Color(0xFF10B981)
-                      : Color(0xFFEF4444),
-                  size: 10.0,
-                ),
-                Text(
-                  scoreRecord.score.toStringAsFixed(0),
-                  style: theme.labelSmall.override(
-                    font: GoogleFonts.plusJakartaSans(
-                        fontWeight: FontWeight.bold),
-                    color: accentColor,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.0,
-                    fontSize: 11.0,
-                  ),
-                ),
-                // Bounded and ellipsized rather than left to grow freely -
-                // this badge sits in a Row next to a Flexible name that can
-                // already shrink to fit; an unbounded tier label here could
-                // still overflow the row on a narrow phone with a long
-                // display name, so it truncates instead.
-                if (tier != null) ...[
-                  Text(
-                    ' · ',
-                    style: theme.labelSmall.override(
-                      color: accentColor.withAlpha(0xAA),
-                      fontSize: 11.0,
-                    ),
-                  ),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 84.0),
-                    child: Text(
-                      tier.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.labelSmall.override(
-                        font: GoogleFonts.plusJakartaSans(
-                            fontWeight: FontWeight.bold),
-                        color: accentColor,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.0,
-                        fontSize: 11.0,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
+        return KindexTierBadge(
+          score: scoreRecord.score,
+          isTrendingUp: scoreRecord.isTrendingUp,
+          dense: true,
         );
       },
     );

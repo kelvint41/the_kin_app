@@ -191,6 +191,7 @@ class KindexTickerEntry {
     required this.score,
     required this.isTrendingUp,
     this.businessRef,
+    this.heroImage,
   });
 
   final String name;
@@ -200,6 +201,10 @@ class KindexTickerEntry {
   /// Only set for business entries (see [KinServices.fetchTopBusinessKindex])
   /// - null for customer entries, which have no business profile to link to.
   final DocumentReference? businessRef;
+
+  /// Business hero photo URL. Only set for business entries - customers
+  /// have no photo anywhere in the leaderboard context.
+  final String? heroImage;
 }
 
 /// One AI-generated post concept, returned by
@@ -397,6 +402,7 @@ class KinServices {
                 score: record.kindexScore,
                 isTrendingUp: record.kindexVelocity >= 0,
                 businessRef: record.reference,
+                heroImage: record.heroImage,
               ))
           .toList();
       return ServiceResult.success(entries);

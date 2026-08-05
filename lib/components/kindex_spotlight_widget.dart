@@ -1,4 +1,7 @@
-import '/components/rank_card_widget.dart';
+import '/components/business_image_widget.dart';
+import '/components/business_rank_highlight_card_widget.dart';
+import '/components/customer_rank_highlight_card_widget.dart';
+import '/components/kindex_tier_badge_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/pages/business_profile_v2/business_profile_v2_widget.dart';
@@ -107,13 +110,11 @@ class _KindexSpotlightWidgetState extends State<KindexSpotlightWidget> {
                   _LeaderboardSection(
                     title: 'Top Business Owners',
                     entries: _businessEntries,
-                    descLabel: 'Business',
                   ),
                   SizedBox(height: theme.designToken.spacing.xl),
                   _LeaderboardSection(
                     title: 'Top Customers',
                     entries: _customerEntries,
-                    descLabel: 'Community Member',
                   ),
                 ],
               ),
@@ -274,7 +275,7 @@ class _PodiumSlot extends StatelessWidget {
     final theme = FlutterFlowTheme.of(context);
     final medal = _medalColors[rank];
     final isFirst = rank == 0;
-    final avatarSize = isFirst ? 52.0 : 42.0;
+    final avatarSize = isFirst ? 64.0 : 42.0;
     final initial =
         entry.name.trim().isNotEmpty ? entry.name.trim()[0].toUpperCase() : '?';
 
@@ -306,14 +307,27 @@ class _PodiumSlot extends StatelessWidget {
                 border: Border.all(color: medal, width: 2.0),
               ),
               alignment: Alignment.center,
-              child: Text(
-                initial,
-                style: theme.titleMedium.override(
-                  font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              // #1 shows the business's actual photo - BusinessImage's own
+              // fallback (the KIN logo) covers a missing/broken heroImage
+              // for free, so no separate empty-state handling is needed
+              // here. #2/#3 keep the initials ring, unchanged.
+              child: isFirst
+                  ? ClipOval(
+                      child: BusinessImage(
+                        imageUrl: entry.heroImage,
+                        width: avatarSize,
+                        height: avatarSize,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Text(
+                      initial,
+                      style: theme.titleMedium.override(
+                        font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
             SizedBox(height: 4.0),
             SizedBox(
@@ -331,13 +345,21 @@ class _PodiumSlot extends StatelessWidget {
                 ),
               ),
             ),
-            Text(
-              entry.score.toStringAsFixed(0),
-              style: theme.labelSmall.override(
-                font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-                color: medal,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.0,
+            // The badge (icon + score + tier label) is wider than the old
+            // plain score Text it replaced, and can overflow the podium's
+            // tight 3-across layout on narrower phones - see the overflow
+            // this exact spot caused on iPhone 17 Pro Max (fine on a wider
+            // iPad). Constrained to the same 76px column as the name above
+            // and allowed to shrink rather than clip or overflow.
+            SizedBox(
+              width: 76.0,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: KindexTierBadge(
+                  score: entry.score,
+                  isTrendingUp: entry.isTrendingUp,
+                  dense: true,
+                ),
               ),
             ),
           ],
@@ -351,12 +373,10 @@ class _LeaderboardSection extends StatelessWidget {
   const _LeaderboardSection({
     required this.title,
     required this.entries,
-    required this.descLabel,
   });
 
   final String title;
   final List<KindexTickerEntry> entries;
-  final String descLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -387,34 +407,11 @@ class _LeaderboardSection extends StatelessWidget {
           ...entries.asMap().entries.map((indexed) {
             final rank = indexed.key + 1;
             final entry = indexed.value;
-            final businessRef = entry.businessRef;
-            final row = RankCardWidget(
-              rank: rank.toString(),
-              name: entry.name,
-              desc: descLabel,
-              score: entry.score.toStringAsFixed(0),
-            );
             return Padding(
               padding: EdgeInsets.only(bottom: theme.designToken.spacing.sm),
-              child: businessRef == null
-                  ? row
-                  : ClipRRect(
-                      borderRadius: BorderRadius.circular(24.0),
-                      child: InkWell(
-                        onTap: () {
-                          context.pushNamed(
-                            BusinessProfileV2Widget.routeName,
-                            queryParameters: {
-                              'businessDocument': serializeParam(
-                                businessRef,
-                                ParamType.DocumentReference,
-                              ),
-                            }.withoutNulls,
-                          );
-                        },
-                        child: row,
-                      ),
-                    ),
+              child: entry.businessRef != null
+                  ? BusinessRankHighlightCardWidget(rank: rank, entry: entry)
+                  : CustomerRankHighlightCardWidget(rank: rank, entry: entry),
             );
           }),
       ],
