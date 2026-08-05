@@ -56,6 +56,12 @@ class MainMenuButton extends StatelessWidget {
 /// A small caption-style header above a group of menu items (Discover,
 /// Community, Quest, Profile) - lighter weight than [SectionHeaderWidget],
 /// which is sized for a full page rather than a compact bottom sheet row.
+///
+/// Bold and underlined (rather than the previous plain semi-bold caption)
+/// specifically to read as a visible divider between the four groups -
+/// on a wider sheet (iPad) with the menu now stretched full-width, an
+/// unbroken run of similarly-weighted ListTiles made it hard to tell where
+/// one category ended and the next began.
 Widget _sectionLabel(FlutterFlowTheme theme, String label) => Padding(
       padding: EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 4.0),
       child: Text(
@@ -63,7 +69,10 @@ Widget _sectionLabel(FlutterFlowTheme theme, String label) => Padding(
         style: theme.labelSmall.override(
           color: theme.secondaryText,
           letterSpacing: 0.5,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.bold,
+          // No decorationColor override needed - TextDecoration inherits
+          // the TextStyle's own color (secondaryText) by default.
+          decoration: TextDecoration.underline,
         ),
       ),
     );
@@ -94,6 +103,12 @@ void showMainMenuSheet(BuildContext context,
           maxHeight: MediaQuery.of(sheetContext).size.height * 0.85,
         ),
         child: Container(
+          // Explicit full width rather than sizing to content - on a wider
+          // canvas (iPad) the Column below used to size itself to its
+          // widest child instead of filling the sheet, so the whole menu
+          // floated centered in the middle of the screen instead of
+          // hugging the left edge.
+          width: double.infinity,
           decoration: BoxDecoration(
             color: theme.primaryBackground,
             borderRadius: BorderRadius.only(
@@ -108,15 +123,22 @@ void showMainMenuSheet(BuildContext context,
                     vertical: theme.designToken.spacing.md),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  // Stretch so every row (section label, ListTile) fills
+                  // the sheet's full width and left-aligns its content,
+                  // instead of the Column's default center alignment
+                  // hugging each row to its own intrinsic width.
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      width: 40.0,
-                      height: 4.0,
-                      margin:
-                          EdgeInsets.only(bottom: theme.designToken.spacing.md),
-                      decoration: BoxDecoration(
-                        color: theme.alternate,
-                        borderRadius: BorderRadius.circular(2.0),
+                    Center(
+                      child: Container(
+                        width: 40.0,
+                        height: 4.0,
+                        margin: EdgeInsets.only(
+                            bottom: theme.designToken.spacing.md),
+                        decoration: BoxDecoration(
+                          color: theme.alternate,
+                          borderRadius: BorderRadius.circular(2.0),
+                        ),
                       ),
                     ),
                     // Grouped under labeled sections (Discover / Community /
