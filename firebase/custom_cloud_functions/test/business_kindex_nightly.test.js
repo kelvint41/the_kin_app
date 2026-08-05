@@ -15,8 +15,13 @@ if (!admin.apps.length) {
 }
 
 const nightly = require("../business_kindex_nightly.js");
-const { computeScore, highestRatingPerVerifiedCustomer, recomputeAll } =
-  nightly._internals;
+const {
+  computeScore,
+  highestRatingPerVerifiedCustomer,
+  distinctPostDaysByAuthor,
+  applyActivePosterBonus,
+  recomputeAll,
+} = nightly._internals;
 
 const db = admin.firestore();
 
@@ -33,6 +38,7 @@ beforeEach(async () => {
     clear("businesses"),
     clear("reviews"),
     clear("uservisits"),
+    clear("exchange_posts"),
     clear("kindex_score_history"),
   ]);
 });
@@ -44,6 +50,7 @@ async function seed({
   isPremium = false,
   reviews = [],
   visits = [],
+  posts = [],
   owner,
   score,
   lastActivityDaysAgo,
@@ -75,6 +82,17 @@ async function seed({
       business_ref: businessRef,
       user_ref: db.collection("users").doc(v.user),
       visit_timestamp: daysAgo(v.daysAgo ?? 1),
+    });
+  }
+  // Author defaults to the business owner - the active-poster bonus only
+  // counts the owner's own posts (see business_kindex_nightly.js), so a
+  // caller only needs to override `user` for the "someone else posted"
+  // case.
+  for (const p of posts) {
+    await db.collection("exchange_posts").doc(uniq("post")).set({
+      user_ref: db.collection("users").doc(p.user ?? owner),
+      business_ref: businessRef,
+      timestamp: daysAgo(p.daysAgo ?? 1),
     });
   }
   return businessRef;
@@ -312,6 +330,143 @@ test("kindex_velocity is never written", async () => {
   });
   await recomputeAll(db, Date.now());
   assert.equal((await businessRef.get()).data().kindex_velocity, 42);
+});
+
+// --- Active Poster Bonus -------------------------------------------------
+
+test("distinctPostDaysByAuthor dedups same-day posts", () => {
+  const day1 = { toDate: () => new Date("2026-01-01T09:00:00Z") };
+  const day1Later = { toDate: () => new Date("2026-01-01T21:00:00Z") };
+  const day2 = { toDate: () => new Date("2026-01-02T09:00:00Z") };
+  const posts = [
+    { user_ref: { id: "owner1" }, timestamp: day1 },
+    { user_ref: { id: "owner1" }, timestamp: day1Later },
+    { user_ref: { id: "owner1" }, timestamp: day2 },
+    { user_ref: { id: "owner2" }, timestamp: day1 },
+  ];
+  const byAuthor = distinctPostDaysByAuthor(posts);
+  assert.equal(byAuthor.get("owner1").size, 2, "same-day posts double-counted");
+  assert.equal(byAuthor.get("owner2").size, 1);
+});
+
+test("applyActivePosterBonus adds and clamps to the ceiling", () => {
+  assert.equal(applyActivePosterBonus(500, false, 10, 750), 500, "bonus applied when not an active poster");
+  assert.equal(applyActivePosterBonus(500, true, 10, 750), 510);
+  assert.equal(applyActivePosterBonus(745, true, 10, 750), 750, "bonus overshot the ceiling");
+});
+
+test("a business with no reviews still gets no bonus below 3 distinct posting days", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500);
+});
+
+test("reaching 3 distinct posting days grants the active-poster bonus", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }, { daysAgo: 3 }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 510); // 500 baseline + 10 bonus
+});
+
+test("five posts in one day count as one distinct day, not five", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [
+      { daysAgo: 1 },
+      { daysAgo: 1 },
+      { daysAgo: 1 },
+      { daysAgo: 1 },
+      { daysAgo: 1 },
+    ],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500, "one busy day granted the bonus");
+});
+
+test("posts outside the 7-day window are excluded from the streak", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }, { daysAgo: 10 }],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500, "stale post counted toward the streak");
+});
+
+test("a post authored by someone other than the owner does not count", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [
+      { daysAgo: 1, user: "customer1" },
+      { daysAgo: 2, user: "customer1" },
+      { daysAgo: 3, user: "customer1" },
+    ],
+  });
+  assert.equal(await scoreAfterRecompute(biz), 500, "a non-owner's posts granted the bonus");
+});
+
+test("posting alone, with no reviews, still counts as activity and blocks decay", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    score: 600,
+    lastActivityDaysAgo: 21,
+    decayedThroughWeek: 2,
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }, { daysAgo: 3 }],
+  });
+  await recomputeAll(db, Date.now());
+  const data = (await biz.get()).data();
+  // Target is baseline+bonus (510) from 600 - a 90pt gap capped at 20, so
+  // the score moves down toward it rather than decaying for inactivity.
+  assert.equal(data.kindex_score, 580);
+  assert.equal(data.kindex_inactivity_weeks, 0, "streak not reset by posting");
+  assert.equal(data.kindex_decayed_through_week, 0, "decay ledger not cleared");
+  assert.equal(data.kindex_active_poster_bonus_applied, true);
+  assert.equal(data.kindex_active_poster_days, 3);
+
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("business_ref", "==", biz)
+    .get();
+  assert.equal(rows.docs[0].data().decay_applied, 0, "decay charged despite active posting");
+});
+
+test("the active-poster bonus is clamped to the tier ceiling, not stacked past it", async () => {
+  // 50 verified 5-star reviews already push the raw target to the tier
+  // ceiling (750) before any bonus is considered.
+  const reviews = [];
+  const visits = [];
+  for (let i = 0; i < 50; i += 1) {
+    reviews.push({ user: `cust${i}`, rating: 5 });
+    visits.push({ user: `cust${i}` });
+  }
+  const biz = await seed({
+    owner: "owner1",
+    reviews,
+    visits,
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }, { daysAgo: 3 }],
+  });
+  await recomputeAll(db, Date.now());
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("business_ref", "==", biz)
+    .get();
+  assert.equal(rows.docs[0].data().target_score, 750, "bonus pushed the target past the ceiling");
+});
+
+test("each run writes active-poster fields on the history row", async () => {
+  const biz = await seed({
+    owner: "owner1",
+    posts: [{ daysAgo: 1 }, { daysAgo: 2 }, { daysAgo: 3 }],
+  });
+  await recomputeAll(db, Date.now());
+  const rows = await db
+    .collection("kindex_score_history")
+    .where("business_ref", "==", biz)
+    .get();
+  const row = rows.docs[0].data();
+  assert.equal(row.active_poster_bonus_applied, true);
+  assert.equal(row.active_poster_days, 3);
+  assert.equal(row.active_poster_bonus_points, 10);
 });
 
 // --- Smoothing (capped nightly movement) --------------------------------

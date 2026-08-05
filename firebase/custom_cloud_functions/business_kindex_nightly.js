@@ -8,6 +8,7 @@ const dynamics = require("./kindex_scoring_dynamics.js");
 const { applyNightlyMovement } = dynamics;
 
 const VISITS_COLLECTION = "uservisits";
+const POSTS_COLLECTION = "exchange_posts";
 const WINDOW_DAYS = 7;
 
 // Same tier baselines/ceilings and star deltas as
@@ -105,21 +106,65 @@ function tierBaseline(isPremium) {
   return isPremium ? PREMIUM_BASELINE : STANDARD_BASELINE;
 }
 
+function tierMaximum(isPremium) {
+  return isPremium ? PREMIUM_MAXIMUM_SCORE : STANDARD_MAXIMUM_SCORE;
+}
+
+/**
+ * Buckets exchange_posts by author into the distinct calendar days they
+ * posted, within whatever window the caller already filtered to. Grouped
+ * by author (user_ref), not by business_ref, because Active Poster rewards
+ * a business owner's own marketing activity in the Exchange, not being
+ * tagged in someone else's post - so a post counts even if the owner
+ * didn't tag this business on it.
+ *
+ * Day boundaries are UTC calendar days (same convention as historyDocId),
+ * not America/Chicago - acceptable skew for a 3-day/7-day threshold,
+ * consistent with the rest of this file's date handling.
+ */
+function distinctPostDaysByAuthor(posts) {
+  const byAuthor = new Map();
+  for (const post of posts) {
+    const userRef = post.user_ref;
+    if (!userRef || !post.timestamp) continue;
+    const day = post.timestamp.toDate().toISOString().slice(0, 10);
+    if (!byAuthor.has(userRef.id)) byAuthor.set(userRef.id, new Set());
+    byAuthor.get(userRef.id).add(day);
+  }
+  return byAuthor;
+}
+
+/**
+ * Adds the active-poster bonus to a computed target score, re-clamped to
+ * the same tier ceiling computeScore() uses. Kept separate from
+ * computeScore() so the two stay independently testable: one is "what do
+ * qualifying reviews alone produce", the other is "what does that become
+ * once posting activity is folded in".
+ */
+function applyActivePosterBonus(score, isActivePoster, bonusAmount, maximumScore) {
+  if (!isActivePoster) return score;
+  return clamp(score + bonusAmount, MINIMUM_SCORE, maximumScore);
+}
+
 async function recomputeAll(db, now) {
   const config = await dynamics.getScoringDynamics(db);
   const windowStart = admin.firestore.Timestamp.fromMillis(
     now - WINDOW_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  // Pull the window's reviews and visits once and bucket them in memory,
-  // rather than issuing two queries per business. At the current scale
+  // Pull the window's reviews, visits, and posts once and bucket them in
+  // memory, rather than issuing per-business queries. At the current scale
   // (hundreds of businesses) that's the difference between a handful of
   // reads and a thousand-plus.
-  const [reviewsSnap, visitsSnap] = await Promise.all([
+  const [reviewsSnap, visitsSnap, postsSnap] = await Promise.all([
     db.collection("reviews").where("timestamp", ">=", windowStart).get(),
     db
       .collection(VISITS_COLLECTION)
       .where("visit_timestamp", ">=", windowStart)
+      .get(),
+    db
+      .collection(POSTS_COLLECTION)
+      .where("timestamp", ">=", windowStart)
       .get(),
   ]);
 
@@ -140,6 +185,10 @@ async function recomputeAll(db, now) {
     if (!verifiedByBusiness.has(key)) verifiedByBusiness.set(key, new Set());
     verifiedByBusiness.get(key).add(data.user_ref.id);
   }
+
+  const postDaysByAuthor = distinctPostDaysByAuthor(
+    postsSnap.docs.map((doc) => doc.data()),
+  );
 
   const businessesSnap = await db.collection("businesses").get();
 
@@ -170,9 +219,28 @@ async function recomputeAll(db, now) {
         ? business.kindex_score
         : baseline;
 
+    // Active Poster Bonus - see kindex_scoring_dynamics.js DEFAULTS for the
+    // threshold/amount rationale. Counted against the owner's own posts
+    // only (not posts merely tagged to this business by someone else), so
+    // this rewards the owner's own marketing activity in the Exchange.
+    const ownerId = business.owner_ref ? business.owner_ref.id : null;
+    const postDays = ownerId ? postDaysByAuthor.get(ownerId)?.size || 0 : 0;
+    const activePoster = postDays >= config.business_active_poster_threshold_days;
+    const target = applyActivePosterBonus(
+      computeScore(ratings, isPremium),
+      activePoster,
+      config.business_active_poster_bonus,
+      tierMaximum(isPremium),
+    );
+
     const outcome = applyNightlyMovement({
-      hasActivity: ratings.length > 0,
-      target: computeScore(ratings, isPremium),
+      // A business with zero qualifying reviews but a genuine posting
+      // streak must still count as active, or the bonus gets defeated by
+      // the decay branch the same night it applies - decay and
+      // move-toward are deliberately exclusive (see
+      // applyNightlyMovement's doc comment).
+      hasActivity: ratings.length > 0 || activePoster,
+      target,
       scoreBefore,
       floor: baseline,
       lastActivityMs: business.kindex_last_activity_at
@@ -190,6 +258,10 @@ async function recomputeAll(db, now) {
       kindex_decayed_through_week: outcome.decayedThroughWeek,
       kindex_qualifying_review_count: ratings.length,
       kindex_last_recomputed_at: admin.firestore.FieldValue.serverTimestamp(),
+      // Audit/debug fields only - recomputed fresh from exchange_posts
+      // every run, never read back in as an input.
+      kindex_active_poster_bonus_applied: activePoster,
+      kindex_active_poster_days: postDays,
     };
     if (outcome.hasActivity) {
       update.kindex_last_activity_at =
@@ -221,6 +293,11 @@ async function recomputeAll(db, now) {
         inactivity_weeks: outcome.inactivityWeeks,
         qualifying_review_count: ratings.length,
         verified_visit_count: verified.size,
+        active_poster_bonus_applied: activePoster,
+        active_poster_days: postDays,
+        active_poster_bonus_points: activePoster
+          ? config.business_active_poster_bonus
+          : 0,
         recorded_at: admin.firestore.FieldValue.serverTimestamp(),
       },
     );
@@ -266,6 +343,8 @@ exports._internals = {
   computeScore,
   starDelta,
   highestRatingPerVerifiedCustomer,
+  distinctPostDaysByAuthor,
+  applyActivePosterBonus,
   recomputeAll,
   WINDOW_DAYS,
 };

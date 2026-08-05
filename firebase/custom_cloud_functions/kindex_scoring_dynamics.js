@@ -35,6 +35,19 @@ const DEFAULTS = {
   // at launch to turn normal target-seeking/decay back on - no redeploy
   // needed, same live-tunable pattern as every other value here.
   customer_scoring_frozen: true,
+  // Active Poster Bonus - business-only (see business_kindex_nightly.js).
+  // Customer KINDEX is frozen pre-launch (customer_scoring_frozen above),
+  // so an equivalent customer-side bonus would ship invisible; businesses
+  // are live today. Distinct-day dedup, not raw post count, mirrors the
+  // anti-farming pattern already used for reviews (one rating per verified
+  // customer) - reposting the same day repeatedly must not multiply the
+  // bonus. 10 points is half of business_max_nightly_change (20) so it
+  // can't monopolize a night's movement budget alongside real review
+  // activity, and sits between a single 4-star (+5) and 5-star (+15)
+  // delta so posting is meaningful but never outweighs real customer
+  // feedback.
+  business_active_poster_threshold_days: 3,
+  business_active_poster_bonus: 10,
 };
 
 let cached = null;
