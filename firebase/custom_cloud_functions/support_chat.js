@@ -112,8 +112,11 @@ exports.sendSupportChatMessage = onCall(
     if (!uid) {
       throw new HttpsError("unauthenticated", "Sign in required.");
     }
+    const db = admin.firestore();
+    const userRef = db.collection("users").doc(uid);
 
-    const { message, conversationId, history, visitorName } = request.data || {};
+    const { message, conversationId, history, visitorName, source, businessId } =
+      request.data || {};
     if (typeof message !== "string" || !message.trim()) {
       throw new HttpsError("invalid-argument", "message is required.");
     }
@@ -125,9 +128,21 @@ exports.sendSupportChatMessage = onCall(
     // just a uid. Denormalized onto every row rather than only the first,
     // so the admin dashboard can show it without joining back through
     // conversation_id.
+    //
+    // For a business owner this is the business's own name, not the
+    // person typing - set client-side from BusinessesRecord, never asked
+    // for as free text the way a customer's name is. `source` is what
+    // actually tells the two apart ('business'/'customer'); visitor_name
+    // alone can't be trusted to distinguish "Jasmine" the customer from
+    // "Jasmine" the business owner typing on someone's behalf.
     const trimmedVisitorName =
       typeof visitorName === "string" && visitorName.trim()
         ? visitorName.trim().slice(0, 100)
+        : null;
+    const resolvedSource = source === "business" ? "business" : "customer";
+    const businessRef =
+      resolvedSource === "business" && typeof businessId === "string" && businessId.trim()
+        ? db.collection("businesses").doc(businessId.trim())
         : null;
 
     // history is client-supplied conversation context (this session's prior
@@ -140,9 +155,6 @@ exports.sendSupportChatMessage = onCall(
           .map((h) => ({ role: h.role, text: h.text.slice(0, 2000) }))
           .slice(-6)
       : [];
-
-    const db = admin.firestore();
-    const userRef = db.collection("users").doc(uid);
 
     let result;
     try {
@@ -174,6 +186,9 @@ exports.sendSupportChatMessage = onCall(
       user_ref: userRef,
       conversation_id: typeof conversationId === "string" ? conversationId.slice(0, 200) : null,
       visitor_name: trimmedVisitorName,
+      // 'business' | 'customer' - see the comment above trimmedVisitorName.
+      source: resolvedSource,
+      business_ref: businessRef,
       message: trimmedMessage,
       reply: result.reply,
       category: result.category,
@@ -224,8 +239,12 @@ exports.sendSupportChatMessage = onCall(
                 : result.category === "bug_report"
                 ? "New bug report in support"
                 : "New support question",
+              // "(Business)" prefix is the whole point of tagging source -
+              // an admin skimming notifications can tell a business
+              // owner's message from a customer's at a glance instead of
+              // a bare name that reads the same either way.
               body: trimmedVisitorName
-                ? `${trimmedVisitorName}: ${result.summary || trimmedMessage.slice(0, 140)}`
+                ? `${resolvedSource === "business" ? "(Business) " : ""}${trimmedVisitorName}: ${result.summary || trimmedMessage.slice(0, 140)}`
                 : result.summary || trimmedMessage.slice(0, 140),
               // Must match ExecutiveDashboardWidget.routeName exactly
               // (underscore included) or the notification taps into nothing.

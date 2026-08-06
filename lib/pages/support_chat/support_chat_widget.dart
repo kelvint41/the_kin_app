@@ -1,3 +1,5 @@
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
 import '/components/main_menu_button.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -49,18 +51,69 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
   // widget is created) rather than pulled from the user's profile display
   // name, which is frequently empty - this is what actually got the admin
   // dashboard a name to show against a conversation.
+  //
+  // For a business owner this is never asked at all - see initState. A
+  // signed-in owner already has a business on file; asking them to type
+  // their own first name here got the admin dashboard a person's name
+  // when what actually identifies the conversation is which business is
+  // asking, not who's typing.
   String? _visitorName;
-  bool get _needsName => _visitorName == null;
+  bool get _needsName => !_isBusiness && _visitorName == null;
+
+  // Set once in initState from currentUserDocument.ownedBusiness - true for
+  // the whole lifetime of this page (a fresh SupportChatWidget is created
+  // per visit, so this can't go stale mid-conversation).
+  bool _isBusiness = false;
+  DocumentReference? _businessRef;
+
+  // Only meaningful while _isBusiness is true and the business-name lookup
+  // hasn't resolved yet - blocks sending so a business owner can't fire off
+  // a message before _visitorName/_businessRef are actually populated.
+  bool _resolvingBusiness = false;
 
   @override
   void initState() {
     super.initState();
     _model = createModel(context, () => SupportChatModel());
-    _turns.add(SupportChatTurn(
-      role: 'assistant',
-      text: "Hi! Before we get started, what's your first name? "
-          "(Last name's optional.)",
-    ));
+
+    final ownedBusiness = currentUserDocument?.ownedBusiness;
+    if (ownedBusiness == null) {
+      _turns.add(SupportChatTurn(
+        role: 'assistant',
+        text: "Hi! Before we get started, what's your first name? "
+            "(Last name's optional.)",
+      ));
+      return;
+    }
+
+    _isBusiness = true;
+    _businessRef = ownedBusiness;
+    _resolvingBusiness = true;
+    BusinessesRecord.getDocumentOnce(ownedBusiness).then((business) {
+      if (!mounted) return;
+      safeSetState(() {
+        _visitorName = business.businessName.isNotEmpty
+            ? business.businessName
+            : 'your business';
+        _resolvingBusiness = false;
+        _turns.add(SupportChatTurn(
+          role: 'assistant',
+          text: 'Hi, $_visitorName! What can I help with?',
+        ));
+      });
+    }).catchError((_) {
+      if (!mounted) return;
+      // Falls back to *something* rather than leaving the owner stuck
+      // with an empty screen and a disabled input bar.
+      safeSetState(() {
+        _visitorName = 'your business';
+        _resolvingBusiness = false;
+        _turns.add(SupportChatTurn(
+          role: 'assistant',
+          text: "Hi! What can I help with?",
+        ));
+      });
+    });
   }
 
   @override
@@ -73,7 +126,7 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
 
   Future<void> _send() async {
     final text = _inputController.text.trim();
-    if (text.isEmpty || _sending) return;
+    if (text.isEmpty || _sending || _resolvingBusiness) return;
 
     if (_needsName) {
       // No AI call for this turn - capturing a name doesn't need a model,
@@ -106,6 +159,8 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
       message: text,
       conversationId: _conversationId,
       visitorName: _visitorName,
+      source: _isBusiness ? 'business' : 'customer',
+      businessRef: _businessRef,
       // Prior turns only - the message just added isn't context for
       // itself.
       history: _turns.sublist(0, _turns.length - 1),
@@ -256,7 +311,11 @@ class _SupportChatWidgetState extends State<SupportChatWidget> {
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _send(),
                 decoration: InputDecoration(
-                  hintText: _needsName ? 'Your first name...' : 'Type a message...',
+                  hintText: _resolvingBusiness
+                      ? 'One moment...'
+                      : _needsName
+                          ? 'Your first name...'
+                          : 'Type a message...',
                   hintStyle: theme.bodySmall.override(color: theme.hint),
                   filled: true,
                   fillColor: theme.secondaryBackground,
