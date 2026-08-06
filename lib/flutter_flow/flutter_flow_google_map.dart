@@ -59,10 +59,23 @@ class MarkerImage {
 }
 
 class FlutterFlowMarker {
-  const FlutterFlowMarker(this.markerId, this.location, [this.onTap]);
+  const FlutterFlowMarker(
+    this.markerId,
+    this.location, [
+    this.onTap,
+    this.colorOverride,
+  ]);
   final String markerId;
   final latlng.LatLng location;
   final Future Function()? onTap;
+
+  /// Per-marker color, overriding the map's single [FlutterFlowGoogleMap.
+  /// markerColor] for just this pin. Null (the default) keeps every
+  /// existing call site's behavior identical - only a caller that sets
+  /// this sees a different-colored pin, e.g. Executive Dashboard's
+  /// business-finds map distinguishing found (hot) from never-found
+  /// (cold) businesses on the same map.
+  final GoogleMarkerColor? colorOverride;
 }
 
 class FlutterFlowGoogleMap extends StatefulWidget {
@@ -234,7 +247,10 @@ class _FlutterFlowGoogleMapState extends State<FlutterFlowGoogleMap> {
               (m) => Marker(
                 markerId: MarkerId(m.markerId),
                 position: m.location.toGoogleMaps(),
-                icon: _markerDescriptor ?? BitmapDescriptor.defaultMarker,
+                icon: m.colorOverride != null
+                    ? BitmapDescriptor.defaultMarkerWithHue(
+                        googleMarkerColorMap[m.colorOverride]!)
+                    : (_markerDescriptor ?? BitmapDescriptor.defaultMarker),
                 onTap: () async {
                   if (widget.centerMapOnMarkerTap) {
                     final controller = await _controller.future;

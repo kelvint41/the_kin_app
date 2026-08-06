@@ -65,8 +65,13 @@ export 'executive_dashboard_model.dart';
 /// 6. A Recent Registrations Feed Section: A final list feed section titled
 /// "Recent Signups" mapping a direct firestore query limited to 10 entries
 /// displaying user name strings, city fields, and user status type badges.
-/// One pin on the KIN Quest Finds map - a business the scavenger hunt has
-/// recorded at least one verified check-in for, plus how many.
+/// One pin on the KIN Quest Finds map - every business with a mapped
+/// location, plus however many verified check-ins the scavenger hunt has
+/// recorded for it (0 for a business nobody's found yet). Was find-only
+/// (businesses with zero visits never got a row at all), which meant the
+/// map only ever showed the sliver of the directory someone had physically
+/// checked into - on a ~1,183-business directory, that hid the other
+/// ~1,100+ pins entirely instead of showing them as "not yet found".
 class _BusinessFindPin {
   const _BusinessFindPin({
     required this.markerId,
@@ -1712,44 +1717,52 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// every metro at once. `uservisits` carries no
   /// location of its own (just user_ref/business_ref/visit_timestamp - see
   /// UservisitsRecord), so each visit is resolved to its business's
-  /// `business_location` GeoPoint. All-time rather than a rolling window:
-  /// a business that's been "found" stays found, the same way
-  /// scavenger_points never resets (see visit_verification.js).
+  /// `business_location` GeoPoint. Find counts are all-time rather than a
+  /// rolling window: a business that's been "found" stays found, the same
+  /// way scavenger_points never resets (see visit_verification.js).
   ///
-  /// Reads across the whole (unfiltered) uservisits collection - allowed
-  /// for an admin under firestore.rules' `is_admin == true` branch, same
-  /// as every other cross-business panel on this page.
+  /// Two whole-collection reads rather than the old one-query-plus-N-gets
+  /// (a `BusinessesRecord.getDocumentOnce` per found business) - that
+  /// pattern only scaled because it only ever ran for the sliver of
+  /// businesses with a visit. Querying every business individually to add
+  /// the ~1,100+ never-found ones on top would mean 1,100+ serial round
+  /// trips; one `queryBusinessesRecordOnce()` gets all of them in a single
+  /// read instead, same as `queryUservisitsRecordOnce()` already does for
+  /// visits. Both reads are allowed for an admin under firestore.rules'
+  /// `is_admin == true` branch, same as every other cross-business panel on
+  /// this page.
   Future<List<_BusinessFindPin>> _loadBusinessFindPins() async {
     List<UservisitsRecord> visits;
     try {
       visits = await queryUservisitsRecordOnce();
     } catch (_) {
-      return const [];
+      visits = const [];
     }
 
-    final findCountsByBusiness = <DocumentReference, int>{};
+    final findCountsByBusiness = <String, int>{};
     for (final visit in visits) {
       final businessRef = visit.businessRef;
       if (businessRef == null) continue;
-      findCountsByBusiness[businessRef] =
-          (findCountsByBusiness[businessRef] ?? 0) + 1;
+      findCountsByBusiness[businessRef.path] =
+          (findCountsByBusiness[businessRef.path] ?? 0) + 1;
+    }
+
+    List<BusinessesRecord> businesses;
+    try {
+      businesses = await queryBusinessesRecordOnce();
+    } catch (_) {
+      return const [];
     }
 
     final pins = <_BusinessFindPin>[];
-    for (final entry in findCountsByBusiness.entries) {
-      BusinessesRecord business;
-      try {
-        business = await BusinessesRecord.getDocumentOnce(entry.key);
-      } catch (_) {
-        continue;
-      }
+    for (final business in businesses) {
       final location = business.businessLocation;
       if (location == null) continue;
       pins.add(_BusinessFindPin(
-        markerId: entry.key.path,
+        markerId: business.reference.path,
         businessName: business.businessName,
         location: location,
-        findCount: entry.value,
+        findCount: findCountsByBusiness[business.reference.path] ?? 0,
       ));
     }
     return pins;
@@ -1765,7 +1778,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'KIN Quest Finds',
+          'Business Coverage & KIN Quest Finds',
           style: theme.titleMedium.override(
             font: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
             letterSpacing: 0.0,
@@ -1774,8 +1787,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           ),
         ),
         Text(
-          'Every metro at once - businesses customers have found via the '
-          'scavenger hunt. Tap a pin for the business name and find count.',
+          'Every metro at once, every mapped business - rose pins have '
+          'been found via the scavenger hunt, azure pins haven\'t yet. Tap '
+          'a pin for the business name and find count.',
           style: theme.bodySmall.override(
             font: GoogleFonts.plusJakartaSans(),
             color: theme.secondaryText,
@@ -1812,7 +1826,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     child: Padding(
                       padding: EdgeInsets.all(24.0),
                       child: Text(
-                        'No KIN Quest finds recorded yet.',
+                        'No businesses with a mapped location yet.',
                         textAlign: TextAlign.center,
                         style: theme.bodySmall.override(
                           font: GoogleFonts.plusJakartaSans(),
@@ -1838,6 +1852,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                 showLocationButton: false,
                 showCompass: false,
                 mapTakesGesturePreference: true,
+                // markerColor is the fallback for any pin below that
+                // doesn't set colorOverride - kept as rose so a stray
+                // marker reads the same "found" way this map always has.
                 markerColor: GoogleMarkerColor.rose,
                 markers: pins.map((pin) => FlutterFlowMarker(
                       pin.markerId,
@@ -1854,6 +1871,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           ),
                         );
                       },
+                      // Hot/cold: rose for a business someone's actually
+                      // found, azure for one that's on the map but nobody
+                      // has checked into yet - the whole point of adding
+                      // every business is to make that gap visible.
+                      pin.findCount > 0
+                          ? GoogleMarkerColor.rose
+                          : GoogleMarkerColor.azure,
                     )),
               );
             },
