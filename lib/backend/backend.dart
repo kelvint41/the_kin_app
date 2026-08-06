@@ -28,6 +28,7 @@ import 'schema/uservisits_record.dart';
 import 'schema/reviews_record.dart';
 import 'schema/user_engagement_events_record.dart';
 import 'schema/kindex_scores_record.dart';
+import 'schema/kindex_score_history_record.dart';
 import 'schema/signup_feed_record.dart';
 import 'schema/unlocked_rewards_record.dart';
 import 'schema/kin_feed_events_record.dart';
@@ -64,6 +65,7 @@ export 'schema/uservisits_record.dart';
 export 'schema/reviews_record.dart';
 export 'schema/user_engagement_events_record.dart';
 export 'schema/kindex_scores_record.dart';
+export 'schema/kindex_score_history_record.dart';
 export 'schema/signup_feed_record.dart';
 export 'schema/exchange_profiles_record.dart';
 export 'schema/unlocked_rewards_record.dart';
@@ -773,6 +775,48 @@ Future<List<UservisitsRecord>> queryUservisitsRecordOnce({
     queryCollectionOnce(
       UservisitsRecord.collection,
       UservisitsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query KindexScoreHistoryRecords (as a Stream and as a
+/// Future). One fetch per screen visit is enough - see
+/// KindexScoreHistoryModel.historyFor - so only the Future variant is
+/// actually used today, but the Stream/Count variants are generated to
+/// match every other record in this file rather than leaving this one
+/// collection an exception.
+Future<int> queryKindexScoreHistoryRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      KindexScoreHistoryRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<KindexScoreHistoryRecord>> queryKindexScoreHistoryRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      KindexScoreHistoryRecord.collection,
+      KindexScoreHistoryRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<KindexScoreHistoryRecord>> queryKindexScoreHistoryRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      KindexScoreHistoryRecord.collection,
+      KindexScoreHistoryRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

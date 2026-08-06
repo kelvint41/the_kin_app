@@ -213,43 +213,63 @@ class _BusinessInsightsWidgetState extends State<BusinessInsightsWidget> {
                       'and above.',
                     );
                   }
-                  return Container(
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: theme.secondaryBackground,
-                      borderRadius: BorderRadius.circular(16.0),
-                      border: Border.all(color: theme.alternate, width: 1.0),
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => context.pushNamed(
+                      KindexScoreHistoryWidget.routeName,
+                      queryParameters: {
+                        'businessDocument': serializeParam(
+                            businessRef, ParamType.DocumentReference),
+                      }.withoutNulls,
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                business.kindexScore.round().toString(),
-                                style: theme.headlineSmall.override(
-                                  font: GoogleFonts.plusJakartaSans(
-                                      fontWeight: FontWeight.bold),
-                                  color: theme.primaryText,
-                                  letterSpacing: 0.0,
-                                  fontWeight: FontWeight.bold,
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: theme.secondaryBackground,
+                        borderRadius: BorderRadius.circular(16.0),
+                        border:
+                            Border.all(color: theme.alternate, width: 1.0),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  business.kindexScore.round().toString(),
+                                  style: theme.headlineSmall.override(
+                                    font: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.bold),
+                                    color: theme.primaryText,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              SizedBox(height: 4.0),
-                              Text(
-                                'Kindex Score',
-                                style: theme.labelSmall.override(
-                                  color: theme.secondaryText,
-                                  letterSpacing: 0.0,
+                                SizedBox(height: 4.0),
+                                Text(
+                                  'Kindex Score',
+                                  style: theme.labelSmall.override(
+                                    color: theme.secondaryText,
+                                    letterSpacing: 0.0,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: 6.0),
+                                Text(
+                                  'View full history →',
+                                  style: theme.labelSmall.override(
+                                    color: theme.primary,
+                                    letterSpacing: 0.0,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        KindexTrendIndicator(
-                            velocity: business.kindexVelocity),
-                      ],
+                          KindexTrendIndicator(
+                              velocity: business.kindexVelocity),
+                        ],
+                      ),
                     ),
                   );
                 },

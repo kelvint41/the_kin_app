@@ -17,6 +17,8 @@ export '/pages/growth_tools/growth_tools_page_widget.dart'
     show GrowthToolsPageWidget;
 export '/pages/business_insights/business_insights_widget.dart'
     show BusinessInsightsWidget;
+export '/pages/kindex_score_history/kindex_score_history_widget.dart'
+    show KindexScoreHistoryWidget;
 export '/pages/notifications/notifications_widget.dart'
     show NotificationsWidget;
 export '/pages/merchant_pricing_suite/merchant_pricing_suite_widget.dart'

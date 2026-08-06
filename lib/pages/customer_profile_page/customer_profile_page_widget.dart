@@ -687,31 +687,38 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                                               'activity and can decrease over '
                                               'time if you go quiet, so keep '
                                               'showing up to keep it climbing.',
-                                          child: wrapWithModel(
-                                            model: _model.metricCardModel3,
-                                            updateCallback: () =>
-                                                safeSetState(() {}),
-                                            child: MetricCard3Widget(
-                                              icon: Icon(
-                                                Icons
-                                                    .volunteer_activism_rounded,
-                                                color: FlutterFlowTheme.of(
-                                                        context)
-                                                    .primaryText,
-                                                size: 20.0,
+                                          child: GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onTap: () => context.pushNamed(
+                                                KindexScoreHistoryWidget
+                                                    .routeName),
+                                            child: wrapWithModel(
+                                              model: _model.metricCardModel3,
+                                              updateCallback: () =>
+                                                  safeSetState(() {}),
+                                              child: MetricCard3Widget(
+                                                icon: Icon(
+                                                  Icons
+                                                      .volunteer_activism_rounded,
+                                                  color: FlutterFlowTheme.of(
+                                                          context)
+                                                      .primaryText,
+                                                  size: 20.0,
+                                                ),
+                                                tint: Color(0xFFFFD700),
+                                                label: 'KINDEX Score',
+                                                value: stats == null
+                                                    ? '--'
+                                                    : impactScoreLabel(
+                                                        stats.kindexScore),
+                                                isTrendingUp:
+                                                    stats?.isTrendingUp,
+                                                // The one card here that
+                                                // has a direction; streak
+                                                // and milestones are
+                                                // counts.
+                                                showTrend: true,
                                               ),
-                                              tint: Color(0xFFFFD700),
-                                              label: 'KINDEX Score',
-                                              value: stats == null
-                                                  ? '--'
-                                                  : impactScoreLabel(
-                                                      stats.kindexScore),
-                                              isTrendingUp:
-                                                  stats?.isTrendingUp,
-                                              // The one card here that has a
-                                              // direction; streak and
-                                              // milestones are counts.
-                                              showTrend: true,
                                             ),
                                           ),
                                         ),

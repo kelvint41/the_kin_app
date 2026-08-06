@@ -218,6 +218,23 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           builder: (context, params) => BusinessInsightsWidget(),
         ),
         FFRoute(
+          // businessDocument is optional: present when pushed from Business
+          // Insights (owner viewing their own business's history), absent
+          // when pushed from Customer Profile (viewer's own history) - see
+          // KindexScoreHistoryWidget's class doc.
+          name: KindexScoreHistoryWidget.routeName,
+          path: KindexScoreHistoryWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KindexScoreHistoryWidget(
+            businessDocument: params.getParam(
+              'businessDocument',
+              ParamType.DocumentReference,
+              isList: false,
+              collectionNamePath: ['businesses'],
+            ),
+          ),
+        ),
+        FFRoute(
           name: GrowthToolsPageWidget.routeName,
           path: GrowthToolsPageWidget.routePath,
           requireAuth: true,

@@ -517,6 +517,34 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // One row per entity per day (recomputeBusinessKindexScores /
+    // recomputeCustomerKindexScores in business_kindex_nightly.js /
+    // customer_kindex_nightly.js, both Admin SDK - bypasses these rules,
+    // so there is no client write path here at all). entity_type
+    // discriminates the two shapes this collection holds and gates who may
+    // read a given row: a 'business' row carries business_ref, so it's
+    // visible to that business's own owner the same way uservisits scopes
+    // owner reads; a 'customer' row carries user_ref and is visible only to
+    // that customer, the same as KindexScores would be if it weren't
+    // world-readable. Without this rule the collection had no read access
+    // at all, so this is purely additive - nothing else depends on it
+    // staying closed.
+    match /kindex_score_history/{document} {
+      allow read: if request.auth != null
+        && (
+          (resource.data.entity_type == 'business'
+            && get(resource.data.business_ref).data.owner_ref
+               == /databases/$(database)/documents/users/$(request.auth.uid))
+          || (resource.data.entity_type == 'customer'
+            && resource.data.user_ref
+               == /databases/$(database)/documents/users/$(request.auth.uid))
+          || get(/databases/$(database)/documents/users/$(request.auth.uid))
+             .data.is_admin == true
+        );
+      allow write: if false;
+      allow delete: if false;
+    }
+
     // Written only by generateMarketingContent/logAiSuggestionEngagement
     // (Cloud Functions, Admin SDK - bypasses rules entirely). No client
     // path needs to read or write this directly; entitlement, latency, and
