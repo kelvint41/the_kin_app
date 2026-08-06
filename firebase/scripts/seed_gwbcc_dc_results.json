@@ -1,0 +1,141 @@
+{
+  "mode": "commit",
+  "created": [
+    {
+      "docId": "LWLuW60SeDnoKoBgpn2H",
+      "ticker_symbol": "ACCOU",
+      "business_name": "AccounTAXstic"
+    },
+    {
+      "docId": "hWlDkRWBWVwA1GAHyNZT",
+      "ticker_symbol": "ACTIO",
+      "business_name": "Actionuity"
+    },
+    {
+      "docId": "9RyZb7rc3O0fED8HzyuT",
+      "ticker_symbol": "GGBTX",
+      "business_name": "Concrete Rose Floral"
+    },
+    {
+      "docId": "ah1pahcQJwgHt5OfHq1q",
+      "ticker_symbol": "DTREN",
+      "business_name": "DTR ENTERPRISE"
+    },
+    {
+      "docId": "j8xY6z1wwceZac8bUC0S",
+      "ticker_symbol": "GENNE",
+      "business_name": "Gennesaret Medical Center"
+    },
+    {
+      "docId": "tyP8V9DuPhimTm8i7gyL",
+      "ticker_symbol": "HENQU",
+      "business_name": "Hen Quarter Prime"
+    },
+    {
+      "docId": "u7Oayqwj5lQGOHadWA7O",
+      "ticker_symbol": "INDUS",
+      "business_name": "Industrial Bank"
+    },
+    {
+      "docId": "T9E8TE7T8swrRTJtcGzq",
+      "ticker_symbol": "RAJAH",
+      "business_name": "Ra-Jah Kelly"
+    },
+    {
+      "docId": "ZIKLAPfbPK9Kzm6USVVT",
+      "ticker_symbol": "LEMMA",
+      "business_name": "Lemmas Consulting, LLC"
+    },
+    {
+      "docId": "MfJ9Km9CVhgkrYfDR6Ui",
+      "ticker_symbol": "MAKER",
+      "business_name": "Makers Union - Wharf"
+    },
+    {
+      "docId": "kJAdohUR2QETBsDT3A8p",
+      "ticker_symbol": "MATCH",
+      "business_name": "Matchbox – Capitol Hill"
+    },
+    {
+      "docId": "leBgrSmCEXj8b1xZ7Rv3",
+      "ticker_symbol": "05WS5",
+      "business_name": "Matchbox – Penn Quarter"
+    },
+    {
+      "docId": "DknoIRPMtStPZdbjPQsq",
+      "ticker_symbol": "MILKH",
+      "business_name": "Milk & Honey – H street"
+    },
+    {
+      "docId": "h07o0Cv9DcCIYkqmTm79",
+      "ticker_symbol": "5NJSB",
+      "business_name": "Milk & Honey – Wharf"
+    },
+    {
+      "docId": "3lgz0MlWKZxsjpjDFgPp",
+      "ticker_symbol": "PRIME",
+      "business_name": "Prime Partners Engineering"
+    },
+    {
+      "docId": "jhrcqHAOapQCfWTPpyfZ",
+      "ticker_symbol": "RESUL",
+      "business_name": "Results One LLC"
+    },
+    {
+      "docId": "405DIlyhOllML5NL75CK",
+      "ticker_symbol": "SOLID",
+      "business_name": "Solid Ground Wellness"
+    },
+    {
+      "docId": "QyhtDigY5OXrIip4v4MQ",
+      "ticker_symbol": "ASHEX",
+      "business_name": "The aSHE XCHNGE LLC"
+    },
+    {
+      "docId": "gD9qOu4O1PhkT7jkDfIX",
+      "ticker_symbol": "DELEG",
+      "business_name": "The Delegate"
+    },
+    {
+      "docId": "S8HSkfV3aybEFZhTCN77",
+      "ticker_symbol": "FW3PQ",
+      "business_name": "The Fresh Food Factory"
+    },
+    {
+      "docId": "942ZQqlnDM9fs3GkSUKo",
+      "ticker_symbol": "HARBO",
+      "business_name": "The Harbor Bank of Maryland"
+    },
+    {
+      "docId": "yt7mHaQlmiF90yuMQEQe",
+      "ticker_symbol": "HEALI",
+      "business_name": "The Healing Palace"
+    },
+    {
+      "docId": "QcWy35VEo5L7VB560Yqx",
+      "ticker_symbol": "3WSGV",
+      "business_name": "The Holliday Collaborative Agency"
+    },
+    {
+      "docId": "Z818vLz4YZ4UDjp8g2jY",
+      "ticker_symbol": "WASHI",
+      "business_name": "The Washington Informer"
+    },
+    {
+      "docId": "1E6CWDmyTfejqHge98qP",
+      "ticker_symbol": "42TWB",
+      "business_name": "Danielle Walker"
+    },
+    {
+      "docId": "pQAf5zxo8RojxZ4cyHdX",
+      "ticker_symbol": "WISEG",
+      "business_name": "Wiseguy Pizza – Dupont"
+    },
+    {
+      "docId": "l14aLdSoFeX73M8L70Gm",
+      "ticker_symbol": "MZIUR",
+      "business_name": "Wiseguy Pizza – Navy Yard"
+    }
+  ],
+  "already_exists": []
+}

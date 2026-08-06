@@ -1,0 +1,245 @@
+[
+  {
+    "name": "AccounTAXstic",
+    "queryAddress": "8640 Guilford Rd, Suite 34, Columbia, MD 21046",
+    "status": "kept",
+    "formattedAddress": "8640 Guilford Rd Ste 34, Columbia, MD 21046, USA",
+    "lat": 39.1698829,
+    "lng": -76.8644388,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Actionuity",
+    "queryAddress": "4614 Hillside RD SE, Washington, DC 20019",
+    "status": "kept",
+    "formattedAddress": "4614 Hillside Rd SE, Washington, DC 20019, USA",
+    "lat": 38.8766874,
+    "lng": -76.9334045,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Concrete Rose Floral",
+    "queryAddress": "5016 Lackawanna Street, College Park, MD 20740",
+    "status": "kept",
+    "formattedAddress": "5016 Lackawanna St, College Park, MD 20740, USA",
+    "lat": 39.0116779,
+    "lng": -76.9192279,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DTR ENTERPRISE",
+    "queryAddress": "84 57th Place SE, Washington, DC 20019",
+    "status": "kept",
+    "formattedAddress": "84 57th Pl SE, Washington, DC 20019, USA",
+    "lat": 38.8867151,
+    "lng": -76.9179867,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gennesaret Medical Center",
+    "queryAddress": "1100 W Pratt St, Baltimore, MD 21223",
+    "status": "kept",
+    "formattedAddress": "1100 W Pratt St, Baltimore, MD 21223, USA",
+    "lat": 39.2858823,
+    "lng": -76.635266,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Hen Quarter Prime",
+    "queryAddress": "2121 First St SW, Washington, DC 20024",
+    "status": "kept",
+    "formattedAddress": "2121 1st St SW, Washington, DC 20024, USA",
+    "lat": 38.8642186,
+    "lng": -77.0133269,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Industrial Bank",
+    "queryAddress": "4812 Georgia Ave. NW, Washington, DC 20011",
+    "status": "kept",
+    "formattedAddress": "4812 Georgia Ave NW, Washington, DC 20011, USA",
+    "lat": 38.9493203,
+    "lng": -77.02740250000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ra-Jah Kelly",
+    "queryAddress": "3117 Martin Luther King Jr. Ave, SE, Washington, DC 20032",
+    "status": "kept",
+    "formattedAddress": "3117 Martin Luther King Jr Ave SE, Washington, DC 20032, USA",
+    "lat": 38.843492,
+    "lng": -76.99992069999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lemmas Consulting, LLC",
+    "queryAddress": "2050 Twin Six Lane, Dumfries, VA 22026",
+    "status": "kept",
+    "formattedAddress": "2050 Twin Six Ln, Dumfries, VA 22026, USA",
+    "lat": 38.5804464,
+    "lng": -77.2765623,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Makers Union - Wharf",
+    "queryAddress": "664 Maine Ave SW, Washington, DC 20024",
+    "status": "kept",
+    "formattedAddress": "670 Maine Office Building, 664 Maine Ave SW, Washington, DC 20024, USA",
+    "lat": 38.877755,
+    "lng": -77.02222300000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Matchbox – Capitol Hill",
+    "queryAddress": "521 8th St SE, Washingotn, DC 20003",
+    "status": "kept",
+    "formattedAddress": "521 8th St SE, Washington, DC 20003, USA",
+    "lat": 38.882103,
+    "lng": -76.9953397,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Matchbox – Penn Quarter",
+    "queryAddress": "750 E St NW, Washington, DC ",
+    "status": "kept",
+    "formattedAddress": "750 E St NW, Washington, DC 20004, USA",
+    "lat": 38.8959483,
+    "lng": -77.0224947,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Milk & Honey – H street",
+    "queryAddress": "1116 H St NE, Washington, DC 20002",
+    "status": "kept",
+    "formattedAddress": "1116 H St NE, Washington, DC 20002, USA",
+    "lat": 38.9003748,
+    "lng": -76.9908172,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Milk & Honey – Wharf",
+    "queryAddress": "676 Maine Ave SW, Ste 710, Washington, DC 20024",
+    "status": "kept",
+    "formattedAddress": "670 Maine Office Building, 676 Maine Ave SW Ste 710, Washington, DC 20024, USA",
+    "lat": 38.8778902,
+    "lng": -77.0223996,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Prime Partners Engineering",
+    "queryAddress": "1100 13th Street Northwest, 1000, Washington, DC 20005",
+    "status": "kept",
+    "formattedAddress": "1100 13th St NW Ste 1000, Washington, DC 20005, USA",
+    "lat": 38.9040854,
+    "lng": -77.0300891,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Results One LLC",
+    "queryAddress": "1809 PARKSIDE DRIVE NORTHWEST, WASHINGTON, DC 20012",
+    "status": "kept",
+    "formattedAddress": "1809 Parkside Dr NW, Washington, DC 20012, USA",
+    "lat": 38.985147,
+    "lng": -77.0436665,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Solid Ground Wellness",
+    "queryAddress": "9175 Guilford Road, Suite 307, Columbia, MD 21046",
+    "status": "kept",
+    "formattedAddress": "9175 Guilford Rd #307, Columbia, MD 21046, USA",
+    "lat": 39.167131,
+    "lng": -76.8411936,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The aSHE XCHNGE LLC",
+    "queryAddress": "1412 Eastern Avenue NE, Washington, DC 20019",
+    "status": "kept",
+    "formattedAddress": "1412 Eastern Ave NE, Washington, DC 20019, USA",
+    "lat": 38.9088974,
+    "lng": -76.93024280000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Delegate",
+    "queryAddress": "901 L St NW, Washington, DC 20001",
+    "status": "kept",
+    "formattedAddress": "901 L St NW, Washington, DC 20001, USA",
+    "lat": 38.904406,
+    "lng": -77.0237875,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Fresh Food Factory",
+    "queryAddress": "1110 Oak Dr SE, Washington, DC 20032",
+    "status": "kept",
+    "formattedAddress": "1110 Oak Dr SE, Washington, DC 20032, USA",
+    "lat": 38.846108,
+    "lng": -76.9902883,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Harbor Bank of Maryland",
+    "queryAddress": "1010 Wayne Ave, Suite 210, Silver Spring, MD 20910",
+    "status": "kept",
+    "formattedAddress": "1010 Wayne Ave #210, Silver Spring, MD 20910, USA",
+    "lat": 38.9939324,
+    "lng": -77.027711,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Healing Palace",
+    "queryAddress": "1629 K Street NW Ste 300, Washington, DC 20006",
+    "status": "kept",
+    "formattedAddress": "1629 K St NW #300, Washington, DC 20006, USA",
+    "lat": 38.9028651,
+    "lng": -77.0378535,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Holliday Collaborative Agency",
+    "queryAddress": "1500 K Street NW, Washington, DC 20005",
+    "status": "kept",
+    "formattedAddress": "1500 K St NW, Washington, DC 20005, USA",
+    "lat": 38.9022593,
+    "lng": -77.03480510000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Washington Informer",
+    "queryAddress": "3117 Martin Luther King Jr. Ave, SE, Washington, DC 20032",
+    "status": "kept",
+    "formattedAddress": "3117 Martin Luther King Jr Ave SE, Washington, DC 20032, USA",
+    "lat": 38.843492,
+    "lng": -76.99992069999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Danielle Walker",
+    "queryAddress": "1816 12th St. NW, STE 304, Washington, DC 20009",
+    "status": "kept",
+    "formattedAddress": "1816 12th St NW #304, Washington, DC 20009, USA",
+    "lat": 38.9149477,
+    "lng": -77.0284994,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Wiseguy Pizza – Dupont",
+    "queryAddress": "1205 19th st NW, Washington, DC 20036",
+    "status": "kept",
+    "formattedAddress": "1205 19th St NW, Washington, DC 20036, USA",
+    "lat": 38.9059601,
+    "lng": -77.04324919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Wiseguy Pizza – Navy Yard",
+    "queryAddress": "202 M St SE, Washington, DC 20003",
+    "status": "kept",
+    "formattedAddress": "202 M St SE, Washington, DC 20003, USA",
+    "lat": 38.87675,
+    "lng": -77.00324499999999,
+    "locationType": "ROOFTOP"
+  }
+]
