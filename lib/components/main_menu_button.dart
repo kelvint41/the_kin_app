@@ -237,6 +237,20 @@ void showMainMenuSheet(BuildContext context,
                         );
                       },
                     ),
+                    // Test entry point for the dark/light map redesign
+                    // prototype - loads the real seeded Georgia/Illinois
+                    // test batch (directory_import_batch ==
+                    // 'ga_il_test_2026_08'), not dummy data. Not meant to
+                    // stay in the menu once the redesign either lands in
+                    // KinQuestWidget itself or is dropped.
+                    ListTile(
+                      leading: Icon(Icons.map_rounded, color: theme.primaryText),
+                      title: Text('KIN Quest Map (Beta)', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(KinQuestMapDemoWidget.routeName);
+                      },
+                    ),
                     _sectionLabel(theme, 'Profile'),
                     // Was unconditionally OwnerProfileWidget - every signed-in
                     // user got the owner dashboard regardless of role. A

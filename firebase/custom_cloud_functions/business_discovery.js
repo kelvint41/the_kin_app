@@ -6,8 +6,13 @@ if (!admin.apps.length) {
 // See mystery_reward_engine.js for why this uses the modular import
 // instead of admin.firestore.FieldValue.
 const { FieldValue, GeoPoint } = require("firebase-admin/firestore");
-const { haversineMeters, isValidCoord } = require("./visit_verification.js")
-  ._internals;
+const {
+  haversineMeters,
+  isValidCoord,
+  UNLISTED_DISCOVERY_POINTS,
+  isSmallBusinessSaturday,
+  SMALL_BUSINESS_SATURDAY_MULTIPLIER,
+} = require("./visit_verification.js")._internals;
 const { encodeGeohash } = require("./geohash.js");
 
 /// Radius within which a submitted business is treated as a duplicate of an
@@ -426,6 +431,49 @@ exports.resolveBusinessSubmissionReview = onCall(async (request) => {
     reviewed_by: db.doc(`users/${uid}`),
     reviewed_at: FieldValue.serverTimestamp(),
   });
+
+  // Discovery bonus: submitting a business that wasn't on the map at all,
+  // once an admin confirms it's real, pays more than either a normal
+  // check-in or a mystery-tier find (see UNLISTED_DISCOVERY_POINTS above) -
+  // finding something never-before-listed is the rarest, most valuable
+  // contribution a customer can make. Paid on approval, not on submission,
+  // so nothing rewards spamming fake business names - same reasoning the
+  // rest of this function already applies to actually publishing the
+  // listing itself. Doubled if the approval itself happens to land on
+  // Small Business Saturday, same boost pointsForCheckIn gives ordinary
+  // check-ins that day.
+  if (sub.submitted_by_user_ref) {
+    const onSmallBusinessSaturday = isSmallBusinessSaturday(Date.now());
+    const discoveryPoints = onSmallBusinessSaturday
+      ? UNLISTED_DISCOVERY_POINTS * SMALL_BUSINESS_SATURDAY_MULTIPLIER
+      : UNLISTED_DISCOVERY_POINTS;
+    // Same running-totals doc recordVerifiedVisit maintains (see
+    // visit_verification.js) - read by getOperationsStats for the
+    // Executive Dashboard's KIN Quest Activity card.
+    const questStatsRef = db.collection("quest_stats").doc("totals");
+    await db.runTransaction(async (tx) => {
+      const submitterRef = sub.submitted_by_user_ref;
+      const submitterSnap = await tx.get(submitterRef);
+      const currentPoints =
+        (submitterSnap.exists && submitterSnap.data().scavenger_points) || 0;
+      tx.set(
+        submitterRef,
+        { scavenger_points: currentPoints + discoveryPoints },
+        { merge: true },
+      );
+      tx.set(
+        questStatsRef,
+        {
+          discovery_bonus_points_total: FieldValue.increment(discoveryPoints),
+          discovery_bonus_count: FieldValue.increment(1),
+          small_business_saturday_points_total: FieldValue.increment(
+            onSmallBusinessSaturday ? discoveryPoints : 0,
+          ),
+        },
+        { merge: true },
+      );
+    });
+  }
 
   return { success: true, action: "approved", businessId: businessRef.id };
 });

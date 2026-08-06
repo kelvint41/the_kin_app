@@ -150,7 +150,47 @@ service cloud.firestore {
 
     match /claim_requests/{document} {
       allow create: if request.auth != null;
-      allow read: if false;
+      // Carries the applicant's email/phone, so this stays closed to
+      // everyone except an admin reviewing the queue (lib/pages/
+      // admin_claim_review/) - same is_admin check used throughout this
+      // file. Approve/reject writes still don't go through this rule at
+      // all - they run server-side via the resolveClaimRequest callable
+      // (Admin SDK), the same way business claim ownership always has.
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    // Crowd-sourced "is this actually Black-owned?" signal, collected from
+    // KIN Quest check-ins at businesses the community hasn't verified yet
+    // (see lib/pages/kin_quest_map_demo/). Deliberately just a log, not a
+    // vote that moves anything automatically - a single report (right or
+    // wrong, honest or not) never touches businesses.is_black_owned by
+    // itself. An admin reads these and decides by hand, same reasoning as
+    // claim_requests just above: real trust changes need a human, not an
+    // anonymous tally.
+    match /business_ownership_reports/{document} {
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
+      allow write: if false;
+      allow delete: if false;
+    }
+
+    // Running KIN Quest point totals (recordVerifiedVisit /
+    // resolveBusinessSubmissionReview maintain it transactionally),
+    // read by getOperationsStats for the Executive Dashboard's KIN
+    // Quest Activity card. Admin-read, Admin-SDK-write-only - same
+    // shape as notifications' create:false, since a client incrementing
+    // its own "points awarded" tally would make the number meaningless.
+    match /quest_stats/{document} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid))
+           .data.is_admin == true;
       allow write: if false;
       allow delete: if false;
     }

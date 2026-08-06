@@ -7,6 +7,7 @@ import '/components/signup_item_widget.dart';
 import '/components/admin_beacon_metrics_card.dart';
 import '/components/admin_discovery_metrics_card.dart';
 import '/components/admin_job_board_metrics_card.dart';
+import '/components/admin_kin_quest_metrics_card.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -555,6 +556,17 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             padding: EdgeInsets.symmetric(vertical: 12.0),
                             child: AdminJobBoardMetricsCard(),
                           ),
+                          // KIN Quest Activity - everything from this
+                          // session's map/scoring rebuild (real check-ins,
+                          // mystery-tier points, the unlisted-business
+                          // discovery bonus, Small Business Saturday, the
+                          // Black-owned ownership survey), plus a CSV
+                          // export covering getOperationsStats' full
+                          // payload, not just this card.
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: AdminKinQuestMetricsCard(),
+                          ),
                           // Entry point to the submission review queue.
                           // business_submissions had no exit before this -
                           // customer-added businesses queued forever with no
@@ -585,6 +597,37 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                       .secondaryText),
                               onTap: () => context
                                   .pushNamed(AdminSubmissionsPage.routeName),
+                            ),
+                          ),
+                          // Entry point to the claim review queue - previously
+                          // the only way to approve a business claim was
+                          // firebase/scripts/approve_claim.js from a terminal.
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: ListTile(
+                              tileColor: FlutterFlowTheme.of(context)
+                                  .secondaryBackground,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              leading: Icon(Icons.verified_user_outlined,
+                                  color: FlutterFlowTheme.of(context).primary),
+                              title: Text('Review business claims',
+                                  style:
+                                      FlutterFlowTheme.of(context).bodyMedium),
+                              subtitle: Text(
+                                'Approve or reject ownership claims, confirm Black-owned status',
+                                style: FlutterFlowTheme.of(context)
+                                    .labelSmall
+                                    .override(
+                                        color: FlutterFlowTheme.of(context)
+                                            .secondaryText),
+                              ),
+                              trailing: Icon(Icons.chevron_right_rounded,
+                                  color: FlutterFlowTheme.of(context)
+                                      .secondaryText),
+                              onTap: () => context
+                                  .pushNamed(AdminClaimReviewPage.routeName),
                             ),
                           ),
                           Container(

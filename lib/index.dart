@@ -51,4 +51,6 @@ export '/pages/job_board/job_management_page.dart' show JobManagementPage;
 export '/pages/community_events/events_listing_page.dart' show EventsListingPage;
 export '/pages/community_events/event_management_page.dart' show EventManagementPage;
 export '/pages/admin_submissions/admin_submissions_page.dart' show AdminSubmissionsPage;
+export '/pages/admin_claim_review/admin_claim_review_page.dart' show AdminClaimReviewPage;
+export '/pages/kin_quest_map_demo/kin_quest_map_demo_widget.dart' show KinQuestMapDemoWidget;
 export '/pages/coming_soon/coming_soon_page.dart' show ComingSoonPage;

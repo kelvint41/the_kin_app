@@ -31,6 +31,28 @@ const RARE_RADIUS_METERS = 20;
 // convention - see kScavengerPointsMultiplier in lib/services/scavenger_hunt.dart).
 const BASE_CHECKIN_POINTS = 10;
 
+// A business the community hasn't verified yet renders as the amber '?'
+// "mystery" pin on the map - checking in there for the first time pays a
+// random amount in this range instead of the deterministic rarity formula,
+// so it reads as an actual surprise. Floor matches a Standard check-in (10)
+// so a mystery find is never worth less than a known business; ceiling
+// (50) sits above every rarity tier's typical payout so it's a genuine
+// prize, not a coin flip that might undershoot a sure thing.
+const MYSTERY_MIN_POINTS = 10;
+const MYSTERY_MAX_POINTS = 50;
+
+// Paid by resolveBusinessSubmissionReview (business_discovery.js) when a
+// customer-submitted business that was never on the map at all gets
+// approved - the rarest, most valuable discovery a customer can make, so
+// it outpays both a normal check-in and the mystery-tier range above.
+// 50 guaranteed + a 25 bonus on top, kept as two named numbers rather than
+// one flat 75 so the "guaranteed base + bonus" shape stays visible at a
+// glance.
+const UNLISTED_DISCOVERY_BASE_POINTS = 50;
+const UNLISTED_DISCOVERY_BONUS_POINTS = 25;
+const UNLISTED_DISCOVERY_POINTS =
+  UNLISTED_DISCOVERY_BASE_POINTS + UNLISTED_DISCOVERY_BONUS_POINTS;
+
 let cachedConfig = null;
 let cachedConfigAt = 0;
 
@@ -155,13 +177,72 @@ function isWithinActiveWindow(business, nowMs, timeZone) {
   return nowMinutes >= start || nowMinutes < end;
 }
 
+// The 4th Thursday of November for `year` - hand-synced with
+// lib/services/seasonal_theme.dart's _thanksgivingDate, since Cloud
+// Functions (Node) can't import Dart code. If this window ever changes,
+// change both - same reasoning geohash.js's own header comment gives for
+// its hand-synced copy of the geohash algorithm.
+function thanksgivingDate(year) {
+  let seen = 0;
+  for (let day = 1; day <= 30; day += 1) {
+    const d = new Date(Date.UTC(year, 10, day)); // month 10 = November
+    if (d.getUTCDay() === 4 /* Thursday */) {
+      seen += 1;
+      if (seen === 4) return d;
+    }
+  }
+  throw new Error("November always has a 4th Thursday");
+}
+
+/**
+ * True if `nowMs` falls on Small Business Saturday (Thanksgiving + 2 days)
+ * in UTC. Using UTC rather than the business's own timezone here - unlike
+ * isWithinActiveWindow's precise open/closed check, a one-day promotional
+ * window doesn't need to-the-minute accuracy per market, and the app has
+ * only ever operated in one US timezone anyway.
+ */
+function isSmallBusinessSaturday(nowMs) {
+  const now = new Date(nowMs);
+  const saturday = new Date(
+    thanksgivingDate(now.getUTCFullYear()).getTime() + 2 * 24 * 60 * 60 * 1000,
+  );
+  return (
+    now.getUTCFullYear() === saturday.getUTCFullYear() &&
+    now.getUTCMonth() === saturday.getUTCMonth() &&
+    now.getUTCDate() === saturday.getUTCDate()
+  );
+}
+
+// "Amp it up, not too much" - a flat doubling on Small Business Saturday
+// specifically, the one day of the year built around supporting small
+// businesses, which is the entire premise of KIN Quest. Applied uniformly
+// to both branches of pointsForCheckIn below, and to the unlisted-business
+// discovery bonus in business_discovery.js.
+const SMALL_BUSINESS_SATURDAY_MULTIPLIER = 2;
+
 /** Scavenger points a verified check-in at this business is worth. */
 function pointsForCheckIn(business) {
+  const boost = isSmallBusinessSaturday(Date.now())
+    ? SMALL_BUSINESS_SATURDAY_MULTIPLIER
+    : 1;
+
+  // Mystery tier: is_verified is what colors the pin amber '?' on the map
+  // (see KinQuestMapDemoWidget) - the same flag decides the payout here,
+  // so the two never disagree about which businesses are "mystery" finds.
+  // This is about the pin's current status, not a permanent bonus for the
+  // business - once it's verified, later check-ins (by other users; see
+  // the one-time-per-business rule below) use the normal formula.
+  if (business.is_verified !== true) {
+    const roll =
+      MYSTERY_MIN_POINTS +
+      Math.floor(Math.random() * (MYSTERY_MAX_POINTS - MYSTERY_MIN_POINTS + 1));
+    return roll * boost;
+  }
   const multiplier =
     typeof business.points_multiplier === "number" && business.points_multiplier > 0
       ? business.points_multiplier
       : 1;
-  return Math.round(BASE_CHECKIN_POINTS * multiplier);
+  return Math.round(BASE_CHECKIN_POINTS * multiplier) * boost;
 }
 
 /**
@@ -294,7 +375,16 @@ exports.recordVerifiedVisit = onCall(async (request) => {
     .get();
 
   const pointsAwarded = priorVisit.empty ? pointsForCheckIn(business) : 0;
+  const wasMysteryFind = priorVisit.empty && business.is_verified !== true;
   const visitRef = db.collection(VISITS_COLLECTION).doc();
+  // Singleton running-totals doc, read by getOperationsStats
+  // (operations_stats.js) for the Executive Dashboard's KIN Quest
+  // Activity card. A maintained counter rather than summing
+  // points_awarded across every uservisits row at read time - that
+  // collection grows one row per check-in with no bound, same reasoning
+  // kindex_score_history's own unbounded growth gets in that file's
+  // header comment.
+  const questStatsRef = db.collection("quest_stats").doc("totals");
 
   // One transaction: the visit document and the point award land together,
   // or neither does - a partial write here would either lose points a
@@ -316,9 +406,33 @@ exports.recordVerifiedVisit = onCall(async (request) => {
         verified_radius_meters: radiusMeters,
         rarity_tier: business.rarity_tier || "Standard",
         points_awarded: pointsAwarded,
+        // Whether this payout came from the mystery-tier random range
+        // (is_verified was false at check-in time) rather than the
+        // deterministic rarity formula - see pointsForCheckIn above.
+        was_mystery_find: wasMysteryFind,
       },
     );
     tx.set(userRef, { scavenger_points: newTotal }, { merge: true });
+    if (pointsAwarded > 0) {
+      // Recomputed rather than threaded through pointsForCheckIn's return
+      // value - pure and free to call twice, and keeps that function's
+      // signature a plain number for every other caller.
+      const onSmallBusinessSaturday = isSmallBusinessSaturday(Date.now());
+      tx.set(
+        questStatsRef,
+        {
+          checkin_points_total: admin.firestore.FieldValue.increment(pointsAwarded),
+          checkin_count: admin.firestore.FieldValue.increment(1),
+          mystery_checkin_count: admin.firestore.FieldValue.increment(
+            wasMysteryFind ? 1 : 0,
+          ),
+          small_business_saturday_points_total: admin.firestore.FieldValue.increment(
+            onSmallBusinessSaturday ? pointsAwarded : 0,
+          ),
+        },
+        { merge: true },
+      );
+    }
 
     await createNotification(tx, {
       userRef,
@@ -354,4 +468,10 @@ exports._internals = {
   pointsForCheckIn,
   RARE_RADIUS_METERS,
   BASE_CHECKIN_POINTS,
+  MYSTERY_MIN_POINTS,
+  MYSTERY_MAX_POINTS,
+  UNLISTED_DISCOVERY_POINTS,
+  thanksgivingDate,
+  isSmallBusinessSaturday,
+  SMALL_BUSINESS_SATURDAY_MULTIPLIER,
 };

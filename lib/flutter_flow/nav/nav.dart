@@ -371,6 +371,18 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           builder: (context, params) => AdminSubmissionsPage(),
         ),
+        FFRoute(
+          name: AdminClaimReviewPage.routeName,
+          path: AdminClaimReviewPage.routePath,
+          requireAuth: true,
+          builder: (context, params) => AdminClaimReviewPage(),
+        ),
+        FFRoute(
+          name: KinQuestMapDemoWidget.routeName,
+          path: KinQuestMapDemoWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => KinQuestMapDemoWidget(),
+        ),
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );
 

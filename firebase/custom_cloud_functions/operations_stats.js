@@ -33,6 +33,18 @@ const ENGAGEMENT_EVENTS = ["post", "review", "share_app", "check_in", "referral"
 
 const CLAIM_STATUSES = ["pending", "approved", "rejected"];
 
+// business_submissions.review_status - the "unlisted business" discovery
+// pipeline (submit -> admin review -> discovery bonus). Absent means
+// "pending" (see admin_submissions_page.dart's own null-matching comment
+// for why that's checked separately rather than as a query key here).
+const SUBMISSION_STATUSES = ["approved", "dismissed"];
+
+// Businesses seeded from the Georgia/Illinois directory-pull test batch
+// (seed_directory_test_batch.js) - tracked by name here rather than a
+// generic "businesses added today" figure, since imports are occasional
+// batches, not a steady daily trickle worth a rolling window for.
+const DIRECTORY_IMPORT_BATCHES = ["ga_il_test_2026_08"];
+
 async function countWhere(query) {
   try {
     const snap = await query.count().get();
@@ -66,6 +78,10 @@ exports.getOperationsStats = onCall(async (request) => {
   const engagement = db.collection("UserEngagementEvents");
   const history = db.collection("kindex_score_history");
   const claims = db.collection("claim_requests");
+  const visits = db.collection("uservisits");
+  const ownershipReports = db.collection("business_ownership_reports");
+  const submissions = db.collection("business_submissions");
+  const businesses = db.collection("businesses");
 
   const [
     activityTotal,
@@ -81,6 +97,16 @@ exports.getOperationsStats = onCall(async (request) => {
     claimsTotal,
     reviewsTotal,
     entitlementsTotal,
+    visitsTotal,
+    visitsWithPoints,
+    mysteryFindsTotal,
+    ownershipReportsBlackOwned,
+    ownershipReportsNotBlackOwned,
+    ownershipReportsTotal,
+    questStatsSnap,
+    submissionsByStatus,
+    submissionsTotal,
+    directoryImportedByBatch,
   ] = await Promise.all([
     countWhere(activity),
     groupCounts(activity, "event_type", ACTIVITY_EVENTS),
@@ -101,7 +127,30 @@ exports.getOperationsStats = onCall(async (request) => {
     countWhere(claims),
     countWhere(db.collection("reviews")),
     countWhere(db.collection("entitlements")),
+    countWhere(visits),
+    // Real payouts only - excludes the 0-point duplicate/repeat-visit
+    // rows recordVerifiedVisit still logs (see that file's dedup and
+    // one-time-per-business rules).
+    countWhere(visits.where("points_awarded", ">", 0)),
+    countWhere(visits.where("was_mystery_find", "==", true)),
+    countWhere(ownershipReports.where("is_black_owned", "==", true)),
+    countWhere(ownershipReports.where("is_black_owned", "==", false)),
+    countWhere(ownershipReports),
+    db.collection("quest_stats").doc("totals").get(),
+    groupCounts(submissions, "review_status", SUBMISSION_STATUSES),
+    countWhere(submissions),
+    groupCounts(businesses, "directory_import_batch", DIRECTORY_IMPORT_BATCHES),
   ]);
+
+  const questStats = questStatsSnap.exists ? questStatsSnap.data() : {};
+  const submissionsAccounted = Object.values(submissionsByStatus).reduce((a, b) => a + b, 0);
+  // Not accounted for by the named statuses above - absent review_status
+  // reads as "pending", same reasoning admin_submissions_page.dart's own
+  // client-side filter gives for treating a missing field as pending
+  // rather than querying for it directly (a Firestore equality clause
+  // can't match "field is absent").
+  const submissionsPending =
+    submissionsTotal === null ? null : submissionsTotal - submissionsAccounted;
 
   const interactions = ACTIVITY_INTERACTIONS.reduce(
     (sum, k) => sum + (activityByEvent[k] || 0),
@@ -142,5 +191,35 @@ exports.getOperationsStats = onCall(async (request) => {
     },
     reviews: reviewsTotal,
     entitlements: entitlementsTotal,
+    // Everything added this session for the new KIN Quest map/scoring
+    // system - see KinQuestMapDemoWidget, visit_verification.js's
+    // pointsForCheckIn/isSmallBusinessSaturday, business_discovery.js's
+    // discovery bonus, and business_ownership_reports.
+    questActivity: {
+      checkins: {
+        total: visitsTotal,
+        withPoints: visitsWithPoints,
+        mysteryFinds: mysteryFindsTotal,
+        pointsTotal: questStats.checkin_points_total || 0,
+      },
+      unlistedDiscoveries: {
+        approvedCount: questStats.discovery_bonus_count || 0,
+        pointsTotal: questStats.discovery_bonus_points_total || 0,
+      },
+      smallBusinessSaturday: {
+        pointsTotal: questStats.small_business_saturday_points_total || 0,
+      },
+      ownershipReports: {
+        total: ownershipReportsTotal,
+        blackOwned: ownershipReportsBlackOwned,
+        notBlackOwned: ownershipReportsNotBlackOwned,
+      },
+      submissions: {
+        total: submissionsTotal,
+        pending: submissionsPending,
+        byStatus: submissionsByStatus,
+      },
+      directoryImports: directoryImportedByBatch,
+    },
   };
 });

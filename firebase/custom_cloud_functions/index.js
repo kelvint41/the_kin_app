@@ -88,8 +88,18 @@ exports.sendSupportChatMessage = supportChat.sendSupportChatMessage;
 const supportChatStats = require("./support_chat_stats.js");
 exports.getSupportChatStats = supportChatStats.getSupportChatStats;
 
+// Never registered before this session - existed in the codebase but had
+// never actually been deployed, so the Executive Dashboard's KIN Quest
+// Activity card (admin_kin_quest_metrics_card.dart) is its first caller.
+const operationsStats = require("./operations_stats.js");
+exports.getOperationsStats = operationsStats.getOperationsStats;
+
 const claimNotifications = require("./claim_notifications.js");
 exports.notifyClaimApproved = claimNotifications.notifyClaimApproved;
+exports.notifyClaimRejected = claimNotifications.notifyClaimRejected;
+
+const claimReview = require("./claim_review.js");
+exports.resolveClaimRequest = claimReview.resolveClaimRequest;
 
 const sendPasswordReset = require("./send_password_reset.js");
 exports.sendPasswordReset = sendPasswordReset.sendPasswordReset;

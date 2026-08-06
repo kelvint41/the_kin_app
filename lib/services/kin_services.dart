@@ -118,6 +118,110 @@ class SupportChatStats {
   int get praise => byCategory['praise'] ?? 0;
 }
 
+/// Recursively converts a decoded callable-function response into
+/// genuinely typed `Map<String, dynamic>` / `List<dynamic>` values.
+///
+/// `HttpsCallable.call<Map<String, dynamic>>()` only types the *outer*
+/// map - platform channels decode JSON with `Map<Object?, Object?>` at
+/// every nesting level, and `Map<Object?, Object?>` is not a subtype of
+/// `Map<String, dynamic>` (key type isn't compatible), so any
+/// `as Map<String, dynamic>` cast on a nested value throws
+/// "_Map<Object?, Object?> is not a subtype of type 'Map<String,
+/// dynamic>?'". Deep-casting once up front means every accessor further
+/// down (e.g. the `as Map<String, dynamic>?` casts in [OperationsStats])
+/// can trust the shape it asks for.
+Object? _deepCastFunctionsResult(Object? value) {
+  if (value is Map) {
+    return value.map(
+      (key, val) => MapEntry(key.toString(), _deepCastFunctionsResult(val)),
+    );
+  }
+  if (value is List) {
+    return value.map(_deepCastFunctionsResult).toList();
+  }
+  return value;
+}
+
+/// Everything `getOperationsStats` returns (operations_stats.js) - kept as
+/// the raw nested map rather than a fully-typed model. Two reasons: the
+/// Executive Dashboard's CSV export (toCsvRows below) needs to walk
+/// whatever fields exist without a matching Dart field for each one, and
+/// this function already has a habit of gaining new sections (it did
+/// twice in one session, for questActivity and submissions) - a rigid
+/// model would need editing every time even though the shape is already
+/// self-describing. Typed getters below cover only the handful of values
+/// the KIN Quest Activity card actually renders directly.
+class OperationsStats {
+  const OperationsStats(this.raw);
+
+  final Map<String, dynamic> raw;
+
+  Map<String, dynamic>? get _questActivity =>
+      raw['questActivity'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _checkins =>
+      _questActivity?['checkins'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _unlistedDiscoveries =>
+      _questActivity?['unlistedDiscoveries'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _ownershipReports =>
+      _questActivity?['ownershipReports'] as Map<String, dynamic>?;
+  Map<String, dynamic>? get _submissions =>
+      _questActivity?['submissions'] as Map<String, dynamic>?;
+
+  int? get checkinsTotal => (_checkins?['total'] as num?)?.toInt();
+  int? get checkinsWithPoints => (_checkins?['withPoints'] as num?)?.toInt();
+  int? get mysteryFinds => (_checkins?['mysteryFinds'] as num?)?.toInt();
+  int get checkinPointsTotal => (_checkins?['pointsTotal'] as num?)?.toInt() ?? 0;
+
+  int get discoveriesApproved =>
+      (_unlistedDiscoveries?['approvedCount'] as num?)?.toInt() ?? 0;
+  int get discoveryPointsTotal =>
+      (_unlistedDiscoveries?['pointsTotal'] as num?)?.toInt() ?? 0;
+
+  int get smallBusinessSaturdayPoints =>
+      ((_questActivity?['smallBusinessSaturday']
+                  as Map<String, dynamic>?)?['pointsTotal'] as num?)
+          ?.toInt() ??
+      0;
+
+  int? get ownershipReportsTotal => (_ownershipReports?['total'] as num?)?.toInt();
+  int get ownershipReportsBlackOwned =>
+      (_ownershipReports?['blackOwned'] as num?)?.toInt() ?? 0;
+  int get ownershipReportsNotBlackOwned =>
+      (_ownershipReports?['notBlackOwned'] as num?)?.toInt() ?? 0;
+
+  int? get submissionsTotal => (_submissions?['total'] as num?)?.toInt();
+  int? get submissionsPending => (_submissions?['pending'] as num?)?.toInt();
+  int get submissionsApproved =>
+      ((_submissions?['byStatus'] as Map<String, dynamic>?)?['approved'] as num?)
+          ?.toInt() ??
+      0;
+
+  /// Flattens the whole raw response into (label, value) rows for CSV
+  /// export - every number this function computes, not just the ones the
+  /// dashboard card renders, so the export is never missing something the
+  /// backend already knows. Dotted path as the label (e.g.
+  /// "questActivity.checkins.total") rather than a prettified name -
+  /// unambiguous beats readable for a raw data dump meant to be pivoted
+  /// in a spreadsheet, not read top to bottom.
+  List<List<String>> toCsvRows() {
+    final rows = <List<String>>[
+      ['metric', 'value']
+    ];
+    void walk(String prefix, dynamic value) {
+      if (value is Map) {
+        for (final entry in value.entries) {
+          walk(prefix.isEmpty ? '${entry.key}' : '$prefix.${entry.key}', entry.value);
+        }
+      } else {
+        rows.add([prefix, '${value ?? ''}']);
+      }
+    }
+
+    walk('', raw);
+    return rows;
+  }
+}
+
 /// One turn in a support chat exchange - kept client-side only, as recent
 /// context sent with the next message (see
 /// [KinServices.sendSupportChatMessage]). Never persisted locally between
@@ -518,6 +622,40 @@ class KinServices {
     } catch (_) {
       return const ServiceResult.failure(
           'Could not check you in. Please try again.');
+    }
+  }
+
+  /// Logs one crowd-sourced "is this actually Black-owned?" signal for an
+  /// unverified business, collected during a KIN Quest check-in. This is
+  /// a plain client write (business_ownership_reports allows create for
+  /// any signed-in user) rather than a callable, because unlike a claim
+  /// or a check-in it grants no privilege and changes nothing by itself -
+  /// firestore.rules makes the collection admin-read-only, and no report,
+  /// however many pile up, ever touches businesses.is_black_owned on its
+  /// own. An admin reviews these by hand before anything about the
+  /// business actually changes.
+  static Future<ServiceResult<void>> reportBusinessOwnership({
+    required DocumentReference businessRef,
+    required bool isBlackOwned,
+  }) async {
+    final userRef = currentUserReference;
+    if (userRef == null) {
+      return const ServiceResult.failure(
+          'You need to be signed in to send this.');
+    }
+    try {
+      await FirebaseFirestore.instance
+          .collection('business_ownership_reports')
+          .doc()
+          .set({
+        'business_ref': businessRef,
+        'user_ref': userRef,
+        'is_black_owned': isBlackOwned,
+        'created_at': getCurrentTimestamp,
+      });
+      return const ServiceResult.success();
+    } catch (_) {
+      return const ServiceResult.failure('Could not send that. Please try again.');
     }
   }
 
@@ -2065,6 +2203,11 @@ class KinServices {
     required String message,
     String? conversationId,
     String? visitorName,
+    // 'business' or 'customer' - lets support_chat_logs and the admin
+    // notification tell the two apart instead of everyone looking like an
+    // anonymous name. businessRef only makes sense alongside 'business'.
+    String? source,
+    DocumentReference? businessRef,
     List<SupportChatTurn> history = const [],
   }) async {
     try {
@@ -2077,6 +2220,8 @@ class KinServices {
         'message': message,
         if (conversationId != null) 'conversationId': conversationId,
         if (visitorName != null) 'visitorName': visitorName,
+        if (source != null) 'source': source,
+        if (businessRef != null) 'businessId': businessRef.id,
         'history': history.map((t) => t.toJson()).toList(),
       });
       final reply = result.data['reply'] as String? ?? '';
@@ -2128,6 +2273,28 @@ class KinServices {
           e.message ?? 'Could not load support chat stats.');
     } catch (_) {
       return const ServiceResult.failure('Could not load support chat stats.');
+    }
+  }
+
+  /// Admin-only aggregation across activity, engagement, Kindex, claims,
+  /// reviews, and the KIN Quest system (operations_stats.js) - the
+  /// Executive Dashboard's KIN Quest Activity card and its CSV export
+  /// both read from this one call.
+  static Future<ServiceResult<OperationsStats>> getOperationsStats() async {
+    try {
+      final result = await FirebaseFunctions.instance
+          .httpsCallable(
+        'getOperationsStats',
+        options: HttpsCallableOptions(timeout: const Duration(seconds: 20)),
+      )
+          .call<Map<String, dynamic>>();
+      final raw = _deepCastFunctionsResult(result.data) as Map<String, dynamic>? ??
+          <String, dynamic>{};
+      return ServiceResult.success(OperationsStats(raw));
+    } on FirebaseFunctionsException catch (e) {
+      return ServiceResult.failure(e.message ?? 'Could not load operations stats.');
+    } catch (_) {
+      return const ServiceResult.failure('Could not load operations stats.');
     }
   }
 
