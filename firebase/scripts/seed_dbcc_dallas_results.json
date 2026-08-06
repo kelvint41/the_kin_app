@@ -1,0 +1,261 @@
+{
+  "mode": "commit",
+  "created": [
+    {
+      "docId": "PXlL6aR21nXnHyGruUGw",
+      "ticker_symbol": "KINDC",
+      "business_name": "Kind Clinic - Oaklawn"
+    },
+    {
+      "docId": "gmMsKI68XxgpwKihNXTi",
+      "ticker_symbol": "QVZV9",
+      "business_name": "E Quality Corporation"
+    },
+    {
+      "docId": "WK5B85SpvJklVFIeu89r",
+      "ticker_symbol": "MIMIN",
+      "business_name": "MIM Insurance Solutions"
+    },
+    {
+      "docId": "g1h6sxQE2amqqQY05HPP",
+      "ticker_symbol": "PULSE",
+      "business_name": "Pulse Check Rehab and Performance"
+    },
+    {
+      "docId": "HMEtihYHIkn5woeG09t6",
+      "ticker_symbol": "ICEDO",
+      "business_name": "Iced Out Philly Water Ice"
+    },
+    {
+      "docId": "l6uj293djS46fZvYdekd",
+      "ticker_symbol": "BOOKI",
+      "business_name": "Bookit Sports Inc"
+    },
+    {
+      "docId": "3155KT1eBEsVLLCamqUt",
+      "ticker_symbol": "KANIO",
+      "business_name": "KA NIOMI CONSULTING LLC"
+    },
+    {
+      "docId": "Qe1ISrAeTH26HKcRP1y6",
+      "ticker_symbol": "QRLTV",
+      "business_name": "Anderson Injury Lawyers"
+    },
+    {
+      "docId": "rBoinwd1OeKnQa2038oN",
+      "ticker_symbol": "KEEPI",
+      "business_name": "Keep It Klean Co."
+    },
+    {
+      "docId": "zib05JjywNagGtgFvvt2",
+      "ticker_symbol": "QTMO8",
+      "business_name": "Black Heart Association"
+    },
+    {
+      "docId": "p00TNJtqvBbfCdfePPcY",
+      "ticker_symbol": "DALLA",
+      "business_name": "Dallas Career Academy"
+    },
+    {
+      "docId": "qhdGu7KAVQfUDkfyx3si",
+      "ticker_symbol": "TYSON",
+      "business_name": "Tyson Law Firm"
+    },
+    {
+      "docId": "UyxF24gQexOLyEwEO1OK",
+      "ticker_symbol": "FRIOS",
+      "business_name": "Frios Dallas"
+    },
+    {
+      "docId": "wmdHS8eaVTb4kNgZTTiw",
+      "ticker_symbol": "GUESS",
+      "business_name": "Guesscreative"
+    },
+    {
+      "docId": "3h5CfP6XSyIKF7r5CiHm",
+      "ticker_symbol": "NGENI",
+      "business_name": "N'Genius"
+    },
+    {
+      "docId": "J2nUKPiWPMkiSflbBrej",
+      "ticker_symbol": "IOKTW",
+      "business_name": "Simple Safe Insurance Agency"
+    },
+    {
+      "docId": "Ky9fcARgrjI0uORZBe3Z",
+      "ticker_symbol": "BAITT",
+      "business_name": "The Bait Tax & Financial Services"
+    },
+    {
+      "docId": "4XXlyRCqRZ1YcYLusjVu",
+      "ticker_symbol": "SDMUL",
+      "business_name": "SD MultiVentures LLC"
+    },
+    {
+      "docId": "fAkrOMRSgx8an2DRbijg",
+      "ticker_symbol": "BROOK",
+      "business_name": "Brooks & Brooks Insurance Agency"
+    },
+    {
+      "docId": "wDNL4OXe66iEUXfK4H8m",
+      "ticker_symbol": "WOOFI",
+      "business_name": "Woofie's of North Dallas"
+    },
+    {
+      "docId": "rH5l3cWBp2ysPxgYCtjc",
+      "ticker_symbol": "SILVE",
+      "business_name": "Silverback Guns and Ammunition"
+    },
+    {
+      "docId": "7E5tBDtLvnGWUUZG5Jmi",
+      "ticker_symbol": "JAYHO",
+      "business_name": "Jay Holland"
+    },
+    {
+      "docId": "1bNPbpXAQeNb9e6NKMfW",
+      "ticker_symbol": "HELMS",
+      "business_name": "HelmsBriscoe"
+    },
+    {
+      "docId": "4pb74EpwdxxZo2R0Qza2",
+      "ticker_symbol": "ZEALI",
+      "business_name": "Zealists"
+    },
+    {
+      "docId": "w95kNLuTG3hJuAOB8uRD",
+      "ticker_symbol": "STEPH",
+      "business_name": "Stephen Goudeau"
+    },
+    {
+      "docId": "BI5X9FGOQPbWuohvdPA9",
+      "ticker_symbol": "AGILE",
+      "business_name": "Agile Private Enterprise LLC"
+    },
+    {
+      "docId": "6jMsniziujrtqy6EzUL2",
+      "ticker_symbol": "MAXST",
+      "business_name": "Max Strength Fitness - North Dallas"
+    },
+    {
+      "docId": "QjzRVAo1KahanHLlpLdW",
+      "ticker_symbol": "FINAN",
+      "business_name": "Financial Literacy Doctors LLC"
+    },
+    {
+      "docId": "pbyo5nYWyDPxulvVT8rD",
+      "ticker_symbol": "RECIP",
+      "business_name": "Recipe Oak Cliff"
+    },
+    {
+      "docId": "6XfBZ6I2BQrIoWuHJ1pG",
+      "ticker_symbol": "MOORS",
+      "business_name": "Moors Society Inc"
+    },
+    {
+      "docId": "RY1iG7C7ylrL2kPS5xLF",
+      "ticker_symbol": "ESAME",
+      "business_name": "ESA Mergers"
+    },
+    {
+      "docId": "jxGIv4SPlj3iusr4torN",
+      "ticker_symbol": "EPICM",
+      "business_name": "Epic Medical Research, LLC"
+    },
+    {
+      "docId": "XyREyv0XntgBhosQ1IX9",
+      "ticker_symbol": "GNIVO",
+      "business_name": "Gnivol Events"
+    },
+    {
+      "docId": "h2NUttQ6Kye4aheXgnWy",
+      "ticker_symbol": "98CQP",
+      "business_name": "Hearts of Light Counseling & Consulting"
+    },
+    {
+      "docId": "CdprtnZ7jWcsJhGO8m81",
+      "ticker_symbol": "F7DPZ",
+      "business_name": "Franklin Realty Grp"
+    },
+    {
+      "docId": "wV9xtxnvMBVpZShUER4k",
+      "ticker_symbol": "SACRE",
+      "business_name": "Sacred Heart Co."
+    },
+    {
+      "docId": "COajMACmc8uqPC3iRgsn",
+      "ticker_symbol": "FUEGO",
+      "business_name": "Fuego Technologies"
+    },
+    {
+      "docId": "VYdGV1nq1FchXn5CgvUN",
+      "ticker_symbol": "LIFET",
+      "business_name": "LifeTax Financial Services LLC"
+    },
+    {
+      "docId": "7S4HrzKmwEFwWX59c3Ik",
+      "ticker_symbol": "POWER",
+      "business_name": "Powerful Blessed Champions LLC"
+    },
+    {
+      "docId": "xjGfqufVEykJF8IDBLQP",
+      "ticker_symbol": "OMGCA",
+      "business_name": "OMG Cakes & Southern Best Catering, LLC"
+    },
+    {
+      "docId": "nvxqOpntif2ZlIOxFhbe",
+      "ticker_symbol": "PERFE",
+      "business_name": "Perfectly Kept Books®"
+    },
+    {
+      "docId": "mmQrP18DZgPIJvPUeuxm",
+      "ticker_symbol": "TEXAS",
+      "business_name": "Texas Crime Prevention & Investigation"
+    },
+    {
+      "docId": "Zz7VcNmthBRf7UC3LNsp",
+      "ticker_symbol": "POTBA",
+      "business_name": "The POT Baked Potato Bar"
+    },
+    {
+      "docId": "Ll7RbFZxM7f61CRSN6e3",
+      "ticker_symbol": "46QDT",
+      "business_name": "Level 1715"
+    },
+    {
+      "docId": "gyVUdmZ864J3CysRJgwk",
+      "ticker_symbol": "9JO13",
+      "business_name": "The Cleaners on Cedar Crest"
+    },
+    {
+      "docId": "ChNM5gpyDayqPXRu1Z8I",
+      "ticker_symbol": "EATSB",
+      "business_name": "EATS Broker"
+    },
+    {
+      "docId": "iRwGBfgzIIXexXWRPweO",
+      "ticker_symbol": "9YB2B",
+      "business_name": "The Legacy Optimizer"
+    },
+    {
+      "docId": "wCIQcV2vVPOxGckZegmi",
+      "ticker_symbol": "BREAS",
+      "business_name": "The Breast Choice Lactation"
+    },
+    {
+      "docId": "URZ5YCqEICHzCw422SJb",
+      "ticker_symbol": "SOULR",
+      "business_name": "Soul Rep Theatre Company"
+    },
+    {
+      "docId": "G886ipmPHSm4mRebIhjY",
+      "ticker_symbol": "LENGO",
+      "business_name": "Lengo Strategic Partners, LLC"
+    },
+    {
+      "docId": "PcIY4CbjH73oyFN7wnxY",
+      "ticker_symbol": "SLCSP",
+      "business_name": "SLC Speedy Process Servers"
+    }
+  ],
+  "already_exists": []
+}

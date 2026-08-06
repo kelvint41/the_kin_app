@@ -1,0 +1,479 @@
+[
+  {
+    "name": "Kind Clinic - Oaklawn",
+    "queryAddress": "3802 Cedar Springs Rd, Suite 110, Dallas, TX 75219",
+    "status": "kept",
+    "formattedAddress": "3802 Cedar Springs Rd Ste 110, Dallas, TX 75219, USA",
+    "lat": 32.8100957,
+    "lng": -96.8086922,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "E Quality Corporation",
+    "queryAddress": "2550 Beckleymeade Ave, Suite 215B, Dallas, TX 75237",
+    "status": "kept",
+    "formattedAddress": "2550 Beckleymeade Ave Ste 215B, Dallas, TX 75237, USA",
+    "lat": 32.6397182,
+    "lng": -96.8616668,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MIM Insurance Solutions",
+    "queryAddress": "17630 Davenport Rd Suite 111, Dallas, TX 75252",
+    "status": "kept",
+    "formattedAddress": "17630 Davenport Rd Ste 111, Dallas, TX 75252, USA",
+    "lat": 32.9892892,
+    "lng": -96.7933652,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pulse Check Rehab and Performance",
+    "queryAddress": "10721 Plano Rd, Dallas, TX 75238",
+    "status": "kept",
+    "formattedAddress": "10721 Plano Rd, Dallas, TX 75238, USA",
+    "lat": 32.8960933,
+    "lng": -96.7009185,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Iced Out Philly Water Ice",
+    "queryAddress": "785 W Wheatland Rd #414, Duncanville, TX 75116",
+    "status": "kept",
+    "formattedAddress": "785 W Wheatland Rd #414, Duncanville, TX 75116, USA",
+    "lat": 32.6486429,
+    "lng": -96.9250435,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bookit Sports Inc",
+    "queryAddress": "3440 Sojourn Dr, Ste 220, Carrollton, TX 75006",
+    "status": "kept",
+    "formattedAddress": "3440 Sojourn Dr Suite 220, Carrollton, TX 75006, USA",
+    "lat": 32.9824926,
+    "lng": -96.8405437,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "KA NIOMI CONSULTING LLC",
+    "queryAddress": "600 Cedar Elm Ct, Dallas, TX 75063",
+    "status": "kept",
+    "formattedAddress": "600 Cedar Elm Ct, Irving, TX 75063, USA",
+    "lat": 32.9112271,
+    "lng": -96.9731831,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Anderson Injury Lawyers",
+    "queryAddress": "408 W Eighth St, Dallas, TX 75208",
+    "status": "kept",
+    "formattedAddress": "408 W Eighth St, Dallas, TX 75208, USA",
+    "lat": 32.7478487,
+    "lng": -96.8288048,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Keep It Klean Co.",
+    "queryAddress": "5743 Blair Road, Dallas, TX 75231",
+    "status": "kept",
+    "formattedAddress": "5743 Blair Rd, Dallas, TX 75231, USA",
+    "lat": 32.8850294,
+    "lng": -96.765289,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Black Heart Association",
+    "queryAddress": "1029 Kaylie St, Grand Prairie, TX 75052",
+    "status": "kept",
+    "formattedAddress": "1029 Kaylie St, Grand Prairie, TX 75052, USA",
+    "lat": 32.6772724,
+    "lng": -96.9955202,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dallas Career Academy",
+    "queryAddress": "3265 W Camp Wisdom, Dallas, TX 75237",
+    "status": "kept",
+    "formattedAddress": "3265 W Camp Wisdom Rd, Dallas, TX 75237, USA",
+    "lat": 32.6638628,
+    "lng": -96.8739283,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tyson Law Firm",
+    "queryAddress": "342 W. Montana Ave, Dallas, TX 75224",
+    "status": "kept",
+    "formattedAddress": "342 W Montana Ave, Dallas, TX 75224, USA",
+    "lat": 32.7212068,
+    "lng": -96.8282385,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Frios Dallas",
+    "queryAddress": "1602 Martin Luther King JR blvd, Dallas, TX 75215",
+    "status": "kept",
+    "formattedAddress": "1602 Martin Luther King Jr Blvd, Dallas, TX 75215, USA",
+    "lat": 32.7607145,
+    "lng": -96.7777463,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Guesscreative",
+    "queryAddress": "4920 Soaring Eagle Ct, Grand Prairie, TX 75052",
+    "status": "kept",
+    "formattedAddress": "4920 Soaring Eagle Ct, Grand Prairie, TX 75052, USA",
+    "lat": 32.6535108,
+    "lng": -97.0387136,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "N'Genius",
+    "queryAddress": "2325 April Ln, Grand Prairie, TX 75050",
+    "status": "kept",
+    "formattedAddress": "2325 April Ln, Grand Prairie, TX 75050, USA",
+    "lat": 32.74792,
+    "lng": -97.0363696,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Simple Safe Insurance Agency",
+    "queryAddress": "7920 Belt Line Rd Ste 570, Dallas, TX 75254",
+    "status": "kept",
+    "formattedAddress": "7920 Belt Line Rd Ste 570, Dallas, TX 75254, USA",
+    "lat": 32.9497895,
+    "lng": -96.770082,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Bait Tax & Financial Services",
+    "queryAddress": "8350 N Central Expy, Dallas, TX 75206",
+    "status": "kept",
+    "formattedAddress": "8350 N Central Expy, Dallas, TX 75206, USA",
+    "lat": 32.8639978,
+    "lng": -96.7688313,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SD MultiVentures LLC",
+    "queryAddress": "5473 Blair Rd PMB 954983, Dallas, TX 75231",
+    "status": "kept",
+    "formattedAddress": "5473 Blair Rd, Dallas, TX 75231, USA",
+    "lat": 32.8852647,
+    "lng": -96.76652349999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Brooks & Brooks Insurance Agency",
+    "queryAddress": "8035 E R.L Thornton Fwy Suite 464, Dallas, TX 75288",
+    "status": "kept",
+    "formattedAddress": "8035 E R L Thornton Fwy #464, Dallas, TX 75228, USA",
+    "lat": 32.7948717,
+    "lng": -96.70373359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Woofie's of North Dallas",
+    "queryAddress": "3008 Ross Ave Ste 117, Dallas, TX 75204",
+    "status": "kept",
+    "formattedAddress": "3008 Ross Ave #117, Dallas, TX 75204, USA",
+    "lat": 32.7927604,
+    "lng": -96.7916185,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Silverback Guns and Ammunition",
+    "queryAddress": "430 East Wheatland Road, Duncanville, TX 75116",
+    "status": "kept",
+    "formattedAddress": "430 E Wheatland Rd, Duncanville, TX 75137, USA",
+    "lat": 32.6465166,
+    "lng": -96.9014852,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Jay Holland",
+    "queryAddress": "539 West Commerce St, Suite 3887, Dallas, TX 75208",
+    "status": "kept",
+    "formattedAddress": "539 W Commerce St #3887, Dallas, TX 75208, USA",
+    "lat": 32.7733009,
+    "lng": -96.833338,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "HelmsBriscoe",
+    "queryAddress": "1707 N Hall St, Apt 167, Dallas, TX 75204",
+    "status": "kept",
+    "formattedAddress": "1707 N Hall St #167, Dallas, TX 75204, USA",
+    "lat": 32.7954385,
+    "lng": -96.7893697,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Astute Performance Consulting",
+    "queryAddress": "1931 Market Center Blvd, Dallas, TX 75207",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1931 Market Center Blvd, Dallas, TX 75207, USA",
+    "lat": 32.7957938,
+    "lng": -96.8255534,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Zealists",
+    "queryAddress": "17727 Addison Road, Dallas, TX 75287",
+    "status": "kept",
+    "formattedAddress": "17727 Addison Rd, Dallas, TX 75287, USA",
+    "lat": 32.9890223,
+    "lng": -96.8308828,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Stephen Goudeau",
+    "queryAddress": "500 Singleton Blvd Apt 1240, Dallas, TX 75212",
+    "status": "kept",
+    "formattedAddress": "500 Singleton Blvd #1240, Dallas, TX 75212, USA",
+    "lat": 32.7782713,
+    "lng": -96.8341579,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Agile Private Enterprise LLC",
+    "queryAddress": "610 Uptown BLVD Suite 2000, Cedar Hill, TX 75115",
+    "status": "kept",
+    "formattedAddress": "610 Uptown Blvd ste 2000, Cedar Hill, TX 75104, USA",
+    "lat": 32.5955217,
+    "lng": -96.9445466,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Max Strength Fitness - North Dallas",
+    "queryAddress": "6522 Laurel Valley Road, Dallas, TX 75248",
+    "status": "kept",
+    "formattedAddress": "6522 Laurel Valley Rd, Dallas, TX 75248, USA",
+    "lat": 32.9661118,
+    "lng": -96.79551579999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Big T's Spinners and Rims Corporation",
+    "queryAddress": "1814 Memorial Dr, Houston, TX 77007",
+    "status": "dropped_out_of_range_225mi",
+    "formattedAddress": "1814 Memorial Dr, Houston, TX 77007, USA",
+    "lat": 29.7641233,
+    "lng": -95.3765117,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Financial Literacy Doctors LLC",
+    "queryAddress": "4408 Carol Ave, Fort Worth, TX 76105",
+    "status": "kept",
+    "formattedAddress": "4408 Carol Ave, Fort Worth, TX 76105, USA",
+    "lat": 32.7186855,
+    "lng": -97.2573262,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Recipe Oak Cliff",
+    "queryAddress": "1831 S. Ewing Ave, Dallas, TX 75216",
+    "status": "kept",
+    "formattedAddress": "1831 S Ewing Ave, Dallas, TX 75216, USA",
+    "lat": 32.7251945,
+    "lng": -96.811273,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Moors Society Inc",
+    "queryAddress": "6968 Clarkridge Drive, Apt 1902, Dallas, TX 75236",
+    "status": "kept",
+    "formattedAddress": "6968 Clarkridge Dr #1902, Dallas, TX 75236, USA",
+    "lat": 32.6662692,
+    "lng": -96.9427199,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ESA Mergers",
+    "queryAddress": "3232 McKinney Avenue, Suite 500, Dallas, TX 75204",
+    "status": "kept",
+    "formattedAddress": "3232 McKinney Ave Ste 500, Dallas, TX 75204, USA",
+    "lat": 32.8034169,
+    "lng": -96.79902849999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Epic Medical Research, LLC",
+    "queryAddress": "935 York Dr, Desoto, TX 75115",
+    "status": "kept",
+    "formattedAddress": "935 York Dr, DeSoto, TX 75115, USA",
+    "lat": 32.645931,
+    "lng": -96.879611,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gnivol Events",
+    "queryAddress": "912 Cherry Hill Ln, DeSoto, TX 75115",
+    "status": "kept",
+    "formattedAddress": "912 Cherry Hill Ln, DeSoto, TX 75115, USA",
+    "lat": 32.5801314,
+    "lng": -96.87827569999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Hearts of Light Counseling & Consulting",
+    "queryAddress": "675 Town Square Blvd Building 1A, Garland, TX 75040",
+    "status": "kept",
+    "formattedAddress": "675 Town Square Blvd #200 #1a, Garland, TX 75040, USA",
+    "lat": 32.9544169,
+    "lng": -96.6118793,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Franklin Realty Grp",
+    "queryAddress": "9209 Buckeye Bend, Little Elm, TX 75068",
+    "status": "kept",
+    "formattedAddress": "9209 Buckeye Bnd, Oak Point, TX 75068, USA",
+    "lat": 33.2027047,
+    "lng": -96.9718848,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Sacred Heart Co.",
+    "queryAddress": "1352 Chemical St., Dallas, TX 75207",
+    "status": "kept",
+    "formattedAddress": "1352 Chemical St, Dallas, TX 75207, USA",
+    "lat": 32.8024126,
+    "lng": -96.8389315,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Fuego Technologies",
+    "queryAddress": "6333 Catalpa Dr, Venus, TX 76084",
+    "status": "kept",
+    "formattedAddress": "6333 Catalpa Dr, Venus, TX 76084, USA",
+    "lat": 32.5038903,
+    "lng": -97.0744532,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "LifeTax Financial Services LLC",
+    "queryAddress": "8585 N. Stemmons Frwy Suite 260, Dallas, TX 75247",
+    "status": "kept",
+    "formattedAddress": "8585 N Stemmons Fwy #260, Dallas, TX 75247, USA",
+    "lat": 32.8303009,
+    "lng": -96.8748569,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Powerful Blessed Champions LLC",
+    "queryAddress": "5801 Marvin D Love Freeway, Dallas, TX 75237",
+    "status": "kept",
+    "formattedAddress": "5801 Marvin D. Love Fwy, Dallas, TX 75237, USA",
+    "lat": 32.6772219,
+    "lng": -96.85764759999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "OMG Cakes & Southern Best Catering, LLC",
+    "queryAddress": "3225 Martin Luther King Jr Blvd, Dallas, TX 75215",
+    "status": "kept",
+    "formattedAddress": "3225 Martin Luther King Jr Blvd, Dallas, TX 75210, USA",
+    "lat": 32.774105,
+    "lng": -96.7633169,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Perfectly Kept Books®",
+    "queryAddress": "539 W Commerce St. Ste 3829, Dallas, TX 75208",
+    "status": "kept",
+    "formattedAddress": "539 W Commerce St Ste 3829, Dallas, TX 75208, USA",
+    "lat": 32.7733009,
+    "lng": -96.833338,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Texas Crime Prevention & Investigation",
+    "queryAddress": "8035 E RL Thornton Fwy Suite 565, Dallas, TX 75228",
+    "status": "kept",
+    "formattedAddress": "8035 E R L Thornton Fwy #565, Dallas, TX 75228, USA",
+    "lat": 32.7948143,
+    "lng": -96.6927223,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "The POT Baked Potato Bar",
+    "queryAddress": "1639 South Blvd, Dallas, TX 75215",
+    "status": "kept",
+    "formattedAddress": "1639 South Blvd, Dallas, TX 75215, USA",
+    "lat": 32.7622796,
+    "lng": -96.77884460000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Level 1715",
+    "queryAddress": "3021 Saint George Dr, Mansfield, TX 76036",
+    "status": "kept",
+    "formattedAddress": "3021 st.George Dr, Mansfield, TX 76063, USA",
+    "lat": 32.6125937,
+    "lng": -97.1215539,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Cleaners on Cedar Crest",
+    "queryAddress": "1412 Bonnieview Rd, Dallas, TX 75203",
+    "status": "kept",
+    "formattedAddress": "1412 Bonnie View Rd, Dallas, TX 75203, USA",
+    "lat": 32.732367,
+    "lng": -96.7933613,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "EATS Broker",
+    "queryAddress": "2001 Ross Ave #700, Dallas, TX 75201",
+    "status": "kept",
+    "formattedAddress": "2001 Ross Ave #700, Dallas, TX 75201, USA",
+    "lat": 32.7877327,
+    "lng": -96.79945889999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Legacy Optimizer",
+    "queryAddress": "1910 Pacific Avenue, Dallas, TX 75201",
+    "status": "kept",
+    "formattedAddress": "1910 Pacific Ave, Dallas, TX 75201, USA",
+    "lat": 32.7826453,
+    "lng": -96.7954613,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Breast Choice Lactation",
+    "queryAddress": "1636 N Hampton Rd Suite 227, Desoto, TX 75115",
+    "status": "kept",
+    "formattedAddress": "1636 N Hampton Rd Ste 227, DeSoto, TX 75115, USA",
+    "lat": 32.6215842,
+    "lng": -96.8563767,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Soul Rep Theatre Company",
+    "queryAddress": "3630 Harry Hines Blvd, Dallas, TX 75219",
+    "status": "kept",
+    "formattedAddress": "3630 Harry Hines Blvd, Dallas, TX 75219, USA",
+    "lat": 32.8000117,
+    "lng": -96.816553,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lengo Strategic Partners, LLC",
+    "queryAddress": "10228 E Northwest Hwy #328, Dallas, TX 75238",
+    "status": "kept",
+    "formattedAddress": "10228 E NW Hwy #328, Dallas, TX 75238, USA",
+    "lat": 32.8638026,
+    "lng": -96.7095377,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SLC Speedy Process Servers",
+    "queryAddress": "5200 S Colony Blvd, The Colony, TX 75056",
+    "status": "kept",
+    "formattedAddress": "5200 S Colony Blvd, The Colony, TX 75056, USA",
+    "lat": 33.0835966,
+    "lng": -96.8790818,
+    "locationType": "ROOFTOP"
+  }
+]
