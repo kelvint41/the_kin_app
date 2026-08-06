@@ -37,9 +37,14 @@ export 'executive_dashboard_model.dart';
 ///
 /// The dashboard layout elements should be structured down the page as
 /// follows:
-/// 1. An AppBar containing the title "Executive Dashboard", a Refresh Button
-/// icon, and a DropdownButton styled city selector (defaulting to 'San
-/// Antonio' with options for Houston and Atlanta).
+/// 1. An AppBar containing the title "Executive Dashboard" and a Refresh
+/// Button icon. Every panel below is a system-wide total across every
+/// city KIN operates in - there used to be a city-selector dropdown here
+/// (defaulting to 'San Antonio', with a hardcoded options list that
+/// needed a code change for every new market) that scoped each panel to
+/// one city at a time; removed so System Overview actually means the
+/// whole system, and so a newly-seeded city shows up in every total
+/// automatically instead of needing to be added to that list first.
 /// 2. A KPI Stat Cards Section: A horizontally scrollable row displaying 4
 /// distinct micro-containers representing stats for Total Users, Businesses
 /// Listed, Black-Owned, and Elite/Pro Subscribers. Each card displays a
@@ -163,15 +168,11 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
       );
     }
 
-    final selectedCity = _model.dropdownValue ?? 'San Antonio';
-
+    // System-wide, not scoped to any one city - see the class doc comment
+    // for why the city-selector dropdown this used to filter against was
+    // removed.
     return StreamBuilder<List<ActivityLogsRecord>>(
-      stream: queryActivityLogsRecord(
-        queryBuilder: (activityLogsRecord) => activityLogsRecord.where(
-          'city',
-          isEqualTo: selectedCity,
-        ),
-      ),
+      stream: queryActivityLogsRecord(),
       builder: (context, snapshot) {
         // Customize what your widget looks like when it's loading.
         if (!snapshot.hasData) {
@@ -206,14 +207,6 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               automaticallyImplyLeading: false,
               title: Text(
                 'Executive Dashboard',
-                // The city dropdown in `actions` below used to demand
-                // unlimited width (a MainAxisSize.max Row wrapping an
-                // Expanded), squeezing the title down until it clipped
-                // with no ellipsis - Flutter's default Text has no
-                // automatic overflow handling. That's fixed at the source
-                // now (the dropdown has a fixed width instead), but a
-                // title this long deserves a graceful "..." rather than a
-                // hard clip if anything narrows the available space again.
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: FlutterFlowTheme.of(context).titleLarge.override(
@@ -233,88 +226,23 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               ),
               actions: [
                 MainMenuButton(),
-                Row(
-                  // Was MainAxisSize.max wrapping an Expanded dropdown - that
-                  // combination tells this action to claim every pixel of
-                  // remaining AppBar width, leaving the title squeezed down
-                  // to whatever was left over. min sizes this action to
-                  // exactly what its two children need (the refresh button
-                  // plus the dropdown's own fixed width below), so the title
-                  // gets its rightful space back instead of fighting for it.
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    FlutterFlowIconButton(
-                      borderRadius: 8.0,
-                      buttonSize: 40.0,
-                      fillColor: Colors.transparent,
-                      icon: Icon(
-                        Icons.refresh_rounded,
-                        color: FlutterFlowTheme.of(context).primaryText,
-                        size: 24.0,
-                      ),
-                      onPressed: () async {
-                        safeSetState(() => _model.isLoading = true);
-                        try {
-                          await Future.delayed(Duration(milliseconds: 500));
-                        } finally {
-                          safeSetState(() => _model.isLoading = false);
-                        }
-                      },
-                    ),
-                    SizedBox(
-                      width: 140.0,
-                      child: FlutterFlowDropDown<String>(
-                        controller: _model.dropdownValueController ??=
-                            FormFieldController<String>(
-                          _model.dropdownValue ??= 'San Antonio',
-                        ),
-                        options: ['San Antonio', 'Houston', 'Dallas', 'Atlanta'],
-                        onChanged: (val) =>
-                            safeSetState(() => _model.dropdownValue = val),
-                        height: 40.0,
-                        textStyle: FlutterFlowTheme.of(context)
-                            .bodyMedium
-                            .override(
-                              font: GoogleFonts.plusJakartaSans(
-                                fontWeight: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontWeight,
-                                fontStyle: FlutterFlowTheme.of(context)
-                                    .bodyMedium
-                                    .fontStyle,
-                              ),
-                              color: FlutterFlowTheme.of(context).secondaryText,
-                              letterSpacing: 0.0,
-                              fontWeight: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontWeight,
-                              fontStyle: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .fontStyle,
-                              lineHeight: 1.4,
-                            ),
-                        hintText: 'San Antonio',
-                        icon: Icon(
-                          Icons.keyboard_arrow_down_rounded,
-                          color: FlutterFlowTheme.of(context).secondaryText,
-                          size: 24.0,
-                        ),
-                        fillColor: Colors.transparent,
-                        elevation: 2.0,
-                        borderColor: FlutterFlowTheme.of(context).alternate,
-                        borderWidth: 1.0,
-                        borderRadius: 14.0,
-                        margin: EdgeInsetsDirectional.fromSTEB(
-                            16.0, 0.0, 16.0, 0.0),
-                        hidesUnderline: true,
-                        isOverButton: false,
-                        isSearchable: false,
-                        isMultiSelect: false,
-                      ),
-                    ),
-                  ].divide(SizedBox(width: 8.0)),
+                FlutterFlowIconButton(
+                  borderRadius: 8.0,
+                  buttonSize: 40.0,
+                  fillColor: Colors.transparent,
+                  icon: Icon(
+                    Icons.refresh_rounded,
+                    color: FlutterFlowTheme.of(context).primaryText,
+                    size: 24.0,
+                  ),
+                  onPressed: () async {
+                    safeSetState(() => _model.isLoading = true);
+                    try {
+                      await Future.delayed(Duration(milliseconds: 500));
+                    } finally {
+                      safeSetState(() => _model.isLoading = false);
+                    }
+                  },
                 ),
               ],
               centerTitle: false,
@@ -405,13 +333,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                       },
                                     ),
                                     FutureBuilder<int>(
-                                      future: queryBusinessesRecordCount(
-                                        queryBuilder: (businessesRecord) =>
-                                            businessesRecord.where(
-                                          'city',
-                                          isEqualTo: selectedCity,
-                                        ),
-                                      ),
+                                      future: queryBusinessesRecordCount(),
                                       builder: (context, snapshot) {
                                         if (!snapshot.hasData) {
                                           return Center(
@@ -437,12 +359,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                               safeSetState(() {}),
                                           child: KpiCardWidget(
                                             value: kpiCardCount.toString(),
-                                            // Was just "Businesses Listed"
-                                            // with no indication the count
-                                            // is scoped to selectedCity -
-                                            // read as a global total when it
-                                            // wasn't one.
-                                            label: '$selectedCity Businesses',
+                                            // System-wide total, not scoped
+                                            // to one city - see the class
+                                            // doc comment for why the city
+                                            // selector this used to read
+                                            // ("$selectedCity Businesses")
+                                            // was removed.
+                                            label: 'Total Businesses',
                                           ),
                                         );
                                       },
@@ -450,15 +373,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                     FutureBuilder<int>(
                                       future: queryBusinessesRecordCount(
                                         queryBuilder: (businessesRecord) =>
-                                            businessesRecord
-                                                .where(
-                                                  'city',
-                                                  isEqualTo: selectedCity,
-                                                )
-                                                .where(
-                                                  'is_black_owned',
-                                                  isEqualTo: true,
-                                                ),
+                                            businessesRecord.where(
+                                          'is_black_owned',
+                                          isEqualTo: true,
+                                        ),
                                       ),
                                       builder: (context, snapshot) {
                                         if (!snapshot.hasData) {
@@ -493,15 +411,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                     FutureBuilder<int>(
                                       future: queryBusinessesRecordCount(
                                         queryBuilder: (businessesRecord) =>
-                                            businessesRecord
-                                                .where(
-                                                  'city',
-                                                  isEqualTo: selectedCity,
-                                                )
-                                                .where(
-                                                  'is_premium',
-                                                  isEqualTo: true,
-                                                ),
+                                            businessesRecord.where(
+                                          'is_premium',
+                                          isEqualTo: true,
+                                        ),
                                       ),
                                       builder: (context, snapshot) {
                                         if (!snapshot.hasData) {
@@ -820,13 +733,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                         height: 220.0,
                                         child: StreamBuilder<
                                             List<BusinessesRecord>>(
-                                          stream: queryBusinessesRecord(
-                                            queryBuilder: (businessesRecord) =>
-                                                businessesRecord.where(
-                                              'city',
-                                              isEqualTo: selectedCity,
-                                            ),
-                                          ),
+                                          stream: queryBusinessesRecord(),
                                           builder: (context, snapshot) {
                                             if (!snapshot.hasData) {
                                               return Center(
@@ -895,8 +802,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                               // width, and truncated to what
                                               // actually fits.
                                               xLabels: shownCategories
-                                                  .map((e) => _truncateLabel(
-                                                      e.key, 6))
+                                                  .map((e) =>
+                                                      _truncateLabel(e.key, 6))
                                                   .toList(),
                                               // Neither had an explicit
                                               // value before, so fl_chart
@@ -1016,16 +923,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                                   queryBusinessesRecordCount(
                                                 queryBuilder:
                                                     (businessesRecord) =>
-                                                        businessesRecord
-                                                            .where(
-                                                              'city',
-                                                              isEqualTo:
-                                                                  selectedCity,
-                                                            )
-                                                            .where(
-                                                              'subscription_tier',
-                                                              isEqualTo: tier,
-                                                            ),
+                                                        businessesRecord.where(
+                                                  'subscription_tier',
+                                                  isEqualTo: tier,
+                                                ),
                                               ),
                                               builder: (context, snapshot) {
                                                 if (!snapshot.hasData) {
@@ -1092,39 +993,38 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                               StreamBuilder<List<BusinessesRecord>>(
                                 stream: queryBusinessesRecord(
                                   queryBuilder: (businessesRecord) =>
-                                      businessesRecord
-                                          .where(
-                                            'city',
-                                            isEqualTo: selectedCity,
-                                          )
-                                          .orderBy('interaction_count',
-                                              descending: true),
+                                      businessesRecord.orderBy(
+                                          'interaction_count',
+                                          descending: true),
                                   limit: 5,
                                 ),
                                 builder: (context, snapshot) {
-                                  // This query filters on city and orders by
-                                  // interaction_count - a composite index
-                                  // Firestore didn't have. That made the
-                                  // stream error out on first read, which
-                                  // the old check for `!snapshot.hasData`
-                                  // never distinguished from "still
-                                  // loading", so this spun forever instead
-                                  // of surfacing the real problem.
+                                  // A plain single-field orderBy needs no
+                                  // composite index - it used to pair with a
+                                  // city equality filter (removed, see the
+                                  // class doc comment), which was exactly
+                                  // the combination that needed one Firestore
+                                  // didn't have, silently erroring out on
+                                  // first read. Kept as a defensive check
+                                  // rather than removed outright, since
+                                  // `!snapshot.hasData` alone never
+                                  // distinguished "still loading" from "the
+                                  // stream actually failed".
                                   if (snapshot.hasError) {
                                     return Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 12.0),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 12.0),
                                       child: Text(
                                         'Could not load top businesses '
                                         '(missing index or query error).',
                                         style: FlutterFlowTheme.of(context)
                                             .bodySmall
                                             .override(
-                                              font: GoogleFonts
-                                                  .plusJakartaSans(),
-                                              color: FlutterFlowTheme.of(
-                                                      context)
-                                                  .error,
+                                              font:
+                                                  GoogleFonts.plusJakartaSans(),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .error,
                                               letterSpacing: 0.0,
                                             ),
                                       ),
@@ -1154,25 +1054,25 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                                   // excludes any business missing that
                                   // field, same as the deliveries list
                                   // below - so an empty result here isn't
-                                  // an error, it means no business in this
-                                  // city has recorded interactions yet.
+                                  // an error, it means no business system-
+                                  // wide has recorded interactions yet.
                                   // Worth a message instead of blank space,
                                   // which reads as broken.
                                   if (listViewBusinessesRecordList.isEmpty) {
                                     return Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          vertical: 12.0),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 12.0),
                                       child: Text(
-                                        'No businesses in $selectedCity '
-                                        'have recorded interactions yet.',
+                                        'No businesses have recorded '
+                                        'interactions yet.',
                                         style: FlutterFlowTheme.of(context)
                                             .bodySmall
                                             .override(
-                                              font: GoogleFonts
-                                                  .plusJakartaSans(),
-                                              color: FlutterFlowTheme.of(
-                                                      context)
-                                                  .secondaryText,
+                                              font:
+                                                  GoogleFonts.plusJakartaSans(),
+                                              color:
+                                                  FlutterFlowTheme.of(context)
+                                                      .secondaryText,
                                               letterSpacing: 0.0,
                                             ),
                                       ),
@@ -1375,8 +1275,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -1456,8 +1355,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                         [
                           if (stats.turnedAwayOverQuota > 0)
                             '${stats.turnedAwayOverQuota} hit the monthly cap',
-                          if (stats.errored > 0)
-                            '${stats.errored} failed',
+                          if (stats.errored > 0) '${stats.errored} failed',
                         ].join(' · '),
                         style: theme.bodySmall.override(
                           font: GoogleFonts.plusJakartaSans(),
@@ -1517,9 +1415,9 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// and Support Chat, startPowerHour is a plain client-side Firestore
   /// update (KinServices.startPowerHour), not a Cloud Function, so there is
   /// no server-aggregated log to call into. This mirrors Category
-  /// Breakdown's approach just above: read the same city-scoped
-  /// BusinessesRecord stream the rest of the page already uses and
-  /// aggregate client-side.
+  /// Breakdown's approach just above: read the same (system-wide, see the
+  /// class doc comment) BusinessesRecord stream the rest of the page
+  /// already uses and aggregate client-side.
   ///
   /// power_hour_usage_count resets every 30 days per business (see
   /// startPowerHour), not on a shared calendar month, so "this cycle" is a
@@ -1527,7 +1425,6 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// for a usage signal, not for month-over-month comparison.
   Widget _powerHourSection(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
-    final selectedCity = _model.dropdownValue ?? 'San Antonio';
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -1550,12 +1447,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           ),
           padding: EdgeInsets.all(20.0),
           child: StreamBuilder<List<BusinessesRecord>>(
-            stream: queryBusinessesRecord(
-              queryBuilder: (businessesRecord) => businessesRecord.where(
-                'city',
-                isEqualTo: selectedCity,
-              ),
-            ),
+            stream: queryBusinessesRecord(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
                 return Center(
@@ -1563,8 +1455,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -1580,8 +1471,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               if (usedThisCycle.isEmpty && liveNow.isEmpty) {
                 return _aiNote(
                   theme,
-                  'No Power Hour activity yet in $selectedCity. Owners start '
-                  'one from Owner Profile.',
+                  'No Power Hour activity yet. Owners start one from Owner '
+                  'Profile.',
                 );
               }
 
@@ -1714,11 +1605,6 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   /// vs `Expired` is the number that actually answers "is the trial
   /// earning subscriptions", and both are readable directly off
   /// trial_status.
-  ///
-  /// Deliberately not scoped to selectedCity, unlike the panels above -
-  /// the trial is a product-wide experiment, not a market-level metric,
-  /// and splitting it by city at this volume would leave every bucket at
-  /// zero or one.
   Widget _foundingLocalTrialCard(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     const statuses = <String, String>{
@@ -1820,8 +1706,10 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
   }
 
   /// Every business the KIN Quest scavenger hunt has ever recorded a
-  /// verified check-in for, nationwide, regardless of [selectedCity] - the
-  /// entire point is to see every metro at once. `uservisits` carries no
+  /// verified check-in for, nationwide - this was always the one panel on
+  /// this page that never took a city filter, back when the rest of the
+  /// page did (see the class doc comment); the entire point is to see
+  /// every metro at once. `uservisits` carries no
   /// location of its own (just user_ref/business_ref/visit_timestamp - see
   /// UservisitsRecord), so each visit is resolved to its business's
   /// `business_location` GeoPoint. All-time rather than a rolling window:
@@ -1886,9 +1774,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
           ),
         ),
         Text(
-          'Every metro at once, regardless of the city selector above - '
-          'businesses customers have found via the scavenger hunt. Tap a '
-          'pin for the business name and find count.',
+          'Every metro at once - businesses customers have found via the '
+          'scavenger hunt. Tap a pin for the business name and find count.',
           style: theme.bodySmall.override(
             font: GoogleFonts.plusJakartaSans(),
             color: theme.secondaryText,
@@ -1912,8 +1799,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -2025,8 +1911,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -2162,8 +2047,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -2212,8 +2096,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                               if (report.pageWhereItHappened.isNotEmpty)
                                 report.pageWhereItHappened,
                               if (report.timestamp != null)
-                                dateTimeFormat(
-                                    "relative", report.timestamp!),
+                                dateTimeFormat("relative", report.timestamp!),
                             ].join(' · '),
                             style: theme.labelSmall.override(
                               font: GoogleFonts.plusJakartaSans(
@@ -2224,8 +2107,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                             ),
                           ),
                           Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
+                            padding: EdgeInsetsDirectional.fromSTEB(0, 4, 0, 0),
                             child: Text(
                               report.issueDescription,
                               style: theme.bodyMedium.override(
@@ -2297,8 +2179,7 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                     width: 30.0,
                     height: 30.0,
                     child: CircularProgressIndicator(
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(theme.primary),
+                      valueColor: AlwaysStoppedAnimation<Color>(theme.primary),
                     ),
                   ),
                 );
@@ -2372,8 +2253,8 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           ),
                           for (final entry in stats.recent)
                             Padding(
-                              padding: EdgeInsetsDirectional.fromSTEB(
-                                  0, 10, 0, 0),
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 10, 0, 0),
                               child: Text(
                                 entry.summary == null
                                     ? '(${entry.category})'

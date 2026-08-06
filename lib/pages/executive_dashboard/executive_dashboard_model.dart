@@ -4,12 +4,10 @@ import '/components/business_item_widget.dart';
 import '/components/kpi_card_widget.dart';
 import '/components/signup_item_widget.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
-import '/flutter_flow/flutter_flow_drop_down.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
-import '/flutter_flow/form_field_controller.dart';
 import 'dart:ui';
 import '/index.dart';
 import 'executive_dashboard_widget.dart' show ExecutiveDashboardWidget;
@@ -33,9 +31,6 @@ class ExecutiveDashboardModel
   late KpiCardModel kpiCardModel3;
   // Model for KpiCard.
   late KpiCardModel kpiCardModel4;
-  // State field(s) for Dropdown widget.
-  String? dropdownValue;
-  FormFieldController<String>? dropdownValueController;
 
   // Loading state
   bool isLoading = false;
