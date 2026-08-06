@@ -1,0 +1,572 @@
+[
+  {
+    "name": "Navient Technology Group",
+    "category": "Information Technology",
+    "raw_address": "110 East Houston Street, 7th Floor, San Antonio, Texas, 78205",
+    "phone": "(210) 819-4736"
+  },
+  {
+    "name": "1st Response CPR and First Aid",
+    "category": "Medical, Dental & Nursing Care",
+    "raw_address": "1714 Buffalo Wolf, San Antonio, Texas, 78245",
+    "phone": "(210) 393-3225"
+  },
+  {
+    "name": "1st Royal Love Services LLC",
+    "category": "Holistic Health",
+    "raw_address": "1423 S WW White, Ste 2, San Antonio, Texas, 78222",
+    "phone": "(210) 287-4838"
+  },
+  {
+    "name": "Acai Eternity Co.",
+    "category": "Food & Beverage/Catering",
+    "raw_address": "211 whitecliff dr, San Antonio, TX 78227",
+    "phone": "(210) 274-8207"
+  },
+  {
+    "name": "AdaOni Events LLC",
+    "category": "Event Planning",
+    "raw_address": "8259 Breezy Cove, San Antonio, TX 78154",
+    "phone": "(512) 910-8985"
+  },
+  {
+    "name": "Aflac Producer Agent",
+    "category": "Suplimental Gap INS",
+    "raw_address": "2265 Goodwin Ln, San Antonio, TX 78130",
+    "phone": "(830) 302-0757"
+  },
+  {
+    "name": "Alamo City Business Financial Solutions",
+    "category": "Banks & Credit Unions",
+    "raw_address": "7434 Banister Pass, San Antonio, TX 78254",
+    "phone": "(181) 628-6698 x4"
+  },
+  {
+    "name": "Allstate Insurance1",
+    "category": "Insurance",
+    "raw_address": "8703 Shuteye Peak, San Antonio, TX 78023",
+    "phone": "(210) 792-6876"
+  },
+  {
+    "name": "Alpha Solar Solutions, LLC",
+    "category": "Contractors",
+    "raw_address": "4243 East Piedras St, San Antonio, TX 78228",
+    "phone": "(210) 783-0507"
+  },
+  {
+    "name": "A TOUCH OF EBONY",
+    "category": "Entertainment",
+    "raw_address": "1200 S 10TH UNIT 2302, San Antonio, TX 78660",
+    "phone": "(737) 233-0509"
+  },
+  {
+    "name": "Black Label Realty Group",
+    "category": "Real Estate Services",
+    "raw_address": "1717 N. Loop 1604 East, Suite 324, San Antonio, TX 78232",
+    "phone": "(210) 237-7268"
+  },
+  {
+    "name": "Bowers Street Entertainment, LLC",
+    "category": "Entertainment",
+    "raw_address": "P.O. Box 276598, San Antonio, TX 78227",
+    "phone": "(210) 462-7907"
+  },
+  {
+    "name": "CBD Pros USA San Antonio",
+    "category": "Holistic Health",
+    "raw_address": "19179 Blanco Rd, San Antonio, TX 78258",
+    "phone": "(469) 810-4867"
+  },
+  {
+    "name": "Colors & Song",
+    "category": "Arts & Crafts",
+    "raw_address": "8003 Pandora Star, San Antonio, TX 78252",
+    "phone": "(210) 570-5006"
+  },
+  {
+    "name": "Computer Tek-Niques, LLC",
+    "category": "Consultants",
+    "raw_address": "6906 Sundew Creek, Converse, Texas 78109, 78109",
+    "phone": "(210) 725-4616"
+  },
+  {
+    "name": "Covington-McGee Christian Counseling",
+    "category": "Counseling",
+    "raw_address": "8026 Vantage Drive, San Antonio, TX 78230",
+    "phone": "(480) 599-9955"
+  },
+  {
+    "name": "Darby Day Staffing",
+    "category": "Staffing",
+    "raw_address": "4035 Naco Perrin Blvd, STE 104, San Antonio, Texas 78217, 78217",
+    "phone": "(817) 876-7233"
+  },
+  {
+    "name": "DESIGNS BY TY",
+    "category": "Interior Design",
+    "raw_address": "1023 Rittiman Rd Suite 318, San Antonio, TX 78218",
+    "phone": "(252) 933-3018"
+  },
+  {
+    "name": "Dr. Lulu\u2019s Life Coaching Lounge",
+    "category": "Counseling",
+    "raw_address": "11844 Bandera Rd #723, San Antonio, TX 78023",
+    "phone": "(802) 768-1180"
+  },
+  {
+    "name": "Ebron Coaching & Consulting, LLC",
+    "category": "Consultants",
+    "raw_address": "3333 Oakwell Court, San Antonio, TX 78218",
+    "phone": "(804) 243-1377"
+  },
+  {
+    "name": "ELSEWEAR COSMETICS",
+    "category": "Cosmetics",
+    "raw_address": "2935 Nacogdoches Rd Apt 109, San Antonio, Texas, 78217",
+    "phone": "(361) 726-0349"
+  },
+  {
+    "name": "Eric Grant Designs",
+    "category": "Architectural Design & Building",
+    "raw_address": "1810 Highland Mist Ln, San Antonio, TX 78281",
+    "phone": "(210) 608-6878"
+  },
+  {
+    "name": "Eyes on Security, LLC",
+    "category": "Consultants",
+    "raw_address": "6914 Barkley Trl, San Antonio, Texas, 78250",
+    "phone": "(210) 580-3631"
+  },
+  {
+    "name": "Founders First Capital Partners",
+    "category": "Counseling",
+    "raw_address": "2919 Commerce St., Dallas, Texas 75226, 75226",
+    "phone": "(727) 742-0157"
+  },
+  {
+    "name": "Friendship Is The New Pretty",
+    "category": "General",
+    "raw_address": "12370 Potranco Rd, Suite 207, PMB 1064, San Antonio, Texas 78253, 78253",
+    "phone": "(318) 210-6646"
+  },
+  {
+    "name": "G.A.P. Lighthouse Medical Equipment and Repairs",
+    "category": "Medical, Dental & Nursing Care",
+    "raw_address": "5504 Bandera Rd, San Antonio, TX 78238",
+    "phone": "(210) 627-5570"
+  },
+  {
+    "name": "Goods Financial Services, LLC",
+    "category": "Financial & Investment Services",
+    "raw_address": "24123 Boerne Stage Road, , Suite 118, San Antonio, TX, 78255",
+    "phone": "(210) 966-4090"
+  },
+  {
+    "name": "Gravity Party Rentals LLC",
+    "category": "Event Planning",
+    "raw_address": "8715 Hedford Flats, San Antonio, TX 78254",
+    "phone": "(210) 763-4244"
+  },
+  {
+    "name": "Guardian Business Solutions, LLC",
+    "category": "Human Resource Services",
+    "raw_address": "8502 Coppersky, San Antonio, TX 78109",
+    "phone": "(210) 393-2567"
+  },
+  {
+    "name": "Hair\u2019ess & Co.",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "10919 Culebra Rd Building 12. Suite 11, San Antonio, TX 78253",
+    "phone": "(240) 766-5474"
+  },
+  {
+    "name": "Heart Centered Ins.",
+    "category": "Training",
+    "raw_address": "1846 N Loop 1604 W, San Antonio, TX 78248",
+    "phone": "(210) 990-6655"
+  },
+  {
+    "name": "Hyde Park and Co",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "421 W. 6th Street, San Antonio, TX 78215",
+    "phone": "(702) 858-2060"
+  },
+  {
+    "name": "HyDryp HEALTH/H20",
+    "category": "Holistic Health",
+    "raw_address": "8403 State Hwy. 151, Suite 104, San Antonio, Texas, 78245",
+    "phone": "(210) 239-3893"
+  },
+  {
+    "name": "Infinity Wear",
+    "category": "Jewelry",
+    "raw_address": "23534 Enchanted Bend, San Antonio, TX 78260",
+    "phone": "(254) 394-0935"
+  },
+  {
+    "name": "In the Eye of The Beholder Art Gallery & Studio",
+    "category": "Art Galleries",
+    "raw_address": "1917 N New Braunfels Ave., San Antonio, TX 78208",
+    "phone": "(210) 600-4141"
+  },
+  {
+    "name": "Jacked Potato LLC",
+    "category": "Restaurants",
+    "raw_address": "8340 Seguin Rd, San Antonio, TX 78109",
+    "phone": "(210) 462-3072"
+  },
+  {
+    "name": "Jasmine Iman Luxury Picnics & Events",
+    "category": "Event Planning",
+    "raw_address": "6522 Camp Bullis Rd, San Antonio, TX 78256",
+    "phone": "(210) 400-2329"
+  },
+  {
+    "name": "Jimmy Solano eXp Realtor Brokered by eXp Realty, LLC",
+    "category": "Real Estate Services",
+    "raw_address": "9726 Autumn Arch, San Antonio, TX 78109",
+    "phone": "(210) 446-9902"
+  },
+  {
+    "name": "JT Ladies of Justice",
+    "category": "Legal Services",
+    "raw_address": "7103 Underwood Court, San Antonio, TX 78154",
+    "phone": "(254) 350-4528"
+  },
+  {
+    "name": "K & M Cleaning & Management Resources, LLC",
+    "category": "Cleaning Services",
+    "raw_address": "P.O. Box 762653, San Antonio, Texas 78245, 78245",
+    "phone": "(512) 773-2581"
+  },
+  {
+    "name": "Kairos Movement LLC",
+    "category": "Financial & Investment Services",
+    "raw_address": "218 Ilka Ranch Circle, San Antonio, TX 78155",
+    "phone": "(812) 648-3528"
+  },
+  {
+    "name": "KE PRINTING & GRAPHICS",
+    "category": "Printing &amp; Typesetting Services",
+    "raw_address": "100 Mayfair Drive, San Antonio, TX 78109",
+    "phone": "(901) 921-6757"
+  },
+  {
+    "name": "Kingdom Healing Institute",
+    "category": "Texas.",
+    "raw_address": "7434 Louis Pasteur Drive, Suite 102, San Antonio, TX 78229, AACCSA",
+    "phone": "(210) 942-2055"
+  },
+  {
+    "name": "Lanai Properties International LLC",
+    "category": "Real Estate Services",
+    "raw_address": "8615 Snow Goose, San Antonio, TX 78245",
+    "phone": "(210) 710-4788"
+  },
+  {
+    "name": "Leaders In Training",
+    "category": "Counseling",
+    "raw_address": "205 Regal Oaks, San Antonio, TX 78233",
+    "phone": "(210) 307-7919"
+  },
+  {
+    "name": "Live Travel More LLC",
+    "category": "Business & Professional Services",
+    "raw_address": "9155 Schaefer Rd #431, San Antonio, TX 78109",
+    "phone": "(213) 924-2457"
+  },
+  {
+    "name": "LXVE MXFFIN",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "12702 Toepperwein Rd, Suite 209, Live Oak, Texas 78233, 78233",
+    "phone": "(210) 580-4811"
+  },
+  {
+    "name": "Malecia Griffin",
+    "category": "Consultants",
+    "raw_address": "8214 Pioneer Oak, San Antonio, TX 78109",
+    "phone": "(210) 771-2716"
+  },
+  {
+    "name": "Meadowview Financial",
+    "category": "Financial & Investment Services",
+    "raw_address": "14502 Brook Hollow Blvd., San Antonio, TX 78232",
+    "phone": "(210) 272-7804"
+  },
+  {
+    "name": "Med Spot Scrub Shop, LLC",
+    "category": "Medical, Dental & Nursing Care",
+    "raw_address": "6323 Sovereign Drive, San Antonio, TX 78229",
+    "phone": "(210) 551-0299"
+  },
+  {
+    "name": "Meshaun Model Management, LLC",
+    "category": "Entertainment",
+    "raw_address": "4926 Corian Well Drive, San Antonio, TX 78247",
+    "phone": "(210) 995-4063"
+  },
+  {
+    "name": "Mills Rodgers Speaks!",
+    "category": "Consultants",
+    "raw_address": "8130 Shin Oak Drive, San Antonio, TX 78233",
+    "phone": "(210) 651-2026"
+  },
+  {
+    "name": "MrSFit",
+    "category": "Fitness",
+    "raw_address": "3101 Howling Wolf, San Antonio, TX 78261",
+    "phone": "(205) 276-9993"
+  },
+  {
+    "name": "Naomi Warren Realtork",
+    "category": "Real Estate Services",
+    "raw_address": "121 Bulverde Crossing, Suite 110, San Antonio, TX 78163",
+    "phone": "(210) 286-7604"
+  },
+  {
+    "name": "NATION\u2019S MULTI-SERVICE",
+    "category": "Landscaping",
+    "raw_address": "8423 greenham, San Antonio, TX 78239",
+    "phone": "(210) 421-4756"
+  },
+  {
+    "name": "Neatly Done San Antonio",
+    "category": "Carpets & Interiors",
+    "raw_address": "10730 Potranco Rd Ste 122-181, San Antonio, Texas 78251, 78251",
+    "phone": "(210) 577-3118"
+  },
+  {
+    "name": "New York Life",
+    "category": "Financial & Investment Services",
+    "raw_address": "8000 I-10 West, Suite 800, San Antonio, Texas, 78230",
+    "phone": "(952) 454-0436"
+  },
+  {
+    "name": "New York LIfe Insurance",
+    "category": "Financial & Investment Services",
+    "raw_address": "8003 Pandora Star, San Antonio, TX 78252",
+    "phone": "(832) 744-4063"
+  },
+  {
+    "name": "Nia Talks, LLC",
+    "category": "Personal Services",
+    "raw_address": "4007 Dunn Oak Drive, San Antonio, TX 78223",
+    "phone": "(717) 719-1251"
+  },
+  {
+    "name": "OMG Sounds",
+    "category": "Entertainment",
+    "raw_address": "11414 LOST MINE TRL, San Antonio, TX 78245",
+    "phone": "(210) 232-2426"
+  },
+  {
+    "name": "Per4mance Printing",
+    "category": "Printing &amp; Signage",
+    "raw_address": "2233 Austin Hwy, San Antonio, Texas 78218, 78218",
+    "phone": "(210) 930-0632"
+  },
+  {
+    "name": "PO BOXES EXPRESS PLUS",
+    "category": "Business & Professional Services",
+    "raw_address": "1721 s ww white rd, San Antonio, TX 78222",
+    "phone": "(210) 430-4885"
+  },
+  {
+    "name": "PowerFactor Entertainment Group",
+    "category": "Entertainment",
+    "raw_address": "108 Tiltwood Court, Boerne, Texas, 78006",
+    "phone": "(210) 385-6163"
+  },
+  {
+    "name": "Prolan Enterprises",
+    "category": "Real Estate Services",
+    "raw_address": "12931, Shoreline Dr, San Antonio, Texas, 78254",
+    "phone": "(210) 269-5305"
+  },
+  {
+    "name": "Q. Watson Construction, LLC",
+    "category": "Construction Management",
+    "raw_address": "3602 Windgap Drive, San Antonio, TX 78230",
+    "phone": "(210) 380-4547"
+  },
+  {
+    "name": "Reaching Out Consultant LLC",
+    "category": "Consultants",
+    "raw_address": "1902 Gray Fox Crk, San Antonio, TX 78245",
+    "phone": "(210) 570-5952"
+  },
+  {
+    "name": "San Antonio Black International Film Festival (SABIFF)",
+    "category": "Entertainment",
+    "raw_address": "322 Rice Road, San Antonio, Texas, 78220",
+    "phone": "(202) 744-2641"
+  },
+  {
+    "name": "Shaon\u2019s Enjoyable Cusinie",
+    "category": "Food & Beverage/Catering",
+    "raw_address": "239 Cascade trail, San Antonio, TX 78009",
+    "phone": "(830) 931-6044"
+  },
+  {
+    "name": "Shelley Simone Luxe Events",
+    "category": "Event Planning",
+    "raw_address": "8340 FM 78 Suite #5, Converse, Texas 78109, 78109",
+    "phone": "(210) 619-6051"
+  },
+  {
+    "name": "Simplykait Braiding & Weaving LLC",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "6836 San Pedro Ave Ste 107, San Antonio, TX 78216",
+    "phone": "(210) 592-1102"
+  },
+  {
+    "name": "Sonia Smith \u2013 Mary Kay",
+    "category": "Beauty",
+    "raw_address": "7335 Wine Gdn, Converse, Texas 78109, 78109",
+    "phone": "(561) 222-4366"
+  },
+  {
+    "name": "Spiritual Specimen Nutritional Supplements",
+    "category": "Holistic Health",
+    "raw_address": "20079 Stone Oak Pkwy Ste 1105 pmb 425, San Antonio, TX 78258",
+    "phone": "(210) 787-8477"
+  },
+  {
+    "name": "Status Stylez & Kutz",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "1308 Austin Hwy, San Antonio, TX 78209",
+    "phone": "(210) 396-1037"
+  },
+  {
+    "name": "Ta Tucker State Farm",
+    "category": "Insurance",
+    "raw_address": "1730 SW Military Drive, San Antonio, Texas, 78253",
+    "phone": "(210) 997-2288"
+  },
+  {
+    "name": "Taylor Hvac Solutions LLC",
+    "category": "Business & Professional Services",
+    "raw_address": "2929 Sunridge Dr, San Antonio, TX 78108",
+    "phone": "(210) 608-5897"
+  },
+  {
+    "name": "TDJ Consulting",
+    "category": "Consultants",
+    "raw_address": "10734 Expedition Creek, San Antonio, TX 78254",
+    "phone": "(210) 802-8352"
+  },
+  {
+    "name": "The African American Network, Inc",
+    "category": "Press/Publications/Television Digital Television",
+    "raw_address": "8000 Midcrown Drive, San Antonio, TX 78218",
+    "phone": "(210) 461-9411"
+  },
+  {
+    "name": "The Air Gods LLC",
+    "category": "Contractors",
+    "raw_address": "7721 ridge mist dr., San Antonio, TX 78239",
+    "phone": "(210) 560-2729"
+  },
+  {
+    "name": "The Carmel Soap Company",
+    "category": "Boutiques",
+    "raw_address": "4535 Summer Fall, San Antonio, TX 78259",
+    "phone": "(301) 928-4139"
+  },
+  {
+    "name": "The Experience Hair Studio",
+    "category": "Beauty Salons/Spas",
+    "raw_address": "1015 Rittiman Rd., Suite 106, San Antonio, Texas, 78218",
+    "phone": "(210) 257-0088"
+  },
+  {
+    "name": "The Joi in Business LLC",
+    "category": "Consultants",
+    "raw_address": "5900 Balcones Drive, Ste. 100, Austin, Texas, 78731",
+    "phone": "(646) 744-6346"
+  },
+  {
+    "name": "The Love Community Center at Redeemer\u2019s Praise Church",
+    "category": "Churches",
+    "raw_address": "107 S. Pine St., San Antonio, TX 78203",
+    "phone": "(210) 241-2966"
+  },
+  {
+    "name": "Thryv",
+    "category": "Marketing",
+    "raw_address": "8451 Mannington Pl., Converse, Texas 78109, 78109",
+    "phone": "(210) 416-9721"
+  },
+  {
+    "name": "TITHING TRANSPORT LLC",
+    "category": "Logistics - Trucking",
+    "raw_address": "9450 COPPER MIST, CONVERSE, Texas, 78109",
+    "phone": "(210) 393-2736"
+  },
+  {
+    "name": "TMLA Financial",
+    "category": "Insurance",
+    "raw_address": "6363 De Zavala Rd Ste, A221, San Antonio, Texas, 78249",
+    "phone": "(210) 436-9220"
+  },
+  {
+    "name": "Tony Savage Independent Contractor",
+    "category": "Business & Professional Services",
+    "raw_address": "7434 Banister Pass, San Antonio, TX 78254",
+    "phone": "(181) 628-6698 x4"
+  },
+  {
+    "name": "Trices Cafe and Lounge",
+    "category": "Restaurants",
+    "raw_address": "7600 Eckhert Road, San Antonio, TX 78240",
+    "phone": "(929) 428-0169"
+  },
+  {
+    "name": "Undecided",
+    "category": "Assisted Living",
+    "raw_address": "4003 Matson Manor, Converse, Texas 78109, 78109",
+    "phone": "(361) 254-3744"
+  },
+  {
+    "name": "Upstage Comedy Lounge LLC",
+    "category": "Entertainment",
+    "raw_address": "4441 Walzem Rd, San Antonio, TX 78247",
+    "phone": "(210) 562-0235"
+  },
+  {
+    "name": "Urban Soul Market",
+    "category": "Food & Beverage/Catering",
+    "raw_address": "1316 Pat Booker Rd, San Antonio, TX 78148",
+    "phone": "(210) 382-8606"
+  },
+  {
+    "name": "VanWright LLC",
+    "category": "Cleaning Services",
+    "raw_address": "2186 Jackson Keller Rd Suite 2190, San Antonio, TX 78213",
+    "phone": "(832) 209-2234"
+  },
+  {
+    "name": "Well Images of SA",
+    "category": "Business & Professional Services",
+    "raw_address": "7934 new world dr, San Antonio, TX 78239",
+    "phone": "(214) 784-3118"
+  },
+  {
+    "name": "Well Made Construction LLC",
+    "category": "Construction Management",
+    "raw_address": "6825 Huebner Road, San Antonio, TX 78238",
+    "phone": "(210) 219-5417"
+  },
+  {
+    "name": "Wholesome Eating Gluten free , Keto and Vegan Bakery & Restaurant",
+    "category": "Food & Beverage/Catering",
+    "raw_address": "19202 Stone Oak Pkwy, Ste 101, Texas, 78258",
+    "phone": "(913) 522-3098"
+  },
+  {
+    "name": "Zayas Legal Nurse Consultant",
+    "category": "Consultants",
+    "raw_address": "6027 Caramel Way, San Antonio, TX 78244",
+    "phone": "(240) 586-0336"
+  }
+]

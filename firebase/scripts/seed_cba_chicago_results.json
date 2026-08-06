@@ -1,0 +1,256 @@
+{
+  "mode": "commit",
+  "created": [
+    {
+      "docId": "RYeJQ2y6FAyMN4IC5hk9",
+      "ticker_symbol": "ADPRO",
+      "business_name": "A&D PROPERTY SERVICES, INC"
+    },
+    {
+      "docId": "iriAh1BRkUpUtleuIwSF",
+      "ticker_symbol": "ADLSO",
+      "business_name": "Adl Solutions LLC"
+    },
+    {
+      "docId": "1AtPJYNRnlMa04tn0cmI",
+      "ticker_symbol": "AUBUR",
+      "business_name": "Auburn Gresham Suites"
+    },
+    {
+      "docId": "DJdw0IamZVIAGxrX9LWr",
+      "ticker_symbol": "BENFO",
+      "business_name": "Benford Protection Group"
+    },
+    {
+      "docId": "EFVWwAgR4CgXgBaonUXV",
+      "ticker_symbol": "BLBRH",
+      "business_name": "BLBR Holdings LLC Production"
+    },
+    {
+      "docId": "wJyyaHn8RhKiyg2Crh1F",
+      "ticker_symbol": "BAWAD",
+      "business_name": "Bawadi Construction, Inc"
+    },
+    {
+      "docId": "Wj8Xgct8i75OKKcGaEBJ",
+      "ticker_symbol": "H91FL",
+      "business_name": "Brightest Star LLC"
+    },
+    {
+      "docId": "Gnb16ULxkAznYEUui7oq",
+      "ticker_symbol": "I819X",
+      "business_name": "Blues Capital Foundation"
+    },
+    {
+      "docId": "1fT1aDKyLW8XxTKpU6Ca",
+      "ticker_symbol": "COUNT",
+      "business_name": "Country Financial Insurance"
+    },
+    {
+      "docId": "lQDi4qRi4W2PA95h4FZG",
+      "ticker_symbol": "CHIFR",
+      "business_name": "ChiFresh Kitchen, LWCA"
+    },
+    {
+      "docId": "8TW1A3T4H0RQjFTz090t",
+      "ticker_symbol": "CITIZ",
+      "business_name": "Citizen Newspaper Chicago"
+    },
+    {
+      "docId": "qCoLokfW5r8zmKgv1zZV",
+      "ticker_symbol": "CELTI",
+      "business_name": "Celtic Development & Construction LTD"
+    },
+    {
+      "docId": "J2EaPXv5qriuuiP8tnOL",
+      "ticker_symbol": "CHATH",
+      "business_name": "Chatham Business HUB - KSP BioScript"
+    },
+    {
+      "docId": "wPMzzWXpkxwFQ5GNHrze",
+      "ticker_symbol": "COMBA",
+      "business_name": "Combat Zone Gym"
+    },
+    {
+      "docId": "RmJQV4ZfrAKCJtP7KAUc",
+      "ticker_symbol": "CHARL",
+      "business_name": "Charles Cathey Jr Ins Agcy Inc"
+    },
+    {
+      "docId": "kqsij4iwEmyfoXmTDE4F",
+      "ticker_symbol": "ECRCL",
+      "business_name": "ECR Clean"
+    },
+    {
+      "docId": "nPkvz2UxvEyRNJZ8g6Hi",
+      "ticker_symbol": "FLOOR",
+      "business_name": "Floor and Decor"
+    },
+    {
+      "docId": "htJAnEwjYcpdPbzOOOsZ",
+      "ticker_symbol": "SYQXG",
+      "business_name": "Guarded Interest Security Corp."
+    },
+    {
+      "docId": "HGD0UvZqjHx8fGrySRAa",
+      "ticker_symbol": "GIFTO",
+      "business_name": "Gift of Hope Organ & Tissue Donor Network"
+    },
+    {
+      "docId": "AxxRwiDi5yaFFS5BfcUA",
+      "ticker_symbol": "GENES",
+      "business_name": "Genesis Print and Copy Services, Inc"
+    },
+    {
+      "docId": "nGFqIDeb6yvILCC3c6Cv",
+      "ticker_symbol": "GWBAS",
+      "business_name": "GWB & Associates"
+    },
+    {
+      "docId": "c66ktXQx07636XA1KEhy",
+      "ticker_symbol": "HELPA",
+      "business_name": "Help at Home, LLC"
+    },
+    {
+      "docId": "gu7mvcRbLPBXrvcKIF4v",
+      "ticker_symbol": "JAMAI",
+      "business_name": "Jamaican Me Hungry"
+    },
+    {
+      "docId": "AlVHlonrQsyMQZ6OihrW",
+      "ticker_symbol": "KCCAC",
+      "business_name": "KCC academy"
+    },
+    {
+      "docId": "gbdLrusIc7zKaTPXoQLo",
+      "ticker_symbol": "LIBER",
+      "business_name": "Liberty Bank and Trust"
+    },
+    {
+      "docId": "k8RB9TdXjuCcbq6tgFTD",
+      "ticker_symbol": "MELKE",
+      "business_name": "Melkel Group L3C"
+    },
+    {
+      "docId": "mbY9tFpkhLZ7F8AY9y8O",
+      "ticker_symbol": "MERCE",
+      "business_name": "Mercer Upfitters Truck and Van Equipment, LLC"
+    },
+    {
+      "docId": "M98Whk733SE0quldKoox",
+      "ticker_symbol": "MINDO",
+      "business_name": "Mind Over Matter Construction Group"
+    },
+    {
+      "docId": "jEpwPB6OVR59EsNM3QjW",
+      "ticker_symbol": "MISUN",
+      "business_name": "Misunderstood Natural Hair Gallery"
+    },
+    {
+      "docId": "NjFJAhupRGortBlbN4UH",
+      "ticker_symbol": "OAPPS",
+      "business_name": "OApps"
+    },
+    {
+      "docId": "HIvIE7hk5YfVKHm9Vg9r",
+      "ticker_symbol": "OSAGH",
+      "business_name": "Osaghae & Associates"
+    },
+    {
+      "docId": "lb8OuHnBlMmHUhG9sy4L",
+      "ticker_symbol": "PROVI",
+      "business_name": "Providence Bank & Trust"
+    },
+    {
+      "docId": "aQYwodgXJDEL89OOP71S",
+      "ticker_symbol": "PHILL",
+      "business_name": "Phillips Investment Enterprises LLC"
+    },
+    {
+      "docId": "ScNsEU7zmI7xA17Lv1vN",
+      "ticker_symbol": "F89FV",
+      "business_name": "PROFESSIONAL ELECTRONICS REPAIR"
+    },
+    {
+      "docId": "8RGV3VD8yxUc9xVkkeGJ",
+      "ticker_symbol": "KG5PM",
+      "business_name": "PCMS, LLC"
+    },
+    {
+      "docId": "nHQWlcGPAm13d5m5u840",
+      "ticker_symbol": "QUANT",
+      "business_name": "Quant16"
+    },
+    {
+      "docId": "5jqlBW5aCCY3rXVBO8m6",
+      "ticker_symbol": "REDAC",
+      "business_name": "Redacre Solutions Inc."
+    },
+    {
+      "docId": "0yF2PvofmO5QSZOEXCfD",
+      "ticker_symbol": "ROOTS",
+      "business_name": "Roots & Vine Produce And Cafe Inc"
+    },
+    {
+      "docId": "r4R2GP1wRpvYLc084FIX",
+      "ticker_symbol": "SPENC",
+      "business_name": "Spence Consulting Inc."
+    },
+    {
+      "docId": "0pAFtTmCsYFCx1jv3xBl",
+      "ticker_symbol": "SEAWA",
+      "business_name": "Seaway, A Division of Self-Help FCU"
+    },
+    {
+      "docId": "y13sBw4YUh2trfv2QMMa",
+      "ticker_symbol": "3AA6W",
+      "business_name": "South Central Community Services"
+    },
+    {
+      "docId": "8TBibFn7znTvwDDpEwjI",
+      "ticker_symbol": "SENTI",
+      "business_name": "Sentinel AI Group Ltd"
+    },
+    {
+      "docId": "e0Lljga9AMrRMrJGueiJ",
+      "ticker_symbol": "SIZZL",
+      "business_name": "Sizzlin Skillets"
+    },
+    {
+      "docId": "rPuiRuYBwW5Qbf9KW6pN",
+      "ticker_symbol": "SALUB",
+      "business_name": "Salubrious"
+    },
+    {
+      "docId": "giHGxXbjkhJjAuzGbjzV",
+      "ticker_symbol": "ITARC",
+      "business_name": "The IT Architect Corporation (ITA)"
+    },
+    {
+      "docId": "Bx78V4w4AG7RbQAbeZya",
+      "ticker_symbol": "TRUTH",
+      "business_name": "Truth Auto Spa"
+    },
+    {
+      "docId": "cMu3s8TdOayPZVLMlvws",
+      "ticker_symbol": "TCAHE",
+      "business_name": "TCA Health, Inc."
+    },
+    {
+      "docId": "AbgOoWDTXFQykrcW9mtf",
+      "ticker_symbol": "GER1V",
+      "business_name": "Tailorite Cleaners"
+    },
+    {
+      "docId": "OS1QWdLaVklHtCFCs3xT",
+      "ticker_symbol": "VALSO",
+      "business_name": "Val-Son Solutions Inc."
+    },
+    {
+      "docId": "k5xADIHXbxOxvcf5irHT",
+      "ticker_symbol": "WINTE",
+      "business_name": "Winter Blue Agency LLC"
+    }
+  ],
+  "already_exists": []
+}

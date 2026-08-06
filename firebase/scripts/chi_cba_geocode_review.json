@@ -1,0 +1,479 @@
+[
+  {
+    "name": "A&D PROPERTY SERVICES, INC",
+    "queryAddress": "7330 S Exchange Ave, Chicago, IL 60649",
+    "status": "kept",
+    "formattedAddress": "7330 S Exchange Ave, Chicago, IL 60649, USA",
+    "lat": 41.7617691,
+    "lng": -87.5631421,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Adl Solutions LLC",
+    "queryAddress": "311 w 118th, chicago, IL 60628",
+    "status": "kept",
+    "formattedAddress": "311 W 118th St, Chicago, IL 60628, USA",
+    "lat": 41.6795572,
+    "lng": -87.63047399999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Auburn Gresham Suites",
+    "queryAddress": "1415 W. 79th St., Chicago, IL 60620",
+    "status": "kept",
+    "formattedAddress": "1415 W 79th St, Chicago, IL 60620, USA",
+    "lat": 41.7503209,
+    "lng": -87.659401,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Benford Protection Group",
+    "queryAddress": "7545 s. western ave, Chicago, IL 60620",
+    "status": "kept",
+    "formattedAddress": "7545 S Western Ave, Chicago, IL 60620, USA",
+    "lat": 41.7563827,
+    "lng": -87.68223300000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "BLBR Holdings LLC Production",
+    "queryAddress": "430 E 162nd Street, South Holland, IL 60473",
+    "status": "kept",
+    "formattedAddress": "430 E 162nd St, South Holland, IL 60473, USA",
+    "lat": 41.6005327,
+    "lng": -87.6058309,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bawadi Construction, Inc",
+    "queryAddress": "5041 171st. St., Chicago, IL 60477",
+    "status": "kept",
+    "formattedAddress": "5041 171st St, Tinley Park, IL 60477, USA",
+    "lat": 41.578609,
+    "lng": -87.7416322,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Brightest Star LLC",
+    "queryAddress": "7315 S East End Ace, Chicago, IL 60649",
+    "status": "kept",
+    "formattedAddress": "7315 S East End Ave, Chicago, IL 60649, USA",
+    "lat": 41.7617079,
+    "lng": -87.5834015,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Blues Capital Foundation",
+    "queryAddress": "1525 East 53rd Street, Chicago, IL 60615",
+    "status": "kept",
+    "formattedAddress": "1525 E 53rd St, Chicago, IL 60615, USA",
+    "lat": 41.7994219,
+    "lng": -87.5879367,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Country Financial Insurance",
+    "queryAddress": "820 E. 87th Street, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "820 E 87th St, Chicago, IL 60619, USA",
+    "lat": 41.7369724,
+    "lng": -87.6039508,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ChiFresh Kitchen, LWCA",
+    "queryAddress": "400 E 71st St., Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "400 E 71st St, Chicago, IL 60619, USA",
+    "lat": 41.76584250000001,
+    "lng": -87.61504819999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Citizen Newspaper Chicago",
+    "queryAddress": "8741 S. Greenwood Ave, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8741 S Greenwood Ave, Chicago, IL 60619, USA",
+    "lat": 41.7354071,
+    "lng": -87.59676549999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Celtic Development & Construction LTD",
+    "queryAddress": "305 Ambriance Drive, Burr Ridge, IL 60527",
+    "status": "kept",
+    "formattedAddress": "305 Ambriance Dr, Burr Ridge, IL 60527, USA",
+    "lat": 41.7489944,
+    "lng": -87.9114091,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Chatham Business HUB - KSP BioScript",
+    "queryAddress": "601 e 87th st, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "601 E 87th St, Chicago, IL 60619, USA",
+    "lat": 41.7363946,
+    "lng": -87.60951759999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Combat Zone Gym",
+    "queryAddress": "8242 S. Cottage Grove, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8242 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7444938,
+    "lng": -87.60539399999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Charles Cathey Jr Ins Agcy Inc",
+    "queryAddress": "1652 E 87th Street, Chicago, IL 60617",
+    "status": "kept",
+    "formattedAddress": "1652 E 87th St, Chicago, IL 60617, USA",
+    "lat": 41.7372015,
+    "lng": -87.5831236,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ECR Clean",
+    "queryAddress": "3636 S. Iron, Chicago, IL 60609",
+    "status": "kept",
+    "formattedAddress": "3636 S Iron St, Chicago, IL 60609, USA",
+    "lat": 41.8275311,
+    "lng": -87.659696,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Floor and Decor",
+    "queryAddress": "1 Countryside Plaza, Chicago, IL 60525",
+    "status": "kept",
+    "formattedAddress": "1 Countryside Plaza, Countryside, IL 60525, USA",
+    "lat": 41.7843143,
+    "lng": -87.8706745,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Guarded Interest Security Corp.",
+    "queryAddress": "777 Torrence ave, Calumet City, IL 60409",
+    "status": "kept",
+    "formattedAddress": "777 Torrence Ave, Calumet City, IL 60409, USA",
+    "lat": 41.6121922,
+    "lng": -87.5584986,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gift of Hope Organ & Tissue Donor Network",
+    "queryAddress": "7936 S. Cottage Grove Ave., Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "7936 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7497072,
+    "lng": -87.6056582,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Genesis Print and Copy Services, Inc",
+    "queryAddress": "8319 South Stony Island Avenue, Chicago, IL 60617",
+    "status": "kept",
+    "formattedAddress": "8319 S Stony Island Ave, Chicago, IL 60617, USA",
+    "lat": 41.7436089,
+    "lng": -87.5851277,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "GWB & Associates",
+    "queryAddress": "1043 E. 95th St, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "1043 E 95th St, Chicago, IL 60619, USA",
+    "lat": 41.7218941,
+    "lng": -87.5979547,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Henry Frerk Sons",
+    "queryAddress": "3135 W. Belmont, Chicago, IL 60618",
+    "status": "dropped_imprecise",
+    "formattedAddress": "3135 W Belmont Ave, Chicago, IL 60618, USA",
+    "lat": 41.9391082,
+    "lng": -87.70540729999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Help at Home, LLC",
+    "queryAddress": "806 E. 78th St, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "806 E 78th St, Chicago, IL 60619, USA",
+    "lat": 41.7543396,
+    "lng": -87.60506819999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Jamaican Me Hungry",
+    "queryAddress": "8221 S Evans Ave, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8221 S Evans Ave, Chicago, IL 60619, USA",
+    "lat": 41.74513390000001,
+    "lng": -87.6059702,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "KCC academy",
+    "queryAddress": "211 E. 79th st., Chicago, IL 60620",
+    "status": "kept",
+    "formattedAddress": "211 E 79th St, Chicago, IL 60619, USA",
+    "lat": 41.750846,
+    "lng": -87.61926679999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Liberty Bank and Trust",
+    "queryAddress": "7610 W Roosevelt Road, Forest Park, IL 60130",
+    "status": "kept",
+    "formattedAddress": "7610 W Roosevelt Rd, Forest Park, IL 60130, USA",
+    "lat": 41.8637968,
+    "lng": -87.8145754,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Melkel Group L3C",
+    "queryAddress": "8435 S Cottage Grove Ave, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8435 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7411065,
+    "lng": -87.60466410000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mercer Upfitters Truck and Van Equipment, LLC",
+    "queryAddress": "1420 W 38th St, Chicago, IL 60653",
+    "status": "kept",
+    "formattedAddress": "1420 W 38th St, Chicago, IL 60609, USA",
+    "lat": 41.8253949,
+    "lng": -87.6616293,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mind Over Matter Construction Group",
+    "queryAddress": "3402 West Monroe, Chicago, IL 60624",
+    "status": "kept",
+    "formattedAddress": "3402 W Monroe St, Chicago, IL 60624, USA",
+    "lat": 41.879779,
+    "lng": -87.711202,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Misunderstood Natural Hair Gallery",
+    "queryAddress": "8245 S. Cottage Grove, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8245 S Cottage Grove Ave, Chicago, IL 60617, USA",
+    "lat": 41.7444637,
+    "lng": -87.6046781,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "NovaPath Transport LLC",
+    "queryAddress": "401 N Michigan, Chicago, IL 60611",
+    "status": "dropped_imprecise",
+    "formattedAddress": "401 N Michigan Ave, Chicago, IL 60611, USA",
+    "lat": 41.88971249999999,
+    "lng": -87.6234199,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "OApps",
+    "queryAddress": "4020 S Ellis Ave, Chicago, IL 60653",
+    "status": "kept",
+    "formattedAddress": "4020 S Ellis Ave, Chicago, IL 60653, USA",
+    "lat": 41.8212158,
+    "lng": -87.6037295,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Osaghae & Associates",
+    "queryAddress": "11070 S Western Avenue, Chicago, IL 60643",
+    "status": "kept",
+    "formattedAddress": "11070 S Western Ave, Chicago, IL 60643, USA",
+    "lat": 41.6919547,
+    "lng": -87.6814967,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Providence Bank & Trust",
+    "queryAddress": "7801 S State, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "7801 S State St, Chicago, IL 60619, USA",
+    "lat": 41.7523001,
+    "lng": -87.6242297,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Phillips Investment Enterprises LLC",
+    "queryAddress": "8007 S Euclid Ave, Chicago, IL 60617",
+    "status": "kept",
+    "formattedAddress": "8007 S Euclid Ave, Chicago, IL 60617, USA",
+    "lat": 41.7494677,
+    "lng": -87.57688279999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PROFESSIONAL ELECTRONICS REPAIR",
+    "queryAddress": "8225 SOUTH COTTAGE GROVE AVENUE, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8225 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7450225,
+    "lng": -87.60452339999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PCMS, LLC",
+    "queryAddress": "8037 S. LaSalle St, Chicago, IL 60620",
+    "status": "kept",
+    "formattedAddress": "8037 S La Salle St, Chicago, IL 60620, USA",
+    "lat": 41.7479371,
+    "lng": -87.62788010000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Quant16",
+    "queryAddress": "33 W Monroe #1050, Chicago, IL 60603",
+    "status": "kept",
+    "formattedAddress": "33 W Monroe St Ste 1050, Chicago, IL 60603, USA",
+    "lat": 41.8803762,
+    "lng": -87.6288158,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Redacre Solutions Inc.",
+    "queryAddress": "7924 S. Sangamon, Chicago, IL 60620",
+    "status": "kept",
+    "formattedAddress": "7924 S Sangamon St, Chicago, IL 60620, USA",
+    "lat": 41.7498274,
+    "lng": -87.6479713,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Roots & Vine Produce And Cafe Inc",
+    "queryAddress": "6600 S Sangamon, CHICAGO, IL 60621",
+    "status": "kept",
+    "formattedAddress": "6600 S Sangamon St, Chicago, IL 60621, USA",
+    "lat": 41.7741149,
+    "lng": -87.6485977,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Spence Consulting Inc.",
+    "queryAddress": "6845 S. Euclid Ave., Chicago, IL 60649",
+    "status": "kept",
+    "formattedAddress": "6845 S Euclid Ave, Chicago, IL 60649, USA",
+    "lat": 41.77024100000001,
+    "lng": -87.57732899999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Seaway, A Division of Self-Help FCU",
+    "queryAddress": "645 E. 87th St., Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "645 E 87th St, Chicago, IL 60619, USA",
+    "lat": 41.7363776,
+    "lng": -87.6079152,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "South Central Community Services",
+    "queryAddress": "8316 S. Ellis, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8316 S Ellis Ave, Chicago, IL 60619, USA",
+    "lat": 41.7433832,
+    "lng": -87.6005065,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Sentinel AI Group Ltd",
+    "queryAddress": "919 West 57th Street, Chicago, IL 60621",
+    "status": "kept",
+    "formattedAddress": "919 W 57th St, Chicago, IL 60621, USA",
+    "lat": 41.790459,
+    "lng": -87.6483499,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SUNBELT SOFT DRINKS USA",
+    "queryAddress": "PO BOX 19631, CHICAGO, IL 60619",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Chicago, IL, USA",
+    "lat": 41.88325,
+    "lng": -87.6323879,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Sizzlin Skillets",
+    "queryAddress": "8635 S. Cottage Grove, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8635 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7373955,
+    "lng": -87.6045204,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Salubrious",
+    "queryAddress": "359 E 79th Street, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "359 E 79th St, Chicago, IL 60619, USA",
+    "lat": 41.7508813,
+    "lng": -87.6157451,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The IT Architect Corporation (ITA)",
+    "queryAddress": "505 N. Lake Shore Drive, Chicago, IL 60611",
+    "status": "kept",
+    "formattedAddress": "Lake Point Tower Condominium, Lake Point Tower, 505 N Lake Shore Dr, Chicago, IL 60611, USA",
+    "lat": 41.8917026,
+    "lng": -87.6126117,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Truth Auto Spa",
+    "queryAddress": "4722  W Harrison St, Chicago, IL 60644",
+    "status": "kept",
+    "formattedAddress": "4722 W Harrison St, Chicago, IL 60644, USA",
+    "lat": 41.8734396,
+    "lng": -87.7436506,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TCA Health, Inc.",
+    "queryAddress": "1029 E. 130th Street, Chicago, IL 60628",
+    "status": "kept",
+    "formattedAddress": "1029 E 130th St, Chicago, IL 60628, USA",
+    "lat": 41.658803,
+    "lng": -87.5968141,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tailorite Cleaners",
+    "queryAddress": "8459 S. Cottage Grove, Chicago, IL 60619",
+    "status": "kept",
+    "formattedAddress": "8459 S Cottage Grove Ave, Chicago, IL 60619, USA",
+    "lat": 41.7404768,
+    "lng": -87.60441399999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Val-Son Solutions Inc.",
+    "queryAddress": "22986 farm trace dr., Richton Park, Illinois,, IL 60471",
+    "status": "kept",
+    "formattedAddress": "22986 Farm Trace Dr, Richton Park, IL 60471, USA",
+    "lat": 41.4728082,
+    "lng": -87.712614,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Winter Blue Agency LLC",
+    "queryAddress": "537 E43rd Street, CHICAGO, IL 60653",
+    "status": "kept",
+    "formattedAddress": "537 E 43rd St, Chicago, IL 60653, USA",
+    "lat": 41.8165352,
+    "lng": -87.6126748,
+    "locationType": "ROOFTOP"
+  }
+]

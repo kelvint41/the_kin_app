@@ -1,0 +1,857 @@
+[
+  {
+    "name": "Navient Technology Group",
+    "queryAddress": "110 East Houston Street, 7th Floor, San Antonio, Texas, 78205",
+    "status": "kept",
+    "formattedAddress": "110 E Houston St 7th Flr, San Antonio, TX 78205, USA",
+    "lat": 29.422919,
+    "lng": -98.491428,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "1st Response CPR and First Aid",
+    "queryAddress": "1714 Buffalo Wolf, San Antonio, Texas, 78245",
+    "status": "kept",
+    "formattedAddress": "1714 Buffalo Wolf, San Antonio, TX 78245, USA",
+    "lat": 29.413949,
+    "lng": -98.70720089999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "1st Royal Love Services LLC",
+    "queryAddress": "1423 S WW White, Ste 2, San Antonio, Texas, 78222",
+    "status": "kept",
+    "formattedAddress": "1423 S WW White Rd #2, San Antonio, TX 78220, USA",
+    "lat": 29.4083322,
+    "lng": -98.4058775,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Acai Eternity Co.",
+    "queryAddress": "211 whitecliff dr, San Antonio, TX 78227",
+    "status": "kept",
+    "formattedAddress": "211 Whitecliff Dr, San Antonio, TX 78227, USA",
+    "lat": 29.3865291,
+    "lng": -98.6487812,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "AdaOni Events LLC",
+    "queryAddress": "8259 Breezy Cove, San Antonio, TX 78154",
+    "status": "kept",
+    "formattedAddress": "8259 Breezy Cv, Schertz, TX 78154, USA",
+    "lat": 29.5963804,
+    "lng": -98.3254058,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Aflac Producer Agent",
+    "queryAddress": "2265 Goodwin Ln, San Antonio, TX 78130",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2265 Goodwin Ln, New Braunfels, TX 78130, USA",
+    "lat": 29.7381324,
+    "lng": -98.0858406,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Alamo City Business Financial Solutions",
+    "queryAddress": "7434 Banister Pass, San Antonio, TX 78254",
+    "status": "kept",
+    "formattedAddress": "7434 Banister Pass, San Antonio, TX 78254, USA",
+    "lat": 29.5085722,
+    "lng": -98.7137202,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Allstate Insurance1",
+    "queryAddress": "8703 Shuteye Peak, San Antonio, TX 78023",
+    "status": "kept",
+    "formattedAddress": "8703 Shuteye Peak, Helotes, TX 78023, USA",
+    "lat": 29.5734231,
+    "lng": -98.6572759,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Alpha Solar Solutions, LLC",
+    "queryAddress": "4243 East Piedras St, San Antonio, TX 78228",
+    "status": "kept",
+    "formattedAddress": "4243 E Piedras Dr, San Antonio, TX 78228, USA",
+    "lat": 29.4861789,
+    "lng": -98.5671563,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A TOUCH OF EBONY",
+    "queryAddress": "1200 S 10TH UNIT 2302, San Antonio, TX 78660",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Pflugerville, TX 78660, USA",
+    "lat": 30.4332061,
+    "lng": -97.60057859999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Black Label Realty Group",
+    "queryAddress": "1717 N. Loop 1604 East, Suite 324, San Antonio, TX 78232",
+    "status": "kept",
+    "formattedAddress": "1717 N Loop 1604 E #324, San Antonio, TX 78232, USA",
+    "lat": 29.6099745,
+    "lng": -98.4670931,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bowers Street Entertainment, LLC",
+    "queryAddress": "P.O. Box 276598, San Antonio, TX 78227",
+    "status": "dropped_imprecise",
+    "formattedAddress": "San Antonio, TX 78227, USA",
+    "lat": 29.41040379999999,
+    "lng": -98.63256109999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "CBD Pros USA San Antonio",
+    "queryAddress": "19179 Blanco Rd, San Antonio, TX 78258",
+    "status": "kept",
+    "formattedAddress": "19179 Blanco Rd, San Antonio, TX 78258, USA",
+    "lat": 29.620209,
+    "lng": -98.5130313,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Colors & Song",
+    "queryAddress": "8003 Pandora Star, San Antonio, TX 78252",
+    "status": "kept",
+    "formattedAddress": "8003 Pandora Star, San Antonio, TX 78252, USA",
+    "lat": 29.3505817,
+    "lng": -98.6338425,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Computer Tek-Niques, LLC",
+    "queryAddress": "6906 Sundew Creek, Converse, Texas 78109, 78109",
+    "status": "kept",
+    "formattedAddress": "6906 Sundew Creek, Converse, TX 78109, USA",
+    "lat": 29.491089,
+    "lng": -98.31602629999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Covington-McGee Christian Counseling",
+    "queryAddress": "8026 Vantage Drive, San Antonio, TX 78230",
+    "status": "kept",
+    "formattedAddress": "8026 Vantage Dr, San Antonio, TX 78230, USA",
+    "lat": 29.5120713,
+    "lng": -98.5501824,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Darby Day Staffing",
+    "queryAddress": "4035 Naco Perrin Blvd, STE 104, San Antonio, Texas 78217, 78217",
+    "status": "kept",
+    "formattedAddress": "4035 Naco Perrin Blvd #104, San Antonio, TX 78217, USA",
+    "lat": 29.5437633,
+    "lng": -98.4151972,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DESIGNS BY TY",
+    "queryAddress": "1023 Rittiman Rd Suite 318, San Antonio, TX 78218",
+    "status": "kept",
+    "formattedAddress": "1023 Rittiman Rd #318, San Antonio, TX 78209, USA",
+    "lat": 29.4852717,
+    "lng": -98.42746509999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dr. Lulu’s Life Coaching Lounge",
+    "queryAddress": "11844 Bandera Rd #723, San Antonio, TX 78023",
+    "status": "kept",
+    "formattedAddress": "11844 Bandera Rd #723, Helotes, TX 78023, USA",
+    "lat": 29.5564123,
+    "lng": -98.6686062,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ebron Coaching & Consulting, LLC",
+    "queryAddress": "3333 Oakwell Court, San Antonio, TX 78218",
+    "status": "dropped_imprecise",
+    "formattedAddress": "3333 Oakwell Ct, San Antonio, TX 78218, USA",
+    "lat": 29.5075003,
+    "lng": -98.43192669999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "ELSEWEAR COSMETICS",
+    "queryAddress": "2935 Nacogdoches Rd Apt 109, San Antonio, Texas, 78217",
+    "status": "kept",
+    "formattedAddress": "2935 Nacogdoches Rd Apt 109, San Antonio, TX 78217, USA",
+    "lat": 29.5255575,
+    "lng": -98.4424973,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Eric Grant Designs",
+    "queryAddress": "1810 Highland Mist Ln, San Antonio, TX 78281",
+    "status": "kept",
+    "formattedAddress": "1810 Highland Mist Ln, San Antonio, TX 78251, USA",
+    "lat": 29.461928,
+    "lng": -98.7047913,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Eyes on Security, LLC",
+    "queryAddress": "6914 Barkley Trl, San Antonio, Texas, 78250",
+    "status": "kept",
+    "formattedAddress": "6914 Barkley Trail, San Antonio, TX 78250, USA",
+    "lat": 29.5014377,
+    "lng": -98.67322879999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Founders First Capital Partners",
+    "queryAddress": "2919 Commerce St., Dallas, Texas 75226, 75226",
+    "status": "dropped_out_of_range_253mi",
+    "formattedAddress": "2919 Commerce St, Dallas, TX 75226, USA",
+    "lat": 32.7838327,
+    "lng": -96.7812871,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Friendship Is The New Pretty",
+    "queryAddress": "12370 Potranco Rd, Suite 207, PMB 1064, San Antonio, Texas 78253, 78253",
+    "status": "kept",
+    "formattedAddress": "12370 Potranco Rd Ste 207, San Antonio, TX 78253, USA",
+    "lat": 29.4289625,
+    "lng": -98.73937389999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "G.A.P. Lighthouse Medical Equipment and Repairs",
+    "queryAddress": "5504 Bandera Rd, San Antonio, TX 78238",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5504 Bandera Rd, San Antonio, TX 78238, USA",
+    "lat": 29.4785683,
+    "lng": -98.59425309999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Goods Financial Services, LLC",
+    "queryAddress": "24123 Boerne Stage Road, , Suite 118, San Antonio, TX, 78255",
+    "status": "kept",
+    "formattedAddress": "24123 Boerne Stage Rd Ste 118, San Antonio, TX 78255, USA",
+    "lat": 29.6655646,
+    "lng": -98.63526970000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gravity Party Rentals LLC",
+    "queryAddress": "8715 Hedford Flats, San Antonio, TX 78254",
+    "status": "kept",
+    "formattedAddress": "8715 Hedford Flats, San Antonio, TX 78254, USA",
+    "lat": 29.5217076,
+    "lng": -98.7440105,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Guardian Business Solutions, LLC",
+    "queryAddress": "8502 Coppersky, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "8502 Coppersky, Converse, TX 78109, USA",
+    "lat": 29.5087282,
+    "lng": -98.2934518,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Hair’ess & Co.",
+    "queryAddress": "10919 Culebra Rd Building 12. Suite 11, San Antonio, TX 78253",
+    "status": "kept",
+    "formattedAddress": "10919 Culebra Rd building 12 suite 11, San Antonio, TX 78253, USA",
+    "lat": 29.4968656,
+    "lng": -98.7074719,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Heart Centered Ins.",
+    "queryAddress": "1846 N Loop 1604 W, San Antonio, TX 78248",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1846 N Loop 1604 W, San Antonio, TX 78248, USA",
+    "lat": 29.60663899999999,
+    "lng": -98.5214695,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Hyde Park and Co",
+    "queryAddress": "421 W. 6th Street, San Antonio, TX 78215",
+    "status": "kept",
+    "formattedAddress": "421 6th St, San Antonio, TX 78215, USA",
+    "lat": 29.4296233,
+    "lng": -98.48301029999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "HyDryp HEALTH/H20",
+    "queryAddress": "8403 State Hwy. 151, Suite 104, San Antonio, Texas, 78245",
+    "status": "kept",
+    "formattedAddress": "8403 TX-151 Ste 104, San Antonio, TX 78245, USA",
+    "lat": 29.4375352,
+    "lng": -98.65241759999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Infinity Wear",
+    "queryAddress": "23534 Enchanted Bend, San Antonio, TX 78260",
+    "status": "kept",
+    "formattedAddress": "23534 Enchanted Bend, San Antonio, TX 78260, USA",
+    "lat": 29.6700781,
+    "lng": -98.5001865,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "In the Eye of The Beholder Art Gallery & Studio",
+    "queryAddress": "1917 N New Braunfels Ave., San Antonio, TX 78208",
+    "status": "kept",
+    "formattedAddress": "1917 N New Braunfels Ave, San Antonio, TX 78208, USA",
+    "lat": 29.4421507,
+    "lng": -98.4611201,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Jacked Potato LLC",
+    "queryAddress": "8340 Seguin Rd, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "8340 Old Seguin Rd, Converse, TX 78109, USA",
+    "lat": 29.4965699,
+    "lng": -98.3223186,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Jasmine Iman Luxury Picnics & Events",
+    "queryAddress": "6522 Camp Bullis Rd, San Antonio, TX 78256",
+    "status": "dropped_imprecise",
+    "formattedAddress": "6522 Camp Bullis Rd, San Antonio, TX 78256, USA",
+    "lat": 29.6229153,
+    "lng": -98.611601,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Jimmy Solano eXp Realtor Brokered by eXp Realty, LLC",
+    "queryAddress": "9726 Autumn Arch, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "9726 Autumn Arch, Converse, TX 78109, USA",
+    "lat": 29.4949179,
+    "lng": -98.2939636,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JT Ladies of Justice",
+    "queryAddress": "7103 Underwood Court, San Antonio, TX 78154",
+    "status": "kept",
+    "formattedAddress": "7103 Underwood Ct, Schertz, TX 78154, USA",
+    "lat": 29.4907216,
+    "lng": -98.26989189999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "K & M Cleaning & Management Resources, LLC",
+    "queryAddress": "P.O. Box 762653, San Antonio, Texas 78245, 78245",
+    "status": "kept",
+    "formattedAddress": "6225 Pioneer Estate, San Antonio, TX 78245, USA",
+    "lat": 29.3683278,
+    "lng": -98.794686,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Kairos Movement LLC",
+    "queryAddress": "218 Ilka Ranch Circle, San Antonio, TX 78155",
+    "status": "dropped_out_of_range_37mi",
+    "formattedAddress": "218 Ilka Ranch Cir, Seguin, TX 78155, USA",
+    "lat": 29.6132247,
+    "lng": -97.9111231,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "KE PRINTING & GRAPHICS",
+    "queryAddress": "100 Mayfair Drive, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "100 Mayfair Dr, Converse, TX 78109, USA",
+    "lat": 29.5058978,
+    "lng": -98.3054324,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Kingdom Healing Institute",
+    "queryAddress": "7434 Louis Pasteur Drive, Suite 102, San Antonio, TX 78229, AACCSA",
+    "status": "kept",
+    "formattedAddress": "7434 Louis Pasteur Dr Ste 102, San Antonio, TX 78229, USA",
+    "lat": 29.5046676,
+    "lng": -98.57268669999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lanai Properties International LLC",
+    "queryAddress": "8615 Snow Goose, San Antonio, TX 78245",
+    "status": "kept",
+    "formattedAddress": "8615 Snow Goose, San Antonio, TX 78245, USA",
+    "lat": 29.427372,
+    "lng": -98.6563661,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Leaders In Training",
+    "queryAddress": "205 Regal Oaks, San Antonio, TX 78233",
+    "status": "kept",
+    "formattedAddress": "205 Regal Oaks Dr, Live Oak, TX 78233, USA",
+    "lat": 29.5544953,
+    "lng": -98.3338429,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Live Travel More LLC",
+    "queryAddress": "9155 Schaefer Rd #431, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "9155 Schaefer Rd #431, Converse, TX 78109, USA",
+    "lat": 29.5070749,
+    "lng": -98.30744109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "LXVE MXFFIN",
+    "queryAddress": "12702 Toepperwein Rd, Suite 209, Live Oak, Texas 78233, 78233",
+    "status": "kept",
+    "formattedAddress": "12702 Toepperwein Rd #209, Live Oak, TX 78233, USA",
+    "lat": 29.5546134,
+    "lng": -98.3457231,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Malecia Griffin",
+    "queryAddress": "8214 Pioneer Oak, San Antonio, TX 78109",
+    "status": "kept",
+    "formattedAddress": "8214 Pioneer Oak, Converse, TX 78109, USA",
+    "lat": 29.5296406,
+    "lng": -98.3286365,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Meadowview Financial",
+    "queryAddress": "14502 Brook Hollow Blvd., San Antonio, TX 78232",
+    "status": "kept",
+    "formattedAddress": "14502 Brook Hollow Blvd, San Antonio, TX 78232, USA",
+    "lat": 29.5791754,
+    "lng": -98.4747823,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Med Spot Scrub Shop, LLC",
+    "queryAddress": "6323 Sovereign Drive, San Antonio, TX 78229",
+    "status": "kept",
+    "formattedAddress": "6323 Sovereign Dr, San Antonio, TX 78229, USA",
+    "lat": 29.49098279999999,
+    "lng": -98.5712861,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Meshaun Model Management, LLC",
+    "queryAddress": "4926 Corian Well Drive, San Antonio, TX 78247",
+    "status": "kept",
+    "formattedAddress": "4926 Corian Well Dr, San Antonio, TX 78247, USA",
+    "lat": 29.5882346,
+    "lng": -98.3985067,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mills Rodgers Speaks!",
+    "queryAddress": "8130 Shin Oak Drive, San Antonio, TX 78233",
+    "status": "dropped_imprecise",
+    "formattedAddress": "8130 Shin Oak Dr, Live Oak, TX 78233, USA",
+    "lat": 29.55488829999999,
+    "lng": -98.3256128,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "MrSFit",
+    "queryAddress": "3101 Howling Wolf, San Antonio, TX 78261",
+    "status": "kept",
+    "formattedAddress": "3101 Howling Wolf, San Antonio, TX 78261, USA",
+    "lat": 29.6810809,
+    "lng": -98.436381,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Naomi Warren Realtork",
+    "queryAddress": "121 Bulverde Crossing, Suite 110, San Antonio, TX 78163",
+    "status": "kept",
+    "formattedAddress": "121 Bulverde Crossing #110, Bulverde, TX 78163, USA",
+    "lat": 29.7960913,
+    "lng": -98.42327209999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "NATION’S MULTI-SERVICE",
+    "queryAddress": "8423 greenham, San Antonio, TX 78239",
+    "status": "kept",
+    "formattedAddress": "8423 Greenham, San Antonio, TX 78239, USA",
+    "lat": 29.5142631,
+    "lng": -98.35342999999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Neatly Done San Antonio",
+    "queryAddress": "10730 Potranco Rd Ste 122-181, San Antonio, Texas 78251, 78251",
+    "status": "kept",
+    "formattedAddress": "10730 Potranco Rd 122 181, San Antonio, TX 78251, USA",
+    "lat": 29.433857,
+    "lng": -98.7033871,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "New York Life",
+    "queryAddress": "8000 I-10 West, Suite 800, San Antonio, Texas, 78230",
+    "status": "kept",
+    "formattedAddress": "8000 I-10 Ste 800, San Antonio, TX 78230, USA",
+    "lat": 29.5134185,
+    "lng": -98.5546887,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "New York LIfe Insurance",
+    "queryAddress": "8003 Pandora Star, San Antonio, TX 78252",
+    "status": "kept",
+    "formattedAddress": "8003 Pandora Star, San Antonio, TX 78252, USA",
+    "lat": 29.3505817,
+    "lng": -98.6338425,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Nia Talks, LLC",
+    "queryAddress": "4007 Dunn Oak Drive, San Antonio, TX 78223",
+    "status": "kept",
+    "formattedAddress": "4007 Dunn Oak Dr, San Antonio, TX 78223, USA",
+    "lat": 29.350606,
+    "lng": -98.4151119,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "OMG Sounds",
+    "queryAddress": "11414 LOST MINE TRL, San Antonio, TX 78245",
+    "status": "kept",
+    "formattedAddress": "11414 Lost Mine Trail, San Antonio, TX 78245, USA",
+    "lat": 29.40856059999999,
+    "lng": -98.7182837,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Per4mance Printing",
+    "queryAddress": "2233 Austin Hwy, San Antonio, Texas 78218, 78218",
+    "status": "kept",
+    "formattedAddress": "2233 Austin Hwy, San Antonio, TX 78218, USA",
+    "lat": 29.5060774,
+    "lng": -98.4139569,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PO BOXES EXPRESS PLUS",
+    "queryAddress": "1721 s ww white rd, San Antonio, TX 78222",
+    "status": "kept",
+    "formattedAddress": "1721 S WW White Rd, San Antonio, TX 78220, USA",
+    "lat": 29.40326,
+    "lng": -98.4064963,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PowerFactor Entertainment Group",
+    "queryAddress": "108 Tiltwood Court, Boerne, Texas, 78006",
+    "status": "kept",
+    "formattedAddress": "108 Tiltwood Ct, Boerne, TX 78006, USA",
+    "lat": 29.7534172,
+    "lng": -98.7148589,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Prolan Enterprises",
+    "queryAddress": "12931, Shoreline Dr, San Antonio, Texas, 78254",
+    "status": "kept",
+    "formattedAddress": "12931 Shoreline Dr, San Antonio, TX 78254, USA",
+    "lat": 29.5153476,
+    "lng": -98.74898429999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Q. Watson Construction, LLC",
+    "queryAddress": "3602 Windgap Drive, San Antonio, TX 78230",
+    "status": "kept",
+    "formattedAddress": "3602 Windgap Dr, San Antonio, TX 78230, USA",
+    "lat": 29.5359785,
+    "lng": -98.5559949,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Reaching Out Consultant LLC",
+    "queryAddress": "1902 Gray Fox Crk, San Antonio, TX 78245",
+    "status": "kept",
+    "formattedAddress": "1902 Gray Fox Creek, San Antonio, TX 78245, USA",
+    "lat": 29.4130259,
+    "lng": -98.7001615,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "San Antonio Black International Film Festival (SABIFF)",
+    "queryAddress": "322 Rice Road, San Antonio, Texas, 78220",
+    "status": "kept",
+    "formattedAddress": "322 Rice Rd, San Antonio, TX 78220, USA",
+    "lat": 29.4088215,
+    "lng": -98.4152812,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Shaon’s Enjoyable Cusinie",
+    "queryAddress": "239 Cascade trail, San Antonio, TX 78009",
+    "status": "kept",
+    "formattedAddress": "239 Cascade Trl, Castroville, TX 78009, USA",
+    "lat": 29.423116,
+    "lng": -98.83738029999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Shelley Simone Luxe Events",
+    "queryAddress": "8340 FM 78 Suite #5, Converse, Texas 78109, 78109",
+    "status": "kept",
+    "formattedAddress": "8340 FM78 #5, Converse, TX 78109, USA",
+    "lat": 29.4965169,
+    "lng": -98.322447,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Simplykait Braiding & Weaving LLC",
+    "queryAddress": "6836 San Pedro Ave Ste 107, San Antonio, TX 78216",
+    "status": "kept",
+    "formattedAddress": "6836 San Pedro Ave #107, San Antonio, TX 78216, USA",
+    "lat": 29.503196,
+    "lng": -98.4986934,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Sonia Smith – Mary Kay",
+    "queryAddress": "7335 Wine Gdn, Converse, Texas 78109, 78109",
+    "status": "kept",
+    "formattedAddress": "7335 Wine Garden, Converse, TX 78109, USA",
+    "lat": 29.5027385,
+    "lng": -98.3144094,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Spiritual Specimen Nutritional Supplements",
+    "queryAddress": "20079 Stone Oak Pkwy Ste 1105 pmb 425, San Antonio, TX 78258",
+    "status": "kept",
+    "formattedAddress": "20079 Stone Oak Pkwy #1105, San Antonio, TX 78258, USA",
+    "lat": 29.6426494,
+    "lng": -98.4888788,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Status Stylez & Kutz",
+    "queryAddress": "1308 Austin Hwy, San Antonio, TX 78209",
+    "status": "kept",
+    "formattedAddress": "1308 Austin Hwy, San Antonio, TX 78209, USA",
+    "lat": 29.4895036,
+    "lng": -98.4411822,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ta Tucker State Farm",
+    "queryAddress": "1730 SW Military Drive, San Antonio, Texas, 78253",
+    "status": "kept",
+    "formattedAddress": "1730 SW Military Dr, San Antonio, TX 78221, USA",
+    "lat": 29.3562618,
+    "lng": -98.52101259999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Taylor Hvac Solutions LLC",
+    "queryAddress": "2929 Sunridge Dr, San Antonio, TX 78108",
+    "status": "kept",
+    "formattedAddress": "2929 Sunridge Dr, Schertz, TX 78108, USA",
+    "lat": 29.61495619999999,
+    "lng": -98.238124,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TDJ Consulting",
+    "queryAddress": "10734 Expedition Creek, San Antonio, TX 78254",
+    "status": "kept",
+    "formattedAddress": "10734 Expedition Creek, San Antonio, TX 78254, USA",
+    "lat": 29.5168653,
+    "lng": -98.7032139,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The African American Network, Inc",
+    "queryAddress": "8000 Midcrown Drive, San Antonio, TX 78218",
+    "status": "dropped_imprecise",
+    "formattedAddress": "8000 Midcrown Dr, San Antonio, TX 78218, USA",
+    "lat": 29.5075376,
+    "lng": -98.38039409999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Air Gods LLC",
+    "queryAddress": "7721 ridge mist dr., San Antonio, TX 78239",
+    "status": "kept",
+    "formattedAddress": "7721 Ridge Mist Dr, San Antonio, TX 78239, USA",
+    "lat": 29.5174357,
+    "lng": -98.33351599999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Carmel Soap Company",
+    "queryAddress": "4535 Summer Fall, San Antonio, TX 78259",
+    "status": "kept",
+    "formattedAddress": "4535 Summer Fall, San Antonio, TX 78259, USA",
+    "lat": 29.6389422,
+    "lng": -98.4015192,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Experience Hair Studio",
+    "queryAddress": "1015 Rittiman Rd., Suite 106, San Antonio, Texas, 78218",
+    "status": "kept",
+    "formattedAddress": "1015 Rittiman Rd Ste 106, San Antonio, TX 78218, USA",
+    "lat": 29.485275,
+    "lng": -98.4281067,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Joi in Business LLC",
+    "queryAddress": "5900 Balcones Drive, Ste. 100, Austin, Texas, 78731",
+    "status": "dropped_out_of_range_77mi",
+    "formattedAddress": "Genesis Business Solutions LLC, 5900 Balcones Dr Suit 100, Austin, TX 78731, USA",
+    "lat": 30.3416503,
+    "lng": -97.7548379,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Love Community Center at Redeemer’s Praise Church",
+    "queryAddress": "107 S. Pine St., San Antonio, TX 78203",
+    "status": "kept",
+    "formattedAddress": "107 S Pine St, San Antonio, TX 78203, USA",
+    "lat": 29.4193351,
+    "lng": -98.47044389999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Thryv",
+    "queryAddress": "8451 Mannington Pl., Converse, Texas 78109, 78109",
+    "status": "kept",
+    "formattedAddress": "8451 Mannington Pl, Converse, TX 78109, USA",
+    "lat": 29.5044126,
+    "lng": -98.3130626,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TITHING TRANSPORT LLC",
+    "queryAddress": "9450 COPPER MIST, CONVERSE, Texas, 78109",
+    "status": "kept",
+    "formattedAddress": "9450 Copper Mist, Converse, TX 78109, USA",
+    "lat": 29.5022198,
+    "lng": -98.2967113,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TMLA Financial",
+    "queryAddress": "6363 De Zavala Rd Ste, A221, San Antonio, Texas, 78249",
+    "status": "kept",
+    "formattedAddress": "6363 De Zavala Rd a221, San Antonio, TX 78249, USA",
+    "lat": 29.56342009999999,
+    "lng": -98.6114338,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tony Savage Independent Contractor",
+    "queryAddress": "7434 Banister Pass, San Antonio, TX 78254",
+    "status": "kept",
+    "formattedAddress": "7434 Banister Pass, San Antonio, TX 78254, USA",
+    "lat": 29.5085722,
+    "lng": -98.7137202,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Trices Cafe and Lounge",
+    "queryAddress": "7600 Eckhert Road, San Antonio, TX 78240",
+    "status": "kept",
+    "formattedAddress": "7600 Eckhert Rd, San Antonio, TX 78240, USA",
+    "lat": 29.5091415,
+    "lng": -98.6255595,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Undecided",
+    "queryAddress": "4003 Matson Manor, Converse, Texas 78109, 78109",
+    "status": "kept",
+    "formattedAddress": "4003 Matson Manor, Converse, TX 78109, USA",
+    "lat": 29.4660866,
+    "lng": -98.3347434,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Upstage Comedy Lounge LLC",
+    "queryAddress": "4441 Walzem Rd, San Antonio, TX 78247",
+    "status": "kept",
+    "formattedAddress": "4441 Walzem Rd, San Antonio, TX 78218, USA",
+    "lat": 29.5111576,
+    "lng": -98.4059144,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Urban Soul Market",
+    "queryAddress": "1316 Pat Booker Rd, San Antonio, TX 78148",
+    "status": "kept",
+    "formattedAddress": "1316 Pat Booker Rd, Universal City, TX 78148, USA",
+    "lat": 29.5513454,
+    "lng": -98.2999475,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VanWright LLC",
+    "queryAddress": "2186 Jackson Keller Rd Suite 2190, San Antonio, TX 78213",
+    "status": "kept",
+    "formattedAddress": "2186 Jackson Keller Rd #2190, San Antonio, TX 78213, USA",
+    "lat": 29.5155216,
+    "lng": -98.52792540000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Well Images of SA",
+    "queryAddress": "7934 new world dr, San Antonio, TX 78239",
+    "status": "kept",
+    "formattedAddress": "7934 New World Dr, San Antonio, TX 78239, USA",
+    "lat": 29.5050128,
+    "lng": -98.35779029999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Well Made Construction LLC",
+    "queryAddress": "6825 Huebner Road, San Antonio, TX 78238",
+    "status": "kept",
+    "formattedAddress": "6825 Huebner Rd, San Antonio, TX 78238, USA",
+    "lat": 29.49731179999999,
+    "lng": -98.62606369999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Wholesome Eating Gluten free , Keto and Vegan Bakery & Restaurant",
+    "queryAddress": "19202 Stone Oak Pkwy, Ste 101, Texas, 78258",
+    "status": "kept",
+    "formattedAddress": "19202 Stone Oak Pkwy #101, San Antonio, TX 78258, USA",
+    "lat": 29.6274253,
+    "lng": -98.4947098,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Zayas Legal Nurse Consultant",
+    "queryAddress": "6027 Caramel Way, San Antonio, TX 78244",
+    "status": "kept",
+    "formattedAddress": "6027 Caramel Way, San Antonio, TX 78244, USA",
+    "lat": 29.4710735,
+    "lng": -98.37019749999999,
+    "locationType": "ROOFTOP"
+  }
+]
