@@ -14,6 +14,8 @@ enum Season {
   blackHistoryMonth,
   juneteenth,
   halloween,
+  thanksgiving,
+  smallBusinessSaturday,
   kwanzaa,
   christmas,
 }
@@ -97,6 +99,45 @@ const _christmas = SeasonalTheme(
   mapStyle: GoogleMapStyle.silver,
 );
 
+// Deliberately no rareMarkerEmoji, same reasoning as Christmas/Kwanzaa/
+// Juneteenth/Black History Month above - this is a real holiday people
+// gather and cater for (a big season for Black-owned catering businesses
+// specifically), not a treasure-hunt gimmick. A harvest amber distinct
+// from both Halloween's brighter orange and Christmas's red.
+const _thanksgiving = SeasonalTheme(
+  season: Season.thanksgiving,
+  label: 'Thanksgiving',
+  accent: Color(0xFFB5651D),
+);
+
+// One day only, carved out of the Christmas window it would otherwise
+// fall inside (the Saturday right after Thanksgiving/Black Friday) - the
+// real, nationally-recognized "Shop Small" day, and arguably the single
+// most on-mission day of the year for an app built around a Black-owned
+// small business directory. Purple/plum matches the real Small Business
+// Saturday campaign's own established branding, not a color picked fresh
+// here.
+const _smallBusinessSaturday = SeasonalTheme(
+  season: Season.smallBusinessSaturday,
+  label: 'Small Business Saturday',
+  accent: Color(0xFF7A4FA0),
+);
+
+/// The 4th Thursday of November for [year] - Thanksgiving's date moves
+/// every year, so this walks the month rather than hardcoding a
+/// day-of-month the way every other window here can.
+DateTime _thanksgivingDate(int year) {
+  var seen = 0;
+  for (var day = 1; day <= 30; day++) {
+    final d = DateTime(year, 11, day);
+    if (d.weekday == DateTime.thursday) {
+      seen += 1;
+      if (seen == 4) return d;
+    }
+  }
+  throw StateError('November always has a 4th Thursday');
+}
+
 /// The active season for [now] (defaults to the current moment).
 ///
 /// Pass an explicit [now] in tests; the app itself always omits it.
@@ -104,11 +145,44 @@ const _christmas = SeasonalTheme(
 /// readability, not correctness.
 SeasonalTheme currentSeasonalTheme([DateTime? now]) {
   final n = now ?? DateTime.now();
+  final today = DateTime(n.year, n.month, n.day);
 
   if (n.month == 2) return _blackHistoryMonth;
-  if (n.month == 6 && n.day >= 15 && n.day <= 19) return _juneteenth;
+  // 7 days (was 5) - June 13 through the 19th itself, not past it. Unlike
+  // Christmas below, this doesn't lead into a separate retail season
+  // afterward, so there's nothing to extend the window toward.
+  if (n.month == 6 && n.day >= 13 && n.day <= 19) return _juneteenth;
   if (n.month == 10) return _halloween;
-  if (n.month == 12 && n.day <= 25) return _christmas;
+
+  // Thanksgiving season: all of November up through Thanksgiving Day
+  // itself, then Christmas picks up immediately the next day (Black
+  // Friday) below - the two windows share a single boundary rather than
+  // each computing it independently, so they can never drift apart or
+  // leave a gap/overlap between them.
+  final thanksgivingDay = _thanksgivingDate(n.year);
+  final novemberStart = DateTime(n.year, 11, 1);
+  if (!today.isBefore(novemberStart) && !today.isAfter(thanksgivingDay)) {
+    return _thanksgiving;
+  }
+
+  // Small Business Saturday: Thanksgiving + 2 days (the day after Black
+  // Friday). Checked before Christmas below specifically because it falls
+  // inside that window and needs to win for its one day, not get absorbed
+  // by it.
+  final smallBusinessSaturday = thanksgivingDay.add(const Duration(days: 2));
+  if (today.isAtSameMomentAs(smallBusinessSaturday)) {
+    return _smallBusinessSaturday;
+  }
+
+  // Starts the day after Thanksgiving (Black Friday - the actual start of
+  // the retail Christmas season, not a fixed December 1st) through
+  // December 25th.
+  final christmasStart = thanksgivingDay.add(const Duration(days: 1));
+  final christmasEnd = DateTime(n.year, 12, 25);
+  if (!today.isBefore(christmasStart) && !today.isAfter(christmasEnd)) {
+    return _christmas;
+  }
+
   if ((n.month == 12 && n.day >= 26) || (n.month == 1 && n.day == 1)) {
     return _kwanzaa;
   }
