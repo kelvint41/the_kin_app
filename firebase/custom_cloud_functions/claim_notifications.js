@@ -44,3 +44,43 @@ exports.notifyClaimApproved = onDocumentUpdated(
     return null;
   },
 );
+
+/**
+ * Same trigger, the rejected counterpart - without this a rejected
+ * claimant heard nothing at all (the approved path was the only one
+ * wired up). Fires the same way: on whatever write flips status to
+ * 'rejected', script or the resolveClaimRequest callable alike.
+ */
+exports.notifyClaimRejected = onDocumentUpdated(
+  "claim_requests/{requestId}",
+  async (event) => {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+
+    if (before.status === after.status || after.status !== "rejected") {
+      return null;
+    }
+
+    const applicantUserId = after.applicant_user_id;
+    if (!applicantUserId) {
+      console.log(
+        `claim_requests/${event.params.requestId} rejected but has no applicant_user_id - skipping notification.`,
+      );
+      return null;
+    }
+
+    const db = admin.firestore();
+    const reason = after.review_note
+      ? ` ${after.review_note}`
+      : " Contact support if you have questions.";
+    await createNotification(db, {
+      userRef: db.collection("users").doc(applicantUserId),
+      type: "claim_rejected",
+      title: "Business claim not approved",
+      body: `Your claim on ${after.business_name || "that business"} wasn't approved.${reason}`,
+      routeName: null,
+    });
+
+    return null;
+  },
+);
