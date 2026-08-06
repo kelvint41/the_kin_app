@@ -1,0 +1,2851 @@
+{
+  "mode": "commit",
+  "created": [
+    {
+      "docId": "d0M4FxWVDAnvVOcIdq79",
+      "ticker_symbol": "2OAKS",
+      "business_name": "2 Oaks Apartments"
+    },
+    {
+      "docId": "9YcV1XskErWj1FxhZyfz",
+      "ticker_symbol": "321SU",
+      "business_name": "321 Sun LLC"
+    },
+    {
+      "docId": "WsQP7Ep7JMBgQ7RGVjFF",
+      "ticker_symbol": "1532T",
+      "business_name": "1532 Tulane Holdco"
+    },
+    {
+      "docId": "qpGKZEhdpMhpfbFR2YnL",
+      "ticker_symbol": "123TI",
+      "business_name": "123 Title & Notary LLC"
+    },
+    {
+      "docId": "iAsFkLKGuoXCRqqa3CGI",
+      "ticker_symbol": "4373F",
+      "business_name": "4373fashionlane LLC"
+    },
+    {
+      "docId": "o9MnUe9ro4yASxAUG6nA",
+      "ticker_symbol": "504DJ",
+      "business_name": "504DJ Company"
+    },
+    {
+      "docId": "nSVKf2IlDvT4SihEoeEZ",
+      "ticker_symbol": "445BE",
+      "business_name": "445 Behavioral Healthcare"
+    },
+    {
+      "docId": "Ch618YpzPaBSugaHUKVT",
+      "ticker_symbol": "3RDMI",
+      "business_name": "3rd Millennium Insurance & Financial Services, Inc."
+    },
+    {
+      "docId": "QqwMuEq3XVHnTWcs3Rg9",
+      "ticker_symbol": "ALACA",
+      "business_name": "A La Carte Specialty Foods LLC"
+    },
+    {
+      "docId": "0cJp8W5gVAsjKPpNevXf",
+      "ticker_symbol": "ADMIR",
+      "business_name": "AdmiredCreations"
+    },
+    {
+      "docId": "DHm9ZCjH7bJjrzhoOr8v",
+      "ticker_symbol": "AFFLU",
+      "business_name": "Affluent Consulting Group"
+    },
+    {
+      "docId": "isCFgNoQRtKtpNX0Z0wR",
+      "ticker_symbol": "ANHCO",
+      "business_name": "A.N.H. Consulting, LLC."
+    },
+    {
+      "docId": "VNFoGN788G032KxdxUcq",
+      "ticker_symbol": "AMPPR",
+      "business_name": "AMP PR"
+    },
+    {
+      "docId": "JOmEDDlrZ9YunOQM1NCj",
+      "ticker_symbol": "ALKAF",
+      "business_name": "Alka Financial LLC"
+    },
+    {
+      "docId": "0OKRyOcdw9eo2ixuI68B",
+      "ticker_symbol": "ANDRI",
+      "business_name": "Andria's Notary Services"
+    },
+    {
+      "docId": "C1bZ9VX1XCi8QbHimInf",
+      "ticker_symbol": "ARTOF",
+      "business_name": "Art Of Style"
+    },
+    {
+      "docId": "oUB2B0eBTRLkESaUtW6r",
+      "ticker_symbol": "ASHCU",
+      "business_name": "Ashé Cultural Arts Center"
+    },
+    {
+      "docId": "sJnuU9JhvlbYScEmJqF8",
+      "ticker_symbol": "AUGUS",
+      "business_name": "August Building Maintenance, Inc."
+    },
+    {
+      "docId": "vXFa5KJlr9WvIz55HXFN",
+      "ticker_symbol": "G2MYR",
+      "business_name": "Adams International House of Fashion, LLC"
+    },
+    {
+      "docId": "MwrxBmxlQlJClh86Qj5j",
+      "ticker_symbol": "AUTOS",
+      "business_name": "Autosmart Detailing Vocational Institute"
+    },
+    {
+      "docId": "pGsYxEKjLcWJ5otcEydQ",
+      "ticker_symbol": "ARCHI",
+      "business_name": "Archie's Hot Dog Island & Catering LLC"
+    },
+    {
+      "docId": "6JrFZI3KIQQKLgPUxgOn",
+      "ticker_symbol": "ANOIN",
+      "business_name": "Anointed To Care Inc"
+    },
+    {
+      "docId": "A3cPrbzmD90c94NMHvcF",
+      "ticker_symbol": "ATKIN",
+      "business_name": "Atkins Consulting Management, LLC"
+    },
+    {
+      "docId": "zwZwSDN7wpi4FR7gH2JM",
+      "ticker_symbol": "ATMOT",
+      "business_name": "A & T MOTOR COMPANY LLC. dba PERFERRED TOWING RECOVERY SERVICE"
+    },
+    {
+      "docId": "JiBHblH1TtTRxLJf2B2T",
+      "ticker_symbol": "ADVAN",
+      "business_name": "Advanced Allergy Associates"
+    },
+    {
+      "docId": "t0YnHOwxgynKAVpxQ3cJ",
+      "ticker_symbol": "ANGEL",
+      "business_name": "Angelique's Baking Company"
+    },
+    {
+      "docId": "eSizCjQbxksaSkGIm1h8",
+      "ticker_symbol": "AUDRE",
+      "business_name": "Audrey Mae's Catering, LLC"
+    },
+    {
+      "docId": "UWnBnGAvaOUn70drL8UI",
+      "ticker_symbol": "AGAPE",
+      "business_name": "Agape Care Providers"
+    },
+    {
+      "docId": "J76Mp522u3OmAEBbIubl",
+      "ticker_symbol": "AAACA",
+      "business_name": "AAA care llc"
+    },
+    {
+      "docId": "U9JE0PhSSj4asz0vLLXo",
+      "ticker_symbol": "AMGLS",
+      "business_name": "AMGL Services LLC"
+    },
+    {
+      "docId": "bh1TNNHoAGM8142Rruck",
+      "ticker_symbol": "Z3BWB",
+      "business_name": "Augusta's Custom Fab and Build Inc."
+    },
+    {
+      "docId": "lTtq8RD9ejbWsn2ygBaH",
+      "ticker_symbol": "AIRWA",
+      "business_name": "Airware Transportation & Logistics, LLC"
+    },
+    {
+      "docId": "OsZ35QnBRp13EqjFcmAa",
+      "ticker_symbol": "AVOND",
+      "business_name": "Avondale Gang LLC"
+    },
+    {
+      "docId": "oJUBws11oHiPtuEDuHy6",
+      "ticker_symbol": "AJWIL",
+      "business_name": "AJ Williams Consulting, LLC"
+    },
+    {
+      "docId": "YfECjGmItCs16rBTwtdt",
+      "ticker_symbol": "NFYYE",
+      "business_name": "Archie B. Sanchez, Jr., Certified Public Accountant & Consultant"
+    },
+    {
+      "docId": "hgV7d1cVM13bIQq5d6jB",
+      "ticker_symbol": "ALEIG",
+      "business_name": "A.Leigh Solutions LLC"
+    },
+    {
+      "docId": "eG6aWBdh7AunVOwQ6BCv",
+      "ticker_symbol": "ANEWF",
+      "business_name": "Anew Fitness"
+    },
+    {
+      "docId": "ywAIDBzi79izSLlaukIm",
+      "ticker_symbol": "WAGN3",
+      "business_name": "A & T MOTOR COMPPANY LLC. DBA PERFERRED TOWING RECOVERY SERVICE"
+    },
+    {
+      "docId": "XVcu53Yw1KQaGN0tlnxM",
+      "ticker_symbol": "ALIGN",
+      "business_name": "alignED New Orleans"
+    },
+    {
+      "docId": "t688YR1qEJdXI64TDjKV",
+      "ticker_symbol": "ALLST",
+      "business_name": "Allstar Community Care"
+    },
+    {
+      "docId": "bCx8BZsLWJioFx8wdI2x",
+      "ticker_symbol": "ALLUR",
+      "business_name": "Allure Lux Med Spa & Aesthetics"
+    },
+    {
+      "docId": "iC2y6cgvIMMY5UusnNIU",
+      "ticker_symbol": "BAMMC",
+      "business_name": "BAMM Communications, LLC"
+    },
+    {
+      "docId": "Zqs7RNDZe4QWHKKXYtb4",
+      "ticker_symbol": "BRCCO",
+      "business_name": "BRC Construction Group, LLC"
+    },
+    {
+      "docId": "dydOJZaroRHkxWDKrYrc",
+      "ticker_symbol": "BUILD",
+      "business_name": "Buildko Construction Group, Inc."
+    },
+    {
+      "docId": "nmoEhsSNF5yxueXBAalR",
+      "ticker_symbol": "BROUS",
+      "business_name": "Broussard Dispute Solutions, LLC"
+    },
+    {
+      "docId": "GFaC3R59nAK3HVdzFsnn",
+      "ticker_symbol": "BRITE",
+      "business_name": "Brite Shine Cleaning and Floor Care LLC"
+    },
+    {
+      "docId": "3DxS59ONdd0QD8R7I6CU",
+      "ticker_symbol": "BYBCL",
+      "business_name": "BYBC LEGGINGS"
+    },
+    {
+      "docId": "UTWaxu4Jph1gChgtWu4Y",
+      "ticker_symbol": "BREAK",
+      "business_name": "Breaking Bread Infinity LLC"
+    },
+    {
+      "docId": "xCETxpwLX9g5VS0i2S5T",
+      "ticker_symbol": "BEEPB",
+      "business_name": "BEEP BEEP TRANSPORTATION LLC"
+    },
+    {
+      "docId": "yMHJqG0ZVxXKguDlyCgY",
+      "ticker_symbol": "BOXKA",
+      "business_name": "BoxKart Media"
+    },
+    {
+      "docId": "P4k4e0IYG0xLMaNAGuGl",
+      "ticker_symbol": "BEYON",
+      "business_name": "Beyond The Stage"
+    },
+    {
+      "docId": "ZFIFw3XOhYUbbgiqBBSs",
+      "ticker_symbol": "BRAND",
+      "business_name": "Brand One Exclusives LLC"
+    },
+    {
+      "docId": "zyhLhSEi03q5KPQfQIjQ",
+      "ticker_symbol": "BAYOU",
+      "business_name": "BAYOU SAVAGE MEALS"
+    },
+    {
+      "docId": "DD76wwKRpFbo3lvTOdJf",
+      "ticker_symbol": "BACKA",
+      "business_name": "Backatown Coffee Parlour"
+    },
+    {
+      "docId": "pbgmm0xevifwdx0aqoWm",
+      "ticker_symbol": "BRIGH",
+      "business_name": "Bright Moments LLV"
+    },
+    {
+      "docId": "yGxRetGBc0wSWs0yFujp",
+      "ticker_symbol": "BYPAS",
+      "business_name": "BypassLines"
+    },
+    {
+      "docId": "2idB2jnOeyBMLGRBQeZG",
+      "ticker_symbol": "BLOSS",
+      "business_name": "Blossoming Minds Health Center and Family Services LLC"
+    },
+    {
+      "docId": "P3wGjQBnaoSvFdi2Run7",
+      "ticker_symbol": "BBRYA",
+      "business_name": "B Bryant Films"
+    },
+    {
+      "docId": "oHqikYrDKb6zaJLKSz0f",
+      "ticker_symbol": "BARON",
+      "business_name": "Baroness on Baronne"
+    },
+    {
+      "docId": "a187qYijCx3eDtNHXKdQ",
+      "ticker_symbol": "BESTT",
+      "business_name": "Best Title & Co. LLC"
+    },
+    {
+      "docId": "PJocY2SHZymO4goTzEr5",
+      "ticker_symbol": "JSIXN",
+      "business_name": "B.A.D.U. LLC"
+    },
+    {
+      "docId": "dJ07AYQ4m6REZ7XGD9ZT",
+      "ticker_symbol": "BURTO",
+      "business_name": "Burton Transit"
+    },
+    {
+      "docId": "TnVCz6hqwsZG8l8ZTau3",
+      "ticker_symbol": "BRENT",
+      "business_name": "Brent House Hotel"
+    },
+    {
+      "docId": "se4IhFxBaxzoBC6WNzmD",
+      "ticker_symbol": "P714L",
+      "business_name": "Busy Bee Cleaning Service"
+    },
+    {
+      "docId": "WzN3vUiuRClzyv5aYhfi",
+      "ticker_symbol": "BIGMA",
+      "business_name": "Big Mama Cooking & Catering"
+    },
+    {
+      "docId": "Q379Jx36FNnugJtaiGdO",
+      "ticker_symbol": "BEASB",
+      "business_name": "Bea's Bayou Skincare"
+    },
+    {
+      "docId": "14ZdT1ZbwSwkwI68Re90",
+      "ticker_symbol": "BOURG",
+      "business_name": "Bourgeois & Associates Mortgage, LLC"
+    },
+    {
+      "docId": "JGo1XrazEPniappjOcnq",
+      "ticker_symbol": "BENOL",
+      "business_name": "BENOLA, Inc"
+    },
+    {
+      "docId": "KfNsr9P1Gdpy7JQp1u2B",
+      "ticker_symbol": "262Q5",
+      "business_name": "BlackHawk Hauling"
+    },
+    {
+      "docId": "8TaVMRz9zeD809BHjqYk",
+      "ticker_symbol": "BARBC",
+      "business_name": "Bar-B-Clean New Orleans"
+    },
+    {
+      "docId": "SSrjmua72qnjjbyckgWg",
+      "ticker_symbol": "BIGEA",
+      "business_name": "BigEasy Praline Connection Llc"
+    },
+    {
+      "docId": "HUK7k7jFU4VYzdXdUIj0",
+      "ticker_symbol": "BELOU",
+      "business_name": "Be Loud Studios"
+    },
+    {
+      "docId": "EPRkS5B8vgQuFgTzlbz6",
+      "ticker_symbol": "SKLIM",
+      "business_name": "Black Futurist Development"
+    },
+    {
+      "docId": "AF50Fbyd5BZZVrBjh44o",
+      "ticker_symbol": "BBLIN",
+      "business_name": "Bblinged LLC"
+    },
+    {
+      "docId": "DuwQBqrKhLOetNuavaf9",
+      "ticker_symbol": "BOXOF",
+      "business_name": "Box Of Care Gift Company"
+    },
+    {
+      "docId": "aPTSSoJJ3agt2GEiXcnR",
+      "ticker_symbol": "BRUNO",
+      "business_name": "Bruno & Tervalon, LLP"
+    },
+    {
+      "docId": "vPUA2fUcPGhzAvux39Bk",
+      "ticker_symbol": "CHAMP",
+      "business_name": "Champagne Transport"
+    },
+    {
+      "docId": "TUjo7jLQixbfeoDyfdZ9",
+      "ticker_symbol": "CARRI",
+      "business_name": "Carriere & Dunn Tax/Accounting Services"
+    },
+    {
+      "docId": "YWiyFWY5fpgZIvxB1lqa",
+      "ticker_symbol": "COLLA",
+      "business_name": "Collaborative Community Initiative, Inc"
+    },
+    {
+      "docId": "g3JEVGvu8OpqIzlOWBqb",
+      "ticker_symbol": "CGCON",
+      "business_name": "CG Consulting"
+    },
+    {
+      "docId": "IueHXNaipkjypMEiBxTE",
+      "ticker_symbol": "CODIF",
+      "business_name": "Codifi Medical Coding & Consulting,LLC"
+    },
+    {
+      "docId": "m3ajA4jNMCwsDDx8rPhB",
+      "ticker_symbol": "COXDR",
+      "business_name": "Cox Drywall Painting General Services"
+    },
+    {
+      "docId": "YGveeBJjkVYzTYubVOGv",
+      "ticker_symbol": "CULTI",
+      "business_name": "Cultivate Advisors"
+    },
+    {
+      "docId": "OnwRGK8bAHqUNLWSfa0r",
+      "ticker_symbol": "CENTE",
+      "business_name": "Center for Hope Children and Family Services, LLC"
+    },
+    {
+      "docId": "SqP6fs9RfVcQh3zRY71a",
+      "ticker_symbol": "CHEST",
+      "business_name": "Chester Electric, LLC"
+    },
+    {
+      "docId": "6eKByjJxrK81N2WGucOQ",
+      "ticker_symbol": "CFOIN",
+      "business_name": "CFO Ink & Notary, LLC"
+    },
+    {
+      "docId": "tWwi129Z2cFmcOInsmbJ",
+      "ticker_symbol": "CDENT",
+      "business_name": "CD ENTERPRISE PRODUCTS CO."
+    },
+    {
+      "docId": "5FBgno0OITNFMOj4EFI4",
+      "ticker_symbol": "CRESC",
+      "business_name": "Crescent City Chiropractic Center"
+    },
+    {
+      "docId": "PqEaUEhQ4aFOmgpDcDlS",
+      "ticker_symbol": "COUZA",
+      "business_name": "Couzan's Lagniappe Bed and Breakfast"
+    },
+    {
+      "docId": "YIfVtODJ7QpAl2n1C7wM",
+      "ticker_symbol": "CONVE",
+      "business_name": "Conventional Insurance Group"
+    },
+    {
+      "docId": "eeTic7zuaC6XSWQKygzC",
+      "ticker_symbol": "CORPO",
+      "business_name": "Corporate Internship Leadership Institute"
+    },
+    {
+      "docId": "MI0qqLvlQaliVObL0nvC",
+      "ticker_symbol": "CORNI",
+      "business_name": "Cornish Law LLC"
+    },
+    {
+      "docId": "0tyqnhUe2gniiBdJAlem",
+      "ticker_symbol": "CREAT",
+      "business_name": "Creativity Justified"
+    },
+    {
+      "docId": "0oWPaI4VRLPwHDSmRF0H",
+      "ticker_symbol": "CAJUN",
+      "business_name": "Cajun Baby Catering"
+    },
+    {
+      "docId": "gbXhfgKswc5FlIEnnEcj",
+      "ticker_symbol": "MZ6X7",
+      "business_name": "Corporate Business Supplies, Inc."
+    },
+    {
+      "docId": "JwS3wTevjqshYO2k74hf",
+      "ticker_symbol": "CAJAN",
+      "business_name": "Cajan Properties LLC"
+    },
+    {
+      "docId": "FdTH22NYalzi20PkS5Ai",
+      "ticker_symbol": "AFGPY",
+      "business_name": "Corporate Playbook"
+    },
+    {
+      "docId": "v2lqSvNyCceVuxmBndjM",
+      "ticker_symbol": "CAFFI",
+      "business_name": "CAF Films"
+    },
+    {
+      "docId": "geme23ypEwgMMWA2wLrH",
+      "ticker_symbol": "CONCR",
+      "business_name": "Concrete Placement LLC"
+    },
+    {
+      "docId": "YorvMLEJEKFxbiZdOA7z",
+      "ticker_symbol": "CHIEF",
+      "business_name": "Chief of Minds, LLC"
+    },
+    {
+      "docId": "6ozFhVrKhAp6j91KzFRy",
+      "ticker_symbol": "CLPRO",
+      "business_name": "C.L. Professional Enterprises Inc."
+    },
+    {
+      "docId": "9nHIRHLgatJ1EgTwIVdh",
+      "ticker_symbol": "CELES",
+      "business_name": "Celestin Development Corporation"
+    },
+    {
+      "docId": "26505TLPhlPh0fSHUZVN",
+      "ticker_symbol": "CHILD",
+      "business_name": "Children’s Palace Learning Academy"
+    },
+    {
+      "docId": "pe2z2D2gGnv5gi1JkXBJ",
+      "ticker_symbol": "CMBAD",
+      "business_name": "CMB Adjusting Co."
+    },
+    {
+      "docId": "wr42zJhDhETOIT6Wy4Fv",
+      "ticker_symbol": "I42L6",
+      "business_name": "Children's Palace Learning Academy 1 & 2"
+    },
+    {
+      "docId": "fjbNmBKGlS1ydo0Mjgmd",
+      "ticker_symbol": "CONNE",
+      "business_name": "Connecting Forward, INC"
+    },
+    {
+      "docId": "FWThqJNI9N7DF56VMhbF",
+      "ticker_symbol": "COLOR",
+      "business_name": "ColorfulDreams INC"
+    },
+    {
+      "docId": "vyFgqTLzShnhR3MyhcMJ",
+      "ticker_symbol": "CALLO",
+      "business_name": "Calloway & Sons A/C & Heating"
+    },
+    {
+      "docId": "9xthxtY3wZJgKuS7dCzN",
+      "ticker_symbol": "COLEM",
+      "business_name": "Coleman's Auto Salvage & Body Shop"
+    },
+    {
+      "docId": "bWDGCtRf56rkHBQ371uZ",
+      "ticker_symbol": "CHOIC",
+      "business_name": "Choice Marketing Group, LLC"
+    },
+    {
+      "docId": "GNl1umnhCvIEGeKMuaex",
+      "ticker_symbol": "CLBIN",
+      "business_name": "CLB Investments, LLC"
+    },
+    {
+      "docId": "RXCtzC44e0v1uQzwtIWe",
+      "ticker_symbol": "CLOUD",
+      "business_name": "Cloud Echelon LLC"
+    },
+    {
+      "docId": "Xq8w5SCcAuXT0dLDt8rW",
+      "ticker_symbol": "CARTE",
+      "business_name": "Carter Capital LLC"
+    },
+    {
+      "docId": "ta0xFtm5hsTGWh76vIOv",
+      "ticker_symbol": "COMEB",
+      "business_name": "Come Back Fit, LLC"
+    },
+    {
+      "docId": "qznPkwd0xxwP9qKsFxre",
+      "ticker_symbol": "COREL",
+      "business_name": "CORE: Louisiana Counseling & Recovery Center"
+    },
+    {
+      "docId": "tVtung2U71J31iHbiOPz",
+      "ticker_symbol": "CUSTO",
+      "business_name": "Custom MADE Consulting"
+    },
+    {
+      "docId": "HWw7U2qVrza4hnTJNwQ2",
+      "ticker_symbol": "CORYW",
+      "business_name": "Cory Williams-Thrivent Financial"
+    },
+    {
+      "docId": "60rOlidzUC215tKBClhI",
+      "ticker_symbol": "CLEAN",
+      "business_name": "Cleaning Concierge"
+    },
+    {
+      "docId": "LBCh80xqFYNA6TYfQ5ot",
+      "ticker_symbol": "CURRY",
+      "business_name": "Curry with a Flavor Festival, LLC"
+    },
+    {
+      "docId": "IkLbpzesu0QMjEqmvRA6",
+      "ticker_symbol": "COLLE",
+      "business_name": "College Beyond"
+    },
+    {
+      "docId": "TYPd8xARWd44KZ9V5fno",
+      "ticker_symbol": "CARIB",
+      "business_name": "Caribbean Carnival/Friends Of Culture"
+    },
+    {
+      "docId": "n8akN4KzktAshyYMF9BC",
+      "ticker_symbol": "CRAZY",
+      "business_name": "Crazy Plant Bae"
+    },
+    {
+      "docId": "cg6kN7GsuxRqrTMV0W8t",
+      "ticker_symbol": "DAVES",
+      "business_name": "Dave’s Transportation Services"
+    },
+    {
+      "docId": "jPml8ouF3OB2NFf9vfh6",
+      "ticker_symbol": "DEPAU",
+      "business_name": "DePaul Community Health Centers"
+    },
+    {
+      "docId": "qRl2qHvvPj6MNB5JwHMp",
+      "ticker_symbol": "DARAJ",
+      "business_name": "Daraja Consulting, LLC"
+    },
+    {
+      "docId": "v0kLDYdPn6mGPxwdagWW",
+      "ticker_symbol": "DIVIN",
+      "business_name": "DIVINE INTERVENTIONS OF GREATER NEW ORLEANS LLC"
+    },
+    {
+      "docId": "OhGA1n0GkAcIrhZLM5rp",
+      "ticker_symbol": "DELTA",
+      "business_name": "Delta Personnel, Inc"
+    },
+    {
+      "docId": "YAUs2eFxsP8NzpJR0w8j",
+      "ticker_symbol": "DANNY",
+      "business_name": "DANNY'S CREOLE KITCHEN LLC"
+    },
+    {
+      "docId": "XjtrWss9b9VG9j6VvbVu",
+      "ticker_symbol": "DELTH",
+      "business_name": "Deltha Corporation"
+    },
+    {
+      "docId": "tDyIORwWip5c9P367Ven",
+      "ticker_symbol": "UVU7R",
+      "business_name": "Divine Realty Consultants"
+    },
+    {
+      "docId": "sLrHMdERgh0oZRIN2hYk",
+      "ticker_symbol": "3M007",
+      "business_name": "Delta Builds Enterprises"
+    },
+    {
+      "docId": "ZlY481zXWUAhwwGla36H",
+      "ticker_symbol": "WFZAA",
+      "business_name": "Divine Event Hall"
+    },
+    {
+      "docId": "taFO4606ec48lynMTZCy",
+      "ticker_symbol": "DINEW",
+      "business_name": "Dine With Myra J"
+    },
+    {
+      "docId": "22YfoVpFrGa4YTABTu6s",
+      "ticker_symbol": "DOMAN",
+      "business_name": "Domango Training"
+    },
+    {
+      "docId": "D1CfNLGNfIqOYCb1uA5n",
+      "ticker_symbol": "DIGIT",
+      "business_name": "Digital Innovation Media Group"
+    },
+    {
+      "docId": "rnKG2pDXyxvKv9hC8LB3",
+      "ticker_symbol": "DISPO",
+      "business_name": "Disposal Services Inc."
+    },
+    {
+      "docId": "V3xNdVx4wybpbmctCCtY",
+      "ticker_symbol": "DEBRA",
+      "business_name": "Debra Gould & Associates, Inc."
+    },
+    {
+      "docId": "kaaEv5wNx1xkYQROCVfG",
+      "ticker_symbol": "DAYDR",
+      "business_name": "Daydream Koffucha LLC"
+    },
+    {
+      "docId": "9V1MI6pOu3sOUF31obJG",
+      "ticker_symbol": "DOING",
+      "business_name": "Doing Business Right Consulting, LLC"
+    },
+    {
+      "docId": "WbHeLybN1WZMMrLGtxZn",
+      "ticker_symbol": "DEMET",
+      "business_name": "Demetric M Mercadel Consulting Group LLC"
+    },
+    {
+      "docId": "u7BGwe89xWxaShFqRWT3",
+      "ticker_symbol": "DEWDR",
+      "business_name": "Dew Drop Inn"
+    },
+    {
+      "docId": "4vlyAHoyu9rD3dIncnFv",
+      "ticker_symbol": "UV413",
+      "business_name": "Demetria L. Robinson-Carter, CPA, LLC"
+    },
+    {
+      "docId": "TsqJxfrvj8bv1Fl37Of2",
+      "ticker_symbol": "DBAGR",
+      "business_name": "DBA Graze Dat"
+    },
+    {
+      "docId": "68BQAoGJqOi0aFTB00Wd",
+      "ticker_symbol": "DRSHE",
+      "business_name": "Dr. Sheika Square"
+    },
+    {
+      "docId": "ROpWjH0fkiarS5xBHEMJ",
+      "ticker_symbol": "DELIS",
+      "business_name": "Delisha Boyd, LLC"
+    },
+    {
+      "docId": "o970Ysi0Q3suAO131074",
+      "ticker_symbol": "DANET",
+      "business_name": "DANETTE ONEAL REALTORS, INC"
+    },
+    {
+      "docId": "bKBeuJVwXpkWKAEOUhm2",
+      "ticker_symbol": "DBABU",
+      "business_name": "DBA BUSINESS CENTRE LLC"
+    },
+    {
+      "docId": "nbClesLpkJHsHYhIhBm1",
+      "ticker_symbol": "DMMAS",
+      "business_name": "DMM & Associates, LLC"
+    },
+    {
+      "docId": "vXlfk1u6iIwkB99wjPwg",
+      "ticker_symbol": "DMCEN",
+      "business_name": "DMC Engineering LLC"
+    },
+    {
+      "docId": "hmzfWs5uPKyEjMZ6FIwv",
+      "ticker_symbol": "DRUMM",
+      "business_name": "Drummer Enterprises"
+    },
+    {
+      "docId": "vfpCf4glBPrpYgInfmjJ",
+      "ticker_symbol": "DECOR",
+      "business_name": "Decorated Jewelry Co."
+    },
+    {
+      "docId": "W44VWjl5V1SX581TbAUJ",
+      "ticker_symbol": "HWGY6",
+      "business_name": "DDSC, LLC"
+    },
+    {
+      "docId": "sAX43qV6G9RkCslNfLmj",
+      "ticker_symbol": "DEELI",
+      "business_name": "Deelightful Roux School of Cooking"
+    },
+    {
+      "docId": "oDNYN4iQ9ejE5sIztoMP",
+      "ticker_symbol": "DRALI",
+      "business_name": "Dr. Alisha Reed"
+    },
+    {
+      "docId": "YEFOEe9kyLCaLu45fIYZ",
+      "ticker_symbol": "DANIE",
+      "business_name": "Danielle’s Dance Academy"
+    },
+    {
+      "docId": "Mu8iURloviXNZ7SuvSoA",
+      "ticker_symbol": "DECOM",
+      "business_name": "DecoMuse Boutique"
+    },
+    {
+      "docId": "zwbitSPuasVC0YuaZZ2N",
+      "ticker_symbol": "EMPRE",
+      "business_name": "Empress Herbals"
+    },
+    {
+      "docId": "asijv5V6NxJZyKYY9clj",
+      "ticker_symbol": "EVERY",
+      "business_name": "Everything Admin"
+    },
+    {
+      "docId": "e19mlGmPXBKtx2ejarYk",
+      "ticker_symbol": "ERARE",
+      "business_name": "ERA Realty All Over"
+    },
+    {
+      "docId": "wCM95RD2tHmKcpjTIUUR",
+      "ticker_symbol": "26UDA",
+      "business_name": "Every Way Insurance Agency LLC"
+    },
+    {
+      "docId": "tgeKUDiBbzvKY957zv6N",
+      "ticker_symbol": "ELITE",
+      "business_name": "Elite Luxury Transportation LLC"
+    },
+    {
+      "docId": "UnnIHmUNHYpyNDXVx1nr",
+      "ticker_symbol": "YBADB",
+      "business_name": "Elite Residential and Commercial Contractors"
+    },
+    {
+      "docId": "m0shc5fOP04SykE43lwY",
+      "ticker_symbol": "ENHAN",
+      "business_name": "Enhanced Destiny Services"
+    },
+    {
+      "docId": "US29vVss11LojpsOLoLI",
+      "ticker_symbol": "ELMAY",
+      "business_name": "ELMAYS ENTERPRISES LLC"
+    },
+    {
+      "docId": "t41LeH9L0AhuWfKY4dim",
+      "ticker_symbol": "ESCHO",
+      "business_name": "Eschol Management and Consulting LLC"
+    },
+    {
+      "docId": "jZksR1cchcaLLYApf4Xn",
+      "ticker_symbol": "EDWAR",
+      "business_name": "Edward Jones"
+    },
+    {
+      "docId": "Kd6Pj1Ri8Dzlu1iivqpP",
+      "ticker_symbol": "ELEME",
+      "business_name": "Element2 Beverage Company"
+    },
+    {
+      "docId": "eMCVWaj6UHx62TuJtZwG",
+      "ticker_symbol": "EQUAL",
+      "business_name": "Equali Tees, LLC"
+    },
+    {
+      "docId": "F2W7FNKUiK7LifTNNw58",
+      "ticker_symbol": "LDAMJ",
+      "business_name": "Elite Affairs Event Rental"
+    },
+    {
+      "docId": "ZdxewndxBU1TuTIVHVoU",
+      "ticker_symbol": "EUGEN",
+      "business_name": "Eugene's Dream, LLC dba Eugene's Dream Organics"
+    },
+    {
+      "docId": "qZhbdZgc0bh6bkrCKBMm",
+      "ticker_symbol": "EXQUI",
+      "business_name": "Exquisite Diamond Transportation, LLC"
+    },
+    {
+      "docId": "OmBKOMoZvQYGubVIiGDW",
+      "ticker_symbol": "ERICA",
+      "business_name": "Erica Garner - Insurance Agent"
+    },
+    {
+      "docId": "6hRPLOCFZhnVnDhipem7",
+      "ticker_symbol": "EXCEL",
+      "business_name": "EXCELSIOR ARMS SECURITY SERVICES LLC"
+    },
+    {
+      "docId": "Ow4DevQVuvyV4HlQSTvW",
+      "ticker_symbol": "TBJ0L",
+      "business_name": "Elite Clean Natural Products"
+    },
+    {
+      "docId": "Ocp9N4jkD5sEV5IyKZfk",
+      "ticker_symbol": "EVANJ",
+      "business_name": "Evan James Consulting"
+    },
+    {
+      "docId": "aYBxWj47bpF7CwnkXZeV",
+      "ticker_symbol": "EVENT",
+      "business_name": "Event Restroom"
+    },
+    {
+      "docId": "qltAiJ8DUNdalontHoMG",
+      "ticker_symbol": "EDIFY",
+      "business_name": "Edify Ventures, LLC"
+    },
+    {
+      "docId": "T1AA0TOtfyR3BV8SbsJX",
+      "ticker_symbol": "ELISE",
+      "business_name": "Elise Phlebotomy Training Center"
+    },
+    {
+      "docId": "Hl2HPGM2O7O0KR9SkUZQ",
+      "ticker_symbol": "OJSDR",
+      "business_name": "Exquisite Realty"
+    },
+    {
+      "docId": "vrCzK3zpbztHx4DXvy6n",
+      "ticker_symbol": "DQ7PI",
+      "business_name": "Erica Nicole Makeup Artistry"
+    },
+    {
+      "docId": "SZClrSoCdPFpToBzKOdi",
+      "ticker_symbol": "EMITC",
+      "business_name": "E Mitchell Construction LLC"
+    },
+    {
+      "docId": "5ck3a0ybl44y2URSxvjv",
+      "ticker_symbol": "GCK5J",
+      "business_name": "Elite Therapy"
+    },
+    {
+      "docId": "qtUUpvi9g7OhI4UUxFnA",
+      "ticker_symbol": "FORPR",
+      "business_name": "For Providers By Providers Louisiana"
+    },
+    {
+      "docId": "bwZ5g5xKXcwtFOijk7aT",
+      "ticker_symbol": "FLYTE",
+      "business_name": "Flyte"
+    },
+    {
+      "docId": "vToBLaXdVRAWNAx7BgWQ",
+      "ticker_symbol": "FATCR",
+      "business_name": "Fat Creole Tomato, LLC"
+    },
+    {
+      "docId": "GACqobNzUSw63IFdQpx7",
+      "ticker_symbol": "FRESH",
+      "business_name": "Fresh Fruit Sensations"
+    },
+    {
+      "docId": "Zixp73ZbcseLkOMlOw5V",
+      "ticker_symbol": "FAVOR",
+      "business_name": "Favorite Educational Consultants, LLc"
+    },
+    {
+      "docId": "XkMrGclqZkTOa56JxYMx",
+      "ticker_symbol": "FIRST",
+      "business_name": "First Klass Enterprise, LLC"
+    },
+    {
+      "docId": "S7E3jxvT0lpLCrgI88oT",
+      "ticker_symbol": "FREED",
+      "business_name": "Freedom Apothecary"
+    },
+    {
+      "docId": "vvFFftLurpSp9JGlPe4a",
+      "ticker_symbol": "FUNWH",
+      "business_name": "Fun While Learning Childcare"
+    },
+    {
+      "docId": "JYNvYnMb10CDEyo12TYj",
+      "ticker_symbol": "FRANK",
+      "business_name": "Frankly Beautiful Medical LLC"
+    },
+    {
+      "docId": "i0gu1h9V0UU0m5Oy5dnq",
+      "ticker_symbol": "FLEUR",
+      "business_name": "Fleur De Lis Janitorial, LLC"
+    },
+    {
+      "docId": "aH5qAAYEl76qB0Bc3Zwz",
+      "ticker_symbol": "GAMBE",
+      "business_name": "Gambel Communications"
+    },
+    {
+      "docId": "Z9TMGPO9xex37i8HGNNT",
+      "ticker_symbol": "ZKTBZ",
+      "business_name": "Global Parking"
+    },
+    {
+      "docId": "PSQwB4jyfe4xDbjhxdhf",
+      "ticker_symbol": "GOGEA",
+      "business_name": "Go Geaux John llc"
+    },
+    {
+      "docId": "QonJPXqoIhM7amm72iwC",
+      "ticker_symbol": "GLASS",
+      "business_name": "Glass Half Full, L3C"
+    },
+    {
+      "docId": "q8ScGqjdJkJVa8AlfnoI",
+      "ticker_symbol": "WVGIR",
+      "business_name": "Global Gateway LLC"
+    },
+    {
+      "docId": "RooNDmgO0x3u33wbUQl0",
+      "ticker_symbol": "GONZA",
+      "business_name": "Gonzaque Business Consulting, LLC"
+    },
+    {
+      "docId": "NLiMGTyDPRomVttzVSv6",
+      "ticker_symbol": "GALCA",
+      "business_name": "GalCan Electric & General Contracting"
+    },
+    {
+      "docId": "dDIO5e7mVrXi5sntOnzk",
+      "ticker_symbol": "GEORG",
+      "business_name": "George E. Ray D.P.M. - Inclusivcare Clinics"
+    },
+    {
+      "docId": "g9HJsJ5EL8so9zVlMr5b",
+      "ticker_symbol": "LCHBQ",
+      "business_name": "Global Golf Institute LLC"
+    },
+    {
+      "docId": "9CDFT77tmQ35t3upnNlK",
+      "ticker_symbol": "1FWB6",
+      "business_name": "Go.Be."
+    },
+    {
+      "docId": "jumhB7lHHUolGSZTh0em",
+      "ticker_symbol": "JQ03E",
+      "business_name": "Go Geaux John"
+    },
+    {
+      "docId": "CiDGANJhaRwGDU8H8WMV",
+      "ticker_symbol": "ZYXVV",
+      "business_name": "Global Digital Pivot"
+    },
+    {
+      "docId": "7HQusQGiCn1A3sethhPU",
+      "ticker_symbol": "GALLO",
+      "business_name": "Gallo Mechanical LLC"
+    },
+    {
+      "docId": "X1oF1MWmxoTiSls7513R",
+      "ticker_symbol": "GLITT",
+      "business_name": "Glitter & Glitz Kids Spa Boutique"
+    },
+    {
+      "docId": "6uSRkSXut68FtLAHRT6I",
+      "ticker_symbol": "GENER",
+      "business_name": "Generations Health Inc dba ShopGHI"
+    },
+    {
+      "docId": "Rq83ceoXOXisBqu3MqO7",
+      "ticker_symbol": "GAUTI",
+      "business_name": "Gautier's Contracting & Trucking, LLC"
+    },
+    {
+      "docId": "BjlKnmc6WjsQMJanepRu",
+      "ticker_symbol": "GWJIN",
+      "business_name": "GWJ Ind Supply & Construction, LLC"
+    },
+    {
+      "docId": "7iygSNruBZG8KlCFBnb3",
+      "ticker_symbol": "GLENN",
+      "business_name": "Glenn Jordan Notary LLC"
+    },
+    {
+      "docId": "orDcLPMMfaKExqn3DQE4",
+      "ticker_symbol": "GOUDC",
+      "business_name": "GOUD CHOICES - SHARED LIVING FACILITY"
+    },
+    {
+      "docId": "uh9JwfDG8jaxRVkPzIZf",
+      "ticker_symbol": "GUICE",
+      "business_name": "Guice Global Medical, LLC"
+    },
+    {
+      "docId": "PJlLm2vcxFiDGmK5WgPh",
+      "ticker_symbol": "GRETN",
+      "business_name": "Gretna Xpress Pharmacy"
+    },
+    {
+      "docId": "VagUChFabtflp6ExqX5f",
+      "ticker_symbol": "GASER",
+      "business_name": "Gasery and Associates Enterprises, LLC"
+    },
+    {
+      "docId": "iCKRl8JqpJB1Pz8AvocI",
+      "ticker_symbol": "GUILL",
+      "business_name": "GUILLORY PITTMAN INSURANCE AGENCY LLC"
+    },
+    {
+      "docId": "CgS7IHffhZNRvf9xP1oe",
+      "ticker_symbol": "HUBBA",
+      "business_name": "Hubbard Mansion Bed & Breakfast"
+    },
+    {
+      "docId": "5zkUcRwXOl6BE3cbNP10",
+      "ticker_symbol": "HONOR",
+      "business_name": "Honore Consultants"
+    },
+    {
+      "docId": "nkatdmKLTH2v0eDwHmxD",
+      "ticker_symbol": "HEYBE",
+      "business_name": "Hey Bebey! LLC"
+    },
+    {
+      "docId": "YUHH0uXjulWXDEYkh04x",
+      "ticker_symbol": "HRBOA",
+      "business_name": "HR BOARD AND MORE INC"
+    },
+    {
+      "docId": "dirIupNv0ZCRETn0a1LO",
+      "ticker_symbol": "HALEY",
+      "business_name": "Haley Law Practice, LLC"
+    },
+    {
+      "docId": "Uk145CrEi1xKxMWyPdhr",
+      "ticker_symbol": "HOLLI",
+      "business_name": "Holli Seaux Pretty"
+    },
+    {
+      "docId": "o9vJKRq55WoiQunbyot5",
+      "ticker_symbol": "HWDRU",
+      "business_name": "H & W Drug Store Inc."
+    },
+    {
+      "docId": "G9x2NTAWo1vlXS9xgUUl",
+      "ticker_symbol": "HEART",
+      "business_name": "Heart Foundation Inc."
+    },
+    {
+      "docId": "R4C7fupxK87uTGicQfRo",
+      "ticker_symbol": "HARRI",
+      "business_name": "Harris Marketing"
+    },
+    {
+      "docId": "848lNvOZwSxlUyVBJcH6",
+      "ticker_symbol": "HARDH",
+      "business_name": "Hard Hat Construction"
+    },
+    {
+      "docId": "0sP3wiIjIr9xIHf0k4Z0",
+      "ticker_symbol": "HAUSN",
+      "business_name": "Haus Nola Realty Group LLC"
+    },
+    {
+      "docId": "4XvHrIw3SarPp4RPOdzS",
+      "ticker_symbol": "HIQUA",
+      "business_name": "HiQuality Kleaning and Maintenance LLC"
+    },
+    {
+      "docId": "GNzFD5WOYFnZmutZV18W",
+      "ticker_symbol": "HOLME",
+      "business_name": "Holmes Healthcare Training Center"
+    },
+    {
+      "docId": "LRVW19i7ohIoJyhwj3WE",
+      "ticker_symbol": "HEWIT",
+      "business_name": "Hewitt-Washington & Associates, Architects and Planners (APC)"
+    },
+    {
+      "docId": "GpKSLhVMgWFfSgod7qHF",
+      "ticker_symbol": "HECOM",
+      "business_name": "H&E Comfort Services"
+    },
+    {
+      "docId": "zFaJiOD0smHxers7BPAL",
+      "ticker_symbol": "HILLS",
+      "business_name": "Hills Daniels and Associates"
+    },
+    {
+      "docId": "Qdi2cghTVvIzxyaPU7lG",
+      "ticker_symbol": "HAMME",
+      "business_name": "Hammerman & Gainer International LLC"
+    },
+    {
+      "docId": "MTh41jOqA3l3L8mvcpMO",
+      "ticker_symbol": "HELPI",
+      "business_name": "Helping Hands of New Orleans"
+    },
+    {
+      "docId": "1YodG06HCA9i9ZADBdAH",
+      "ticker_symbol": "7PW7B",
+      "business_name": "HiQuality Fashion Boutique LLC"
+    },
+    {
+      "docId": "O9Kjvy4veSirWoOZNuwM",
+      "ticker_symbol": "HENRY",
+      "business_name": "Henry Consulting LLC"
+    },
+    {
+      "docId": "DGGtswTECvYEkHphMCsL",
+      "ticker_symbol": "3F9TG",
+      "business_name": "Hello Scrubs Uniforms Nola"
+    },
+    {
+      "docId": "B6qYTixP1r4FIgRs5FPR",
+      "ticker_symbol": "7B15B",
+      "business_name": "Haus Nola Realty Group"
+    },
+    {
+      "docId": "OFYkev8vOGkbhgKMjT3n",
+      "ticker_symbol": "JPXQK",
+      "business_name": "HiQuality Home Improvements LLC"
+    },
+    {
+      "docId": "prXfUrBnNhVYXBsS5yjR",
+      "ticker_symbol": "HOTTI",
+      "business_name": "Hotties Tamales"
+    },
+    {
+      "docId": "EPTKMHCeTdSUclR6SKOj",
+      "ticker_symbol": "HJJIN",
+      "business_name": "HJJ INSURANCE & FINANCIAL SERVICES INC"
+    },
+    {
+      "docId": "0eBe43OKl5eVXmKNS6NF",
+      "ticker_symbol": "NEVSS",
+      "business_name": "Holmes Healthcare Services"
+    },
+    {
+      "docId": "BOvsxoDYdhdqtM2pRMBG",
+      "ticker_symbol": "IULBO",
+      "business_name": "IUL Bonds"
+    },
+    {
+      "docId": "NOe3ZcWFO375VyIuP94c",
+      "ticker_symbol": "IMPAC",
+      "business_name": "Impact Nurse Consulting"
+    },
+    {
+      "docId": "TirwwfHl3Otv9UrB6Itt",
+      "ticker_symbol": "ISATS",
+      "business_name": "ISAT Services LLC"
+    },
+    {
+      "docId": "wYTHste5fLgpdWAfFwkB",
+      "ticker_symbol": "INTEG",
+      "business_name": "Integrated Media Group Inc"
+    },
+    {
+      "docId": "Qr7kFEhuBMWEFKidtCWb",
+      "ticker_symbol": "INEED",
+      "business_name": "I Need An Architect"
+    },
+    {
+      "docId": "BU3f6V2EG6ZxQwhLKOlc",
+      "ticker_symbol": "INNOV",
+      "business_name": "Innovative Strategic Partners"
+    },
+    {
+      "docId": "OSiD3sAvVQolsMM9eff3",
+      "ticker_symbol": "INITI",
+      "business_name": "Initiatives Etcetera LLC"
+    },
+    {
+      "docId": "3lw5BUbJ5VXd2I9aCxUo",
+      "ticker_symbol": "ISLAN",
+      "business_name": "Island of Algiers LLC"
+    },
+    {
+      "docId": "EqjGGn9cHo5MafOdM37y",
+      "ticker_symbol": "INFIN",
+      "business_name": "Infinity Title Company, LLC"
+    },
+    {
+      "docId": "R5zHQ7me3zUseVKy1FPd",
+      "ticker_symbol": "INHAN",
+      "business_name": "Inhands Financial Services"
+    },
+    {
+      "docId": "a5y0Qfl5RkeHjsb8rmFe",
+      "ticker_symbol": "INTER",
+      "business_name": "Interface Construction Services"
+    },
+    {
+      "docId": "RoDqPyLhGvydJ7PCLjqN",
+      "ticker_symbol": "JOWAS",
+      "business_name": "Jowash LLC, dba Clara's Federal City"
+    },
+    {
+      "docId": "9yRlYnbJgUvH60q8BB9g",
+      "ticker_symbol": "JOSEP",
+      "business_name": "Joseph Video Production Llc"
+    },
+    {
+      "docId": "U3dxjYUlE4WykncrlrWw",
+      "ticker_symbol": "JJFUL",
+      "business_name": "J. J. Fulton Companies"
+    },
+    {
+      "docId": "pNkMFP49EBDE7bWTwrgX",
+      "ticker_symbol": "JADEE",
+      "business_name": "Jade-ED Consulting LLC"
+    },
+    {
+      "docId": "ncUqpIxyibaUirSXZYW8",
+      "ticker_symbol": "JUNMA",
+      "business_name": "Jun Magnolia"
+    },
+    {
+      "docId": "1C7vxCRoh4BNboakGNkx",
+      "ticker_symbol": "JUMPS",
+      "business_name": "JUMPSTART CHILD DEVELOPMENT CENTER"
+    },
+    {
+      "docId": "J4cOnyjt8fq23aiX0Y5r",
+      "ticker_symbol": "JUJAB",
+      "business_name": "JuJaBee"
+    },
+    {
+      "docId": "EW2XY7gMzO7DHJnqLmWe",
+      "ticker_symbol": "JECOH",
+      "business_name": "JECohen"
+    },
+    {
+      "docId": "oiVU9f5Hok2mi6oflXDY",
+      "ticker_symbol": "JGBTA",
+      "business_name": "JGB Tax Services and Financial Planning LLC"
+    },
+    {
+      "docId": "8MnKFomJ9S8nR8N5y4yX",
+      "ticker_symbol": "JEENT",
+      "business_name": "J.E. Enterprise, LLC"
+    },
+    {
+      "docId": "WLkuUDB440GvrvkvrJ5K",
+      "ticker_symbol": "JERUS",
+      "business_name": "Jerusalem Church of God in Christ"
+    },
+    {
+      "docId": "kf0F60WbOQUbrUPMYucu",
+      "ticker_symbol": "JBHOL",
+      "business_name": "J.B. Holton and Associates, LLC"
+    },
+    {
+      "docId": "QOg2EiBBdzGPRep5oNmd",
+      "ticker_symbol": "JACKS",
+      "business_name": "Jackson Offshore Operators LLC"
+    },
+    {
+      "docId": "mx6f3HgQyQZ8IRWFfVG9",
+      "ticker_symbol": "JENCA",
+      "business_name": "Jen Care"
+    },
+    {
+      "docId": "CuxI35u1kos4M6xyVbYv",
+      "ticker_symbol": "JOJAC",
+      "business_name": "Jo Jackson LLC"
+    },
+    {
+      "docId": "q9FrCC2H3BG48IErjTiW",
+      "ticker_symbol": "JWSCR",
+      "business_name": "JWs Creative Solutions LLC"
+    },
+    {
+      "docId": "U6GJqU5ikT28LKVg6oBg",
+      "ticker_symbol": "JAVAC",
+      "business_name": "Java Copy Zone LLC"
+    },
+    {
+      "docId": "jIJFWR78VsOn7kBjpmuF",
+      "ticker_symbol": "JUSTI",
+      "business_name": "JusTini’s"
+    },
+    {
+      "docId": "WJp5ZMc1TOQhEdIYH8oj",
+      "ticker_symbol": "JEFFE",
+      "business_name": "Jefferson Law Firm, A.P.L.C."
+    },
+    {
+      "docId": "GDDvakF3tkSGCsLvsnE1",
+      "ticker_symbol": "KWCOM",
+      "business_name": "KW Commercial 889-9898 / Keller Williams Realty 455-0100"
+    },
+    {
+      "docId": "wMyUdOa9cdeOqf8heAQd",
+      "ticker_symbol": "80C71",
+      "business_name": "Kost, LLC"
+    },
+    {
+      "docId": "gaPgiPhoPN83B4112PRo",
+      "ticker_symbol": "KALLE",
+      "business_name": "K. Allen Consulting"
+    },
+    {
+      "docId": "7SvqfqzcmwA1lDAFADbP",
+      "ticker_symbol": "KIKIB",
+      "business_name": "Kiki Baker Barnes, LLC"
+    },
+    {
+      "docId": "lWJPwdo0TKmj3aa0LlCW",
+      "ticker_symbol": "KSROC",
+      "business_name": "K's Rock Climbing Wall"
+    },
+    {
+      "docId": "9GQHXlDFgaC4gXOYLLCI",
+      "ticker_symbol": "KINKZ",
+      "business_name": "Kinkz Hair Products"
+    },
+    {
+      "docId": "YLdQdnjuNy7QqvD48kEh",
+      "ticker_symbol": "KNIGH",
+      "business_name": "KNIGHT CPA SERVICES LLC"
+    },
+    {
+      "docId": "EDx9qyPof7fYcJcEiZgl",
+      "ticker_symbol": "KPMHO",
+      "business_name": "KPM Home Inspections"
+    },
+    {
+      "docId": "NR9MHiTgVTPUvdyDlOAi",
+      "ticker_symbol": "KRABK",
+      "business_name": "Krab Kingz NOLA"
+    },
+    {
+      "docId": "GeKX6ckHiypCKLGqYRjp",
+      "ticker_symbol": "KCCDE",
+      "business_name": "KCC Designer Gifts LLC"
+    },
+    {
+      "docId": "fp6uwCHyF9bWod3xh2AP",
+      "ticker_symbol": "KLEVY",
+      "business_name": "K.Levy Music"
+    },
+    {
+      "docId": "weFDSsALuBohbSagWeZZ",
+      "ticker_symbol": "KMBOO",
+      "business_name": "Kmboobies Boob Tape"
+    },
+    {
+      "docId": "MoGBJ0BOjy56lY3ANUhp",
+      "ticker_symbol": "KJONE",
+      "business_name": "K. Jones Advisors LLC"
+    },
+    {
+      "docId": "jVliszjQsQt92usEtmjo",
+      "ticker_symbol": "LAWOF",
+      "business_name": "Law Office of Jalonda M Morris, LLC"
+    },
+    {
+      "docId": "iZMuNvDBlEEqo0yQssIa",
+      "ticker_symbol": "LRSEC",
+      "business_name": "L & R Security Services, Inc."
+    },
+    {
+      "docId": "u0lKNWTnqIC6yaFMf9uu",
+      "ticker_symbol": "LIFTE",
+      "business_name": "Lifted Tax & Accounting Services"
+    },
+    {
+      "docId": "N9vBMKSOhzSVEhsTHICL",
+      "ticker_symbol": "LOLLI",
+      "business_name": "Lollipop Boutique LLC"
+    },
+    {
+      "docId": "E9fPLiFk0UD5jmmhSQwX",
+      "ticker_symbol": "LEVEL",
+      "business_name": "LEVEL Water, LLC"
+    },
+    {
+      "docId": "UcMffgn6vqRRWlpHCszU",
+      "ticker_symbol": "LAPET",
+      "business_name": "La’Petite Learning Academy Northshore LLC."
+    },
+    {
+      "docId": "GMiG4HogapKyTNLjjTCM",
+      "ticker_symbol": "LAVIE",
+      "business_name": "La Vie En Rose Cafe"
+    },
+    {
+      "docId": "6stbUeccO3n2AmH2eXqY",
+      "ticker_symbol": "LAFRA",
+      "business_name": "LaFrance-Wiltz Realty Group, LLC"
+    },
+    {
+      "docId": "iGqs028pcwKWPm5DTLQo",
+      "ticker_symbol": "LASNA",
+      "business_name": "LASnackShop"
+    },
+    {
+      "docId": "1QkEv5weVfYGwxvRhK7Y",
+      "ticker_symbol": "LUTHE",
+      "business_name": "LUTHER SPEIGHT & COMPANY CPAs"
+    },
+    {
+      "docId": "ww6bcVLcaqTF2HO6cnAI",
+      "ticker_symbol": "LEGEN",
+      "business_name": "Legendary Tours Inc"
+    },
+    {
+      "docId": "huENY3G5FC1WoYMS9jfb",
+      "ticker_symbol": "LIBRA",
+      "business_name": "Libra Transportation LLC"
+    },
+    {
+      "docId": "BXiLtzdROhDuVCZSga7G",
+      "ticker_symbol": "LABHA",
+      "business_name": "L. A. B. Harris LLC DBA Fantastic Sams Cut & Color"
+    },
+    {
+      "docId": "ww7rL3gbNbnSi4Jt5QiD",
+      "ticker_symbol": "LEGAC",
+      "business_name": "Legacy Restoration and Referral, LLC"
+    },
+    {
+      "docId": "mJHo0vxeq9DnHa2H1Ey1",
+      "ticker_symbol": "LILDI",
+      "business_name": "Lil Dizzy's Cafe"
+    },
+    {
+      "docId": "2AwZ6xdx4LIKeKZqanNz",
+      "ticker_symbol": "LOUIS",
+      "business_name": "Louisiana Creole Candy"
+    },
+    {
+      "docId": "EgXCfK892MHDm9ZK7vIP",
+      "ticker_symbol": "LEWIS",
+      "business_name": "Lewis Coaches Inc"
+    },
+    {
+      "docId": "B8dZf1db5A5Xo66RawhP",
+      "ticker_symbol": "LEWCA",
+      "business_name": "Lew Cat Enterprises llc"
+    },
+    {
+      "docId": "0YRX7iKA8NsoLpAr3fPI",
+      "ticker_symbol": "LOANF",
+      "business_name": "LOAN FOX INC"
+    },
+    {
+      "docId": "rCHAdWdmgeBPP1rLQ7bv",
+      "ticker_symbol": "WOXZS",
+      "business_name": "Legacy Private Business Solutions"
+    },
+    {
+      "docId": "04AZsmlHOLO4xWpguPgC",
+      "ticker_symbol": "LANDR",
+      "business_name": "Landry food store"
+    },
+    {
+      "docId": "cmalJFhbGM77jOeI9siE",
+      "ticker_symbol": "LEB1E",
+      "business_name": "Law Office of Nadine Ramsey"
+    },
+    {
+      "docId": "zd8lhQc9MC5UGAbcjsmv",
+      "ticker_symbol": "LIZZI",
+      "business_name": "Lizzie’s Boutique"
+    },
+    {
+      "docId": "pdTLtnwMGKDagXgoXDwO",
+      "ticker_symbol": "LUXUR",
+      "business_name": "Luxury Studio"
+    },
+    {
+      "docId": "DRpXrvQTL86McQHfL0UJ",
+      "ticker_symbol": "LABLO",
+      "business_name": "Lab & Lounge"
+    },
+    {
+      "docId": "cMLJTyfPVMUJWpiWCzMp",
+      "ticker_symbol": "LANDI",
+      "business_name": "Landis Construction"
+    },
+    {
+      "docId": "kup6vjiHcQ3aMQFId8SH",
+      "ticker_symbol": "MICHE",
+      "business_name": "Michelle Rose Realtor LLC"
+    },
+    {
+      "docId": "3jVMYwwiRNFPg70A4Yt8",
+      "ticker_symbol": "MAJOR",
+      "business_name": "Major Services, Inc."
+    },
+    {
+      "docId": "1PU8mdLFi4VwzpyUbb0u",
+      "ticker_symbol": "MRDIS",
+      "business_name": "M&R Disposal Services Inc."
+    },
+    {
+      "docId": "fFApWCwTw0m1Ifm4E0qj",
+      "ticker_symbol": "MARYM",
+      "business_name": "MaryMac's Doggie Retreat"
+    },
+    {
+      "docId": "Z8HyhFReiD5Pv2CB2qVW",
+      "ticker_symbol": "MORRE",
+      "business_name": "Morrell & Morrell, LLC"
+    },
+    {
+      "docId": "kOHZxrbVfKuX7eT0y1sE",
+      "ticker_symbol": "MINOR",
+      "business_name": "Minor Consulting Group, LLC"
+    },
+    {
+      "docId": "fHXGLklebcdhWsMNc0za",
+      "ticker_symbol": "MAGNO",
+      "business_name": "Magnolia Tags and Title"
+    },
+    {
+      "docId": "MaHXvuDHC33MaW8N2oLI",
+      "ticker_symbol": "MINIM",
+      "business_name": "Minimize Services"
+    },
+    {
+      "docId": "NE7m7rNCfPtJo9ingdvQ",
+      "ticker_symbol": "MAKEU",
+      "business_name": "Makeup by AC LLC"
+    },
+    {
+      "docId": "Gg8veHZVdG6KH7MINqok",
+      "ticker_symbol": "MACKI",
+      "business_name": "Mackie One Construction"
+    },
+    {
+      "docId": "58E2OnyisygyjQ0kKfMd",
+      "ticker_symbol": "MOMMY",
+      "business_name": "Mommyfluent"
+    },
+    {
+      "docId": "zBBEWMOtosQDeIpDtQf3",
+      "ticker_symbol": "MASSE",
+      "business_name": "Masse' Media Consulting"
+    },
+    {
+      "docId": "ZDOvIOmcd9tMeCmfqR36",
+      "ticker_symbol": "MONIQ",
+      "business_name": "Monique S. Briggs- Mortgage Loan Originator"
+    },
+    {
+      "docId": "bBXLoNLmueMGeyBGSFJH",
+      "ticker_symbol": "HSAUE",
+      "business_name": "Miller Enterprises74, LLC"
+    },
+    {
+      "docId": "qoHJwmLzdsQsyaSfngj1",
+      "ticker_symbol": "MALON",
+      "business_name": "Malone Electrical Services, Inc."
+    },
+    {
+      "docId": "KoA18CXmv2nYetQoH56Z",
+      "ticker_symbol": "MSREA",
+      "business_name": "MS Realty, LLC"
+    },
+    {
+      "docId": "8gsBhKFQW1qBwFIfejFv",
+      "ticker_symbol": "MRPCO",
+      "business_name": "MRP Coach & Consulting"
+    },
+    {
+      "docId": "QA7O48cv0Fc8d8Ao98W7",
+      "ticker_symbol": "MONAS",
+      "business_name": "Mona's Accents Florist and Gift Company"
+    },
+    {
+      "docId": "UjeUCICg97N8FaScEWv3",
+      "ticker_symbol": "MELAN",
+      "business_name": "Melanin Magic"
+    },
+    {
+      "docId": "XOk1CD9Anc7StgKQ3duO",
+      "ticker_symbol": "MOGUL",
+      "business_name": "Mogul Boutique LLC"
+    },
+    {
+      "docId": "TKy4IdO35xI8KbxvnDTv",
+      "ticker_symbol": "MIRRO",
+      "business_name": "Mirror Image Photo Booths"
+    },
+    {
+      "docId": "Boh8apO793HSBNOc439J",
+      "ticker_symbol": "MOUNT",
+      "business_name": "Mount Olivet Cemetery"
+    },
+    {
+      "docId": "B4fYs8BFXn0EzNsEZYOp",
+      "ticker_symbol": "MARBL",
+      "business_name": "Marbley Enterprise LLC"
+    },
+    {
+      "docId": "S30AYgEjQU9E9mEp5Jxa",
+      "ticker_symbol": "MSPOE",
+      "business_name": "MS Poetry In Motion"
+    },
+    {
+      "docId": "beJnCgaU0LZe7DGROIyh",
+      "ticker_symbol": "SJO8N",
+      "business_name": "MCDS, LLC"
+    },
+    {
+      "docId": "ie44OIgi79cKr6p79Tsd",
+      "ticker_symbol": "MALIN",
+      "business_name": "Malin PR, LLC"
+    },
+    {
+      "docId": "yXN91e0GGPRVCwzHQqz5",
+      "ticker_symbol": "9HXM4",
+      "business_name": "MaryMac's Doggie Retreat, LLC"
+    },
+    {
+      "docId": "S4pS1IXBkh4MNy8i4KjZ",
+      "ticker_symbol": "MIGHT",
+      "business_name": "Mighty Trucking LLC"
+    },
+    {
+      "docId": "t0MeTGaNyWqjbJa6ppZT",
+      "ticker_symbol": "MMCOM",
+      "business_name": "M&M Community Development Inc.(New Orleans)"
+    },
+    {
+      "docId": "djQmBpcodnfPILUS0fDP",
+      "ticker_symbol": "OB306",
+      "business_name": "Magnolia Wealth Strategies"
+    },
+    {
+      "docId": "Ak3YdD2Q33loJY9cgj66",
+      "ticker_symbol": "NUANG",
+      "business_name": "Nu Angels"
+    },
+    {
+      "docId": "P9gjZlDS4g0fpCj7BMWM",
+      "ticker_symbol": "NOLAB",
+      "business_name": "Nola Botanical Tea"
+    },
+    {
+      "docId": "Z6KZyMwfyzILMs3nwA0I",
+      "ticker_symbol": "NAILO",
+      "business_name": "Nailor Services LLC"
+    },
+    {
+      "docId": "F9BHLTbUK03aHGXBvLHk",
+      "ticker_symbol": "NEAUX",
+      "business_name": "NeauxLA Janitorial Service"
+    },
+    {
+      "docId": "o6ScEyqmWirsaxPbDxR3",
+      "ticker_symbol": "NOLAC",
+      "business_name": "NoLa Cookie Co. LLC"
+    },
+    {
+      "docId": "D1TD520PrHJnkHM7cuee",
+      "ticker_symbol": "NOLAS",
+      "business_name": "NOLA Security Ops"
+    },
+    {
+      "docId": "KXmThJoyBsgiJRjwjEYE",
+      "ticker_symbol": "F2EUT",
+      "business_name": "NuAngels"
+    },
+    {
+      "docId": "F2AEi4ypMB15tSXOHJnO",
+      "ticker_symbol": "NORTH",
+      "business_name": "Northwestern Mutual"
+    },
+    {
+      "docId": "PQqlwZImp0f48xAhic0w",
+      "ticker_symbol": "AIPDS",
+      "business_name": "NOLA Steele Fabrication & Erection, LLC"
+    },
+    {
+      "docId": "sEhxIphacgQOGh0mKsoX",
+      "ticker_symbol": "FMHEH",
+      "business_name": "Nola Beauty LLC"
+    },
+    {
+      "docId": "23SERiEIhA7MJDvPGPAU",
+      "ticker_symbol": "NICEG",
+      "business_name": "Nice Guys Nola"
+    },
+    {
+      "docId": "yGs8xPaq2dUZ3B1lMRLh",
+      "ticker_symbol": "NOAHW",
+      "business_name": "Noah W. Lewis & Associates"
+    },
+    {
+      "docId": "EQH4mEXuHeJgyRd2ozFX",
+      "ticker_symbol": "EZEB2",
+      "business_name": "NOLA Skyline Event Center"
+    },
+    {
+      "docId": "KZoWD8VtbufMnik6BNA1",
+      "ticker_symbol": "NOLAE",
+      "business_name": "NOLA Event Planners, LLC"
+    },
+    {
+      "docId": "n57nqzbALn8TUQJSXZzM",
+      "ticker_symbol": "NOLAO",
+      "business_name": "Nola Oouweman Seafood"
+    },
+    {
+      "docId": "ndvJL1EaPbxuyEnCZQFV",
+      "ticker_symbol": "NEXTG",
+      "business_name": "NextGen PR Group"
+    },
+    {
+      "docId": "GSUT7eWGOLq6vReQt0LL",
+      "ticker_symbol": "NEWCO",
+      "business_name": "NewCorp, Inc."
+    },
+    {
+      "docId": "XXbCPBhDRvkmahnsTpDP",
+      "ticker_symbol": "NEWOR",
+      "business_name": "New Orleans Job Corps"
+    },
+    {
+      "docId": "U822pX35NuR51HhURNBw",
+      "ticker_symbol": "NEWDA",
+      "business_name": "NEW DAY PROPERTIES, LLC"
+    },
+    {
+      "docId": "0iz2wglpQhJSozo2978i",
+      "ticker_symbol": "NVISI",
+      "business_name": "NVisions Communications & Consulting"
+    },
+    {
+      "docId": "Xso8u8oINziuAj3hJwGA",
+      "ticker_symbol": "NONIS",
+      "business_name": "Noni's Creole Blends, LLC."
+    },
+    {
+      "docId": "dg4MX0o0D6Uz9Miv5zEg",
+      "ticker_symbol": "NOLAM",
+      "business_name": "NOLA Media Group"
+    },
+    {
+      "docId": "hEdtxChY3bRB75FolDRs",
+      "ticker_symbol": "NOCCI",
+      "business_name": "NOCCI, Inc."
+    },
+    {
+      "docId": "Qix04aE9Yg7Mc0ysDdl5",
+      "ticker_symbol": "Z8007",
+      "business_name": "New Orleans Hospitality SAFE"
+    },
+    {
+      "docId": "usTSB5hVTTMvITcuwGhE",
+      "ticker_symbol": "URAFP",
+      "business_name": "NOLA Societees"
+    },
+    {
+      "docId": "RoBVQIIfEBeNQlwlZNez",
+      "ticker_symbol": "Y03ON",
+      "business_name": "Nola Cityscape Tax"
+    },
+    {
+      "docId": "ziwdIsBGMqq0W5fdatqM",
+      "ticker_symbol": "NBANY",
+      "business_name": "N&B ANYTIME TRUCKING LLC"
+    },
+    {
+      "docId": "65d68YSRRnjUqygPdjHd",
+      "ticker_symbol": "NGOMB",
+      "business_name": "Ngombo Cafe and Sanctuary"
+    },
+    {
+      "docId": "AOPgm3oEv5QFoTTBlUgq",
+      "ticker_symbol": "LJ696",
+      "business_name": "North Star Waste Management LLC"
+    },
+    {
+      "docId": "tjGw15FEjUgfQTHToth3",
+      "ticker_symbol": "OMBUD",
+      "business_name": "OMBUDS EDUCATORS"
+    },
+    {
+      "docId": "6qbFj31zpeG6Tez35FTy",
+      "ticker_symbol": "OBATA",
+      "business_name": "Obatala Sciences Inc"
+    },
+    {
+      "docId": "xoPzf6VMyddjfWWBng7W",
+      "ticker_symbol": "OVERF",
+      "business_name": "Overflow Media"
+    },
+    {
+      "docId": "1oau5Jv62fT0MzspqKCi",
+      "ticker_symbol": "OPTIM",
+      "business_name": "Optimist Dreamer Photography LLC"
+    },
+    {
+      "docId": "s1hQZDlLL5Ab1R3LlPON",
+      "ticker_symbol": "OIMAG",
+      "business_name": "O’Imagination"
+    },
+    {
+      "docId": "osnMj1j68078LlkOhqil",
+      "ticker_symbol": "OPERA",
+      "business_name": "OperaCréole"
+    },
+    {
+      "docId": "5hNyZF92yfhnKBQgacto",
+      "ticker_symbol": "OLEOR",
+      "business_name": "Ole Orleans Wines and Spirits"
+    },
+    {
+      "docId": "FAriClwG9iNs5U85P3dw",
+      "ticker_symbol": "OSSAO",
+      "business_name": "OSSA, One Stop Staffing Agency LLC"
+    },
+    {
+      "docId": "s4c2jA5HwjL4710FGjZU",
+      "ticker_symbol": "OFFIC",
+      "business_name": "Office Ops LLC"
+    },
+    {
+      "docId": "1nPBO2lg1GJzXlG5vjKG",
+      "ticker_symbol": "ORTHO",
+      "business_name": "Orthotic and Prosthetic Solutions (OPS)"
+    },
+    {
+      "docId": "KlnhA7k5LQzmNMY3G26w",
+      "ticker_symbol": "PILLA",
+      "business_name": "Pillar Homecare LLC"
+    },
+    {
+      "docId": "4TD8K8mEpfSLOzyFjBRC",
+      "ticker_symbol": "PAULA",
+      "business_name": "Paula's Taste Of Soul Catering"
+    },
+    {
+      "docId": "Lb6kpBNKn3e5ev8LEino",
+      "ticker_symbol": "PEREZ",
+      "business_name": "Perez, A Professional Corporation"
+    },
+    {
+      "docId": "o6GvUgUIX4Nw3mymyq4F",
+      "ticker_symbol": "PROFE",
+      "business_name": "Professionally Polished, LLC"
+    },
+    {
+      "docId": "5zDDmORpsTgNY2e2zjeI",
+      "ticker_symbol": "PLANR",
+      "business_name": "Plan Right Group / ACE / Ace Clean Air"
+    },
+    {
+      "docId": "SkOYZv7WAx1kr8wxMh74",
+      "ticker_symbol": "PERKI",
+      "business_name": "Perkins A/C & Heat LLC"
+    },
+    {
+      "docId": "Dzm4jEyZ3IQYVIs4FEcW",
+      "ticker_symbol": "PARTY",
+      "business_name": "Party Stop LLC"
+    },
+    {
+      "docId": "RbjFscpUSQJTg8Rn32eY",
+      "ticker_symbol": "PAINT",
+      "business_name": "Paint and Jrink"
+    },
+    {
+      "docId": "osIH4OKcrcnsBdKWaL3x",
+      "ticker_symbol": "PERFO",
+      "business_name": "Performance First Media, LLC"
+    },
+    {
+      "docId": "V0UaBUum7A8ViJtfzIzM",
+      "ticker_symbol": "PAIDY",
+      "business_name": "Paidyn Realty"
+    },
+    {
+      "docId": "zTQp8f3o3sjXowFoBu6Q",
+      "ticker_symbol": "PROGR",
+      "business_name": "Progressive HR Strategies Inc."
+    },
+    {
+      "docId": "aTdyKPaKMGKf9CpYcGA7",
+      "ticker_symbol": "POSIT",
+      "business_name": "Positive Family Solutions LLC"
+    },
+    {
+      "docId": "7CgpbHkf5lpucFHP5rUc",
+      "ticker_symbol": "PEEWE",
+      "business_name": "Peewees Crab Cakes LLC"
+    },
+    {
+      "docId": "mdfK2kbL7J1JfwVy79OE",
+      "ticker_symbol": "PEACE",
+      "business_name": "Peace of Serenity Day Spa"
+    },
+    {
+      "docId": "LBWI7uQcZtbyK2gFaYNr",
+      "ticker_symbol": "PERSO",
+      "business_name": "Personal Touch Mobile Detailing"
+    },
+    {
+      "docId": "CCNFqA2Y6dFQOCQ04iVF",
+      "ticker_symbol": "PRYTA",
+      "business_name": "Prytania Managed Services"
+    },
+    {
+      "docId": "R3kqzh3IMXcmoIMGpqL8",
+      "ticker_symbol": "PIERR",
+      "business_name": "Pierre Principle Communications LLC"
+    },
+    {
+      "docId": "tFO71GP1Gw2Lq1F71lH0",
+      "ticker_symbol": "PARKP",
+      "business_name": "Park Place Premier Barber School"
+    },
+    {
+      "docId": "uTmdEFYP6V23SE3AtAGh",
+      "ticker_symbol": "PRISM",
+      "business_name": "Prism Quality Care"
+    },
+    {
+      "docId": "UmmEsnJJN4MAzgNzB9z6",
+      "ticker_symbol": "PHODA",
+      "business_name": "Phodat Booths"
+    },
+    {
+      "docId": "ssjmnNjhNPHI04hhsXCC",
+      "ticker_symbol": "PYNKM",
+      "business_name": "PYNK MEDIA"
+    },
+    {
+      "docId": "3EwVusDHV4BvGFdaHwlh",
+      "ticker_symbol": "PLAYN",
+      "business_name": "PlayNOLA Sports and Social Club"
+    },
+    {
+      "docId": "M7rCazEzkXXQK8ubOMeF",
+      "ticker_symbol": "PHOEN",
+      "business_name": "Phoenix Prodigy Consulting Firm"
+    },
+    {
+      "docId": "EktUfnrXf6WYiplNToI7",
+      "ticker_symbol": "PJSCO",
+      "business_name": "PJ's Coffee - Read BLVD"
+    },
+    {
+      "docId": "2p98DyDzAw9NtNukD99C",
+      "ticker_symbol": "K5IBH",
+      "business_name": "Pierre Parade Productions"
+    },
+    {
+      "docId": "Up4QcZ8XOjjB2FyJlHPM",
+      "ticker_symbol": "T6UQX",
+      "business_name": "P.L.A.M. LLC"
+    },
+    {
+      "docId": "ux76OAwuRGDvWXywrDhB",
+      "ticker_symbol": "DFDGE",
+      "business_name": "Qoi"
+    },
+    {
+      "docId": "nZSGduvWHRIH1O0l5AWH",
+      "ticker_symbol": "QSBOU",
+      "business_name": "Q's Boutique & Gift Shop"
+    },
+    {
+      "docId": "gHXemWoYRqQNTzx6XJFw",
+      "ticker_symbol": "RENFR",
+      "business_name": "Renfro & Associates LLC"
+    },
+    {
+      "docId": "hWNrdJqOazAU2hb8NNBV",
+      "ticker_symbol": "RENEW",
+      "business_name": "Re New Orleans Property Management, LLC"
+    },
+    {
+      "docId": "rY4Mr0mQUZzgftF0wrGB",
+      "ticker_symbol": "RICHE",
+      "business_name": "Riche Aesthetics and Wellness Spa"
+    },
+    {
+      "docId": "PALo25ck2Jpcuy2V0D0z",
+      "ticker_symbol": "RAYFO",
+      "business_name": "Rayford Realty NOLA"
+    },
+    {
+      "docId": "Ov9bCGzAQWNxSwZLiFEA",
+      "ticker_symbol": "ROVEM",
+      "business_name": "Rovem Movers"
+    },
+    {
+      "docId": "1ocCamPANswr3hN8OKC5",
+      "ticker_symbol": "ROYAL",
+      "business_name": "Royal Financial Services, LLC"
+    },
+    {
+      "docId": "N9LG9wC33JkZ47ai1Nwu",
+      "ticker_symbol": "RAYNB",
+      "business_name": "Raynbo Development"
+    },
+    {
+      "docId": "2q5nuwdKoEGn663AB7xf",
+      "ticker_symbol": "RICHA",
+      "business_name": "RICHARD ACCOUNTING SERVICES"
+    },
+    {
+      "docId": "OoryDJvMXbeiACnkM6v7",
+      "ticker_symbol": "REFLE",
+      "business_name": "Reflections Health and Wellness"
+    },
+    {
+      "docId": "vrwW7vKq16vKXbkVV0He",
+      "ticker_symbol": "RYCAR",
+      "business_name": "RYCARS Construction, LLC"
+    },
+    {
+      "docId": "Y1UfoWvgP1WEjSdSz66G",
+      "ticker_symbol": "ROSEA",
+      "business_name": "Rose and Beaux Online Solutions L.L.C."
+    },
+    {
+      "docId": "EzWIYoONR8zUhpJzEMr0",
+      "ticker_symbol": "RAINT",
+      "business_name": "Raintree Children & Family Services"
+    },
+    {
+      "docId": "atGysCez5advZOUCbIBN",
+      "ticker_symbol": "RUSSE",
+      "business_name": "Russell Frank Realty Group, LLC"
+    },
+    {
+      "docId": "3zFTZk5Gmca6FmcirRyP",
+      "ticker_symbol": "ROBIN",
+      "business_name": "robinson et al. marketing & public relations llc"
+    },
+    {
+      "docId": "Su25eKBsYnkMrEbYDJnz",
+      "ticker_symbol": "RELEN",
+      "business_name": "Relentless Nutrition"
+    },
+    {
+      "docId": "NGMg16T1OEDHSZPu7WQH",
+      "ticker_symbol": "37XIA",
+      "business_name": "REFLECTION'S; THROUGH US"
+    },
+    {
+      "docId": "tZ6Y9X23HDtNE0R7qZ0w",
+      "ticker_symbol": "RIGHT",
+      "business_name": "Right Words"
+    },
+    {
+      "docId": "ej4Xwv3n0kvJieNzRWwU",
+      "ticker_symbol": "REEFP",
+      "business_name": "REEF Parking"
+    },
+    {
+      "docId": "kB7vYr085DDve4NXeUqQ",
+      "ticker_symbol": "7C8VW",
+      "business_name": "Renew Insurance Agency, LLC"
+    },
+    {
+      "docId": "oDXvv9P4HQnyoqtsYbn6",
+      "ticker_symbol": "RAIRE",
+      "business_name": "RAIRE LABEL"
+    },
+    {
+      "docId": "3Wy8aHrFyQmNuITbmn77",
+      "ticker_symbol": "RRTDC",
+      "business_name": "RRTDC"
+    },
+    {
+      "docId": "A1hmXFNCDm7Yg7b7yrWY",
+      "ticker_symbol": "RAMON",
+      "business_name": "Ramona Deculus State Farm"
+    },
+    {
+      "docId": "zVcsMiEHG0zSYzpOFpVq",
+      "ticker_symbol": "6SMK0",
+      "business_name": "Royal Palace Wig Boutique & Salon Suites"
+    },
+    {
+      "docId": "wTkSWJX3Xcn6qIVBLPq7",
+      "ticker_symbol": "REALT",
+      "business_name": "Real Talk T.Y.M.E. LLC"
+    },
+    {
+      "docId": "J45jZAN5Iilddqupvr2Q",
+      "ticker_symbol": "RECON",
+      "business_name": "Reconcile New Orleans Inc. dba Cafe Reconcile"
+    },
+    {
+      "docId": "HZLOiqHIMXrweYRr5gdx",
+      "ticker_symbol": "5VMZ3",
+      "business_name": "Realtor Tanisca M. Wilson"
+    },
+    {
+      "docId": "OZFsXF7eEDVDGi0kKDGG",
+      "ticker_symbol": "SMALL",
+      "business_name": "Small World Academy Ltd"
+    },
+    {
+      "docId": "ndHBJDnWkWDJx4elL7I9",
+      "ticker_symbol": "STUMP",
+      "business_name": "Stumpy's Hatchet House"
+    },
+    {
+      "docId": "VjBeVxL9IexfHT1glTjf",
+      "ticker_symbol": "SECON",
+      "business_name": "Second Vine Wine"
+    },
+    {
+      "docId": "VPfbyrqrbudcfdozshh7",
+      "ticker_symbol": "STIRL",
+      "business_name": "Stirling Properties, LLC."
+    },
+    {
+      "docId": "s9xGAWHLWuhGwcGHXrZp",
+      "ticker_symbol": "SYLVA",
+      "business_name": "Sylvan Transportation"
+    },
+    {
+      "docId": "P52iQkqBUTG4GRAV6B15",
+      "ticker_symbol": "SHEZB",
+      "business_name": "Shezbie7Diamonds"
+    },
+    {
+      "docId": "hYYWi9Yxc76mFzOWSOLq",
+      "ticker_symbol": "SHANN",
+      "business_name": "Shannon Health Solutions"
+    },
+    {
+      "docId": "JQx5piMWMJjZxVYeA6Jp",
+      "ticker_symbol": "SYRIT",
+      "business_name": "Syrita Steib LLC"
+    },
+    {
+      "docId": "0ckFGooNX9qhPNIIIsP4",
+      "ticker_symbol": "STARA",
+      "business_name": "Star Automotive LLC"
+    },
+    {
+      "docId": "ZJY9fLnPQIHuzVfhVI5E",
+      "ticker_symbol": "STRIP",
+      "business_name": "StripePros of Louisiana"
+    },
+    {
+      "docId": "YVRFUG4KELDWKJWhh8HZ",
+      "ticker_symbol": "STAVE",
+      "business_name": "Staves Elegant Cleaning LLC"
+    },
+    {
+      "docId": "nglO4m0oe2eksMkGFGte",
+      "ticker_symbol": "SERVI",
+      "business_name": "Service 1st Real Estate"
+    },
+    {
+      "docId": "fF0N5utbrYFOuiT0eHSe",
+      "ticker_symbol": "SOREN",
+      "business_name": "Sorena A Photography LLC"
+    },
+    {
+      "docId": "NHO5rjMMJEXkTCOOaINY",
+      "ticker_symbol": "SMILE",
+      "business_name": "Smile Philosophy Dental Care"
+    },
+    {
+      "docId": "oOpcFA7h66pJjlwr0Nwm",
+      "ticker_symbol": "8WQSW",
+      "business_name": "Sylvain Solutions"
+    },
+    {
+      "docId": "8qQxpR3LTvmts5aMz6Ae",
+      "ticker_symbol": "SOHEN",
+      "business_name": "SOHENU Art Circles Academy"
+    },
+    {
+      "docId": "QnFMfVdmoMEZuu5i30QG",
+      "ticker_symbol": "SEVEN",
+      "business_name": "Seven Star Academy, Inc"
+    },
+    {
+      "docId": "SvJwtb2IjJT7ZK9L0YOd",
+      "ticker_symbol": "SIMPL",
+      "business_name": "Simply Scrubs LLC"
+    },
+    {
+      "docId": "AHmIrj3t7yhUtnQwhVUC",
+      "ticker_symbol": "SAINT",
+      "business_name": "Saint Josephine Consultants, LLC"
+    },
+    {
+      "docId": "Ru7hAZD4FxIhK6rlpXrD",
+      "ticker_symbol": "SEWSE",
+      "business_name": "Sew Seaux"
+    },
+    {
+      "docId": "Oel5owg4q2u5S938THUf",
+      "ticker_symbol": "STBER",
+      "business_name": "St Bernard Magazine-Chalmette"
+    },
+    {
+      "docId": "oPTAeFKW8DCvhubqaHUg",
+      "ticker_symbol": "SOCIA",
+      "business_name": "Socialite Events LLC"
+    },
+    {
+      "docId": "s753Wa3CWyeanMpNA9X2",
+      "ticker_symbol": "SPEAR",
+      "business_name": "Spears Group"
+    },
+    {
+      "docId": "kbGk4thYGecPjuwqUwMw",
+      "ticker_symbol": "SKYES",
+      "business_name": "Skye's Janitorial LLC"
+    },
+    {
+      "docId": "MoFGvhXJAfAsM56PmCzK",
+      "ticker_symbol": "STEEL",
+      "business_name": "Steele Protective Services LLC"
+    },
+    {
+      "docId": "O48YbuOGmCJJtbTE9fDs",
+      "ticker_symbol": "SECUR",
+      "business_name": "Security Experts and Leaders"
+    },
+    {
+      "docId": "cwAiYkQeotP9MJYxTJgy",
+      "ticker_symbol": "SOUTH",
+      "business_name": "Southern Soul Event Decor LLC"
+    },
+    {
+      "docId": "vHOenOu1yv3fT5w9neGd",
+      "ticker_symbol": "1WC4I",
+      "business_name": "Southern LA Granite (SLAG)"
+    },
+    {
+      "docId": "INh0x9PjFf69Xa5mqbx4",
+      "ticker_symbol": "SOBAH",
+      "business_name": "SOBA Hibiscus LLC"
+    },
+    {
+      "docId": "YZ8N2V06TGPTcNQxqroI",
+      "ticker_symbol": "STATE",
+      "business_name": "Statement Styles Company"
+    },
+    {
+      "docId": "Fycsuwh1RAyMvBuJIR4s",
+      "ticker_symbol": "N8RO3",
+      "business_name": "Second Chance Living PMI"
+    },
+    {
+      "docId": "27eSpaJslXG97UJ1WtQC",
+      "ticker_symbol": "SPEED",
+      "business_name": "Speedway printing & copy center"
+    },
+    {
+      "docId": "swHLL7Idcr1DA76BRSR7",
+      "ticker_symbol": "SILKC",
+      "business_name": "Silk Curves Body Contouring Studio"
+    },
+    {
+      "docId": "fcfMQwNXrwlqY5vNr03i",
+      "ticker_symbol": "M7S38",
+      "business_name": "SocialStep Marketing and Consulting"
+    },
+    {
+      "docId": "HJ57NZ48nyZPvN2pHSsq",
+      "ticker_symbol": "SABIS",
+      "business_name": "Sabiston Consultants"
+    },
+    {
+      "docId": "8DJubO0H9Z2Ao8MMgg6S",
+      "ticker_symbol": "SALON",
+      "business_name": "Salon22"
+    },
+    {
+      "docId": "Bbm0EfbvG8EGIDS8sJsM",
+      "ticker_symbol": "TEEPE",
+      "business_name": "Teepee Lounge"
+    },
+    {
+      "docId": "tFPkVRDcVfT16AdmAhK8",
+      "ticker_symbol": "IVYLE",
+      "business_name": "The Ivy League Coach"
+    },
+    {
+      "docId": "kx5OEjzH9Gm2JlQSro7b",
+      "ticker_symbol": "DOMAI",
+      "business_name": "The Domain Cos"
+    },
+    {
+      "docId": "rfDYdMlFmuiXGLeNeHZP",
+      "ticker_symbol": "COOKS",
+      "business_name": "The Cook Shop, LLC"
+    },
+    {
+      "docId": "4YEJEgvwaiYfip0W8sAE",
+      "ticker_symbol": "WEALT",
+      "business_name": "The Wealth by Design Legacy Firm LLC"
+    },
+    {
+      "docId": "jzzBw483NyhephqJuFnS",
+      "ticker_symbol": "BATTE",
+      "business_name": "The Batterina LLC"
+    },
+    {
+      "docId": "y6fKrXGhTjndhvpZYKJI",
+      "ticker_symbol": "MENAL",
+      "business_name": "The Mena Law Firm"
+    },
+    {
+      "docId": "KH247NJhZeZd7vhelwfD",
+      "ticker_symbol": "TAILO",
+      "business_name": "Tailor's International / Executive Tradition Corp"
+    },
+    {
+      "docId": "kVYScnKgLYR7AcHM0OGJ",
+      "ticker_symbol": "ORIGI",
+      "business_name": "The Original New Orleans Snack Box"
+    },
+    {
+      "docId": "3PhOm2XTmoALwt6DPv1N",
+      "ticker_symbol": "BAGNE",
+      "business_name": "The Bagneris Firm"
+    },
+    {
+      "docId": "1hsnQKr6H7Ima0h6EwUm",
+      "ticker_symbol": "TOTAL",
+      "business_name": "Total Home Inspections"
+    },
+    {
+      "docId": "lgtOsYvsoF535zrTJMya",
+      "ticker_symbol": "TEAME",
+      "business_name": "Teamer Strategy Group, LLC"
+    },
+    {
+      "docId": "fyy7pv85ckJA545K6dIa",
+      "ticker_symbol": "TEMPE",
+      "business_name": "Temperaturepro Nola"
+    },
+    {
+      "docId": "lkGt1qqzjCb3odbpV4zF",
+      "ticker_symbol": "EDENP",
+      "business_name": "The Eden Project"
+    },
+    {
+      "docId": "L3hJkcMHzRiTXwAkePhb",
+      "ticker_symbol": "POTCA",
+      "business_name": "The Pot Called Kettle"
+    },
+    {
+      "docId": "YIyYDmS7qm99VQpSIR57",
+      "ticker_symbol": "3G43J",
+      "business_name": "The Lewis Group llc"
+    },
+    {
+      "docId": "mqBRayFsHXpafAh7BcnR",
+      "ticker_symbol": "NATUR",
+      "business_name": "The nature Study Project"
+    },
+    {
+      "docId": "gwYyEjrvwTCSQGRb34bL",
+      "ticker_symbol": "TRANS",
+      "business_name": "Transcendent Law Group"
+    },
+    {
+      "docId": "YvqXIOJkxzUXkAxwkw6B",
+      "ticker_symbol": "THOMA",
+      "business_name": "Thomas Consulting Group"
+    },
+    {
+      "docId": "aTZMsp1yCT1S9W1glPpi",
+      "ticker_symbol": "TOUCH",
+      "business_name": "Touches by Tircuit"
+    },
+    {
+      "docId": "oHTX6T6ISTO10Yi4tNzs",
+      "ticker_symbol": "TWJEN",
+      "business_name": "TWJ Enterprise"
+    },
+    {
+      "docId": "er0SQBCjCjg0Sgn4FA0D",
+      "ticker_symbol": "LOOPF",
+      "business_name": "The Loop Factor LLC"
+    },
+    {
+      "docId": "kPbahvBK8XCdEUido29m",
+      "ticker_symbol": "VAULT",
+      "business_name": "The Vault Nola LLC"
+    },
+    {
+      "docId": "NikWlqUitSNN3IYAIV44",
+      "ticker_symbol": "16ADX",
+      "business_name": "TMM LLC"
+    },
+    {
+      "docId": "ojJYiuLH2MCuVLsx9EDH",
+      "ticker_symbol": "BETAG",
+      "business_name": "The Beta Group"
+    },
+    {
+      "docId": "OjI9PvnAJnC45rNG3jzO",
+      "ticker_symbol": "TUXED",
+      "business_name": "Tuxedo Dat"
+    },
+    {
+      "docId": "Q0G3oI6sgrbwYXNcYl1l",
+      "ticker_symbol": "OWNLI",
+      "business_name": "THE O.W.N.  LIFE"
+    },
+    {
+      "docId": "b5gINt9aJAVKIzUp3I2H",
+      "ticker_symbol": "TRINI",
+      "business_name": "Trinity and Company, LLC"
+    },
+    {
+      "docId": "1RJabEYFVAT15nJVZ0Bs",
+      "ticker_symbol": "SLONE",
+      "business_name": "The Slone Group"
+    },
+    {
+      "docId": "EsGNeKXxBQ5BNzbqQl5E",
+      "ticker_symbol": "HACKE",
+      "business_name": "The Hackett Group, LLC"
+    },
+    {
+      "docId": "JbArsW2FLyAKzWIEtTzE",
+      "ticker_symbol": "TOOME",
+      "business_name": "Toomer's Tax, Notary and Wedding Officiant Services"
+    },
+    {
+      "docId": "MYA91nV17UKmlIceUwcM",
+      "ticker_symbol": "MTO8L",
+      "business_name": "The Hackett Group"
+    },
+    {
+      "docId": "low1Ueiyyo9tOYRIFHrj",
+      "ticker_symbol": "TASTE",
+      "business_name": "Taste and see"
+    },
+    {
+      "docId": "bsj4TcewHToRKEwMgZgu",
+      "ticker_symbol": "TULAN",
+      "business_name": "Tulane Family Dentistry LLC"
+    },
+    {
+      "docId": "ZtATOqtQGhCgHu5WBBux",
+      "ticker_symbol": "VILLA",
+      "business_name": "The Villavaso Group, LLC"
+    },
+    {
+      "docId": "xY06c5Qp8wgJ9wdAxcXd",
+      "ticker_symbol": "COOKI",
+      "business_name": "The Cooking Therapist"
+    },
+    {
+      "docId": "t557mN3h4V1oHRbWDELE",
+      "ticker_symbol": "2HA72",
+      "business_name": "The Miller Group Consulting LLC"
+    },
+    {
+      "docId": "kfHWY7ZNY7DFlEVrklGN",
+      "ticker_symbol": "SINGL",
+      "business_name": "The Single Housewife"
+    },
+    {
+      "docId": "xaEaNUKaP78FuTVdvEJr",
+      "ticker_symbol": "JAEIM",
+      "business_name": "The Jae Impact"
+    },
+    {
+      "docId": "dT75LPZ9vm8Z88HA6Frp",
+      "ticker_symbol": "BERNA",
+      "business_name": "The Bernard Group"
+    },
+    {
+      "docId": "lyINo4HLfuE5jUyHbLoU",
+      "ticker_symbol": "TURNI",
+      "business_name": "Turning Tables"
+    },
+    {
+      "docId": "RnfI0uoofd4MhfyzMgoR",
+      "ticker_symbol": "VOCAL",
+      "business_name": "The Vocal Music Academy, LLC"
+    },
+    {
+      "docId": "nUi0T0VOk1NRh0ct5GXW",
+      "ticker_symbol": "DOTTI",
+      "business_name": "The Dottin-Haley Group"
+    },
+    {
+      "docId": "rM6vOMjE5uV4jyZZQikm",
+      "ticker_symbol": "TECOO",
+      "business_name": "TE Cookery"
+    },
+    {
+      "docId": "uRv2DZfhZK9i9qDslkSX",
+      "ticker_symbol": "OOEYG",
+      "business_name": "The ooey gooey factory"
+    },
+    {
+      "docId": "ZLKTKXuCENDvGFBUuzIA",
+      "ticker_symbol": "5LH0R",
+      "business_name": "TransMedia, LLC"
+    },
+    {
+      "docId": "mlWfFYIXvpmdy6Bd9WJc",
+      "ticker_symbol": "5SN1V",
+      "business_name": "Totally Fit Physique, LLC"
+    },
+    {
+      "docId": "iKYMUtDOyEyyfaQR8haH",
+      "ticker_symbol": "EHRHA",
+      "business_name": "The Ehrhardt Group"
+    },
+    {
+      "docId": "rQnvYaHXBMDj4QT8BnOX",
+      "ticker_symbol": "HALFS",
+      "business_name": "The Half Shell New Orleans LLC"
+    },
+    {
+      "docId": "3LyMLf7VjOjyxWQR6VUM",
+      "ticker_symbol": "THRIV",
+      "business_name": "Thrive NOLA Spa"
+    },
+    {
+      "docId": "LFlonhUOE5ze0WMomYdt",
+      "ticker_symbol": "TNTTA",
+      "business_name": "TNT Tax and Financial Service"
+    },
+    {
+      "docId": "CCChgQE6i2lUTGb8DZLR",
+      "ticker_symbol": "TECHN",
+      "business_name": "Techniques International Corp"
+    },
+    {
+      "docId": "gEywc2tjA99FtK57bg3W",
+      "ticker_symbol": "TASTY",
+      "business_name": "Tasty Treat Food Truck"
+    },
+    {
+      "docId": "QPES2cUC4vbrDUYuxQ8Z",
+      "ticker_symbol": "PRINT",
+      "business_name": "The Printing Source, Inc."
+    },
+    {
+      "docId": "vpallT0me2kEHxSiHeFI",
+      "ticker_symbol": "PIPEI",
+      "business_name": "The Pipe Inspectors"
+    },
+    {
+      "docId": "9VeFgKgpFmIywakkBdgy",
+      "ticker_symbol": "COSME",
+      "business_name": "The Cosmetology Institute"
+    },
+    {
+      "docId": "ZtGwykoLRLKiu6l7EEX2",
+      "ticker_symbol": "7VTQ1",
+      "business_name": "Taste of Louisiana Utah"
+    },
+    {
+      "docId": "DSwwkQAHN7JTfX36M27z",
+      "ticker_symbol": "THERA",
+      "business_name": "THERAPIST WITH TALENT MASSAGE"
+    },
+    {
+      "docId": "4kLQ4Qml4jIU0Uc7BMqa",
+      "ticker_symbol": "OHMWE",
+      "business_name": "The Ohm Well"
+    },
+    {
+      "docId": "bBrOrAx5oXXWFkh8DZSc",
+      "ticker_symbol": "5HIJO",
+      "business_name": "Trinity One Telecommunication and Utilities LLC"
+    },
+    {
+      "docId": "SRYfClKiKrnLAIFgUPZE",
+      "ticker_symbol": "FHDQE",
+      "business_name": "The HeartFull Company"
+    },
+    {
+      "docId": "9cpQRcTBCQVCxdrerKDt",
+      "ticker_symbol": "TDSTR",
+      "business_name": "TDS TRUCKING, TRAINING & TECHNOLOGY LLC"
+    },
+    {
+      "docId": "hEZgK6OTJjdz2WEaF9fJ",
+      "ticker_symbol": "TURNE",
+      "business_name": "Turner Property Group LLC"
+    },
+    {
+      "docId": "cc1H4SPudShz0nJ6amf7",
+      "ticker_symbol": "LITTL",
+      "business_name": "The Little Brown Basket"
+    },
+    {
+      "docId": "ldFHb7bqcM3LkH70WeoN",
+      "ticker_symbol": "YPT1V",
+      "business_name": "The Big Easy Bicycle festival"
+    },
+    {
+      "docId": "jAWXbOhHGkANZVQvpWuq",
+      "ticker_symbol": "VAGIP",
+      "business_name": "The VagiPlug Co"
+    },
+    {
+      "docId": "nWRHiT6ptR7exidsyPFh",
+      "ticker_symbol": "UNIVE",
+      "business_name": "UNIVERSOUL TRAVEL, LLC"
+    },
+    {
+      "docId": "ApAPpLrss9eTMrWi7J09",
+      "ticker_symbol": "XWHUM",
+      "business_name": "Universal Printing, LLC"
+    },
+    {
+      "docId": "9t90RO3nMcSxNaAeD59r",
+      "ticker_symbol": "URBAN",
+      "business_name": "Urbanscapes Design + Build"
+    },
+    {
+      "docId": "1dQOWECN7IovL6HLpVCB",
+      "ticker_symbol": "UNIQU",
+      "business_name": "Unique Access Office"
+    },
+    {
+      "docId": "UsDh0xztLMYRyeuqqFoJ",
+      "ticker_symbol": "VPGCO",
+      "business_name": "VPG Construction"
+    },
+    {
+      "docId": "ECvWByKSeYhhPYpEmSS1",
+      "ticker_symbol": "VYOON",
+      "business_name": "Vyoones Restaurant"
+    },
+    {
+      "docId": "Tbepr3SZ8XvlT1o1ZCax",
+      "ticker_symbol": "VONDE",
+      "business_name": "VonDerricks Commercial Cleaning company"
+    },
+    {
+      "docId": "MPGHIO1vZS2DVXBUAnja",
+      "ticker_symbol": "VERTI",
+      "business_name": "Vertical Horizons Construction Group"
+    },
+    {
+      "docId": "EvjYyS2l1yVD4CHwmkSa",
+      "ticker_symbol": "VIDEO",
+      "business_name": "Video/Photography by J.R. Thomason"
+    },
+    {
+      "docId": "WgSuOzaVgL219wGfIHaI",
+      "ticker_symbol": "VIVIF",
+      "business_name": "Vivify Training and Fitness LLC"
+    },
+    {
+      "docId": "8fpoX5eyxAhJ02NdJefo",
+      "ticker_symbol": "VAREV",
+      "business_name": "VAR EVENTS"
+    },
+    {
+      "docId": "YlqnxB87xRjyQQMoq8Ki",
+      "ticker_symbol": "VETER",
+      "business_name": "Veterans At Home Care"
+    },
+    {
+      "docId": "BZ16mpheDa7PDOqP5kGf",
+      "ticker_symbol": "WORKF",
+      "business_name": "WorkFlow"
+    },
+    {
+      "docId": "AWSxnCb1rUpZCRWwoPHw",
+      "ticker_symbol": "WHODA",
+      "business_name": "Who Dat Steppers of New Orleans, LA LLC"
+    },
+    {
+      "docId": "EHTgUxMlQ96n635bvonR",
+      "ticker_symbol": "WEYAM",
+      "business_name": "Weyams Catering"
+    },
+    {
+      "docId": "K87VswiZg5uUOZNRY8ug",
+      "ticker_symbol": "WIRCS",
+      "business_name": "WIRC Solutions, LLC"
+    },
+    {
+      "docId": "MdumGQpXJTZuPwUTz8Ng",
+      "ticker_symbol": "WHITE",
+      "business_name": "White Auto Sales"
+    },
+    {
+      "docId": "2het5hBfMkvdjpPOhUlg",
+      "ticker_symbol": "WHERE",
+      "business_name": "WhereWeGo"
+    },
+    {
+      "docId": "PWzhiNFRBKnbzBpFRjvx",
+      "ticker_symbol": "WELIF",
+      "business_name": "We Lift L.L.C."
+    },
+    {
+      "docId": "mRIzpaTTiBquM3LdqfZw",
+      "ticker_symbol": "WILCO",
+      "business_name": "Wilcox Academy of Early Learning"
+    },
+    {
+      "docId": "Mqy21n12HmcAFO7AtIZm",
+      "ticker_symbol": "WHISK",
+      "business_name": "Whiskey & Sticks LLC"
+    },
+    {
+      "docId": "XjIR1iCT36uBsyNLJHsf",
+      "ticker_symbol": "T9L9Z",
+      "business_name": "WHO DAT BarberShop Inc"
+    },
+    {
+      "docId": "JVhoiVz0lFcYOvMw4LfV",
+      "ticker_symbol": "WEBRE",
+      "business_name": "Webre Consulting, LLC"
+    },
+    {
+      "docId": "zjxKkP9NCLyHF4NZE2XB",
+      "ticker_symbol": "WEBST",
+      "business_name": "Webster Telecommunication & Utilities LLC"
+    },
+    {
+      "docId": "snU5dC0Y9NHD0gYVVSXl",
+      "ticker_symbol": "WNQZ8",
+      "business_name": "Wilcox’s Academy of Early Learning"
+    },
+    {
+      "docId": "y8JY8kJAd4wIDHmAFGuj",
+      "ticker_symbol": "WOODW",
+      "business_name": "Woodward Design+Build"
+    },
+    {
+      "docId": "4RQt3rCKw3nAb2rQbI5t",
+      "ticker_symbol": "WELLS",
+      "business_name": "WELLS LAW OFFICE, LLC"
+    },
+    {
+      "docId": "kezyv919P10u26CvkOIf",
+      "ticker_symbol": "UP7M4",
+      "business_name": "Who Dat Transportation and Tours, LLC."
+    },
+    {
+      "docId": "XhsIsWYD3KOGYRGzaWqP",
+      "ticker_symbol": "WORDO",
+      "business_name": "Word of a Rebel Marketing"
+    },
+    {
+      "docId": "c2V1Y9chAU7ooKaPzesO",
+      "ticker_symbol": "XCLUS",
+      "business_name": "Xclusive Cleaning"
+    },
+    {
+      "docId": "lI1VZqfKMhjwjav1WsvQ",
+      "ticker_symbol": "XTREM",
+      "business_name": "Xtreme Party Galore"
+    },
+    {
+      "docId": "U17LIMXgyB5QCVfMWllw",
+      "ticker_symbol": "YOURL",
+      "business_name": "Your Last Minute Tees & More"
+    },
+    {
+      "docId": "UweqTs4RTxz9KMecVplL",
+      "ticker_symbol": "YOURS",
+      "business_name": "Your Self Care Prescription LLC"
+    },
+    {
+      "docId": "zyc246zgfRQyh9JgrPUG",
+      "ticker_symbol": "ZLUXE",
+      "business_name": "Z Luxe Suites"
+    }
+  ],
+  "already_exists": []
+}
