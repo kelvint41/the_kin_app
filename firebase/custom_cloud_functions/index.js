@@ -101,6 +101,9 @@ exports.notifyClaimRejected = claimNotifications.notifyClaimRejected;
 const claimReview = require("./claim_review.js");
 exports.resolveClaimRequest = claimReview.resolveClaimRequest;
 
+const questActivityFeed = require("./quest_activity_feed.js");
+exports.syncQuestActivityFeed = questActivityFeed.syncQuestActivityFeed;
+
 const sendPasswordReset = require("./send_password_reset.js");
 exports.sendPasswordReset = sendPasswordReset.sendPasswordReset;
 

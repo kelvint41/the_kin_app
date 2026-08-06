@@ -13,24 +13,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 // constructor call in this file should resolve to the maps package's version.
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart' hide LatLng;
+// Prefixed rather than a bare import: lat_lng.dart is FlutterFlow's own
+// LatLng, the same type this file hides above - only needed here to build
+// the defaultLocation argument getCurrentUserLocation expects.
+import '/flutter_flow/lat_lng.dart' as ff_lat_lng;
+// show, not a plain import - flutter_flow_util.dart re-exports lat_lng.dart
+// itself, which would reintroduce the exact collision the hide above
+// avoids. This pulls in only the one function actually needed.
+import '/flutter_flow/flutter_flow_util.dart' show getCurrentUserLocation;
 import '/services/kin_services.dart';
+import '/services/nearby_feed.dart';
+import '/services/quest_eligibility.dart';
 import '/services/seasonal_theme.dart';
 
-/// Standalone "KIN Quest" map interface - dark/light theme toggle,
-/// verified/unverified quest pins, a proximity-gated real check-in flow,
-/// and the etiquette/points rules explainer.
+/// The KIN Quest map interface - dark/light theme toggle, verified/
+/// unverified quest pins, a proximity-gated real check-in flow, and the
+/// etiquette/points rules explainer.
 ///
-/// Pins load from the real `businesses` collection (filtered to the
-/// `directory_import_batch` tag `seed_directory_test_batch.js` wrote on
-/// the Georgia/Illinois test batch - see firebase/scripts/
-/// seed_directory_test_batch.js). "Verify" now calls the real
+/// Pins load from [QuestEligibility.questEligibleBusinesses] (the same
+/// source the production KIN Quest list page uses), filtered to the
+/// closest [kNearbyFeedMaxBusinesses] within [kNearbyFeedRadiusKm] via
+/// [selectNearby] - same "nearby" definition as the Nearby Feed, so a map
+/// full of pins never means a different set of businesses than what
+/// "nearby" means anywhere else in the app. This used to be pinned to a
+/// single Georgia/Illinois test batch (`directory_import_batch ==
+/// 'ga_il_test_2026_08'`) while the map redesign was still in beta - see
+/// firebase/scripts/seed_directory_test_batch.js for that batch, which is
+/// unrelated to this page now. "Verify" calls the real
 /// `recordVerifiedVisit` callable (same one Business Profile V2's "I'm
-/// Here" button and the real KIN Quest list page use), so points are
-/// real KIN scavenger_points, not local widget state - the only thing
-/// still simulated is the user's own position: _userLocation below is
-/// fixed rather than read from a location plugin, since this page has no
-/// live GPS wiring yet. Swapping that for geolocator is the one piece
-/// left before this can leave beta.
+/// Here" button and the real KIN Quest list page use), so points are real
+/// KIN scavenger_points, not local widget state - and as of the GPS wiring
+/// below, the coordinates sent with that call are the device's actual
+/// position too, not a fixed stand-in.
 ///
 /// A pin's amber '?' / emerald '✓' reflects businesses.is_verified - the
 /// same ownership/trust flag the claim-approval flow controls, not
@@ -85,15 +99,35 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
   GoogleMapController? _mapController;
   late final AnimationController _pulseController;
 
-  /// "You are here" - a short walk (~50m) from Busy Bee Cafe, one of the
-  /// real seeded Atlanta businesses, rather than a city center. Picked
-  /// deliberately close to a real pin so the Verify button has at least
-  /// one guaranteed-enabled case to test on-device, alongside plenty of
-  /// far-away seeded pins (Savannah/Macon/Chicago) that correctly show
-  /// the button disabled - real geographic spread doing the job dummy
-  /// data would have needed to fake.
-  static const _userLocation = LatLng(33.7541, -84.4136);
+  /// The device's real position once [_resolveUserLocation] resolves it.
+  /// Starts at San Antonio - this app's first-launch market, same default
+  /// [KinQuestWidget] falls back to - purely so the map has somewhere
+  /// sensible to render before that first GPS fix lands, not because
+  /// there's any dummy-data scope left here: a KIN Quest check-in is a
+  /// real, server-trusted proximity claim (`recordVerifiedVisit` re-checks
+  /// the distance server-side), so this being wrong wasn't just a
+  /// misplaced pin on the map, it meant every check-in from this screen
+  /// sent fake coordinates.
+  LatLng _userLocation = const LatLng(29.4241, -98.4936);
   static const _verifyRadiusMeters = 100.0;
+
+  /// Resolves the real device location (falling back to San Antonio on
+  /// denied/unavailable, same as [getCurrentUserLocation] always does) and
+  /// recenters the map on it. Sequenced before [_loadPins] in initState -
+  /// [_loadPins] needs real coordinates to filter "nearby" by, not the
+  /// fallback default, otherwise a user outside San Antonio would see San
+  /// Antonio's businesses for one frame before the real list swapped in.
+  Future<void> _resolveUserLocation() async {
+    final loc = await getCurrentUserLocation(
+      defaultLocation: const ff_lat_lng.LatLng(29.4241, -98.4936),
+      cached: true,
+    );
+    if (!mounted) return;
+    setState(() => _userLocation = LatLng(loc.latitude, loc.longitude));
+    await _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(_userLocation, 16),
+    );
+  }
 
   List<_QuestPin> _pins = [];
   bool _loadingPins = true;
@@ -101,12 +135,15 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
 
   Future<void> _loadPins() async {
     try {
-      final snapshot = await BusinessesRecord.collection
-          .where('directory_import_batch', isEqualTo: 'ga_il_test_2026_08')
-          .get();
-      final pins = snapshot.docs
-          .map(BusinessesRecord.fromSnapshot)
-          .where((b) => b.businessLocation != null)
+      final businesses = await QuestEligibility.questEligibleBusinesses();
+      final nearby = selectNearby<BusinessesRecord>(
+        businesses,
+        originLat: _userLocation.latitude,
+        originLng: _userLocation.longitude,
+        latOf: (b) => b.businessLocation?.latitude,
+        lngOf: (b) => b.businessLocation?.longitude,
+      );
+      final pins = nearby
           .map((b) => _QuestPin(
                 id: b.reference.id,
                 businessRef: b.reference,
@@ -129,6 +166,7 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
       // loaded pins would have no screen position until the user next
       // pans/zooms.
       _updatePinPositions();
+      _listenForNearbyActivity();
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -138,12 +176,105 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     }
   }
 
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _activitySub;
+
+  /// Pending/currently-shown "X just found Y" toasts - see
+  /// _listenForNearbyActivity and _showNextToast.
+  final List<String> _toastQueue = [];
+  String? _visibleToast;
+  Timer? _toastTimer;
+
+  /// businessRef.path -> when this device itself last checked in there,
+  /// set by _performCheckIn. quest_activity_feed deliberately carries no
+  /// user_ref (see quest_activity_feed.js's doc comment - that's the
+  /// whole privacy point of it existing separately from uservisits), so
+  /// there's no server-side way to tell "someone else checked in" from
+  /// "I did" - this local, short-lived record is what suppresses a toast
+  /// for your own check-in instead, since you already get your own
+  /// "Checked in!" snackbar for that.
+  final Map<String, DateTime> _myRecentCheckIns = {};
+
+  /// Live "someone just found this business" toasts, scoped to exactly
+  /// the businesses currently pinned on screen (same nearby set _loadPins
+  /// computed) - reads quest_activity_feed, the privacy-safe fan-out of
+  /// uservisits (see that collection's rule comment in firestore.rules
+  /// for why this doesn't read uservisits directly). Only started once,
+  /// after the one-shot _loadPins finishes, since this screen has no pin
+  /// refresh/reload path yet to re-subscribe against.
+  void _listenForNearbyActivity() {
+    if (_pins.isEmpty) return;
+    final since = Timestamp.now();
+    _activitySub = FirebaseFirestore.instance
+        .collection('quest_activity_feed')
+        .where('business_ref',
+            whereIn: _pins.map((p) => p.businessRef).toList())
+        .where('created_at', isGreaterThan: since)
+        .snapshots()
+        .listen((snapshot) {
+      for (final change in snapshot.docChanges) {
+        // The initial snapshot only ever contains docs already excluded
+        // by the created_at filter above having matched, so this is just
+        // guarding against a doc that later gets modified/removed (never
+        // happens today - quest_activity_feed is create-only - but costs
+        // nothing to be explicit about).
+        if (change.type != DocumentChangeType.added) continue;
+        final data = change.doc.data();
+        if (data == null) continue;
+
+        final businessPath = (data['business_ref'] as DocumentReference?)?.path;
+        final myVisit =
+            businessPath == null ? null : _myRecentCheckIns[businessPath];
+        if (myVisit != null &&
+            DateTime.now().difference(myVisit) < const Duration(seconds: 15)) {
+          continue;
+        }
+
+        final firstName = (data['first_name'] as String?)?.trim();
+        final businessName = (data['business_name'] as String?)?.trim();
+        _queueToast(
+          '${firstName?.isNotEmpty == true ? firstName : 'Someone'} just found '
+          '${businessName?.isNotEmpty == true ? businessName : 'a business'}',
+        );
+      }
+    }, onError: (_) {
+      // Best-effort - a missed activity toast isn't worth an error banner
+      // on top of the real pin-loading one above.
+    });
+  }
+
+  void _queueToast(String message) {
+    if (!mounted) return;
+    _toastQueue.add(message);
+    _showNextToast();
+  }
+
+  void _showNextToast() {
+    if (_visibleToast != null || _toastQueue.isEmpty || !mounted) return;
+    setState(() => _visibleToast = _toastQueue.removeAt(0));
+    _toastTimer = Timer(const Duration(milliseconds: 3500), () {
+      if (!mounted) return;
+      setState(() => _visibleToast = null);
+      // A short gap so consecutive toasts read as separate events rather
+      // than one replacing another mid-breath.
+      Timer(const Duration(milliseconds: 300), _showNextToast);
+    });
+  }
+
   /// Screen-space position for every pin, recomputed on camera
   /// move/idle via GoogleMapController.getScreenCoordinate - this is what
   /// lets the badges be real Flutter widgets (real BoxShadow glow/soft
   /// drop-shadow, instant repaint on state change) instead of baked
   /// BitmapDescriptor marker icons, which can't do either cheaply.
   final Map<String, Offset> _pinScreenPositions = {};
+
+  /// Same idea as [_pinScreenPositions], for the "you are here" pulse
+  /// marker - it used to sit fixed at the screen's literal center
+  /// regardless of where the map panned, which meant there was no real
+  /// way to see your exact position on the map, just a badge that never
+  /// moved. Tracking a real screen coordinate off [_userLocation] instead
+  /// makes it a real marker, and native `myLocationButtonEnabled` below
+  /// gives an explicit way to recenter on it.
+  Offset? _userScreenPosition;
   bool _updatingPositions = false;
 
   // 'kin_quest_map_rules_seen_v1' rather than a bare name - versioned so a
@@ -159,7 +290,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
-    _loadPins();
+    // Sequenced, not parallel - see _resolveUserLocation's doc comment.
+    _resolveUserLocation().then((_) => _loadPins());
     _loadRealScore();
     WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowRules());
   }
@@ -193,24 +325,60 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
   void dispose() {
     _pulseController.dispose();
     _mapController?.dispose();
+    _activitySub?.cancel();
+    _toastTimer?.cancel();
     super.dispose();
   }
 
+  /// True while a screen-coordinate batch is in flight; set alongside
+  /// [_updatingPositions] when another update is requested mid-batch (see
+  /// below) rather than starting an overlapping second batch.
+  bool _positionUpdatePending = false;
+
+  /// Recomputes every pin's (and the user marker's) screen position for
+  /// the *current* camera frame.
+  ///
+  /// Previously this just no-op'd (`_updatingPositions` short-circuit)
+  /// whenever a batch was already in flight - during a fast pinch-zoom,
+  /// Google Maps fires onCameraMove many times a second, each one much
+  /// faster than a getScreenCoordinate round trip resolves, so most of
+  /// those calls were silently dropped. The batch that *did* eventually
+  /// finish then applied positions computed against whatever camera frame
+  /// was current when it started, which could be several frames stale by
+  /// the time setState ran - pins would render at wherever they used to
+  /// be, which at typical zoom deltas is easily off-screen. That's what
+  /// read as pins "not stationary" and "disappearing" while zooming.
+  ///
+  /// Now a request that arrives mid-batch is recorded rather than dropped,
+  /// and the loop below re-runs once more after the in-flight batch
+  /// finishes - always ending on a fetch against the camera's current
+  /// state, without stacking up unbounded overlapping batches the way
+  /// firing a fresh one on every single onCameraMove tick would.
   Future<void> _updatePinPositions() async {
+    if (_updatingPositions) {
+      _positionUpdatePending = true;
+      return;
+    }
     final controller = _mapController;
-    if (controller == null || _updatingPositions) return;
+    if (controller == null) return;
     _updatingPositions = true;
     try {
-      final entries = await Future.wait(_pins.map((pin) async {
-        final sc = await controller.getScreenCoordinate(pin.position);
-        return MapEntry(pin.id, Offset(sc.x.toDouble(), sc.y.toDouble()));
-      }));
-      if (!mounted) return;
-      setState(() {
-        _pinScreenPositions
-          ..clear()
-          ..addEntries(entries);
-      });
+      do {
+        _positionUpdatePending = false;
+        final entries = await Future.wait(_pins.map((pin) async {
+          final sc = await controller.getScreenCoordinate(pin.position);
+          return MapEntry(pin.id, Offset(sc.x.toDouble(), sc.y.toDouble()));
+        }));
+        final userSc = await controller.getScreenCoordinate(_userLocation);
+        if (!mounted) return;
+        setState(() {
+          _pinScreenPositions
+            ..clear()
+            ..addEntries(entries);
+          _userScreenPosition =
+              Offset(userSc.x.toDouble(), userSc.y.toDouble());
+        });
+      } while (_positionUpdatePending);
     } catch (_) {
       // A screen coordinate lookup can fail transiently mid-gesture (map
       // not yet laid out, or disposed while awaiting) - next camera event
@@ -228,13 +396,17 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     final lat1 = toRad(a.latitude);
     final lat2 = toRad(b.latitude);
     final h = math.sin(dLat / 2) * math.sin(dLat / 2) +
-        math.cos(lat1) * math.cos(lat2) * math.sin(dLon / 2) * math.sin(dLon / 2);
+        math.cos(lat1) *
+            math.cos(lat2) *
+            math.sin(dLon / 2) *
+            math.sin(dLon / 2);
     final c = 2 * math.atan2(math.sqrt(h), math.sqrt(1 - h));
     return earthRadiusMeters * c;
   }
 
-  String _formatDistance(double meters) =>
-      meters < 1000 ? '${meters.round()}m away' : '${(meters / 1000).toStringAsFixed(1)}km away';
+  String _formatDistance(double meters) => meters < 1000
+      ? '${meters.round()}m away'
+      : '${(meters / 1000).toStringAsFixed(1)}km away';
 
   /// Tapping a pin asks first, rather than dropping straight into the
   /// proximity sheet - "do you want to start the quest for this
@@ -258,7 +430,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
           ),
           FilledButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            style: FilledButton.styleFrom(backgroundColor: theme.colorScheme.primary),
+            style: FilledButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary),
             child: const Text('Start Quest'),
           ),
         ],
@@ -269,7 +442,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
 
   void _openPinSheet(_QuestPin pin) {
     final distance = _distanceMeters(_userLocation, pin.position);
-    final canVerify = !pin.isVerified && !pin.alreadyMine && distance <= _verifyRadiusMeters;
+    final canVerify =
+        !pin.isVerified && !pin.alreadyMine && distance <= _verifyRadiusMeters;
 
     showModalBottomSheet<void>(
       context: context,
@@ -297,7 +471,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
   /// because this *is* a real check-in.
   Future<void> _performCheckIn(_QuestPin pin) async {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Checking in...'), duration: Duration(seconds: 1)),
+      const SnackBar(
+          content: Text('Checking in...'), duration: Duration(seconds: 1)),
     );
     try {
       final result = await FirebaseFunctions.instance
@@ -313,6 +488,9 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
       final data = result.data;
       final pointsAwarded = (data['pointsAwarded'] as num?)?.toInt() ?? 0;
       final totalPoints = (data['totalPoints'] as num?)?.toInt();
+      // See _myRecentCheckIns' doc comment - suppresses the nearby-activity
+      // toast that would otherwise fire for this exact check-in.
+      _myRecentCheckIns[pin.businessRef.path] = DateTime.now();
       if (!mounted) return;
       setState(() {
         pin.alreadyMine = true;
@@ -340,7 +518,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Couldn't check you in. Please try again.")),
+        const SnackBar(
+            content: Text("Couldn't check you in. Please try again.")),
       );
     }
   }
@@ -378,15 +557,19 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     );
     if (!mounted || !result.isSuccess) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Thanks - that helps us keep the map accurate.')),
+      const SnackBar(
+          content: Text('Thanks - that helps us keep the map accurate.')),
     );
   }
 
   // ---- theme tokens ---------------------------------------------------
 
-  Color get _bg => _isDarkMode ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
-  Color get _surface => _isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5);
-  Color get _onSurface => _isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
+  Color get _bg =>
+      _isDarkMode ? const Color(0xFF121212) : const Color(0xFFFFFFFF);
+  Color get _surface =>
+      _isDarkMode ? const Color(0xFF1E1E1E) : const Color(0xFFF5F5F5);
+  Color get _onSurface =>
+      _isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
   // Deep blue accent for dark mode's "stealth" feel, warm amber-brown for
   // light mode's accent per the brief - two different accent hues on
   // purpose, not the same color reused across both themes. Deliberately
@@ -395,7 +578,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
   // mystery pin's glyph below borrows from the season, same scope the
   // real KIN Quest page already gives it (rareMarkerEmoji only, nothing
   // wider).
-  Color get _accent => _isDarkMode ? const Color(0xFF3B82F6) : const Color(0xFFB5651D);
+  Color get _accent =>
+      _isDarkMode ? const Color(0xFF3B82F6) : const Color(0xFFB5651D);
 
   /// Same source the real KIN Quest page reads
   /// (services/seasonal_theme.dart) - only rareMarkerEmoji is used here,
@@ -501,8 +685,11 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
             ),
           ),
           IconButton(
-            tooltip: _isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode',
-            icon: Icon(_isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded),
+            tooltip:
+                _isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+            icon: Icon(_isDarkMode
+                ? Icons.light_mode_rounded
+                : Icons.dark_mode_rounded),
             onPressed: () => setState(() => _isDarkMode = !_isDarkMode),
           ),
           const SizedBox(width: 4),
@@ -511,9 +698,17 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
       body: Stack(
         children: [
           GoogleMap(
-            initialCameraPosition: const CameraPosition(target: _userLocation, zoom: 16),
+            initialCameraPosition:
+                CameraPosition(target: _userLocation, zoom: 16),
             style: _isDarkMode ? _darkMapStyle : _lightMapStyle,
-            myLocationEnabled: false,
+            // Native blue dot + the built-in recenter button - the actual
+            // fix for "no way to pin point your exact location": before
+            // this, the only "you are here" indicator was the pulse marker
+            // below, fixed to the screen's center regardless of where the
+            // map was panned, so it never represented a real position you
+            // could recenter back to.
+            myLocationEnabled: true,
+            myLocationButtonEnabled: true,
             zoomControlsEnabled: false,
             mapToolbarEnabled: false,
             onMapCreated: (controller) {
@@ -538,18 +733,24 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
                   onTap: () => _confirmStart(pin),
                 ),
               ),
-          // User location - fixed at the screen's focal point rather than
-          // converted from a real GPS lat/lng, matching the brief
-          // ("positioned as the focal point of the screen") and this
-          // widget's dummy-data scope.
-          IgnorePointer(
-            child: Center(
-              child: AnimatedBuilder(
-                animation: _pulseController,
-                builder: (context, _) => _UserPulseMarker(progress: _pulseController.value),
+          // User location - real screen coordinate off _userLocation, same
+          // pattern as the quest pins above, rather than a marker fixed to
+          // the screen's center regardless of where the map is panned.
+          // Layers on top of the native blue dot (myLocationEnabled above)
+          // as the app's own branded radar-pulse treatment of the same
+          // real point, not a competing indicator.
+          if (_userScreenPosition != null)
+            Positioned(
+              left: _userScreenPosition!.dx - 45,
+              top: _userScreenPosition!.dy - 45,
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, _) =>
+                      _UserPulseMarker(progress: _pulseController.value),
+                ),
               ),
             ),
-          ),
           if (_loadingPins || _loadError != null)
             Positioned(
               top: 12,
@@ -558,7 +759,8 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
               child: IgnorePointer(
                 ignoring: _loadError == null,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
                     color: _surface.withValues(alpha: 0.95),
                     borderRadius: BorderRadius.circular(12),
@@ -573,18 +775,61 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
                         SizedBox(
                           width: 14,
                           height: 14,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: _accent),
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: _accent),
                         )
                       else
-                        const Icon(Icons.error_outline, size: 16, color: Colors.redAccent),
+                        const Icon(Icons.error_outline,
+                            size: 16, color: Colors.redAccent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          _loadError ?? 'Loading quest locations from Firestore...',
+                          _loadError ??
+                              'Loading quest locations from Firestore...',
                           style: TextStyle(color: _onSurface, fontSize: 12.5),
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ),
+            ),
+          // "Someone just found X" - offset below the loading/error banner
+          // above rather than sharing its exact position, so the two never
+          // literally overlap in the unlikely case both are visible at
+          // once (loading finishes before this can start - see
+          // _listenForNearbyActivity - but _loadError can persist).
+          if (_visibleToast != null)
+            Positioned(
+              top: 60,
+              left: 12,
+              right: 12,
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _visibleToast != null ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _surface.withValues(alpha: 0.95),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _accent.withValues(alpha: 0.5)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.emoji_events_rounded,
+                            size: 16, color: _accent),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            _visibleToast!,
+                            style: TextStyle(color: _onSurface, fontSize: 12.5),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -657,15 +902,15 @@ class _QuestPinBadge extends StatelessWidget {
               color: color,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isDarkMode ? Colors.black.withValues(alpha: 0.4) : Colors.white,
+                color: isDarkMode
+                    ? Colors.black.withValues(alpha: 0.4)
+                    : Colors.white,
                 width: 2,
               ),
               boxShadow: glow,
             ),
             child: Text(
-              isVerified
-                  ? '✓'
-                  : (seasonalEmoji ?? '?'),
+              isVerified ? '✓' : (seasonalEmoji ?? '?'),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w900,
@@ -697,7 +942,8 @@ class _PinTailPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _PinTailPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(covariant _PinTailPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// The user's own location - a solid center dot plus two expanding,
@@ -716,8 +962,7 @@ class _UserPulseMarker extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          for (final offset in [0.0, 0.5])
-            _ring((progress + offset) % 1.0),
+          for (final offset in [0.0, 0.5]) _ring((progress + offset) % 1.0),
           Container(
             width: 18,
             height: 18,
@@ -726,7 +971,10 @@ class _UserPulseMarker extends StatelessWidget {
               color: _blue,
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: [
-                BoxShadow(color: _blue.withValues(alpha: 0.6), blurRadius: 10, spreadRadius: 2),
+                BoxShadow(
+                    color: _blue.withValues(alpha: 0.6),
+                    blurRadius: 10,
+                    spreadRadius: 2),
               ],
             ),
           ),
@@ -775,8 +1023,10 @@ class _QuestBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final onSurface = isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
-    final onSurfaceMuted = isDarkMode ? const Color(0xFFA0A0AB) : const Color(0xFF6B6B75);
+    final onSurface =
+        isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
+    final onSurfaceMuted =
+        isDarkMode ? const Color(0xFFA0A0AB) : const Color(0xFF6B6B75);
     final statusColor = pin.isVerified ? _emerald : _amber;
 
     return SafeArea(
@@ -817,10 +1067,13 @@ class _QuestBottomSheet extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(pin.isVerified ? '✓' : (seasonalEmoji ?? '?'),
-                      style: TextStyle(color: statusColor, fontWeight: FontWeight.w900)),
+                      style: TextStyle(
+                          color: statusColor, fontWeight: FontWeight.w900)),
                   const SizedBox(width: 6),
                   Text(
-                    pin.isVerified ? 'Verified Black-Owned' : 'Unverified Quest Location',
+                    pin.isVerified
+                        ? 'Verified Black-Owned'
+                        : 'Unverified Quest Location',
                     style: TextStyle(
                       color: statusColor,
                       fontWeight: FontWeight.w700,
@@ -833,10 +1086,12 @@ class _QuestBottomSheet extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               pin.name,
-              style: TextStyle(color: onSurface, fontWeight: FontWeight.w800, fontSize: 20),
+              style: TextStyle(
+                  color: onSurface, fontWeight: FontWeight.w800, fontSize: 20),
             ),
             const SizedBox(height: 4),
-            Text(pin.address, style: TextStyle(color: onSurfaceMuted, fontSize: 13.5)),
+            Text(pin.address,
+                style: TextStyle(color: onSurfaceMuted, fontSize: 13.5)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -863,9 +1118,12 @@ class _QuestBottomSheet extends StatelessWidget {
                   border: Border.all(color: _emerald.withValues(alpha: 0.5)),
                 ),
                 child: Text(
-                  pin.isVerified ? '✓ Already verified' : '✓ Already checked in',
+                  pin.isVerified
+                      ? '✓ Already verified'
+                      : '✓ Already checked in',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: _emerald, fontWeight: FontWeight.w700),
+                  style:
+                      TextStyle(color: _emerald, fontWeight: FontWeight.w700),
                 ),
               )
             else
@@ -880,7 +1138,8 @@ class _QuestBottomSheet extends StatelessWidget {
                     foregroundColor: Colors.black,
                     disabledForegroundColor: onSurfaceMuted,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(999)),
                     elevation: 0,
                   ),
                   child: Text(
@@ -888,7 +1147,8 @@ class _QuestBottomSheet extends StatelessWidget {
                     // business pays a random 10-50, so promising a specific
                     // number here would just be wrong most of the time.
                     canVerify ? 'Verify Location' : "Get closer to verify",
-                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800, fontSize: 15),
                   ),
                 ),
               ),
@@ -914,10 +1174,13 @@ class _RulesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final surface = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final onSurface = isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
-    final onSurfaceMuted = isDarkMode ? const Color(0xFFA0A0AB) : const Color(0xFF6B6B75);
+    final onSurface =
+        isDarkMode ? const Color(0xFFF2F2F2) : const Color(0xFF1A1A1A);
+    final onSurfaceMuted =
+        isDarkMode ? const Color(0xFFA0A0AB) : const Color(0xFF6B6B75);
 
-    Widget rule(String emoji, Color color, String title, String body) => Padding(
+    Widget rule(String emoji, Color color, String title, String body) =>
+        Padding(
           padding: const EdgeInsets.only(bottom: 14),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -939,10 +1202,15 @@ class _RulesDialog extends StatelessWidget {
                   children: [
                     Text(title,
                         style: TextStyle(
-                            color: onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
+                            color: onSurface,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14)),
                     const SizedBox(height: 2),
                     Text(body,
-                        style: TextStyle(color: onSurfaceMuted, fontSize: 12.5, height: 1.4)),
+                        style: TextStyle(
+                            color: onSurfaceMuted,
+                            fontSize: 12.5,
+                            height: 1.4)),
                   ],
                 ),
               ),
@@ -960,7 +1228,16 @@ class _RulesDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('How KIN Quest works',
-                style: TextStyle(color: onSurface, fontWeight: FontWeight.w800, fontSize: 18)),
+                style: TextStyle(
+                    color: onSurface,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 18)),
+            const SizedBox(height: 4),
+            Text(
+              "Totally optional - everything else in KIN works whether or not you ever play.",
+              style:
+                  TextStyle(color: onSurfaceMuted, fontSize: 12.5, height: 1.4),
+            ),
             const SizedBox(height: 16),
             rule('✓', _emerald, 'Verified businesses',
                 "Check in at an already-verified business and you'll earn its standard points."),

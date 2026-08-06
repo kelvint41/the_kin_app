@@ -307,6 +307,20 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "quest_activity_feed",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "business_ref",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "created_at",
+          "order": "ASCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [
