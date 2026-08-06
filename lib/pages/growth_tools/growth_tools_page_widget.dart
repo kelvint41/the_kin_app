@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/services/subscription_tiers.dart';
 import '/components/compact_action_list_widget.dart';
 import '/components/kin_back_button.dart';
+import '/components/kindex_engagement_nudge.dart';
 import '/components/support_bubble_widget.dart';
 import '/components/power_hour_panel_widget.dart';
 import '/components/location_beacon_card_widget.dart';
@@ -360,6 +361,9 @@ class GrowthToolsPageWidget extends StatelessWidget {
                             getWidgetBoundingBox(builderContext),
                         businessRef: ownedBusiness,
                       );
+                      if (builderContext.mounted) {
+                        showKindexEngagementNudge(builderContext);
+                      }
                     },
                     text: 'Promote Your Business',
                     icon: Icon(Icons.share_rounded, size: 18.0),

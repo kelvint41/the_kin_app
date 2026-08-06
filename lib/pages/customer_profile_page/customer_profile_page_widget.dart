@@ -8,6 +8,7 @@ import '/components/marketplace_item_card_widget.dart';
 import '/components/business_image_widget.dart';
 import '/components/image_upload_button.dart';
 import '/components/feedback_sheet_widget.dart';
+import '/components/kindex_engagement_nudge.dart';
 import '/components/promo_card_widget.dart';
 import '/components/edit_bio_sheet.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -1037,6 +1038,7 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                       'Download the app: $kPlayStoreUrl',
                   sharePositionOrigin: getWidgetBoundingBox(context),
                 );
+                if (context.mounted) showKindexEngagementNudge(context);
               },
             ),
             CompactActionRowData(

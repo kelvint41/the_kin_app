@@ -296,6 +296,33 @@ void showMainMenuSheet(BuildContext context,
                           );
                         },
                       ),
+                      // Same role-branch as the row above, but the
+                      // destination is the same widget either way -
+                      // KindexScoreHistoryWidget renders the owner's
+                      // business history when given a businessDocument and
+                      // the signed-in customer's own history when not (see
+                      // its class doc). An owner still has a personal
+                      // customer-side Kindex too, but their business's score
+                      // is what they came to this menu to check.
+                      ListTile(
+                        leading: Icon(Icons.show_chart_rounded,
+                            color: theme.primaryText),
+                        title: Text('My Kindex', style: theme.bodyLarge),
+                        onTap: () {
+                          final businessRef =
+                              currentUserDocument?.ownedBusiness;
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(
+                            KindexScoreHistoryWidget.routeName,
+                            queryParameters: {
+                              'businessDocument': serializeParam(
+                                businessRef,
+                                ParamType.DocumentReference,
+                              ),
+                            }.withoutNulls,
+                          );
+                        },
+                      ),
                       ListTile(
                         leading: Icon(Icons.work_outline_rounded,
                             color: theme.primaryText),

@@ -7,6 +7,7 @@ import '/components/business_image_widget.dart';
 import '/components/kin_back_button.dart';
 import '/components/main_menu_button.dart';
 import '/components/kindex_trend_indicator.dart';
+import '/components/kindex_engagement_nudge.dart';
 import '/components/visit_check_in_widget.dart';
 import '/components/clean_elegant_mobile_widget.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -508,6 +509,9 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                 box.size,
                                         businessRef: business.reference,
                                       );
+                                      if (context.mounted) {
+                                        showKindexEngagementNudge(context);
+                                      }
                                     },
                                   ),
                                 ],
