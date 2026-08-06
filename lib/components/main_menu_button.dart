@@ -116,258 +116,275 @@ void showMainMenuSheet(BuildContext context,
               topRight: Radius.circular(theme.designToken.radius.lg),
             ),
           ),
-          child: SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                    vertical: theme.designToken.spacing.md),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  // Stretch so every row (section label, ListTile) fills
-                  // the sheet's full width and left-aligns its content,
-                  // instead of the Column's default center alignment
-                  // hugging each row to its own intrinsic width.
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40.0,
-                        height: 4.0,
-                        margin: EdgeInsets.only(
-                            bottom: theme.designToken.spacing.md),
-                        decoration: BoxDecoration(
-                          color: theme.alternate,
-                          borderRadius: BorderRadius.circular(2.0),
+          // A Material re-established here, not just relied-on from
+          // showModalBottomSheet's own (transparent) one further up - the
+          // Container above paints an opaque background between that outer
+          // Material and every ListTile below, which is exactly the
+          // "background is hidden" ListTile assertion Crashlytics was
+          // catching in production: ListTile paints its ink/ripple on the
+          // nearest Material ancestor, but this Container's opaque color
+          // sits on top of that same distant Material, so the ink would be
+          // invisible. transparent here so the Container's own rounded
+          // sheet background still shows through underneath everything.
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      vertical: theme.designToken.spacing.md),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    // Stretch so every row (section label, ListTile) fills
+                    // the sheet's full width and left-aligns its content,
+                    // instead of the Column's default center alignment
+                    // hugging each row to its own intrinsic width.
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40.0,
+                          height: 4.0,
+                          margin: EdgeInsets.only(
+                              bottom: theme.designToken.spacing.md),
+                          decoration: BoxDecoration(
+                            color: theme.alternate,
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),
                         ),
                       ),
-                    ),
-                    // Grouped under labeled sections (Discover / Community /
-                    // Quest / Profile) rather than one flat list of 9+ items
-                    // - same destinations, same role-adaptive logic, just
-                    // organized so the menu reads as a few clear categories
-                    // instead of a wall of rows. Mirrors the customer bottom
-                    // nav's own Home/Directory/Feed/Loyalty groupings, which
-                    // this deliberately doesn't touch.
-                    _sectionLabel(theme, 'Discover'),
-                    ListTile(
-                      leading: Icon(Icons.map_outlined, color: theme.primaryText),
-                      title: Text('Map', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(GoogleMapPageWidget.routeName);
-                      },
-                    ),
-                    // Always visible, not role-adaptive - Marketplace is
-                    // discovery for everyone, same as the map itself. No
-                    // auth required, matching MarketplaceWidget's public route.
-                    ListTile(
-                      leading: Icon(Icons.storefront_outlined,
-                          color: theme.primaryText),
-                      title: Text('Marketplace', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(MarketplaceWidget.routeName);
-                      },
-                    ),
-                    _sectionLabel(theme, 'Community'),
-                    // Hidden while the social layer is unfinished. The
-                    // route is gated too (see nav.dart) - this just stops
-                    // anyone tapping into a Coming Soon screen.
-                    if (FeatureFlags.exchangeEnabled)
-                    ListTile(
-                      leading:
-                          Icon(Icons.forum_outlined, color: theme.primaryText),
-                      title: Text('The Exchange', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        // No longer gated on owning a business. The Exchange
-                        // is a global feed that anyone can read and post to,
-                        // so requiring a business here turned the menu item
-                        // into a no-op with a snackbar for every customer -
-                        // most of the people it exists for. A null ref just
-                        // means posts carry no business tag.
-                        final businessRef = currentUserDocument?.ownedBusiness;
-                        context.pushNamed(
-                          TheExchangeWidget.routeName,
-                          queryParameters: {
-                            'businessRef': serializeParam(
-                              businessRef,
-                              ParamType.DocumentReference,
-                            ),
-                          }.withoutNulls,
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.volunteer_activism_outlined,
-                          color: theme.primaryText),
-                      title: Text('Community Events', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(EventsListingPage.routeName);
-                      },
-                    ),
-                    _sectionLabel(theme, 'Quest'),
-                    // Same slot, different destination by role. A business
-                    // owner has no reason to play the customer Quest
-                    // themselves (see KinQuestWidget's own doc comment -
-                    // deliberately customer-only), but the underlying
-                    // check-in data is exactly what they'd want to see about
-                    // their own business - so this becomes their insights
-                    // dashboard instead of just disappearing.
-                    ListTile(
-                      leading: Icon(
-                        currentUserDocument?.ownedBusiness != null
-                            ? Icons.insights_rounded
-                            : Icons.explore_rounded,
-                        color: theme.primaryText,
-                      ),
-                      title: Text(
-                        currentUserDocument?.ownedBusiness != null
-                            ? 'Business Insights'
-                            : 'The KIN Quest',
-                        style: theme.bodyLarge,
-                      ),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(
-                          currentUserDocument?.ownedBusiness != null
-                              ? BusinessInsightsWidget.routeName
-                              : KinQuestWidget.routeName,
-                        );
-                      },
-                    ),
-                    // Test entry point for the dark/light map redesign
-                    // prototype - loads the real seeded Georgia/Illinois
-                    // test batch (directory_import_batch ==
-                    // 'ga_il_test_2026_08'), not dummy data. Not meant to
-                    // stay in the menu once the redesign either lands in
-                    // KinQuestWidget itself or is dropped.
-                    ListTile(
-                      leading: Icon(Icons.map_rounded, color: theme.primaryText),
-                      title: Text('KIN Quest Map (Beta)', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(KinQuestMapDemoWidget.routeName);
-                      },
-                    ),
-                    _sectionLabel(theme, 'Profile'),
-                    // Was unconditionally OwnerProfileWidget - every signed-in
-                    // user got the owner dashboard regardless of role. A
-                    // customer with no owned business landed on
-                    // OwnerProfileWidget's "set up your business" empty state
-                    // instead of their own profile. Branches on the same
-                    // ownedBusiness check OwnerProfileWidget itself already
-                    // guards on (see its build() method).
-                    ListTile(
-                      leading: Icon(
-                        currentUserDocument?.ownedBusiness != null
-                            ? Icons.storefront_rounded
-                            : Icons.person_rounded,
-                        color: theme.primaryText,
-                      ),
-                      title: Text(
-                        currentUserDocument?.ownedBusiness != null
-                            ? 'My Business / Profile'
-                            : 'My Profile',
-                        style: theme.bodyLarge,
-                      ),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(
-                          currentUserDocument?.ownedBusiness != null
-                              ? OwnerProfileWidget.routeName
-                              : CustomerProfilePageWidget.routeName,
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading:
-                          Icon(Icons.work_outline_rounded, color: theme.primaryText),
-                      title: Text('Job Board', style: theme.bodyLarge),
-                      onTap: () {
-                        Navigator.pop(sheetContext);
-                        context.pushNamed(JobBoardListingPage.routeName);
-                      },
-                    ),
-                    // Universal rather than threaded onto individual pages -
-                    // this menu is the one thing every page already shares,
-                    // so it's the fastest way to put feedback within reach
-                    // everywhere at once. originPage is the route the menu
-                    // was opened from, not a hardcoded per-page string, so
-                    // it stays correct with zero per-page wiring.
-                    ListTile(
-                      leading: Icon(Icons.chat_bubble_outline_rounded,
-                          color: theme.primaryText),
-                      title: Text('Send Feedback', style: theme.bodyLarge),
-                      onTap: () {
-                        final originPage =
-                            GoRouterState.of(context).uri.toString();
-                        Navigator.pop(sheetContext);
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) =>
-                              FeedbackSheetWidget(originPage: originPage),
-                        );
-                      },
-                    ),
-                    ...extraItems,
-                    Divider(
-                      height: theme.designToken.spacing.md,
-                      thickness: 1.0,
-                      indent: 16.0,
-                      endIndent: 16.0,
-                      color: theme.alternate,
-                    ),
-                    // The account row. Before this existed there was no way to
-                    // sign out anywhere in the app, so a device stayed signed in
-                    // to whoever used it first.
-                    if (loggedIn)
-                      ListTile(
-                        leading: Icon(Icons.logout_rounded, color: theme.error),
-                        title: Text(
-                          'Sign Out',
-                          style: theme.bodyLarge.override(color: theme.error),
-                        ),
-                        subtitle: currentUserEmail.isEmpty
-                            ? null
-                            : Text(
-                                currentUserEmail,
-                                style: theme.bodySmall
-                                    .override(color: theme.secondaryText),
-                              ),
-                        onTap: () {
-                          Navigator.pop(sheetContext);
-                          confirmSignOut(context);
-                        },
-                      ),
-                    if (loggedIn)
-                      ListTile(
-                        leading: Icon(Icons.delete_outline_rounded,
-                            color: theme.secondaryText),
-                        title: Text(
-                          'Delete Account',
-                          style: theme.bodyLarge
-                              .override(color: theme.secondaryText),
-                        ),
-                        onTap: () {
-                          Navigator.pop(sheetContext);
-                          confirmDeleteAccount(context);
-                        },
-                      )
-                    else
+                      // Grouped under labeled sections (Discover / Community /
+                      // Quest / Profile) rather than one flat list of 9+ items
+                      // - same destinations, same role-adaptive logic, just
+                      // organized so the menu reads as a few clear categories
+                      // instead of a wall of rows. Mirrors the customer bottom
+                      // nav's own Home/Directory/Feed/Loyalty groupings, which
+                      // this deliberately doesn't touch.
+                      _sectionLabel(theme, 'Discover'),
                       ListTile(
                         leading:
-                            Icon(Icons.login_rounded, color: theme.primaryText),
-                        title: Text('Sign In', style: theme.bodyLarge),
+                            Icon(Icons.map_outlined, color: theme.primaryText),
+                        title: Text('Map', style: theme.bodyLarge),
                         onTap: () {
                           Navigator.pop(sheetContext);
-                          context.pushNamed(SignInPageWidget.routeName);
+                          context.pushNamed(GoogleMapPageWidget.routeName);
                         },
                       ),
-                  ],
+                      // Always visible, not role-adaptive - Marketplace is
+                      // discovery for everyone, same as the map itself. No
+                      // auth required, matching MarketplaceWidget's public route.
+                      ListTile(
+                        leading: Icon(Icons.storefront_outlined,
+                            color: theme.primaryText),
+                        title: Text('Marketplace', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(MarketplaceWidget.routeName);
+                        },
+                      ),
+                      _sectionLabel(theme, 'Community'),
+                      // Hidden while the social layer is unfinished. The
+                      // route is gated too (see nav.dart) - this just stops
+                      // anyone tapping into a Coming Soon screen.
+                      if (FeatureFlags.exchangeEnabled)
+                        ListTile(
+                          leading: Icon(Icons.forum_outlined,
+                              color: theme.primaryText),
+                          title: Text('The Exchange', style: theme.bodyLarge),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            // No longer gated on owning a business. The Exchange
+                            // is a global feed that anyone can read and post to,
+                            // so requiring a business here turned the menu item
+                            // into a no-op with a snackbar for every customer -
+                            // most of the people it exists for. A null ref just
+                            // means posts carry no business tag.
+                            final businessRef =
+                                currentUserDocument?.ownedBusiness;
+                            context.pushNamed(
+                              TheExchangeWidget.routeName,
+                              queryParameters: {
+                                'businessRef': serializeParam(
+                                  businessRef,
+                                  ParamType.DocumentReference,
+                                ),
+                              }.withoutNulls,
+                            );
+                          },
+                        ),
+                      ListTile(
+                        leading: Icon(Icons.volunteer_activism_outlined,
+                            color: theme.primaryText),
+                        title: Text('Community Events', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(EventsListingPage.routeName);
+                        },
+                      ),
+                      _sectionLabel(theme, 'Quest'),
+                      // Same slot, different destination by role. A business
+                      // owner has no reason to play the customer Quest
+                      // themselves (see KinQuestWidget's own doc comment -
+                      // deliberately customer-only), but the underlying
+                      // check-in data is exactly what they'd want to see about
+                      // their own business - so this becomes their insights
+                      // dashboard instead of just disappearing.
+                      ListTile(
+                        leading: Icon(
+                          currentUserDocument?.ownedBusiness != null
+                              ? Icons.insights_rounded
+                              : Icons.explore_rounded,
+                          color: theme.primaryText,
+                        ),
+                        title: Text(
+                          currentUserDocument?.ownedBusiness != null
+                              ? 'Business Insights'
+                              : 'The KIN Quest',
+                          style: theme.bodyLarge,
+                        ),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(
+                            currentUserDocument?.ownedBusiness != null
+                                ? BusinessInsightsWidget.routeName
+                                : KinQuestWidget.routeName,
+                          );
+                        },
+                      ),
+                      // The dark/light map redesign of KIN Quest - real
+                      // businesses nearby (QuestEligibility.
+                      // questEligibleBusinesses, same source the list-based
+                      // KinQuestWidget uses) and real GPS, not the
+                      // Georgia/Illinois test batch this used to be pinned
+                      // to during development.
+                      ListTile(
+                        leading:
+                            Icon(Icons.map_rounded, color: theme.primaryText),
+                        title: Text('KIN Quest Map', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(KinQuestMapDemoWidget.routeName);
+                        },
+                      ),
+                      _sectionLabel(theme, 'Profile'),
+                      // Was unconditionally OwnerProfileWidget - every signed-in
+                      // user got the owner dashboard regardless of role. A
+                      // customer with no owned business landed on
+                      // OwnerProfileWidget's "set up your business" empty state
+                      // instead of their own profile. Branches on the same
+                      // ownedBusiness check OwnerProfileWidget itself already
+                      // guards on (see its build() method).
+                      ListTile(
+                        leading: Icon(
+                          currentUserDocument?.ownedBusiness != null
+                              ? Icons.storefront_rounded
+                              : Icons.person_rounded,
+                          color: theme.primaryText,
+                        ),
+                        title: Text(
+                          currentUserDocument?.ownedBusiness != null
+                              ? 'My Business / Profile'
+                              : 'My Profile',
+                          style: theme.bodyLarge,
+                        ),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(
+                            currentUserDocument?.ownedBusiness != null
+                                ? OwnerProfileWidget.routeName
+                                : CustomerProfilePageWidget.routeName,
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: Icon(Icons.work_outline_rounded,
+                            color: theme.primaryText),
+                        title: Text('Job Board', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(JobBoardListingPage.routeName);
+                        },
+                      ),
+                      // Universal rather than threaded onto individual pages -
+                      // this menu is the one thing every page already shares,
+                      // so it's the fastest way to put feedback within reach
+                      // everywhere at once. originPage is the route the menu
+                      // was opened from, not a hardcoded per-page string, so
+                      // it stays correct with zero per-page wiring.
+                      ListTile(
+                        leading: Icon(Icons.chat_bubble_outline_rounded,
+                            color: theme.primaryText),
+                        title: Text('Send Feedback', style: theme.bodyLarge),
+                        onTap: () {
+                          final originPage =
+                              GoRouterState.of(context).uri.toString();
+                          Navigator.pop(sheetContext);
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (_) =>
+                                FeedbackSheetWidget(originPage: originPage),
+                          );
+                        },
+                      ),
+                      ...extraItems,
+                      Divider(
+                        height: theme.designToken.spacing.md,
+                        thickness: 1.0,
+                        indent: 16.0,
+                        endIndent: 16.0,
+                        color: theme.alternate,
+                      ),
+                      // The account row. Before this existed there was no way to
+                      // sign out anywhere in the app, so a device stayed signed in
+                      // to whoever used it first.
+                      if (loggedIn)
+                        ListTile(
+                          leading:
+                              Icon(Icons.logout_rounded, color: theme.error),
+                          title: Text(
+                            'Sign Out',
+                            style: theme.bodyLarge.override(color: theme.error),
+                          ),
+                          subtitle: currentUserEmail.isEmpty
+                              ? null
+                              : Text(
+                                  currentUserEmail,
+                                  style: theme.bodySmall
+                                      .override(color: theme.secondaryText),
+                                ),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            confirmSignOut(context);
+                          },
+                        ),
+                      if (loggedIn)
+                        ListTile(
+                          leading: Icon(Icons.delete_outline_rounded,
+                              color: theme.secondaryText),
+                          title: Text(
+                            'Delete Account',
+                            style: theme.bodyLarge
+                                .override(color: theme.secondaryText),
+                          ),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            confirmDeleteAccount(context);
+                          },
+                        )
+                      else
+                        ListTile(
+                          leading: Icon(Icons.login_rounded,
+                              color: theme.primaryText),
+                          title: Text('Sign In', style: theme.bodyLarge),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            context.pushNamed(SignInPageWidget.routeName);
+                          },
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -446,8 +463,8 @@ Future<void> confirmDeleteAccount(BuildContext context) async {
       content: Text(
         (email.isEmpty
                 ? 'This will permanently delete your account'
-                : 'This will permanently delete $email')
-            + ' - your profile, reviews, and check-in history. '
+                : 'This will permanently delete $email') +
+            ' - your profile, reviews, and check-in history. '
                 'This action is permanent and cannot be undone.',
         style: theme.bodyMedium,
       ),

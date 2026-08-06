@@ -169,7 +169,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     try {
       final controller = await _model.mapGoogleMapsController.future
           .timeout(const Duration(seconds: 5));
-      final bounds = await controller.getVisibleRegion()
+      final bounds = await controller
+          .getVisibleRegion()
           .timeout(const Duration(seconds: 5));
       if (!mounted) return;
       safeSetState(() => _viewportBounds = bounds);
@@ -392,73 +393,83 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
               topRight: Radius.circular(theme.designToken.radius.lg),
             ),
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40.0,
-                  height: 4.0,
-                  margin: EdgeInsets.symmetric(
-                      vertical: theme.designToken.spacing.md),
-                  decoration: BoxDecoration(
-                    color: theme.alternate,
-                    borderRadius: BorderRadius.circular(2.0),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 4.0),
-                  child: Align(
-                    alignment: AlignmentDirectional(-1.0, 0.0),
-                    child: Text(
-                      '${businesses.length} businesses here',
-                      style: theme.titleMedium,
+          // Material re-established here - same "background is hidden"
+          // ListTile assertion fix as _searchResultsList and
+          // main_menu_button.dart's hamburger sheet just above: this
+          // Container's opaque decoration otherwise sits between the
+          // sheet's own (transparent) Material and every ListTile the
+          // ListView.builder below creates.
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.0,
+                    height: 4.0,
+                    margin: EdgeInsets.symmetric(
+                        vertical: theme.designToken.spacing.md),
+                    decoration: BoxDecoration(
+                      color: theme.alternate,
+                      borderRadius: BorderRadius.circular(2.0),
                     ),
                   ),
-                ),
-                if (businesses.first.address.isNotEmpty)
                   Padding(
                     padding:
-                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 8.0),
+                        EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 4.0),
                     child: Align(
                       alignment: AlignmentDirectional(-1.0, 0.0),
                       child: Text(
-                        businesses.first.address,
-                        style: theme.bodySmall.override(
-                          font: GoogleFonts.plusJakartaSans(),
-                          color: theme.secondaryText,
-                          letterSpacing: 0.0,
-                        ),
+                        '${businesses.length} businesses here',
+                        style: theme.titleMedium,
                       ),
                     ),
                   ),
-                Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.zero,
-                    itemCount: businesses.length,
-                    itemBuilder: (listContext, index) {
-                      final business = businesses[index];
-                      return ListTile(
-                        leading: Icon(Icons.storefront_rounded,
-                            color: theme.primaryText),
-                        title:
-                            Text(business.businessName, style: theme.bodyLarge),
-                        subtitle: business.category.isNotEmpty
-                            ? Text(business.category, style: theme.bodySmall)
-                            : null,
-                        trailing: Icon(Icons.chevron_right_rounded,
-                            color: theme.secondaryText),
-                        onTap: () {
-                          Navigator.pop(sheetContext);
-                          _openBusiness(business);
-                        },
-                      );
-                    },
+                  if (businesses.first.address.isNotEmpty)
+                    Padding(
+                      padding:
+                          EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 8.0),
+                      child: Align(
+                        alignment: AlignmentDirectional(-1.0, 0.0),
+                        child: Text(
+                          businesses.first.address,
+                          style: theme.bodySmall.override(
+                            font: GoogleFonts.plusJakartaSans(),
+                            color: theme.secondaryText,
+                            letterSpacing: 0.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  Flexible(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.zero,
+                      itemCount: businesses.length,
+                      itemBuilder: (listContext, index) {
+                        final business = businesses[index];
+                        return ListTile(
+                          leading: Icon(Icons.storefront_rounded,
+                              color: theme.primaryText),
+                          title: Text(business.businessName,
+                              style: theme.bodyLarge),
+                          subtitle: business.category.isNotEmpty
+                              ? Text(business.category, style: theme.bodySmall)
+                              : null,
+                          trailing: Icon(Icons.chevron_right_rounded,
+                              color: theme.secondaryText),
+                          onTap: () {
+                            Navigator.pop(sheetContext);
+                            _openBusiness(business);
+                          },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(height: theme.designToken.spacing.md),
-              ],
+                  SizedBox(height: theme.designToken.spacing.md),
+                ],
+              ),
             ),
           ),
         );
@@ -583,59 +594,69 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
           ),
         ],
       ),
-      child: _searching
-          ? Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: SizedBox(
-                  width: 20.0,
-                  height: 20.0,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.0,
-                    valueColor:
-                        AlwaysStoppedAnimation<Color>(theme.secondaryText),
+      // Material re-established here rather than relying on whatever's up
+      // the tree (Scaffold's own, most likely) - this Container's opaque
+      // decoration above sits between that distant Material and every
+      // ListTile below, which is exactly the "background is hidden"
+      // ListTile assertion Crashlytics caught in production (same root
+      // cause, same fix, as the hamburger menu sheet in
+      // main_menu_button.dart). transparent so the Container's own
+      // rounded/bordered background still shows through.
+      child: Material(
+        color: Colors.transparent,
+        child: _searching
+            ? Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: SizedBox(
+                    width: 20.0,
+                    height: 20.0,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
+                      valueColor:
+                          AlwaysStoppedAnimation<Color>(theme.secondaryText),
+                    ),
                   ),
                 ),
-              ),
-            )
-          : _searchResults.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'No businesses match "$_searchQuery".',
-                    style: theme.bodySmall
-                        .override(color: theme.secondaryText),
-                  ),
-                )
-              : ListView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  itemCount: _searchResults.length,
-                  itemBuilder: (listContext, index) {
-                    final business = _searchResults[index];
-                    final hasPin = business.businessLocation != null;
-                    return ListTile(
-                      dense: true,
-                      leading: Icon(Icons.storefront_rounded,
-                          color: theme.primaryText, size: 20.0),
-                      title: Text(business.businessName,
-                          style: theme.bodyMedium
-                              .override(color: theme.primaryText)),
-                      subtitle: Text(
-                        hasPin
-                            ? business.category
-                            : 'Not on the map yet - view profile',
-                        style: theme.labelSmall.override(
-                          color:
-                              hasPin ? theme.secondaryText : theme.warning,
+              )
+            : _searchResults.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      'No businesses match "$_searchQuery".',
+                      style:
+                          theme.bodySmall.override(color: theme.secondaryText),
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    itemCount: _searchResults.length,
+                    itemBuilder: (listContext, index) {
+                      final business = _searchResults[index];
+                      final hasPin = business.businessLocation != null;
+                      return ListTile(
+                        dense: true,
+                        leading: Icon(Icons.storefront_rounded,
+                            color: theme.primaryText, size: 20.0),
+                        title: Text(business.businessName,
+                            style: theme.bodyMedium
+                                .override(color: theme.primaryText)),
+                        subtitle: Text(
+                          hasPin
+                              ? business.category
+                              : 'Not on the map yet - view profile',
+                          style: theme.labelSmall.override(
+                            color: hasPin ? theme.secondaryText : theme.warning,
+                          ),
                         ),
-                      ),
-                      trailing: Icon(Icons.chevron_right_rounded,
-                          color: theme.secondaryText),
-                      onTap: () => _selectSearchResult(business),
-                    );
-                  },
-                ),
+                        trailing: Icon(Icons.chevron_right_rounded,
+                            color: theme.secondaryText),
+                        onTap: () => _selectSearchResult(business),
+                      );
+                    },
+                  ),
+      ),
     );
   }
 
@@ -716,9 +737,10 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
     // known center means the map and pins still render immediately, and
     // get replaced by the precise viewport the moment the real callback
     // does fire.
-    final bounds = _viewportBounds ?? _fallbackBounds(
-      _model.mapGoogleMapsCenter ?? LatLng(29.4241, -98.4936),
-    );
+    final bounds = _viewportBounds ??
+        _fallbackBounds(
+          _model.mapGoogleMapsCenter ?? LatLng(29.4241, -98.4936),
+        );
 
     return FutureBuilder<List<List<BusinessesRecord>>>(
       future: Future.wait([
@@ -762,8 +784,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
         // by whatever the user is browsing or has panned to would silently
         // take away exposure a merchant bought. Eligibility is
         // subscription status only - see GoogleMapPageModel.premiumBusinesses.
-        final premiumBusinesses =
-            premiumCarouselBusinesses(snapshot.data![1]);
+        final premiumBusinesses = premiumCarouselBusinesses(snapshot.data![1]);
 
         return GestureDetector(
           onTap: () {
@@ -875,9 +896,9 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                             .stepFor('main_menu')
                                             ?.body ??
                                         'Tap the menu to find Discover, '
-                                        'Community, Quest, and Profile - '
-                                        'the whole app is organized under '
-                                        'these four.',
+                                            'Community, Quest, and Profile - '
+                                            'the whole app is organized under '
+                                            'these four.',
                                     child: const MainMenuButton(),
                                   ),
                                   const NotificationBellButton(),
@@ -893,9 +914,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    ...kBusinessCategoryFilters.map(
-                                        (filter) =>
-                                            _categoryChip(context, filter)),
+                                    ...kBusinessCategoryFilters.map((filter) =>
+                                        _categoryChip(context, filter)),
                                     _blackOwnedChip(context),
                                   ].divide(SizedBox(width: 8.0)),
                                 ),
@@ -1031,19 +1051,17 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                                 child:
                                                     BusinessPreviewCardWidget(
                                                   name: business.businessName,
-                                                  isPriority: business
-                                                      .isPriorityPinned,
+                                                  isPriority:
+                                                      business.isPriorityPinned,
                                                   category: business.category,
                                                   rating: formatNumber(
                                                     business.reviewScore,
                                                     formatType:
                                                         FormatType.decimal,
-                                                    decimalType:
-                                                        DecimalType
-                                                            .periodDecimal,
+                                                    decimalType: DecimalType
+                                                        .periodDecimal,
                                                   ),
-                                                  imageUrl:
-                                                      business.heroImage,
+                                                  imageUrl: business.heroImage,
                                                 ),
                                               ),
                                             )
@@ -1052,8 +1070,7 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                                   .premiumCardModels[index],
                                               updateCallback: () =>
                                                   safeSetState(() {}),
-                                              child:
-                                                  BusinessPreviewCardWidget(
+                                              child: BusinessPreviewCardWidget(
                                                 name: business.businessName,
                                                 isPriority:
                                                     business.isPriorityPinned,
@@ -1062,8 +1079,8 @@ class _GoogleMapPageWidgetState extends State<GoogleMapPageWidget> {
                                                   business.reviewScore,
                                                   formatType:
                                                       FormatType.decimal,
-                                                  decimalType: DecimalType
-                                                      .periodDecimal,
+                                                  decimalType:
+                                                      DecimalType.periodDecimal,
                                                 ),
                                                 imageUrl: business.heroImage,
                                               ),
