@@ -13,7 +13,6 @@ import 'auth/firebase_auth/auth_util.dart';
 
 import 'backend/backend.dart';
 import 'backend/firebase/firebase_config.dart';
-import '/components/kin_splash_widget.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
@@ -91,7 +90,8 @@ void _maybeUseFirebaseEmulator() {
       : 'localhost';
   FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
   FirebaseFunctions.instance.useFunctionsEmulator(host, 5001);
-  debugPrint('Using Firebase Emulator Suite at $host (Firestore :8080, Functions :5001)');
+  debugPrint(
+      'Using Firebase Emulator Suite at $host (Firestore :8080, Functions :5001)');
 }
 
 /// Debug-only auto sign-in for local testing, so you don't have to log in
@@ -268,20 +268,16 @@ class _MyAppState extends State<MyApp> {
         _appStateNotifier.update(user);
       });
     jwtTokenStream.listen((_) {});
-    // Held for the length of the intro animation rather than a bare 1000ms,
-    // so the splash isn't cut off part-way through. KinSplashWidget owns the
-    // duration so the two can't drift apart.
-    //
-    // Timed from the first rendered frame rather than from initState: the
-    // engine spends a noticeable stretch on the native launch screen before
-    // the splash is ever on screen, and counting that stretch against the
-    // hold meant the animation was being torn down part-way through.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(
-        KinSplashWidget.introDuration,
-        () => _appStateNotifier.stopShowingSplashImage(),
-      );
-    });
+    // No timer here anymore - KinSplashWidget now dismisses itself (tap on
+    // its "Tap to enter" CTA, or its own auto-continue fallback if no one
+    // taps) via the onContinue callback nav.dart wires to
+    // stopShowingSplashImage. That also fixes the reason this used to be
+    // routed through addPostFrameCallback: counting the hold from
+    // initState double-counted the stretch the engine spends on the native
+    // launch screen before the splash is ever on screen. Starting the
+    // widget's own timer from its initState has the same effect for free,
+    // since that only runs once the widget is actually mounted and
+    // rendering.
   }
 
   @override

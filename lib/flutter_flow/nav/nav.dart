@@ -142,8 +142,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
                 )
               : const ComingSoonPage(
                   featureName: 'The Exchange',
-                  blurb:
-                      "The Exchange is where businesses and neighbours post "
+                  blurb: "The Exchange is where businesses and neighbours post "
                       "what's happening. We're finishing it up.",
                 ),
         ),
@@ -183,8 +182,7 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
               ? NearbyFeedWidget()
               : const ComingSoonPage(
                   featureName: 'The Feed',
-                  blurb:
-                      "Posts from businesses near you. We're finishing this "
+                  blurb: "Posts from businesses near you. We're finishing this "
                       'one up alongside The Exchange.',
                 ),
         ),
@@ -567,8 +565,10 @@ class FFRoute {
                   builder: (context, _) => builder(context, ffParams),
                 )
               : builder(context, ffParams);
-          final child =
-              appStateNotifier.loading ? const KinSplashWidget() : page;
+          final child = appStateNotifier.loading
+              ? KinSplashWidget(
+                  onContinue: appStateNotifier.stopShowingSplashImage)
+              : page;
 
           final transitionInfo = state.transitionInfo;
           return transitionInfo.hasTransition
