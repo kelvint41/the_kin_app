@@ -1,3 +1,4 @@
+import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -129,6 +130,14 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
         onTap: () => context.pushNamed(KinQuestWidget.routeName),
       );
 
+  /// Whether the signed-in account owns a business - the one signal this
+  /// bar branches on for Home/Loyalty below. Deliberately not `isAdmin`:
+  /// admin is an orthogonal permission layered on top of a real account
+  /// (Executive Dashboard embeds this same bar, and its viewer might also
+  /// own a business, or might just be a customer with admin rights) - it
+  /// says nothing about which "home" screen actually belongs to them.
+  bool get _isBusinessOwner => currentUserDocument?.ownedBusiness != null;
+
   /// The tab for [slot], or the Quest tab if [slot] is the page this bar
   /// is currently embedded on.
   Widget _tabFor(BuildContext context, KinNavPage slot) {
@@ -136,13 +145,28 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
 
     switch (slot) {
       case KinNavPage.home:
+        // Every embed of this bar used to send Home to the customer
+        // profile unconditionally - including on Owner Profile, Business
+        // Insights, and the Executive Dashboard themselves, where a
+        // business owner or admin tapping "Home" landed on a customer
+        // profile that usually wasn't even theirs (they'd have to already
+        // be signed in as the same account with no owned business for it
+        // to make sense). This is what "reflect which type of user" in
+        // the original ask meant: the destination now actually depends on
+        // who's looking at it.
         return _buildTab(
           context,
           icon: Icons.home_rounded,
           label: 'Home',
-          onTap: () => context.pushNamed(CustomerProfilePageWidget.routeName),
+          onTap: () => context.pushNamed(
+            _isBusinessOwner
+                ? OwnerProfileWidget.routeName
+                : CustomerProfilePageWidget.routeName,
+          ),
         );
       case KinNavPage.directory:
+        // Universal - both a customer and a business owner want to browse
+        // the same business directory, so this one doesn't branch.
         return _buildTab(
           context,
           icon: Icons.map_rounded,
@@ -154,7 +178,24 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
         // so it's held back by the same flag. Swapped for the Quest tab
         // rather than removed: the bar is a fixed four slots, and dropping
         // one would leave a visible gap. Reuses the existing swap mechanic.
-        if (!FeatureFlags.exchangeEnabled) return _questTab(context);
+        //
+        // On the Quest page itself (widget.currentPage == quest doesn't
+        // match this slot, so the early return above doesn't catch it)
+        // that swap used to put a second, identical "Quest" button right
+        // next to the real one - falls back to Support Chat instead in
+        // that specific case, since there's nowhere else useful left to
+        // send this slot that isn't already one of the other three.
+        if (!FeatureFlags.exchangeEnabled) {
+          if (widget.currentPage == KinNavPage.quest) {
+            return _buildTab(
+              context,
+              icon: Icons.support_agent_rounded,
+              label: 'Support',
+              onTap: () => context.pushNamed(SupportChatWidget.routeName),
+            );
+          }
+          return _questTab(context);
+        }
         return _buildTab(
           context,
           icon: Icons.forum_rounded,
@@ -167,6 +208,19 @@ class _KinBottomNav2WidgetState extends State<KinBottomNav2Widget> {
           onTap: () => context.pushNamed(NearbyFeedWidget.routeName),
         );
       case KinNavPage.loyalty:
+        // A business owner has no "Personal Milestones" of their own to
+        // show here - that block (support streak, reviews written,
+        // personal Kindex) is a customer concept. Business Insights is
+        // the owner-side equivalent: their own business's Kindex and
+        // analytics, same reasoning as the Home swap above.
+        if (_isBusinessOwner) {
+          return _buildTab(
+            context,
+            icon: Icons.insights_rounded,
+            label: 'Insights',
+            onTap: () => context.pushNamed(BusinessInsightsWidget.routeName),
+          );
+        }
         return _buildTab(
           context,
           icon: Icons.workspace_premium_rounded,
