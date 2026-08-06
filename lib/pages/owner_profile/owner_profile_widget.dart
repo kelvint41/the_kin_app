@@ -465,19 +465,14 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
               // owner actually needs at a glance (profile info, KINDEX
               // score, job applicant messages), same as
               // GrowthToolsPageWidget's own doc comment describes.
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(20.0, 24.0, 20.0, 0.0),
-                child: CompactActionListWidget(items: [
-                  CompactActionRowData(
-                    icon: Icons.trending_up_rounded,
-                    title: 'Growth Tools',
-                    subtitle:
-                        'Promote, Power Hour, your plan, and listing management.',
-                    onTap: () =>
-                        context.pushNamed(GrowthToolsPageWidget.routeName),
-                  ),
-                ]),
-              ),
+              //
+              // The row that used to sit here (a single "Growth Tools"
+              // CompactActionListWidget entry, right above the KINDEX score
+              // below) was removed on request - Growth Tools is still fully
+              // reachable from the hamburger menu (_ownerMenuItems below),
+              // so this wasn't the only path, just a redundant second one
+              // competing for attention right above the score an owner
+              // actually opens this page to check.
               Padding(
                 padding: EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 0.0),
                 child: Column(

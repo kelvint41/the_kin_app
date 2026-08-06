@@ -45,56 +45,64 @@ class GrowthToolsPageWidget extends StatelessWidget {
               topRight: Radius.circular(theme.designToken.radius.lg),
             ),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  EdgeInsets.symmetric(vertical: theme.designToken.spacing.md),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 40.0,
-                    height: 4.0,
-                    margin:
-                        EdgeInsets.only(bottom: theme.designToken.spacing.md),
-                    decoration: BoxDecoration(
-                      color: theme.alternate,
-                      borderRadius: BorderRadius.circular(2.0),
+          // Material re-established here - same "background is hidden"
+          // ListTile assertion fix as main_menu_button.dart's hamburger
+          // sheet and google_map_page_widget.dart's sheets: this
+          // Container's opaque decoration otherwise sits between the
+          // sheet's own (transparent) Material and every ListTile below.
+          child: Material(
+            color: Colors.transparent,
+            child: SafeArea(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: theme.designToken.spacing.md),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40.0,
+                      height: 4.0,
+                      margin:
+                          EdgeInsets.only(bottom: theme.designToken.spacing.md),
+                      decoration: BoxDecoration(
+                        color: theme.alternate,
+                        borderRadius: BorderRadius.circular(2.0),
+                      ),
                     ),
-                  ),
-                  ListTile(
-                    leading:
-                        Icon(Icons.storefront_rounded, color: theme.primaryText),
-                    title: Text('My Items', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(MyItemsWidget.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.work_outline_rounded,
-                        color: theme.primaryText),
-                    title: Text('Manage Jobs', style: theme.bodyLarge),
-                    subtitle: Text(
-                      'Also where applicant messages live.',
-                      style: theme.labelSmall
-                          .override(color: theme.secondaryText),
+                    ListTile(
+                      leading: Icon(Icons.storefront_rounded,
+                          color: theme.primaryText),
+                      title: Text('My Items', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(MyItemsWidget.routeName);
+                      },
                     ),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(JobManagementPage.routeName);
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.volunteer_activism_outlined,
-                        color: theme.primaryText),
-                    title: Text('Manage Events', style: theme.bodyLarge),
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      context.pushNamed(EventManagementPage.routeName);
-                    },
-                  ),
-                ],
+                    ListTile(
+                      leading: Icon(Icons.work_outline_rounded,
+                          color: theme.primaryText),
+                      title: Text('Manage Jobs', style: theme.bodyLarge),
+                      subtitle: Text(
+                        'Also where applicant messages live.',
+                        style: theme.labelSmall
+                            .override(color: theme.secondaryText),
+                      ),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(JobManagementPage.routeName);
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.volunteer_activism_outlined,
+                          color: theme.primaryText),
+                      title: Text('Manage Events', style: theme.bodyLarge),
+                      onTap: () {
+                        Navigator.pop(sheetContext);
+                        context.pushNamed(EventManagementPage.routeName);
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -103,11 +111,66 @@ class GrowthToolsPageWidget extends StatelessWidget {
     );
   }
 
-  /// The three benefit rows under "Your Membership Tier" - see
-  /// kSubscriptionTierOrder (subscription_tiers.dart) for the ladder these
-  /// minimums are checked against.
-  Widget _tierFeatureRow(
-      BuildContext context, String label, bool included) {
+  /// Real per-tier feature copy - kept word-for-word identical to
+  /// merchant_pricing_suite_widget.dart's own f1-f4 bullets (the actual
+  /// purchase flow's tier cards) so this comparison can never drift from
+  /// what upgrading actually gets someone. One canonical source of truth,
+  /// just displayed in two places.
+  static const Map<String, List<String>> _tierFeatures = {
+    'Community': [
+      'Access to public community forums',
+      'Basic business profile page on local directory',
+      'Up to 3 active local connections',
+      'Basic community support',
+    ],
+    'Founder': [
+      'Weekly carousel rotations',
+      'Basic business profile analytics',
+      'Post 1 promotion per month on The Exchange',
+      'Community support',
+    ],
+    'Founding Local': [
+      'Verified Founding Member trust badge',
+      'Up to 5 gallery photos on profile',
+      'Basic profile analytics (views & trends)',
+      'Post 1 promotion per month on The Exchange',
+    ],
+    'Premium Local': [
+      'Premium interactive map carousel placement',
+      'Location Beacon feature (broadcast your location)',
+      'Advanced performance analytics & insights',
+      'Priority support + featured business badge',
+    ],
+    'Elite': [
+      'Always featured on carousel (daily visibility)',
+      'Unlimited Location Beacons for mobile services',
+      'Priority support + account manager',
+      'Custom branding & co-marketing opportunities',
+    ],
+  };
+
+  /// Also mirrors merchant_pricing_suite_widget.dart's own _priceFor calls
+  /// (the monthly figure - annual pricing/discount stays on the actual
+  /// purchase page, this is a comparison summary, not a checkout).
+  static const Map<String, String> _tierPrices = {
+    'Community': 'Free',
+    'Founder': '\$29/mo',
+    'Founding Local': '\$59/mo',
+    'Premium Local': '\$99/mo',
+    'Elite': '\$149/mo',
+  };
+
+  /// One feature row - a checkmark when [cardTier] is a tier the business
+  /// already has (at or below their actual [currentTier]), a lock when it
+  /// isn't. Previously this compared the business's own tier against a
+  /// fixed feature's OWN minimum tier, always evaluated against whichever
+  /// tier was already current - meaningful for "do I have this feature"
+  /// but with only one tier's card ever shown, a Community business saw
+  /// nothing but locks and no way to see what stepping up would actually
+  /// unlock. This version is called once per tier CARD instead, so every
+  /// tier's own full feature list renders, checked against whether that
+  /// whole tier is included.
+  Widget _tierFeatureRow(BuildContext context, String label, bool included) {
     final theme = FlutterFlowTheme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.max,
@@ -134,18 +197,105 @@ class GrowthToolsPageWidget extends StatelessWidget {
     );
   }
 
-  Widget _tierFeatureList(BuildContext context, String tierName) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _tierFeatureRow(context, 'Priority KINDEX Ranking',
-            tierAtLeast(tierName, 'Founder')),
-        _tierFeatureRow(context, 'Unlimited Promotions',
-            tierAtLeast(tierName, 'Premium Local')),
-        _tierFeatureRow(context, 'Advanced Performance Analytics',
-            tierAtLeast(tierName, 'Premium Local')),
-      ].divide(SizedBox(height: 8.0)),
+  /// One tier's full card in the comparison - name, price, "CURRENT PLAN"
+  /// badge when it matches [currentTier], and all four of its real
+  /// features, checked (not locked) since a business on this tier or
+  /// higher already has everything a lower tier offers.
+  Widget _tierComparisonCard(
+      BuildContext context, String cardTier, String currentTier) {
+    final theme = FlutterFlowTheme.of(context);
+    final isCurrent = cardTier == currentTier;
+    final included = tierAtLeast(currentTier, cardTier);
+    final features = _tierFeatures[cardTier] ?? const [];
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: isCurrent
+            ? LinearGradient(
+                colors: [theme.primary, const Color(0xFF06251B)],
+                stops: [0.0, 1.0],
+                begin: AlignmentDirectional(1.0, 1.0),
+                end: AlignmentDirectional(-1.0, -1.0),
+              )
+            : null,
+        color: isCurrent ? null : theme.secondaryBackground,
+        borderRadius: BorderRadius.circular(24.0),
+        border: Border.all(
+          color: isCurrent ? theme.accent1.withAlpha(51) : theme.alternate,
+          width: 1.0,
+        ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      cardTier,
+                      style: theme.titleMedium.override(
+                        font: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold),
+                        color: const Color(0xFFD4AF37),
+                        letterSpacing: 0.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (isCurrent)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 8.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: theme.accent1.withAlpha(51),
+                            borderRadius: BorderRadius.circular(9999.0),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.fromSTEB(
+                                10.0, 3.0, 10.0, 3.0),
+                            child: Text(
+                              'CURRENT PLAN',
+                              style: theme.labelSmall.override(
+                                font: GoogleFonts.plusJakartaSans(
+                                    fontWeight: FontWeight.bold),
+                                color: const Color(0xFFD4AF37),
+                                letterSpacing: 0.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                Text(
+                  _tierPrices[cardTier] ?? '',
+                  style: theme.bodyMedium.override(
+                    font: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold),
+                    color: isCurrent ? theme.primaryText : theme.secondaryText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 14.0),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final feature in features)
+                  _tierFeatureRow(context, feature, included),
+              ].divide(SizedBox(height: 8.0)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -345,6 +495,30 @@ class GrowthToolsPageWidget extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    // Every tier's own card, not just the current one - a
+                    // Community business used to see a single card with
+                    // nothing but locked features and no way to see what
+                    // stepping up would actually unlock. StreamBuilder
+                    // wraps the whole comparison (not one card each) so
+                    // all five stay in sync off one read.
+                    StreamBuilder<BusinessesRecord>(
+                      stream: BusinessesRecord.getDocument(ownedBusiness),
+                      builder: (context, snapshot) {
+                        final rawTierName = snapshot.hasData
+                            ? snapshot.data!.subscriptionTier
+                            : '';
+                        final currentTier =
+                            rawTierName.isEmpty ? 'Community' : rawTierName;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            for (final cardTier in kSubscriptionTierOrder)
+                              _tierComparisonCard(
+                                  context, cardTier, currentTier),
+                          ].divide(SizedBox(height: 12.0)),
+                        );
+                      },
+                    ),
                     InkWell(
                       onTap: () => context.pushNamed(
                         MerchantPricingSuiteWidget.routeName,
@@ -355,78 +529,16 @@ class GrowthToolsPageWidget extends StatelessWidget {
                           ),
                         }.withoutNulls,
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [theme.primary, const Color(0xFF06251B)],
-                            stops: [0.0, 1.0],
-                            begin: AlignmentDirectional(1.0, 1.0),
-                            end: AlignmentDirectional(-1.0, -1.0),
-                          ),
-                          borderRadius: BorderRadius.circular(24.0),
-                          border: Border.all(
-                            color: theme.accent1.withAlpha(51),
-                            width: 1.0,
-                          ),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(24.0),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  color: theme.accent1.withAlpha(51),
-                                  borderRadius: BorderRadius.circular(9999.0),
-                                ),
-                                child: Padding(
-                                  padding: EdgeInsetsDirectional.fromSTEB(
-                                      16.0, 4.0, 16.0, 4.0),
-                                  child: Text(
-                                    'CURRENT PLAN',
-                                    style: theme.labelSmall.override(
-                                      font: GoogleFonts.plusJakartaSans(
-                                          fontWeight: FontWeight.bold),
-                                      color: const Color(0xFFD4AF37),
-                                      letterSpacing: 0.0,
-                                      fontWeight: FontWeight.bold,
-                                      lineHeight: 1.4,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              StreamBuilder<BusinessesRecord>(
-                                stream:
-                                    BusinessesRecord.getDocument(ownedBusiness),
-                                builder: (context, snapshot) {
-                                  final rawTierName = snapshot.hasData
-                                      ? snapshot.data!.subscriptionTier
-                                      : '';
-                                  final tierName = rawTierName.isEmpty
-                                      ? 'Community'
-                                      : rawTierName;
-                                  return Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        tierName,
-                                        style: theme.headlineSmall.override(
-                                          font: GoogleFonts.plusJakartaSans(
-                                              fontWeight: FontWeight.bold),
-                                          color: const Color(0xFFD4AF37),
-                                          letterSpacing: 0.0,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      _tierFeatureList(context, tierName),
-                                    ].divide(SizedBox(height: 16.0)),
-                                  );
-                                },
-                              ),
-                            ].divide(SizedBox(height: 24.0)),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Text(
+                          'See full plan details & upgrade',
+                          style: theme.bodyMedium.override(
+                            font: GoogleFonts.plusJakartaSans(
+                                fontWeight: FontWeight.bold),
+                            color: const Color(0xFFD4AF37),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
