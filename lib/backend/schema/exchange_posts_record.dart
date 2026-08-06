@@ -41,6 +41,15 @@ class ExchangePostsRecord extends FirestoreRecord {
   String get postImage => _postImage ?? '';
   bool hasPostImage() => _postImage != null;
 
+  // "post_video" field. Download URL of an uploaded video, set only at
+  // post-creation time - firestore.rules locks exchange_posts updates to
+  // ['post_text', 'is_edited', 'edited_at'], so this can never be patched
+  // in afterward, same as post_image. A post carries one or the other, not
+  // both, since the composer picker returns a single file.
+  String? _postVideo;
+  String get postVideo => _postVideo ?? '';
+  bool hasPostVideo() => _postVideo != null;
+
   // "timestamp" field.
   DateTime? _timestamp;
   DateTime? get timestamp => _timestamp;
@@ -131,6 +140,7 @@ class ExchangePostsRecord extends FirestoreRecord {
     _businessRef = snapshotData['business_ref'] as DocumentReference?;
     _postText = snapshotData['post_text'] as String?;
     _postImage = snapshotData['post_image'] as String?;
+    _postVideo = snapshotData['post_video'] as String?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
     _likesCount = castToType<int>(snapshotData['likes_count']);
     _isEdited = snapshotData['is_edited'] as bool?;
@@ -184,6 +194,7 @@ Map<String, dynamic> createExchangePostsRecordData({
   DocumentReference? businessRef,
   String? postText,
   String? postImage,
+  String? postVideo,
   DateTime? timestamp,
   int? likesCount,
   String? authorName,
@@ -198,6 +209,7 @@ Map<String, dynamic> createExchangePostsRecordData({
       'business_ref': businessRef,
       'post_text': postText,
       'post_image': postImage,
+      'post_video': postVideo,
       'timestamp': timestamp,
       'likes_count': likesCount,
       'author_name': authorName,
@@ -221,6 +233,7 @@ class ExchangePostsRecordDocumentEquality
         e1?.businessRef == e2?.businessRef &&
         e1?.postText == e2?.postText &&
         e1?.postImage == e2?.postImage &&
+        e1?.postVideo == e2?.postVideo &&
         e1?.timestamp == e2?.timestamp &&
         e1?.likesCount == e2?.likesCount &&
         e1?.postType == e2?.postType &&
@@ -234,6 +247,7 @@ class ExchangePostsRecordDocumentEquality
         e?.businessRef,
         e?.postText,
         e?.postImage,
+        e?.postVideo,
         e?.timestamp,
         e?.likesCount,
         e?.postType,

@@ -8,10 +8,12 @@ import '/components/kindex_spotlight_widget.dart';
 import '/components/main_menu_button.dart';
 import '/components/promo_card_widget.dart';
 import '/services/exchange_post_types.dart';
+import '/backend/firebase_storage/storage.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import '/flutter_flow/upload_data.dart';
 import '/pages/kin_bottom_nav2/kin_bottom_nav2_widget.dart';
 import '/index.dart';
 import 'dart:async';
@@ -47,6 +49,14 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
   /// post; this copy only drives whether we prompt before the first post.
   bool _acceptedConduct = false;
 
+  /// Media picked in the persistent bottom composer, staged until Send is
+  /// tapped. The "New Post" dialog keeps its own equivalent locally (via
+  /// the dialog's StatefulBuilder) since it opens and closes independently
+  /// of this widget's own rebuilds.
+  SelectedFile? _pendingMedia;
+  bool _pendingMediaIsVideo = false;
+  bool _uploadingPendingMedia = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +69,38 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     if (uid.isEmpty) return;
     final accepted = await KinServices.hasAcceptedExchangeConduct(uid);
     if (mounted && accepted) setState(() => _acceptedConduct = true);
+  }
+
+  /// Opens the photo-or-video picker and validates the result's format.
+  /// Shared by both composers so the picker options, the storage folder,
+  /// and the format-rejection message stay identical between them.
+  ///
+  /// Uploads land under the uploading user's own `users/{uid}/...` path -
+  /// the only prefix `storage.rules` opens for writes - just organized
+  /// under an `exchange_posts` subfolder rather than the shared default
+  /// `uploads/` used elsewhere.
+  Future<SelectedFile?> _pickPostMedia(BuildContext context) async {
+    final media = await selectMediaWithSourceBottomSheet(
+      context: context,
+      allowPhoto: true,
+      allowVideo: true,
+      storageFolderPath: 'users/$currentUserUid/uploads/exchange_posts',
+    );
+    if (media == null || media.isEmpty) return null;
+    final file = media.first;
+    if (!validateFileFormat(file.storagePath, context)) return null;
+    return file;
+  }
+
+  /// Uploads a picked file, returning its download URL or null on failure.
+  /// Mirrors `ImageUploadButton`'s upload try/catch shape rather than
+  /// inventing a new one.
+  Future<String?> _uploadPostMedia(SelectedFile file) async {
+    try {
+      return await uploadData(file.storagePath, file.bytes);
+    } catch (_) {
+      return null;
+    }
   }
 
   /// A standing notice for anyone who hasn't accepted the terms yet.
@@ -261,6 +303,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
     // customer with no business) can use. Local to this call, not _model,
     // since it resets every time the dialog opens.
     ExchangePostType? selectedType;
+    // Local to this call, same reasoning as selectedType - the dialog opens
+    // and closes independently of this widget's own state, so nothing here
+    // needs to survive past a single showDialog invocation.
+    SelectedFile? selectedMedia;
+    bool selectedMediaIsVideo = false;
+    bool isPosting = false;
     await showDialog(
       context: context,
       builder: (dialogContext) {
@@ -319,22 +367,100 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                         );
                       }).toList(),
                     ),
+                    SizedBox(height: theme.designToken.spacing.sm),
+                    if (selectedMedia == null)
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          final media = await _pickPostMedia(dialogContext);
+                          if (media == null) return;
+                          setDialogState(() {
+                            selectedMedia = media;
+                            selectedMediaIsVideo =
+                                media.storagePath.endsWith('.mp4');
+                          });
+                        },
+                        icon: Icon(Icons.attach_file, size: 16.0,
+                            color: theme.secondaryText),
+                        label: Text('Add photo or video',
+                            style: theme.labelSmall
+                                .override(color: theme.secondaryText)),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: theme.alternate),
+                        ),
+                      )
+                    else
+                      Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                                theme.designToken.radius.sm),
+                            child: selectedMediaIsVideo
+                                ? Container(
+                                    width: 56.0,
+                                    height: 56.0,
+                                    color: Colors.black87,
+                                    child: const Icon(Icons.videocam,
+                                        color: Colors.white, size: 24.0),
+                                  )
+                                : Image.memory(
+                                    selectedMedia!.bytes,
+                                    width: 56.0,
+                                    height: 56.0,
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                          SizedBox(width: theme.designToken.spacing.xs),
+                          Text(
+                            selectedMediaIsVideo ? 'Video attached'
+                                : 'Photo attached',
+                            style: theme.bodySmall
+                                .override(color: theme.secondaryText),
+                          ),
+                          const Spacer(),
+                          IconButton(
+                            icon: Icon(Icons.close, size: 18.0,
+                                color: theme.secondaryText),
+                            onPressed: () =>
+                                setDialogState(() => selectedMedia = null),
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
+                  onPressed: isPosting
+                      ? null
+                      : () => Navigator.pop(dialogContext),
                   child: Text('Cancel',
                       style: theme.bodyMedium
                           .override(color: theme.secondaryText)),
                 ),
                 TextButton(
-                  onPressed: () async {
+                  onPressed: isPosting
+                      ? null
+                      : () async {
                     final postText =
                         _model.postTextController!.text.trim();
                     if (postText.isEmpty || currentUserReference == null) {
                       return;
+                    }
+                    setDialogState(() => isPosting = true);
+                    String? uploadedUrl;
+                    if (selectedMedia != null) {
+                      uploadedUrl = await _uploadPostMedia(selectedMedia!);
+                      if (uploadedUrl == null) {
+                        setDialogState(() => isPosting = false);
+                        if (dialogContext.mounted) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Upload failed. Please try again.')),
+                          );
+                        }
+                        return;
+                      }
                     }
                     final exchangePostsRecordReference =
                         ExchangePostsRecord.collection.doc();
@@ -345,6 +471,10 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                           userRef: currentUserReference,
                           businessRef: businessRef,
                           postText: postText,
+                          postImage: selectedMediaIsVideo
+                              ? null : uploadedUrl,
+                          postVideo: selectedMediaIsVideo
+                              ? uploadedUrl : null,
                           timestamp: getCurrentTimestamp,
                           likesCount: 0,
                           // Copied onto the post so the feed never has to read
@@ -356,6 +486,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                         ),
                       );
                     } catch (e) {
+                      setDialogState(() => isPosting = false);
                       if (dialogContext.mounted) {
                         ScaffoldMessenger.of(dialogContext).showSnackBar(
                           SnackBar(content: Text('Could not post: $e')),
@@ -381,10 +512,20 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                       Navigator.pop(dialogContext);
                     }
                   },
-                  child: Text('Post',
-                      style: theme.bodyMedium.override(
-                          color: theme.primaryText,
-                          fontWeight: FontWeight.bold)),
+                  child: isPosting
+                      ? SizedBox(
+                          width: 18.0,
+                          height: 18.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(theme.primary),
+                          ),
+                        )
+                      : Text('Post',
+                          style: theme.bodyMedium.override(
+                              color: theme.primaryText,
+                              fontWeight: FontWeight.bold)),
                 ),
               ],
             );
@@ -1258,12 +1399,87 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                                 ),
                                                           ),
                                               ),
-                                              // Removed: a GIF-picker icon
-                                              // with no onTap and no GIF
-                                              // feature behind it anywhere
-                                              // in the app - same class of
-                                              // dead control as the forum
-                                              // icon removed above.
+                                              if (_pendingMedia != null) ...[
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .designToken
+                                                              .radius
+                                                              .sm),
+                                                  child: _pendingMediaIsVideo
+                                                      ? Container(
+                                                          width: 32.0,
+                                                          height: 32.0,
+                                                          color:
+                                                              Colors.black87,
+                                                          child: const Icon(
+                                                              Icons.videocam,
+                                                              color: Colors
+                                                                  .white,
+                                                              size: 16.0),
+                                                        )
+                                                      : Image.memory(
+                                                          _pendingMedia!
+                                                              .bytes,
+                                                          width: 32.0,
+                                                          height: 32.0,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                ),
+                                                InkWell(
+                                                  onTap: () => safeSetState(
+                                                      () =>
+                                                          _pendingMedia =
+                                                              null),
+                                                  child: Icon(Icons.close,
+                                                      size: 16.0,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .secondaryText),
+                                                ),
+                                              ] else
+                                                InkWell(
+                                                  // A signed-in user with no
+                                                  // media selected yet gets
+                                                  // the attach control; the
+                                                  // composer field above is
+                                                  // already gated on
+                                                  // currentUserReference, so
+                                                  // this mirrors that.
+                                                  onTap:
+                                                      currentUserReference ==
+                                                                  null ||
+                                                              _uploadingPendingMedia
+                                                          ? null
+                                                          : () async {
+                                                              final media =
+                                                                  await _pickPostMedia(
+                                                                      context);
+                                                              if (media ==
+                                                                  null) {
+                                                                return;
+                                                              }
+                                                              safeSetState(
+                                                                  () {
+                                                                _pendingMedia =
+                                                                    media;
+                                                                _pendingMediaIsVideo =
+                                                                    media.storagePath
+                                                                        .endsWith(
+                                                                            '.mp4');
+                                                              });
+                                                            },
+                                                  child: Icon(
+                                                      Icons.attach_file,
+                                                      size: 20.0,
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .secondaryText),
+                                                ),
                                             ].divide(SizedBox(
                                                 width:
                                                     FlutterFlowTheme.of(context)
@@ -1275,7 +1491,9 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                       ),
                                     ),
                                     GestureDetector(
-                                      onTap: () async {
+                                      onTap: _uploadingPendingMedia
+                                          ? null
+                                          : () async {
                                         print(
                                             'TheExchangeWidget: composer send tapped');
                                         final composerText = _model
@@ -1293,6 +1511,32 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                               'TheExchangeWidget: composer send ignored (conduct not accepted)');
                                           return;
                                         }
+                                        // The upload has to land before the
+                                        // Firestore write - post_video/
+                                        // post_image can only ever be set on
+                                        // the create call, firestore.rules
+                                        // forbids patching either in later.
+                                        String? uploadedUrl;
+                                        final pendingMedia = _pendingMedia;
+                                        final pendingMediaIsVideo =
+                                            _pendingMediaIsVideo;
+                                        if (pendingMedia != null) {
+                                          safeSetState(() =>
+                                              _uploadingPendingMedia = true);
+                                          uploadedUrl = await _uploadPostMedia(
+                                              pendingMedia);
+                                          safeSetState(() =>
+                                              _uploadingPendingMedia = false);
+                                          if (uploadedUrl == null) {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                      content: Text(
+                                                          'Upload failed. Please try again.')));
+                                            }
+                                            return;
+                                          }
+                                        }
                                         final exchangePostsRecordReference =
                                             ExchangePostsRecord.collection
                                                 .doc();
@@ -1305,6 +1549,12 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                                 theExchangeBusinessesRecord
                                                     ?.reference,
                                             postText: composerText,
+                                            postImage: pendingMediaIsVideo
+                                                ? null
+                                                : uploadedUrl,
+                                            postVideo: pendingMediaIsVideo
+                                                ? uploadedUrl
+                                                : null,
                                             timestamp: getCurrentTimestamp,
                                             likesCount: 0,
                                             // This composer used to omit
@@ -1341,6 +1591,7 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                               );
                                         } catch (_) {}
                                         _model.feedComposerController?.clear();
+                                        _pendingMedia = null;
                                         safeSetState(() {});
                                       },
                                       child: Container(
@@ -1366,12 +1617,28 @@ class _TheExchangeWidgetState extends State<TheExchangeWidget> {
                                         ),
                                         alignment:
                                             AlignmentDirectional(0.0, 0.0),
-                                        child: Icon(
-                                          Icons.send_rounded,
-                                          color: FlutterFlowTheme.of(context)
-                                              .onPrimary,
-                                          size: 20.0,
-                                        ),
+                                        child: _uploadingPendingMedia
+                                            ? SizedBox(
+                                                width: 20.0,
+                                                height: 20.0,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2.0,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                              Color>(
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .onPrimary),
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.send_rounded,
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .onPrimary,
+                                                size: 20.0,
+                                              ),
                                       ),
                                     ),
                                   ].divide(SizedBox(

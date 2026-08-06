@@ -3,6 +3,7 @@ import '/backend/backend.dart';
 import '/components/create_promotion_sheet.dart';
 import '/components/edit_exchange_post_sheet.dart';
 import '/components/exchange_profile_sheet.dart';
+import '/components/exchange_video_player_widget.dart';
 import '/pages/business_profile_v2/business_profile_v2_widget.dart';
 import '/services/engagement_stats.dart';
 import '/components/kindex_tier_badge_widget.dart';
@@ -213,6 +214,7 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
     final postImage = widget.postRecord.postImage;
+    final postVideo = widget.postRecord.postVideo;
 
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
@@ -421,7 +423,14 @@ class _ExchangeFeedItemWidgetState extends State<ExchangeFeedItemWidget> {
                     ),
                   ),
                 ),
-              if (postImage.isNotEmpty)
+              // A post carries one or the other, not both - the composer
+              // picker returns a single file, so video takes precedence if
+              // somehow both were ever present.
+              if (postVideo.isNotEmpty)
+                ClipRRect(
+                  child: ExchangeVideoPlayerWidget(videoUrl: postVideo),
+                )
+              else if (postImage.isNotEmpty)
                 ClipRRect(
                   child: CachedNetworkImage(
                     fadeInDuration: Duration(milliseconds: 0),
