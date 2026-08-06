@@ -1,0 +1,4368 @@
+[
+  {
+    "name": "Personal Concierge MD, LLC",
+    "queryAddress": "10105 Westside Parkway Alpharetta,GA 30009",
+    "status": "kept",
+    "formattedAddress": "10105 Westside Pkwy, Alpharetta, GA 30009, USA",
+    "lat": 34.0477882,
+    "lng": -84.3052538,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cohesive Consulting",
+    "queryAddress": "1115 Mt Zion Rd Morrow,GA 30260-2266",
+    "status": "kept",
+    "formattedAddress": "1115 Mt Zion Rd, Morrow, GA 30260, USA",
+    "lat": 33.5708001,
+    "lng": -84.35396109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Chapter Avenue Productions",
+    "queryAddress": "2774 Cobb Pkway NW Kennesaw,GA 30144",
+    "status": "kept",
+    "formattedAddress": "2774 Cobb Pkwy NW, Kennesaw, GA 30152, USA",
+    "lat": 34.0233857,
+    "lng": -84.62450849999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gateway Massage LLC",
+    "queryAddress": "8318 Durelee Ln Douglasville,GA 30134",
+    "status": "kept",
+    "formattedAddress": "8318 Durelee Ln, Douglasville, GA 30134, USA",
+    "lat": 33.7534428,
+    "lng": -84.725453,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Essential Wealth Management",
+    "queryAddress": "384 Northyards Blvd. N.W. Atlanta,GA 30313",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Parking lot, 384 Northyards Boulevard NW, Atlanta, GA 30313, USA",
+    "lat": 33.7682926,
+    "lng": -84.40101489999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Journey Unlimited",
+    "queryAddress": "191 Peachtree St NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "191 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7590381,
+    "lng": -84.3872591,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lloyd Media Group",
+    "queryAddress": "922 Hwy 81E Mcdonough,GA 30252",
+    "status": "dropped_imprecise",
+    "formattedAddress": "McDonough, GA, USA",
+    "lat": 33.4471669,
+    "lng": -84.1423703,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The Griffin Firm PLLC",
+    "queryAddress": "1100 Peachtree St. NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ellison Consulting",
+    "queryAddress": "5336 Kelleys Creek Dr. Stone Mountain,GA 30088",
+    "status": "kept",
+    "formattedAddress": "5336 Kelleys Creek Dr, Stone Mountain, GA 30088, USA",
+    "lat": 33.7459146,
+    "lng": -84.17126239999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Quality Personal Care",
+    "queryAddress": "3399 Peachtree Rd, NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3399 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.846121,
+    "lng": -84.35988239999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Jumbo Tax",
+    "queryAddress": "4928 Hamlet Ct. Lithonia,GA 30038",
+    "status": "kept",
+    "formattedAddress": "4928 Hamlet Ct, Stonecrest, GA 30038, USA",
+    "lat": 33.6986477,
+    "lng": -84.1886066,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Turning Point Leadership Group LLC",
+    "queryAddress": "3340 Peachtree Rd, Suite 1800 Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3340 Peachtree Rd #1800, Atlanta, GA 30326, USA",
+    "lat": 33.8474435,
+    "lng": -84.3708872,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Urban Asset Builders",
+    "queryAddress": "P.O. Box 162544 Atlanta,GA 30321",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30321, USA",
+    "lat": 33.75,
+    "lng": -84.39,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The Wellness Sanctuary",
+    "queryAddress": "828 Ralph Mcgill Blvd Atlanta,GA 30306",
+    "status": "kept",
+    "formattedAddress": "828 Ralph McGill Blvd NE, Atlanta, GA 30306, USA",
+    "lat": 33.7687144,
+    "lng": -84.3607588,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "She Works Now",
+    "queryAddress": "4707 Ashford Dunwoody Atlanta,GA 30338",
+    "status": "kept",
+    "formattedAddress": "4707 Ashford Dunwoody Rd, Dunwoody, GA 30338, USA",
+    "lat": 33.9321324,
+    "lng": -84.3352714,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Financial Parent Academy",
+    "queryAddress": "3235 Satellite Blvd Bldg 400 Ste 300 Duluth,GA 30096",
+    "status": "kept",
+    "formattedAddress": "Satellite Place, 3235 Satellite Blvd NW Bldg. 400, Suite 300, Duluth, GA 30096, USA",
+    "lat": 33.9631851,
+    "lng": -84.1190881,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Graphics House",
+    "queryAddress": "2451 Cumberland Pkwy Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "2451 Cumberland Pkwy SE, Atlanta, GA 30339, USA",
+    "lat": 33.8626738,
+    "lng": -84.4787029,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The ADS Agency",
+    "queryAddress": "828 Ralph Mcgill Blvd Atlanta,GA 30306\\",
+    "status": "kept",
+    "formattedAddress": "828 Ralph McGill Blvd NE, Atlanta, GA 30306, USA",
+    "lat": 33.7687144,
+    "lng": -84.3607588,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pivotal Performance Group",
+    "queryAddress": "384 Northyards Blvd NW Atlanta,GA 30313",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Parking lot, 384 Northyards Boulevard NW, Atlanta, GA 30313, USA",
+    "lat": 33.7682926,
+    "lng": -84.40101489999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Totally You Support Services, LLC",
+    "queryAddress": "850 Paden Street Woodstock,GA 30188",
+    "status": "kept",
+    "formattedAddress": "850 Paden St, Woodstock, GA 30188, USA",
+    "lat": 34.0992176,
+    "lng": -84.52454089999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ARC Business Solutions",
+    "queryAddress": "1954 airport Road Chamblee,GA 30341",
+    "status": "kept",
+    "formattedAddress": "1954 Airport Rd, Chamblee, GA 30341, USA",
+    "lat": 33.8772491,
+    "lng": -84.3081687,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Capital City Mediations, LLC",
+    "queryAddress": "2133 Lawrenceville Suwanee Rd Suwanee,GA 30024",
+    "status": "kept",
+    "formattedAddress": "2133 Lawrenceville-Suwanee Rd, Suwanee, GA 30024, USA",
+    "lat": 34.0036079,
+    "lng": -84.03838490000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JAE Financial Group",
+    "queryAddress": "191 Peachtree St NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "191 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7590381,
+    "lng": -84.3872591,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Behavorial Management Group",
+    "queryAddress": "2795Main Street West Snellville,GA 30078",
+    "status": "kept",
+    "formattedAddress": "2795 Main St W, Snellville, GA 30078, USA",
+    "lat": 33.8561268,
+    "lng": -84.03126879999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "EH Staffing",
+    "queryAddress": "160 Clairemont Avenue Decatur,GA 30030",
+    "status": "kept",
+    "formattedAddress": "160 Clairemont Ave, Decatur, GA 30030, USA",
+    "lat": 33.7774947,
+    "lng": -84.2978194,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Nowell Sparks LLC",
+    "queryAddress": "303 W Peachtree St NW Atlanta,GA 30308",
+    "status": "kept",
+    "formattedAddress": "303 W Peachtree St NW, Atlanta, GA 30308, USA",
+    "lat": 33.7707434,
+    "lng": -84.38597310000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Investment Network Financial Offices LLC",
+    "queryAddress": "3899 Flowers Road Doraville,GA 30360",
+    "status": "kept",
+    "formattedAddress": "3899 Flowers Rd, Doraville, GA 30360, USA",
+    "lat": 33.9067108,
+    "lng": -84.275966,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "New Day Promotional Products",
+    "queryAddress": "1425 Market Blvd. Roswell,GA 30076",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1425 Market Blvd, Roswell, GA 30076, USA",
+    "lat": 34.018859,
+    "lng": -84.32067599999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "SERVPRO of Panthersville",
+    "queryAddress": "4153 Flat Shoals Pkwy Decatur,GA 30034",
+    "status": "dropped_imprecise",
+    "formattedAddress": "4153 Flat Shoals Pkwy, Decatur, GA 30034, USA",
+    "lat": 33.6879684,
+    "lng": -84.255207,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Sinfo-Nia Youth Orchestra",
+    "queryAddress": "4500 Hugh Howell Rd. Tucker,GA 30084",
+    "status": "kept",
+    "formattedAddress": "4500 Hugh Howell Rd, Tucker, GA 30084, USA",
+    "lat": 33.850971,
+    "lng": -84.204199,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "WhiteStone Investigations",
+    "queryAddress": "270 Cobb Parkway South Marietta,GA 30060",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Cobb Pkwy S, Marietta, GA 30060, USA",
+    "lat": 33.9179947,
+    "lng": -84.5010486,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Gordon Branding Group",
+    "queryAddress": "3333 Piedmont Road NE Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "3333 Piedmont Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.846072,
+    "lng": -84.37190679999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Blue Scorpion Reputation Management",
+    "queryAddress": "191 Peachtree St Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "Peachtree Tower, 191 Peachtree St, Atlanta, GA 30303, USA",
+    "lat": 33.7590563,
+    "lng": -84.3873043,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Third Morgan Global Construction Firm",
+    "queryAddress": "P.O. Box 362040 Decatur,GA 30036",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Decatur, GA, USA",
+    "lat": 33.7748275,
+    "lng": -84.2963123,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Advanced Wifi Solutions",
+    "queryAddress": "6105 Stanton Place Lane Acworth,GA 30101",
+    "status": "kept",
+    "formattedAddress": "6105 Stanton Pl Ln, Acworth, GA 30101, USA",
+    "lat": 34.0680768,
+    "lng": -84.6492638,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "OpportUNITY Development LLC",
+    "queryAddress": "4701 Irish Red Court South Fulton,GA 30291",
+    "status": "kept",
+    "formattedAddress": "4701 Irish Red Ct, Union City, GA 30291, USA",
+    "lat": 33.5476458,
+    "lng": -84.5425575,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Alpha Business Images",
+    "queryAddress": "4279 Roswell Road NE Atlanta,GA 30342",
+    "status": "kept",
+    "formattedAddress": "4279 Roswell Rd NE, Atlanta, GA 30342, USA",
+    "lat": 33.8712214,
+    "lng": -84.3792964,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Atlanta Business Technologies",
+    "queryAddress": "3350 Riverwood Parkway Atlanta,GA 30339",
+    "status": "dropped_imprecise",
+    "formattedAddress": "3350 Riverwood Pkwy, Atlanta, GA 30339, USA",
+    "lat": 33.8781872,
+    "lng": -84.458286,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Bryant Group Ventures",
+    "queryAddress": "191 Peachtree Street NE Atlanta,GA 30313",
+    "status": "kept",
+    "formattedAddress": "191 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7590381,
+    "lng": -84.3872591,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Distinct Tax Consulting Group",
+    "queryAddress": "1115 Mt. Zion Road Morrow,GA 30260",
+    "status": "kept",
+    "formattedAddress": "1115 Mt Zion Rd, Morrow, GA 30260, USA",
+    "lat": 33.5708001,
+    "lng": -84.35396109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Healing Our Village of Maryland Inc",
+    "queryAddress": "560 HWY 138 SW Jonesboro,GA 30238",
+    "status": "kept",
+    "formattedAddress": "560 GA-138, Jonesboro, GA 30238, USA",
+    "lat": 33.5352223,
+    "lng": -84.3728321,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Micah 6-8 Media, LLC / Atlanta Black Theatre Festival",
+    "queryAddress": "PO Box 392 Norcross,GA 30091",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Norcross, GA 30091, USA",
+    "lat": 33.9418864,
+    "lng": -84.20912469999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Mobile Marketing Branding Solutions",
+    "queryAddress": "400 Galleria Pkwy. Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "400 Galleria Pkwy SE, Atlanta, GA 30339, USA",
+    "lat": 33.8867251,
+    "lng": -84.46127919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mutual of Omaha",
+    "queryAddress": "100 Galleria Pkwy SE Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "100 Galleria Pkwy SE, Atlanta, GA 30339, USA",
+    "lat": 33.8849577,
+    "lng": -84.4625559,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "RH WARE LLC",
+    "queryAddress": "3645 Marketplace Blvd Atlanta,GA 30344",
+    "status": "kept",
+    "formattedAddress": "3645 Marketplace Blvd, East Point, GA 30344, USA",
+    "lat": 33.6581062,
+    "lng": -84.50352509999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Man Cave Atlanta",
+    "queryAddress": "2139 Liddell Dr. Atlanta,GA 30324",
+    "status": "kept",
+    "formattedAddress": "2139 Liddell Dr NE, Atlanta, GA 30324, USA",
+    "lat": 33.8119337,
+    "lng": -84.36314730000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Underground App",
+    "queryAddress": "4530 West Village Ct Smyrna,GA 30080",
+    "status": "kept",
+    "formattedAddress": "4530 W Village Ct, Smyrna, GA 30080, USA",
+    "lat": 33.8412407,
+    "lng": -84.4957118,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Almenta International, LLC",
+    "queryAddress": "2924 Wintercrest Way Atlanta,GA 30360",
+    "status": "kept",
+    "formattedAddress": "2924 Wintercrest Way, Dunwoody, GA 30360, USA",
+    "lat": 33.9318404,
+    "lng": -84.2672362,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Spellman Consulting Group, LLC",
+    "queryAddress": "9797 Preswicke Point Alpharetta,GA 30022",
+    "status": "kept",
+    "formattedAddress": "9797 Preswicke Point, Alpharetta, GA 30022, USA",
+    "lat": 34.0201543,
+    "lng": -84.19590529999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mercy Medical Supply & Mastectomy Boutique",
+    "queryAddress": "3584 Georgia Hwy 138 SE Stockbridge,GA 30281",
+    "status": "kept",
+    "formattedAddress": "3584 GA-138, Stockbridge, GA 30281, USA",
+    "lat": 33.5498134,
+    "lng": -84.2722713,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Demmons Enterprise LLC",
+    "queryAddress": "396 Countryside Way Snellville,GA 30039",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Countryside Way SW, Georgia 30039, USA",
+    "lat": 33.8010954,
+    "lng": -84.0053436,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Georgia Team Builders, LLC",
+    "queryAddress": "314 Auburn Avenue Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "314 Auburn Ave NE, Atlanta, GA 30303, USA",
+    "lat": 33.7556879,
+    "lng": -84.3773444,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lifestyles of Luxury",
+    "queryAddress": "6175 Hickory Flat Canton,GA 30115",
+    "status": "kept",
+    "formattedAddress": "6175 Hickory Flat Hwy, Canton, GA 30115, USA",
+    "lat": 34.1780382,
+    "lng": -84.4180769,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dumas Edwards LLC",
+    "queryAddress": "321 Pavillion St. SE Atlanta,GA 30315",
+    "status": "kept",
+    "formattedAddress": "321 Pavillion St SE, Atlanta, GA 30315, USA",
+    "lat": 33.735511,
+    "lng": -84.37711499999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Heavenly Movers and Clean up Services",
+    "queryAddress": "2369 Brianna Dr. Hampton,GA 30228",
+    "status": "kept",
+    "formattedAddress": "2369 Brianna Dr, Hampton, GA 30228, USA",
+    "lat": 33.4437798,
+    "lng": -84.3205634,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "New Beginnings International, Inc.",
+    "queryAddress": "611 Estuary Trail Alpharetta,GA 30005",
+    "status": "kept",
+    "formattedAddress": "611 Estuary Trail, Alpharetta, GA 30005, USA",
+    "lat": 34.1087116,
+    "lng": -84.2300873,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "E-1-1",
+    "queryAddress": "30 Pintail Overlook Covington,GA 30014",
+    "status": "kept",
+    "formattedAddress": "30 Pintail Overlook, Covington, GA 30014, USA",
+    "lat": 33.5627603,
+    "lng": -83.82445829999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Office Building Brokers",
+    "queryAddress": "1170 Peachtree Street Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1170 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7864313,
+    "lng": -84.3837324,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pet Yard Indoor Dog Park",
+    "queryAddress": "1100 Peachtree St. Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "FinQuest Bookkeeping Services",
+    "queryAddress": "1000 Parkwood Circle Southeast Atlanta,GA 30339",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1000 Parkwood Cir SE, Atlanta, GA 30339, USA",
+    "lat": 33.9016912,
+    "lng": -84.4577324,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Hylton Collection",
+    "queryAddress": "321 Pavillion St. SE Atlanta,GA 30315\\",
+    "status": "kept",
+    "formattedAddress": "321 Pavillion St SE, Atlanta, GA 30315, USA",
+    "lat": 33.735511,
+    "lng": -84.37711499999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DORSEY CPA",
+    "queryAddress": "10 Glenlake Parkway Atlanta,GA 30328",
+    "status": "dropped_imprecise",
+    "formattedAddress": "10 Glenlake Pkwy NE, Sandy Springs, GA 30328, USA",
+    "lat": 33.9360646,
+    "lng": -84.3616478,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Northwestern Mutual - The Shelby Green Agency",
+    "queryAddress": "400 Interstate North Parkway Southeast Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "400 Interstate N Pkwy, Atlanta, GA 30339, USA",
+    "lat": 33.8941719,
+    "lng": -84.4560751,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TaxPro Financial Service",
+    "queryAddress": "6163 Reynolds Road Morrow,GA 30260",
+    "status": "kept",
+    "formattedAddress": "6163 Reynolds Rd, Morrow, GA 30260, USA",
+    "lat": 33.5879685,
+    "lng": -84.3390532,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Alonzo F. and Norris B. Herndon Foundation",
+    "queryAddress": "587 University Place NW Atlanta,GA 30314",
+    "status": "kept",
+    "formattedAddress": "587 University Pl NW, Atlanta, GA 30314, USA",
+    "lat": 33.7558111,
+    "lng": -84.4068151,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Vi Capital Lending Group",
+    "queryAddress": "2150 Lenox Road Northeast Atlanta,GA 30324",
+    "status": "kept",
+    "formattedAddress": "2150 Lenox Rd NE, Atlanta, GA 30324, USA",
+    "lat": 33.8133387,
+    "lng": -84.3518376,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Diane Adoma Consulting LLC",
+    "queryAddress": "PO Box 1376 Lithonia,GA 30058",
+    "status": "kept",
+    "formattedAddress": "Post Office, 6813 Main St, Lithonia, GA 30058, USA",
+    "lat": 33.7082843,
+    "lng": -84.1117879,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "William Henry State Farm",
+    "queryAddress": "607 Main St. Palmetto,GA 30268",
+    "status": "kept",
+    "formattedAddress": "607 Main St, Palmetto, GA 30268, USA",
+    "lat": 33.5216124,
+    "lng": -84.6664708,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Nurse Next Door",
+    "queryAddress": "11770 Haynes Bridge Road Alpharetta,GA 30009",
+    "status": "dropped_imprecise",
+    "formattedAddress": "11770 Haynes Bridge Rd, Alpharetta, GA 30022, USA",
+    "lat": 34.0693559,
+    "lng": -84.2946945,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Scoop on Health & Wealth",
+    "queryAddress": "3455 Peachtree Road Atlanta,GA 30308",
+    "status": "kept",
+    "formattedAddress": "3455 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8511837,
+    "lng": -84.3609043,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Alumni Cheerleaders, LLC",
+    "queryAddress": "2870 Peachtree Road NW Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "2870 Peachtree Rd NW, Atlanta, GA 30305, USA",
+    "lat": 33.8336456,
+    "lng": -84.3844386,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Symbatek",
+    "queryAddress": "2890 GA-212 A Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "2890 GA-212 A, Conyers, GA 30094, USA",
+    "lat": 33.6173964,
+    "lng": -84.08140809999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Advisory CPA Group",
+    "queryAddress": "3895 Cherokee St. Kennesaw,GA 30144",
+    "status": "dropped_imprecise",
+    "formattedAddress": "3895 Cherokee St NW, Kennesaw, GA 30144, USA",
+    "lat": 34.0485377,
+    "lng": -84.6024455,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Edge of the Frame, LLC",
+    "queryAddress": "5812 Tree Fern Ct SE Mableton,GA 30126",
+    "status": "kept",
+    "formattedAddress": "5812 Tree Fern Ct, Mableton, GA 30126, USA",
+    "lat": 33.8135237,
+    "lng": -84.52623469999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Life & Style Executive LLC",
+    "queryAddress": "3355 Lenox Rd Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3355 Lenox Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8466809,
+    "lng": -84.3589741,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "About My Father's Business Enterprise,LLC",
+    "queryAddress": "PO BOX 602 Lovejoy,GA 30250",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Lovejoy, GA 30250, USA",
+    "lat": 33.44,
+    "lng": -84.31000000000002,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Chrysalist Studios LLC",
+    "queryAddress": "5015 Monument Ave Atlanta,GA 30316",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Monument Ave SE, Atlanta, GA 30316, USA",
+    "lat": 33.7431127,
+    "lng": -84.3413385,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "EnrichHER",
+    "queryAddress": "1075 Peachtree ST NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1075 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7839202,
+    "lng": -84.38304889999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pamela Sanders Agency",
+    "queryAddress": "4340 N Henry Blvd Stockbridge,GA 30281",
+    "status": "kept",
+    "formattedAddress": "4340 N Henry Blvd, Stockbridge, GA 30281, USA",
+    "lat": 33.5440262,
+    "lng": -84.22150669999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "I've Got You Covered",
+    "queryAddress": "1188 Misty Meadows Lane Hampton,GA 30228",
+    "status": "kept",
+    "formattedAddress": "1188 Misty Meadows Ln, Hampton, GA 30228, USA",
+    "lat": 33.4629515,
+    "lng": -84.3543911,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "BeConnects, LLC",
+    "queryAddress": "PO BOX 42755 Atlanta,GA 30311",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA, USA",
+    "lat": 33.7501275,
+    "lng": -84.3885209,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Solutionary Consulting",
+    "queryAddress": "Three Alliance Center, 3550 Lenox Road NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3550 Lenox Rd NE Ste 2300, Atlanta, GA 30326, USA",
+    "lat": 33.8520093,
+    "lng": -84.3675166,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Riverside EpiCenter",
+    "queryAddress": "135 Riverside Parkway Austell,GA 30168",
+    "status": "kept",
+    "formattedAddress": "135 Riverside Pkwy, Austell, GA 30168, USA",
+    "lat": 33.771783,
+    "lng": -84.5571166,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Champions IFM, Inc.",
+    "queryAddress": "PO Box 957106 Lawrenceville,GA 30095",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Duluth, GA 30095, USA",
+    "lat": 33.9799999,
+    "lng": -84.14999999999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "White Howard Brands, LLC",
+    "queryAddress": "2282 Defoor Hills Rd Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "2282 Defoor Hills Rd NW, Atlanta, GA 30318, USA",
+    "lat": 33.8158848,
+    "lng": -84.43544,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Barbosa Benefits & Financial Services",
+    "queryAddress": "1387 Haynes Meadow Trail Grayson,GA 30017",
+    "status": "kept",
+    "formattedAddress": "1387 Haynes Meadow Trail SW, Grayson, GA 30017, USA",
+    "lat": 33.868695,
+    "lng": -83.979748,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Amazing Rare Rubies",
+    "queryAddress": "2582 Heritage Lake Cove Grayson,GA 30017",
+    "status": "kept",
+    "formattedAddress": "2582 Heritage Lake Cove Ln, Grayson, GA 30017, USA",
+    "lat": 33.8822726,
+    "lng": -83.9649891,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "3T Consulting Group, LLC",
+    "queryAddress": "3379 Peachtree Road NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3379 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8483327,
+    "lng": -84.3659701,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Legacy Pointe Telecommunications",
+    "queryAddress": "3915 Cascade Rd Atlanta,GA 30331",
+    "status": "kept",
+    "formattedAddress": "3915 Cascade Rd, Atlanta, GA 30331, USA",
+    "lat": 33.72664230000001,
+    "lng": -84.51615730000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Veterans Psychological Group, Inc",
+    "queryAddress": "3915 Cascade Rd Atlanta,GA 30331",
+    "status": "kept",
+    "formattedAddress": "3915 Cascade Rd, Atlanta, GA 30331, USA",
+    "lat": 33.72664230000001,
+    "lng": -84.51615730000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "zCode Solutions",
+    "queryAddress": "2121 Windy Hill Rd. Marietta,GA 30060",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2121 Windy Hill Rd, Marietta, GA 30067, USA",
+    "lat": 33.8992968,
+    "lng": -84.4974376,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Concierge Psychotherapy",
+    "queryAddress": "6 Concourse Parkway Sandy Springs,GA 30328",
+    "status": "kept",
+    "formattedAddress": "Concourse Corporate Center 6, 6 Concourse Pkwy, Atlanta, GA 30328, USA",
+    "lat": 33.9170778,
+    "lng": -84.3558627,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Wright Choice Business Consultants",
+    "queryAddress": "300 Colonial Center Parkway Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "300 Colonial Center Pkwy, Roswell, GA 30076, USA",
+    "lat": 34.0437928,
+    "lng": -84.3251969,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Multicultural Educational Programs, Inc.",
+    "queryAddress": "P O Box 1584 Covington,GA 30015",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Covington, GA 30015, USA",
+    "lat": 33.5999919,
+    "lng": -83.8600252,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Terri S Brooks LLC",
+    "queryAddress": "880 Holcomb Bridge Rd. Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "880 Holcomb Bridge Rd, Roswell, GA 30076, USA",
+    "lat": 34.0292016,
+    "lng": -84.33578179999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "E. O'Kelley Sports, Entertainment & Business Law Firm",
+    "queryAddress": "PO Box 961035 Riverdale,GA 30296",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Riverdale, GA 30296, USA",
+    "lat": 33.5658548,
+    "lng": -84.4435223,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The Concrete Lady, LLC",
+    "queryAddress": "P.O.BOX 373251 Decatur,GA 30037",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Decatur, GA 30037, USA",
+    "lat": 33.7068911,
+    "lng": -84.2720732,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Dwellings by La Trina, LLC",
+    "queryAddress": "1123 Church Street Covington,GA 30014",
+    "status": "kept",
+    "formattedAddress": "1123 Church St, Covington, GA 30014, USA",
+    "lat": 33.5962456,
+    "lng": -83.8590029,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Power House Pest Control",
+    "queryAddress": "157 Burke Street Stockbridge,GA 30281",
+    "status": "kept",
+    "formattedAddress": "157 Burke St, Stockbridge, GA 30281, USA",
+    "lat": 33.5470883,
+    "lng": -84.2340129,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Digital Reveries Media",
+    "queryAddress": "2997 Cobb Parkway SE Atlanta,GA 31139â€‹",
+    "status": "kept",
+    "formattedAddress": "2997 Cobb Pkwy SE, Atlanta, GA 30339, USA",
+    "lat": 33.8807029,
+    "lng": -84.4582782,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "CMBC Wellness, LLC",
+    "queryAddress": "384 Northyards Blvd Atlanta,GA 30033",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Parking lot, 384 Northyards Boulevard NW, Atlanta, GA 30313, USA",
+    "lat": 33.7682926,
+    "lng": -84.40101489999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "EZ Meadows Travel, LLC",
+    "queryAddress": "P. O. Box 1495 Conley,GA 30288",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Conley, GA, USA",
+    "lat": 33.6418635,
+    "lng": -84.3357992,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "SOS Creative Group",
+    "queryAddress": "2255 Satellite Blvd. Duluth,GA 30097",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2255 Satellite Blvd NW, Duluth, GA 30097, USA",
+    "lat": 33.9795018,
+    "lng": -84.0948303,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "BestU4Life",
+    "queryAddress": "769 Old Roswell Rd Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "769 Old Roswell Rd, Roswell, GA 30076, USA",
+    "lat": 34.0342723,
+    "lng": -84.3396753,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Atlanta Elite Real Estate",
+    "queryAddress": "1005 Alderman Dr. Alpharetta,GA 30005",
+    "status": "kept",
+    "formattedAddress": "1005 Alderman Dr, Alpharetta, GA 30005, USA",
+    "lat": 34.0948855,
+    "lng": -84.24275449999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SENIOR insurance SOLUTIONS, LLC",
+    "queryAddress": "5800 Oakdale  Rd SE Mableton,GA 30126",
+    "status": "kept",
+    "formattedAddress": "5800 Oakdale Rd SE, Mableton, GA 30126, USA",
+    "lat": 33.8118331,
+    "lng": -84.505578,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Berkshire Hathaway HomeServices Georgia",
+    "queryAddress": "1163 W. Peachtree Street NE Atlanta,GA 30309",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1163 W Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7860281,
+    "lng": -84.3873043,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Horizon Advisory Group, LLC",
+    "queryAddress": "Mableton,GA 30126\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Mableton, GA 30126, USA",
+    "lat": 33.8215697,
+    "lng": -84.5536678,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Tech & Main",
+    "queryAddress": "PO Box 725408 Atlanta,GA 31139",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 31139, USA",
+    "lat": 33.87,
+    "lng": -84.4599999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "SilverHook Studios",
+    "queryAddress": "5200 Dallas Hwy., Suite 200 Powder Springs,GA 30127",
+    "status": "kept",
+    "formattedAddress": "5200 Dallas Hwy #200, Powder Springs, GA 30127, USA",
+    "lat": 33.9420413,
+    "lng": -84.7030132,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cultured Speech, LLC",
+    "queryAddress": "P.O. Box 1408 Snellville,GA 30078",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Snellville, GA 30078, USA",
+    "lat": 33.8639894,
+    "lng": -84.0273168,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "StarWalker Industries, LLC",
+    "queryAddress": "1170 Peachtree Street NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1170 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7864313,
+    "lng": -84.3837324,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "iQ Telecom Solutions LLC",
+    "queryAddress": "922 Cascade Crossing SW Atlanta,GA 30331",
+    "status": "kept",
+    "formattedAddress": "922 Cascade Crossing, Atlanta, GA 30331, USA",
+    "lat": 33.7291093,
+    "lng": -84.56403019999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "House Flipping Guide",
+    "queryAddress": "1270 Caroline St. Atlanta,GA 30307",
+    "status": "kept",
+    "formattedAddress": "1270 Caroline St NE, Atlanta, GA 30307, USA",
+    "lat": 33.7585884,
+    "lng": -84.34736869999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Mitchell Group",
+    "queryAddress": "3350 Lenox Rd. Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3350 Lenox Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.845948,
+    "lng": -84.35899940000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Rigsby Group, LLC",
+    "queryAddress": "PO Box 725408 Atlanta,GA 31139\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 31139, USA",
+    "lat": 33.87,
+    "lng": -84.4599999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Bridges and Barriers Counseling Services, LLC",
+    "queryAddress": "118 North Ave Jonesboro,GA 30236",
+    "status": "dropped_imprecise",
+    "formattedAddress": "118 North Ave, Jonesboro, GA 30236, USA",
+    "lat": 33.5307709,
+    "lng": -84.3560945,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Fix My Kix",
+    "queryAddress": "6450 Evans Drive Rex,GA 30273",
+    "status": "kept",
+    "formattedAddress": "6450 Evans Dr, Rex, GA 30273, USA",
+    "lat": 33.5786182,
+    "lng": -84.28141280000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "T86 Marketing",
+    "queryAddress": "3707 Main St College Park,GA 30337",
+    "status": "kept",
+    "formattedAddress": "3707 Main St, College Park, GA 30337, USA",
+    "lat": 33.6540794,
+    "lng": -84.44995109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "BHFL Group, LLC",
+    "queryAddress": "1954 Airport Blvd. Chamblee,GA 30341",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30341, USA",
+    "lat": 33.8992049,
+    "lng": -84.3016021,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "BJB & Associates LLC",
+    "queryAddress": "4000 Dunwoody Park Dunwoody,GA 30338",
+    "status": "kept",
+    "formattedAddress": "4000 Dunwoody Park, Dunwoody, GA 30338, USA",
+    "lat": 33.9244108,
+    "lng": -84.31202359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "1st Urban Group LLC",
+    "queryAddress": "3116 Peachtree Rd NE Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "3116 Peachtree Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.840577,
+    "lng": -84.37879629999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cross & Dot, LLC",
+    "queryAddress": "779 Mimosa Way Jefferson,GA 30549",
+    "status": "dropped_out_of_range_52mi",
+    "formattedAddress": "779 Mimosa Way, Jefferson, GA 30549, USA",
+    "lat": 34.1176776,
+    "lng": -83.6071983,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Fairway Independent Mortgage Corporation",
+    "queryAddress": "5825 Glenridge Drive Atlanta,GA 30328",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5825 Glenridge Dr, Atlanta, GA 30328, USA",
+    "lat": 33.9147968,
+    "lng": -84.3611056,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Kika Stretch Studios-Atlanta",
+    "queryAddress": "800 Peachtree St NE Atlanta,GA 30308",
+    "status": "kept",
+    "formattedAddress": "800 Peachtree St NE, Atlanta, GA 30308, USA",
+    "lat": 33.7770745,
+    "lng": -84.3855667,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Prestige Accounting Solutions",
+    "queryAddress": "5784 Lake Forrest Drive Sandy Springs,GA 30328",
+    "status": "kept",
+    "formattedAddress": "5784 Lake Forrest Dr NW, Atlanta, GA 30328, USA",
+    "lat": 33.9134073,
+    "lng": -84.388888,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Heyward Insurance Group LLC",
+    "queryAddress": "1175 Peachtree St. Atlanta,GA 30361\\",
+    "status": "kept",
+    "formattedAddress": "1175 Peachtree St NE, Atlanta, GA 30361, USA",
+    "lat": 33.7867812,
+    "lng": -84.3829668,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "No Junk Productions",
+    "queryAddress": "1465 Northside Drive Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "1465 Northside Dr NW, Atlanta, GA 30318, USA",
+    "lat": 33.794491,
+    "lng": -84.4072791,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MTW Enterprises/South Fulton Lifestyle Magazine",
+    "queryAddress": "2275 MARIETTA BLVD NW Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "2275 Marietta Blvd NW, Atlanta, GA 30318, USA",
+    "lat": 33.82035,
+    "lng": -84.45102759999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Douglass Allstate Agency",
+    "queryAddress": "2255 Sewell Mill Rd Marietta,GA 30062",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2255 Sewell Mill Rd, Marietta, GA 30062, USA",
+    "lat": 33.9738826,
+    "lng": -84.4865726,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "CMIT Solutions of Atlanta Northeast",
+    "queryAddress": "1954 Airport Road Chamblee,GA 30341",
+    "status": "kept",
+    "formattedAddress": "1954 Airport Rd, Chamblee, GA 30341, USA",
+    "lat": 33.8772491,
+    "lng": -84.3081687,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Telknology, LLC",
+    "queryAddress": "Snellville,GA 30039\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Snellville, GA 30039, USA",
+    "lat": 33.7972391,
+    "lng": -84.0273168,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "James Brown Financial Services",
+    "queryAddress": "2890 GEORGIA HWY 212 Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "2890 GA-212, Conyers, GA 30094, USA",
+    "lat": 33.6173328,
+    "lng": -84.08139919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DMcNeil Properties, LLC",
+    "queryAddress": "880 Holcomb Bridge Road Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "880 Holcomb Bridge Rd, Roswell, GA 30076, USA",
+    "lat": 34.0292016,
+    "lng": -84.33578179999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pediatric Works",
+    "queryAddress": "4553 N Shallowford Rd. Atlanta,GA 30338",
+    "status": "dropped_imprecise",
+    "formattedAddress": "4553 N Shallowford Rd, Atlanta, GA 30338, USA",
+    "lat": 33.9256892,
+    "lng": -84.30702889999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Millwork Financial Group",
+    "queryAddress": "2398 Lenora Church Rd. Snellville,GA 30078",
+    "status": "kept",
+    "formattedAddress": "2398 Lenora Church Rd, Snellville, GA 30078, USA",
+    "lat": 33.8540638,
+    "lng": -84.0187892,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Karmen Kendrick Creative",
+    "queryAddress": "1072 W Peachtree St. Atlanta,GA 30357",
+    "status": "kept",
+    "formattedAddress": "1072 W Peachtree St NW, Atlanta, GA 30309, USA",
+    "lat": 33.7841929,
+    "lng": -84.3881639,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Downtown Hott Radio",
+    "queryAddress": "3011 Rainbow Drive Decatur,GA 30034",
+    "status": "kept",
+    "formattedAddress": "3011 Rainbow Dr, Decatur, GA 30034, USA",
+    "lat": 33.7090847,
+    "lng": -84.2666624,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Leslie Taylor & Associates Business Solutions",
+    "queryAddress": "4455 Lower Roswell Rd. Marietta,GA 30068",
+    "status": "kept",
+    "formattedAddress": "4455 Lower Roswell Rd, Marietta, GA 30068, USA",
+    "lat": 33.9645805,
+    "lng": -84.42131479999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Taylor2U Kutz",
+    "queryAddress": "3232 Peachtree Rd. Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "3232 Peachtree Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.8443928,
+    "lng": -84.3741653,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MDW Salon LLC",
+    "queryAddress": "5815 Windward Parkway Alpharetta,GA 30005",
+    "status": "kept",
+    "formattedAddress": "5815 Windward Pkwy, Alpharetta, GA 30005, USA",
+    "lat": 34.0875835,
+    "lng": -84.25560639999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VaVa Virtual Assistants",
+    "queryAddress": "3208 Stratford Commons Decatur,GA 30033-7455",
+    "status": "kept",
+    "formattedAddress": "3208 Stratford Commons, Decatur, GA 30033, USA",
+    "lat": 33.791582,
+    "lng": -84.277615,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ReferAll, LLC",
+    "queryAddress": "3070 Windward Plaza Alpharetta,GA 30005",
+    "status": "dropped_imprecise",
+    "formattedAddress": "3070 Windward Plaza, Alpharetta, GA 30005, USA",
+    "lat": 34.0932297,
+    "lng": -84.2413803,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Marke' Enterprises",
+    "queryAddress": "227 Sandy Springs Place Atlanta,GA 30328",
+    "status": "kept",
+    "formattedAddress": "227 Sandy Springs Pl NE, Atlanta, GA 30328, USA",
+    "lat": 33.9205413,
+    "lng": -84.382149,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "McIntosh Bros Productions",
+    "queryAddress": "170 Boulevard SE Atlanta,GA 30312",
+    "status": "dropped_imprecise",
+    "formattedAddress": "170 Boulevard SE, Atlanta, GA 30312, USA",
+    "lat": 33.7511674,
+    "lng": -84.3688268,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "GoodNews Media Works dba Grants Works",
+    "queryAddress": "1100 Peachtree Street, NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Artportunity Knocks Academies Inc",
+    "queryAddress": "1755 The Exchange SE Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "1755 The Exchange SE, Atlanta, GA 30339, USA",
+    "lat": 33.9099367,
+    "lng": -84.4844557,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Little Angels 3D/4D Ultrasound Imaging",
+    "queryAddress": "1385 McDonough Parkway Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "1385 McDonough Pkwy, McDonough, GA 30253, USA",
+    "lat": 33.4553128,
+    "lng": -84.1643678,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "True Potential Financial, LLC",
+    "queryAddress": "6595 Roswell Road Atlanta,GA 30342",
+    "status": "kept",
+    "formattedAddress": "6595 Roswell Rd, Atlanta, GA 30328, USA",
+    "lat": 33.9366432,
+    "lng": -84.3752651,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Whiskey, Wine and Dine Tours",
+    "queryAddress": "6000 Stewart Pkwy Douglasville,GA 30154",
+    "status": "kept",
+    "formattedAddress": "6000 Stewart Pkwy, Douglasville, GA 30135, USA",
+    "lat": 33.7200904,
+    "lng": -84.7715241,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "On The Fly Vacations",
+    "queryAddress": "6000 Stewart Pkwy Douglasville,GA 30154",
+    "status": "kept",
+    "formattedAddress": "6000 Stewart Pkwy, Douglasville, GA 30135, USA",
+    "lat": 33.7200904,
+    "lng": -84.7715241,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Infra Tech Global Services",
+    "queryAddress": "863 Flat Shoal Rd SE Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "863 Flat Shoals Rd SE, Conyers, GA 30094, USA",
+    "lat": 33.6422897,
+    "lng": -84.0151575,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Control EHS",
+    "queryAddress": "PO Box 491792 Atlanta,GA 30349",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30349, USA",
+    "lat": 33.620038,
+    "lng": -84.5327038,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The Millennials Next Door",
+    "queryAddress": "1385 McDonough Parkway Mcdonough,GA 30253\\",
+    "status": "kept",
+    "formattedAddress": "1385 McDonough Pkwy, McDonough, GA 30253, USA",
+    "lat": 33.4553128,
+    "lng": -84.1643678,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Everlasting Love Fulfillment",
+    "queryAddress": "1389 HWY 92 Acworth,GA 30102",
+    "status": "kept",
+    "formattedAddress": "1389 GA-92, Acworth, GA 30102, USA",
+    "lat": 34.0865133,
+    "lng": -84.6570579,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dvine Systems GA",
+    "queryAddress": "40 Macon St Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "40 Macon St, McDonough, GA 30253, USA",
+    "lat": 33.4464754,
+    "lng": -84.1461291,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Sonia Booker Enterprises",
+    "queryAddress": "140 Peachtree Street NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "140 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7578614,
+    "lng": -84.3876229,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "T.A.M.G REALTY INC.",
+    "queryAddress": "875 Old Roswell Rd Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "875 Old Roswell Rd, Roswell, GA 30076, USA",
+    "lat": 34.0364872,
+    "lng": -84.33501389999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Olam, LLC",
+    "queryAddress": "3202 Peachtree Park Dr. NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "3202 Peachtree Park Dr NE, Atlanta, GA 30309, USA",
+    "lat": 33.8136269,
+    "lng": -84.3893946,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Admiral and Ray Properties, LLC",
+    "queryAddress": "2302 Parklake Drive Northeast Atlanta,GA 30345",
+    "status": "kept",
+    "formattedAddress": "2302 Parklake Dr NE, Atlanta, GA 30345, USA",
+    "lat": 33.8538211,
+    "lng": -84.25051619999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cyber Institute of Atlanta",
+    "queryAddress": "150 Carnegie Pl Fayetteville,GA 30214",
+    "status": "kept",
+    "formattedAddress": "150 Carnegie Pl, Fayetteville, GA 30214, USA",
+    "lat": 33.5090352,
+    "lng": -84.4273099,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SWINC",
+    "queryAddress": "2255 Sewell Mill Rd. Marietta,GA 30062",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2255 Sewell Mill Rd, Marietta, GA 30062, USA",
+    "lat": 33.9738826,
+    "lng": -84.4865726,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Legacy Legal, LLC",
+    "queryAddress": "3554 Habersham at Northlake Road Tucker,GA 30084",
+    "status": "kept",
+    "formattedAddress": "3554 Habersham at Northlake Rd, Tucker, GA 30084, USA",
+    "lat": 33.8536432,
+    "lng": -84.2436465,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Premier Taxes & Accounting",
+    "queryAddress": "4284 Memorial Drive Decatur,GA 30032",
+    "status": "kept",
+    "formattedAddress": "4284 Memorial Dr, Decatur, GA 30032, USA",
+    "lat": 33.774221,
+    "lng": -84.2492084,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SavvyPro Freelance LLC",
+    "queryAddress": "PO Box 719 Avondale Estates,GA 30002",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Avondale Estates, GA 30002, USA",
+    "lat": 33.7695269,
+    "lng": -84.26475219999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Solve Tutoring LLC",
+    "queryAddress": "770 Old Roswell Place Roswell,GA 30076",
+    "status": "dropped_imprecise",
+    "formattedAddress": "770 Old Roswell Pl, Roswell, GA 30076, USA",
+    "lat": 34.035203,
+    "lng": -84.3402369,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Jenivid Solutions, LLC",
+    "queryAddress": "3535 Peachtree Rd. NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3535 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8515083,
+    "lng": -84.3605539,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Wicks and Wines",
+    "queryAddress": "308 Woodlands Dr SE Smyrna,GA 30080",
+    "status": "kept",
+    "formattedAddress": "308 Woodlands Dr SE, Smyrna, GA 30080, USA",
+    "lat": 33.891761,
+    "lng": -84.4928824,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Lawn Doctor of Smyrna-Brookhaven",
+    "queryAddress": "4455 Lower Roswell Rd Marietta,GA 30068",
+    "status": "kept",
+    "formattedAddress": "4455 Lower Roswell Rd, Marietta, GA 30068, USA",
+    "lat": 33.9645805,
+    "lng": -84.42131479999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TLA Real Estate Consulting",
+    "queryAddress": "1100 Peachtree St. N.E. Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Synergetic Virtual HR Consulting, LLC",
+    "queryAddress": "PO Box 1034 Marietta,GA 30061",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Marietta, GA 30061, USA",
+    "lat": 33.9491123,
+    "lng": -84.5507433,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Alternative Finance and Business Strategies, LLC",
+    "queryAddress": "149 South McDonough Street Jonesboro,GA 30236",
+    "status": "kept",
+    "formattedAddress": "149 S McDonough St, Jonesboro, GA 30236, USA",
+    "lat": 33.5191897,
+    "lng": -84.3536709,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Fit For Legacy, LLC",
+    "queryAddress": "1201 West Peachtree Street, NW Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1201 W Peachtree St NW, Atlanta, GA 30309, USA",
+    "lat": 33.7872182,
+    "lng": -84.3873733,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mobile Energy",
+    "queryAddress": "3340 Peachtree Road Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3340 Peachtree Rd, Atlanta, GA 30326, USA",
+    "lat": 33.8456761,
+    "lng": -84.35942159999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Academy for Creating Excellence",
+    "queryAddress": "302 Deering Rd NW Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "302 Deering Rd NW, Atlanta, GA 30309, USA",
+    "lat": 33.795922,
+    "lng": -84.3985072,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ridgewood Personal Care Home, Inc.",
+    "queryAddress": "1755 North Brown Rd. Lawrenceville,GA 30043",
+    "status": "kept",
+    "formattedAddress": "1755 N Brown Rd, Lawrenceville, GA 30043, USA",
+    "lat": 33.9913344,
+    "lng": -84.0791478,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Monica Howard Social Media Services",
+    "queryAddress": "P.O. Box 170091 Atlanta,GA 30317",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30317, USA",
+    "lat": 33.7467783,
+    "lng": -84.3147572,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Omega Business Solutions",
+    "queryAddress": "7590 Saybrook Trail Jonesboro,GA 30274",
+    "status": "kept",
+    "formattedAddress": "7590 Saybrook Trail, Jonesboro, GA 30236, USA",
+    "lat": 33.547094,
+    "lng": -84.3285552,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Aspire Construction & Design",
+    "queryAddress": "352 University Ave SW Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "352 University Ave SW, Atlanta, GA 30310, USA",
+    "lat": 33.7205023,
+    "lng": -84.3999441,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "C.R.A.M. Academy, LLC",
+    "queryAddress": "5523 Lofwood Lane Lithonia,GA 30058",
+    "status": "kept",
+    "formattedAddress": "5523 Lofwood Ln, Lithonia, GA 30058, USA",
+    "lat": 33.711971,
+    "lng": -84.1551562,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Peymac",
+    "queryAddress": "2378 Centenary Way Ct. Dacula,GA 30019",
+    "status": "kept",
+    "formattedAddress": "2378 Centenary Way Ct, Dacula, GA 30019, USA",
+    "lat": 33.9883485,
+    "lng": -83.9108669,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "All A's Spices, LLC.",
+    "queryAddress": "504 Fair St SW Atlanta,GA 30313",
+    "status": "kept",
+    "formattedAddress": "504 Fair St SW, Atlanta, GA 30313, USA",
+    "lat": 33.7485746,
+    "lng": -84.40408790000001,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "HR Biz LLC",
+    "queryAddress": "10945 State Bridge Rd Alpharetta,GA 30022",
+    "status": "dropped_imprecise",
+    "formattedAddress": "10945 State Bridge Rd, Alpharetta, GA 30022, USA",
+    "lat": 34.0504141,
+    "lng": -84.2232689,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Hair Debate, Morale Ocain LLC",
+    "queryAddress": "2148 Duluth Hwy. Duluth,GA 30096",
+    "status": "kept",
+    "formattedAddress": "2148 Duluth Hwy, Duluth, GA 30097, USA",
+    "lat": 33.9786266,
+    "lng": -84.0938438,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JW Supreme Xpress LLC",
+    "queryAddress": "1201 Peachtree St NE Atlanta,GA 30361",
+    "status": "kept",
+    "formattedAddress": "1201 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.787311,
+    "lng": -84.3824133,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ã€ la Carte Investments, LLC",
+    "queryAddress": "4480 S. Cobb Drive Smyrna,GA 30080",
+    "status": "kept",
+    "formattedAddress": "4480 S Cobb Dr SE, Smyrna, GA 30080, USA",
+    "lat": 33.843602,
+    "lng": -84.5042935,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VSC Logistics",
+    "queryAddress": "2471 Old Sewell Rd. Marietta,GA 30068",
+    "status": "kept",
+    "formattedAddress": "2471 Old Sewell Rd, Marietta, GA 30068, USA",
+    "lat": 33.9516577,
+    "lng": -84.4799443,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "RTW Xxact Enterprises, LLC",
+    "queryAddress": "4915 Hwy 138 Loganville,GA 30052",
+    "status": "kept",
+    "formattedAddress": "4915 GA-138, Loganville, GA 30052, USA",
+    "lat": 33.7389184,
+    "lng": -83.86445859999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Caribbean and American Global Business Connections, LLC",
+    "queryAddress": "4813 Ridge Rd Douglasville,GA 30134",
+    "status": "kept",
+    "formattedAddress": "4813 Ridge Rd, Douglasville, GA 30134, USA",
+    "lat": 33.8188153,
+    "lng": -84.8136482,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Transworld Business Advisors of Atlanta Peachtree",
+    "queryAddress": "107 Technology Parkway Peachtree Corners,GA 30092",
+    "status": "kept",
+    "formattedAddress": "107 Technology Pkwy NW, Peachtree Corners, GA 30092, USA",
+    "lat": 33.9668211,
+    "lng": -84.2189018,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Wellness Sanctuary International Corp",
+    "queryAddress": "1003 E. Freeway Drive South East Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "1003 E Freeway Dr SE, Conyers, GA 30094, USA",
+    "lat": 33.6511748,
+    "lng": -84.0140097,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Maidpro Smyrna",
+    "queryAddress": "1770 The Exchange SE Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "1770 The Exchange SE, Atlanta, GA 30339, USA",
+    "lat": 33.9088918,
+    "lng": -84.4804511,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Kinetic Marketing & Analytics",
+    "queryAddress": "760 Birch Ridge Drive Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "760 Birch Ridge Dr, Roswell, GA 30076, USA",
+    "lat": 34.0725894,
+    "lng": -84.3279641,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Noise Media Network",
+    "queryAddress": "1075 Chimney Trace Way Lawrenceville, Ga,GA 30045",
+    "status": "kept",
+    "formattedAddress": "1075 Chimney Trace Way SE, Lawrenceville, GA 30045, USA",
+    "lat": 33.934939,
+    "lng": -83.919767,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A Squared Offices",
+    "queryAddress": "2056 W Park Place Blvd Stone Mountain,GA 30087",
+    "status": "kept",
+    "formattedAddress": "2056 W Park Pl. Blvd, Stone Mountain, GA 30087, USA",
+    "lat": 33.81942340000001,
+    "lng": -84.1192878,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Conserte Consulting",
+    "queryAddress": "1372 Peachtree Street NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1372 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7928865,
+    "lng": -84.38584209999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Robinson Consulting, LLC",
+    "queryAddress": "100 Hartsfield Center Parkway Atlanta,GA 30354",
+    "status": "kept",
+    "formattedAddress": "100 Hartsfield Center Pkwy, Atlanta, GA 30354, USA",
+    "lat": 33.6552323,
+    "lng": -84.4288369,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Atlanta Premier Insurance Agency",
+    "queryAddress": "12 Powder Springs Street Marietta,GA 30064",
+    "status": "kept",
+    "formattedAddress": "Anderson Building, 12 Powder Springs St SW, Marietta, GA 30064, USA",
+    "lat": 33.9518039,
+    "lng": -84.550367,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "L. Gabrielle Enterprises, LLC",
+    "queryAddress": "2274 Salem Rd Conyers,GA 30013",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2274 Salem Rd SE, Conyers, GA 30013, USA",
+    "lat": 33.6292634,
+    "lng": -83.97657579999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Lloyd's Quick Cleaning Service, LLC",
+    "queryAddress": "2090 Lawrenceville Suwanee Rd. Suwanee,GA 30024",
+    "status": "kept",
+    "formattedAddress": "2090 Lawrenceville-Suwanee Rd, Suwanee, GA 30024, USA",
+    "lat": 34.0015883,
+    "lng": -84.0405735,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "P & S Services",
+    "queryAddress": "2724 Autumn View Dr. Lawrenceville,GA 30044",
+    "status": "kept",
+    "formattedAddress": "2724 Autumn View Dr, Lawrenceville, GA 30044, USA",
+    "lat": 33.9272498,
+    "lng": -84.077306,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Safeguard Security Solutions LLC",
+    "queryAddress": "245 Country Club Drive Stockbridge,GA 30281",
+    "status": "dropped_imprecise",
+    "formattedAddress": "245 Country Club Dr, Stockbridge, GA 30281, USA",
+    "lat": 33.5067509,
+    "lng": -84.2227749,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Michelle A Roberts Legacy Group",
+    "queryAddress": "998 Hwy 1941 Hampton,GA 30228",
+    "status": "kept",
+    "formattedAddress": "1941 McDonough Hampton Rd, McDonough, GA 30253, USA",
+    "lat": 33.4096388,
+    "lng": -84.2098382,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "The Life Luxe Group, LLC",
+    "queryAddress": "3355 Lenox Rd Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3355 Lenox Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8466809,
+    "lng": -84.3589741,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "W2S Marketing",
+    "queryAddress": "400 Trabert NW Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "400 Trabert Ave NW, Atlanta, GA 30309, USA",
+    "lat": 33.794309,
+    "lng": -84.401097,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Privy Capital Management",
+    "queryAddress": "1261 Caroline St Atlanta,GA 30307",
+    "status": "kept",
+    "formattedAddress": "1261 Caroline St NE, Atlanta, GA 30307, USA",
+    "lat": 33.757957,
+    "lng": -84.3464881,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Brightway Insurance The Alonzo Anderson Agency",
+    "queryAddress": "401 Westpark Court Peachtree City,GA 30269",
+    "status": "kept",
+    "formattedAddress": "401 Westpark Ct, Peachtree City, GA 30269, USA",
+    "lat": 33.4013162,
+    "lng": -84.5896003,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Insurance Services 3, Inc.",
+    "queryAddress": "2818 East Point St. East Point,GA 30344",
+    "status": "kept",
+    "formattedAddress": "2818 E Point St, East Point, GA 30344, USA",
+    "lat": 33.6782512,
+    "lng": -84.44176569999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DreamHouse Management Group",
+    "queryAddress": "2774 Cobb Pkwy NW Kennesaw,GA 30152",
+    "status": "kept",
+    "formattedAddress": "2774 Cobb Pkwy NW, Kennesaw, GA 30152, USA",
+    "lat": 34.0233857,
+    "lng": -84.62450849999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A House Called Hue LLC",
+    "queryAddress": "4827 Old National Hwy Atlanta,GA 30337",
+    "status": "kept",
+    "formattedAddress": "4827 Old National Hwy, Atlanta, GA 30337, USA",
+    "lat": 33.6239748,
+    "lng": -84.4762799,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Politicare",
+    "queryAddress": "2855 Peachtree Rd. NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "2855 Peachtree Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.8328221,
+    "lng": -84.3841206,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Strother Financial Solutions",
+    "queryAddress": "881 Peachtree Street NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "881 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7786621,
+    "lng": -84.38398939999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Unique and Innovative Solutions",
+    "queryAddress": "3645 Market Place Blvd East Point,GA 30344",
+    "status": "kept",
+    "formattedAddress": "3645 Marketplace Blvd, East Point, GA 30344, USA",
+    "lat": 33.6581062,
+    "lng": -84.50352509999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VB Consulting",
+    "queryAddress": "3391 Main St College Park,GA 30337",
+    "status": "kept",
+    "formattedAddress": "3391 Main St, College Park, GA 30337, USA",
+    "lat": 33.6631502,
+    "lng": -84.44657959999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Palmer Firm Group LLC",
+    "queryAddress": "384 Northyards Blvd. Atlanta,GA 30313",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Parking lot, 384 Northyards Boulevard NW, Atlanta, GA 30313, USA",
+    "lat": 33.7682926,
+    "lng": -84.40101489999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "iCare Technology Geeks, Inc",
+    "queryAddress": "3355 Lenox Rd NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3355 Lenox Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8466809,
+    "lng": -84.3589741,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tapestry Consulting, LLC",
+    "queryAddress": "2346 Leith Avenue Atlanta,GA 30344",
+    "status": "kept",
+    "formattedAddress": "2346 Leith Ave, Atlanta, GA 30344, USA",
+    "lat": 33.6859662,
+    "lng": -84.4651544,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bridge Forward Solutions by The Beasley Law Firm",
+    "queryAddress": "2385 Godby Rd Atlanta,GA 30349",
+    "status": "kept",
+    "formattedAddress": "2385 Godby Rd, Atlanta, GA 30349, USA",
+    "lat": 33.617088,
+    "lng": -84.46751139999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "High Yield Real Estate Services, LLC",
+    "queryAddress": "361 Brackin Trace Grayson,GA 30017",
+    "status": "kept",
+    "formattedAddress": "361 Brackin Trace, Grayson, GA 30017, USA",
+    "lat": 33.9066811,
+    "lng": -83.9598859,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Valentina Corleone Inc.",
+    "queryAddress": "117 Julee Emilyn Dr Bonaire,GA 31005",
+    "status": "dropped_out_of_range_94mi",
+    "formattedAddress": "117 Julee Emilyn Dr, Bonaire, GA 31005, USA",
+    "lat": 32.5589024,
+    "lng": -83.6170274,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Crystal Genesis Properties",
+    "queryAddress": "2967 Monterey Dr Decatur,GA 30032",
+    "status": "kept",
+    "formattedAddress": "2967 Monterey Dr, Decatur, GA 30032, USA",
+    "lat": 33.7472059,
+    "lng": -84.26863379999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Superior Eyecare",
+    "queryAddress": "1569 N Expy Griffin,GA 30223",
+    "status": "kept",
+    "formattedAddress": "1569 N Expy, Griffin, GA 30223, USA",
+    "lat": 33.2723309,
+    "lng": -84.29671359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pamela Myers Model Fitness (PMMFIT)",
+    "queryAddress": "250 Business Center Drive Stockbridge,GA 30281",
+    "status": "kept",
+    "formattedAddress": "250 Business Center Dr, Stockbridge, GA 30281, USA",
+    "lat": 33.5188915,
+    "lng": -84.20772889999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "FourStage Branding",
+    "queryAddress": "1230 Peachtree St. Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "1230 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7881269,
+    "lng": -84.3881296,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Swing Into Their Dreams Foundation",
+    "queryAddress": "191 Peachtree St NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "191 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7590381,
+    "lng": -84.3872591,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "LegalShield",
+    "queryAddress": "PO Box 28132 Atlanta,GA 30358",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA, USA",
+    "lat": 33.7501275,
+    "lng": -84.3885209,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The Black Art Depot",
+    "queryAddress": "2569 Park Central Blvd Decatur,GA 30035",
+    "status": "kept",
+    "formattedAddress": "2569 Park Central Blvd, Decatur, GA 30035, USA",
+    "lat": 33.7119223,
+    "lng": -84.17359909999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gold Star Logistics Group, LLC",
+    "queryAddress": "3015 R.N. Martin Street East Point,GA 30344",
+    "status": "kept",
+    "formattedAddress": "3015 RN Martin St, East Point, GA 30344, USA",
+    "lat": 33.6726006,
+    "lng": -84.4376466,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Campbell Commercial Real Estate",
+    "queryAddress": "900 Circle 75 Parkway Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "900 Circle 75 Pkwy, Atlanta, GA 30339, USA",
+    "lat": 33.8880949,
+    "lng": -84.46814839999999,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Lowrey Staffing, LLC",
+    "queryAddress": "4480-H S. Cobb Dr. Smyrna,GA 30080",
+    "status": "dropped_imprecise",
+    "formattedAddress": "S Cobb Dr, Smyrna, GA 30080, USA",
+    "lat": 33.8594405,
+    "lng": -84.51711,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Christiana Press LLC",
+    "queryAddress": "P.O. Box 83097 Conyers,GA 30013",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Conyers, GA, USA",
+    "lat": 33.6676103,
+    "lng": -84.01769039999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Fierce Gleam",
+    "queryAddress": "2569 Park Central Blvd Decatur,GA 30035\\",
+    "status": "kept",
+    "formattedAddress": "2569 Park Central Blvd, Decatur, GA 30035, USA",
+    "lat": 33.7119223,
+    "lng": -84.17359909999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SAB Entertainment",
+    "queryAddress": "1100 Peachtree St NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Akoma Events",
+    "queryAddress": "P.O. Box 4152 Marietta,GA 30061",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Marietta, GA 30061, USA",
+    "lat": 33.9491123,
+    "lng": -84.5507433,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "EBS Administrative Services",
+    "queryAddress": "5522 Old National Hwy. College Park,GA 30349",
+    "status": "kept",
+    "formattedAddress": "5522 Old National Hwy, Atlanta, GA 30349, USA",
+    "lat": 33.604983,
+    "lng": -84.4707846,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Precision Maintenance & Construction",
+    "queryAddress": "4330 Janice Dr College Park,GA 30337",
+    "status": "kept",
+    "formattedAddress": "4330 Janice Dr, College Park, GA 30337, USA",
+    "lat": 33.6374822,
+    "lng": -84.4837218,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Gud Gud Pudin, LLC",
+    "queryAddress": "215 Laredo Drive Decatur,GA 30030",
+    "status": "kept",
+    "formattedAddress": "215 Laredo Dr, Decatur, GA 30030, USA",
+    "lat": 33.78127610000001,
+    "lng": -84.2686193,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Unified Courier, Inc.",
+    "queryAddress": "1775 Parker Road Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "1775 Parker Rd SE, Conyers, GA 30094, USA",
+    "lat": 33.6436588,
+    "lng": -84.0234528,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Independent Film and Music Collaborative, LLC.",
+    "queryAddress": "185 Nix Court Fayetteville,GA 30214",
+    "status": "kept",
+    "formattedAddress": "185 Nix Ct, Fayetteville, GA 30214, USA",
+    "lat": 33.471899,
+    "lng": -84.492459,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "FLAVVRR DIGITAL, LLC",
+    "queryAddress": "300 Colonial Center Parkway Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "300 Colonial Center Pkwy, Roswell, GA 30076, USA",
+    "lat": 34.0437928,
+    "lng": -84.3251969,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Benton & Muse Consulting",
+    "queryAddress": "108 Fowler Ct Decatur,GA 30030",
+    "status": "kept",
+    "formattedAddress": "108 Fowler Ct, Decatur, GA 30030, USA",
+    "lat": 33.7711845,
+    "lng": -84.3024983,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Black Women Moguls",
+    "queryAddress": "445 Markham Street Atlanta,GA 30313",
+    "status": "kept",
+    "formattedAddress": "445 Markham St SW, Atlanta, GA 30313, USA",
+    "lat": 33.7531239,
+    "lng": -84.4022993,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Conyers Walk In Clinic",
+    "queryAddress": "1804 Over Lake Drive Conyers,GA 30013",
+    "status": "kept",
+    "formattedAddress": "1804 Over Lake Dr SE, Conyers, GA 30013, USA",
+    "lat": 33.6418678,
+    "lng": -84.0094896,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VISION Youth and Family Christian Counseling",
+    "queryAddress": "3188 PACES STATION RDG Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "3188 Paces Station Ridge, Atlanta, GA 30339, USA",
+    "lat": 33.8567725,
+    "lng": -84.47576219999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Academy for Exceptional Youth",
+    "queryAddress": "P.O. Box 82538 Conyers,GA 30013",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Conyers, GA, USA",
+    "lat": 33.6676103,
+    "lng": -84.01769039999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Mister Bath & Spas",
+    "queryAddress": "2727 Paces Ferry Rd Se Atlanta,GA 30339",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2727 Paces Ferry Rd SE, Atlanta, GA 30339, USA",
+    "lat": 33.8664059,
+    "lng": -84.4746857,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "RTW Xxact Enterprises LLC",
+    "queryAddress": "5000 Snapfinger Woods Drive Decatur,GA 30035",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5000 Snapfinger Woods Dr, Decatur, GA 30035, USA",
+    "lat": 33.7118366,
+    "lng": -84.1847228,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "LETS FACE IT LLC",
+    "queryAddress": "3348 PEACHTREE ROAD Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3348 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.848079,
+    "lng": -84.369744,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "LT Printing & Promotion",
+    "queryAddress": "1201 W. Peachtree Streeet NW Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1201 W Peachtree St NW, Atlanta, GA 30309, USA",
+    "lat": 33.7872182,
+    "lng": -84.3873733,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "M13 Creative Media",
+    "queryAddress": "108 Fowler Ct Decatur,GA 30030\\",
+    "status": "kept",
+    "formattedAddress": "108 Fowler Ct, Decatur, GA 30030, USA",
+    "lat": 33.7711845,
+    "lng": -84.3024983,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Empire Board of Realtist, Inc.",
+    "queryAddress": "686 Joseph E. Lowery Blvd Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "686 Joseph Echols Lowery Blvd SW, Atlanta, GA 30310, USA",
+    "lat": 33.7362359,
+    "lng": -84.4174585,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "VDINX LLC",
+    "queryAddress": "678 OLD HICKORY LN SW Lilburn,GA 30047",
+    "status": "kept",
+    "formattedAddress": "678 Old Hickory Ln SW, Lilburn, GA 30047, USA",
+    "lat": 33.8766427,
+    "lng": -84.0971544,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MI Group USA",
+    "queryAddress": "40 Technology Parkway South Norcross,GA 30092",
+    "status": "kept",
+    "formattedAddress": "40 Technology Pkwy NW, Peachtree Corners, GA 30092, USA",
+    "lat": 33.962058,
+    "lng": -84.2166431,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Morale Ocain LLC",
+    "queryAddress": "3330 Satellite Blvd Duluth,GA 30096",
+    "status": "kept",
+    "formattedAddress": "3330 Satellite Blvd NW, Duluth, GA 30096, USA",
+    "lat": 33.9632572,
+    "lng": -84.12474960000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ASERET DEVELOPMENT SERIES LLC",
+    "queryAddress": "235 Peachtree St NE Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "235 Peachtree Rd NE, Atlanta, GA 30303, USA",
+    "lat": 33.7604647,
+    "lng": -84.38709109999999,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Steel City Cleaning Solutions",
+    "queryAddress": "541 10th street Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "541 10th St NW, Atlanta, GA 30318, USA",
+    "lat": 33.7818264,
+    "lng": -84.4051156,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Miripa Real Estate Investment Company",
+    "queryAddress": "4480H South Cobb Drive Smyrna,GA 30080",
+    "status": "kept",
+    "formattedAddress": "4480 S Cobb Dr SE, Smyrna, GA 30080, USA",
+    "lat": 33.843602,
+    "lng": -84.5042935,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SOHO Realty and Mortgage",
+    "queryAddress": "760 Roswell Rd Roswell,GA 30076",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Roswell Greenway, Roswell, GA 30076, USA",
+    "lat": 34.0333982,
+    "lng": -84.3067336,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "ATTYYA Limited Co.",
+    "queryAddress": "4834 Spinepoint Way Douglasville,GA 30135",
+    "status": "kept",
+    "formattedAddress": "4834 Spinepoint Way, Douglasville, GA 30135, USA",
+    "lat": 33.6757924,
+    "lng": -84.6596283,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "j-Nu Creative",
+    "queryAddress": "2950 S Cobb Dr SE Smyrna,GA 30080",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2950 S Cobb Dr SE, Smyrna, GA 30080, USA",
+    "lat": 33.8816077,
+    "lng": -84.5349971,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Real Women Atlanta Magazine",
+    "queryAddress": "931 Dove Court Conyers,GA 30012",
+    "status": "kept",
+    "formattedAddress": "931 Dove Ct, Conyers, GA 30012, USA",
+    "lat": 33.6641626,
+    "lng": -84.0057187,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Anointed Professional Enterprises Inc",
+    "queryAddress": "132 Mitchell street SW Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "132 Mitchell St SW, Atlanta, GA 30303, USA",
+    "lat": 33.7503994,
+    "lng": -84.3923507,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dawson's Management",
+    "queryAddress": "50 Hurt Plaza Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "Hurt Bldg, 50 Hurt Plaza SE, Atlanta, GA 30303, USA",
+    "lat": 33.7543349,
+    "lng": -84.3868116,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Alliance Tax Solutions",
+    "queryAddress": "5665 New Northside Drive Atlanta,GA 30328",
+    "status": "kept",
+    "formattedAddress": "5665 New Northside Dr, Atlanta, GA 30328, USA",
+    "lat": 33.9101815,
+    "lng": -84.4315501,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Garraway Property Inspections",
+    "queryAddress": "1803 Ashborough Way Marietta,GA 30067",
+    "status": "kept",
+    "formattedAddress": "1803 Ashborough Way SE, Marietta, GA 30067, USA",
+    "lat": 33.9237645,
+    "lng": -84.4969371,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Libra Management Group",
+    "queryAddress": "160 Clairemont Ave Decatur,GA 30030",
+    "status": "kept",
+    "formattedAddress": "160 Clairemont Ave, Decatur, GA 30030, USA",
+    "lat": 33.7774947,
+    "lng": -84.2978194,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "CBS Environmental",
+    "queryAddress": "1720 Mars Hill Rd Acworth,GA 30101",
+    "status": "kept",
+    "formattedAddress": "1720 Mars Hill Rd, Acworth, GA 30101, USA",
+    "lat": 33.9958734,
+    "lng": -84.7058584,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "STEAM Revolution, Inc",
+    "queryAddress": "504 Fair Street Atlanta,GA 30313",
+    "status": "kept",
+    "formattedAddress": "504 Fair St SW, Atlanta, GA 30313, USA",
+    "lat": 33.7485746,
+    "lng": -84.40408790000001,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Intruder Protection Services",
+    "queryAddress": "2890 Hwy 212 Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "2890 GA-212, Conyers, GA 30094, USA",
+    "lat": 33.6173328,
+    "lng": -84.08139919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "EnCompass Management Solutions LLC",
+    "queryAddress": "1788 Austell Rd SW Marietta,GA 30008",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1788 Austell Rd SW, Marietta, GA 30008, USA",
+    "lat": 33.9093181,
+    "lng": -84.56341909999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Clarity Custom Jewelry",
+    "queryAddress": "75 John Portman Blvd Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "75 John Portman Blvd NW, Atlanta, GA 30303, USA",
+    "lat": 33.7604933,
+    "lng": -84.3882896,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SJW Logistics",
+    "queryAddress": "3721 New Macland Rd Powder Springs,GA 30127",
+    "status": "kept",
+    "formattedAddress": "3721 New MacLand Rd, Powder Springs, GA 30127, USA",
+    "lat": 33.8643045,
+    "lng": -84.6741459,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Levins Realty powered by KW-Southern Equity Commercial",
+    "queryAddress": "695 Mansell Rd. Roswell,GA 30076",
+    "status": "kept",
+    "formattedAddress": "695 Mansell Rd, Roswell, GA 30076, USA",
+    "lat": 34.0425808,
+    "lng": -84.34409889999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Schooley Mitchell",
+    "queryAddress": "225 Gentrys Walk Atlanta,GA 30341",
+    "status": "kept",
+    "formattedAddress": "225 Gentrys Walk, Atlanta, GA 30341, USA",
+    "lat": 33.91604239999999,
+    "lng": -84.3003275,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mocha Travel",
+    "queryAddress": "P.O. Box 90386 Atlanta,GA 30364",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA, USA",
+    "lat": 33.7501275,
+    "lng": -84.3885209,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "TCPyles Consulting and Financial Services LLC",
+    "queryAddress": "250 Georgia Ave SE Atlanta,GA 30312",
+    "status": "kept",
+    "formattedAddress": "250 Georgia Ave SE, Atlanta, GA 30312, USA",
+    "lat": 33.7369828,
+    "lng": -84.3793802,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Evolving Solution Services",
+    "queryAddress": "289 Jonesboro Road Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "289 Jonesboro Rd, McDonough, GA 30253, USA",
+    "lat": 33.4522775,
+    "lng": -84.16882969999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Coolest Nerd Ever, LLC",
+    "queryAddress": "88 N Avondale Rd Avondale Estates,GA 30002",
+    "status": "kept",
+    "formattedAddress": "88 N Avondale Rd, Avondale Estates, GA 30002, USA",
+    "lat": 33.7763084,
+    "lng": -84.26888660000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Micah Byrd Bookkeeping & Tax Service",
+    "queryAddress": "PO BOX 2307 Stockbridge,GA 30281",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Stockbridge, GA 30281, USA",
+    "lat": 33.5494383,
+    "lng": -84.20679919999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The AMS Guy LLC",
+    "queryAddress": "5061 Martins Crossing Rd Stone Mountain,GA 30088",
+    "status": "kept",
+    "formattedAddress": "5061 Martins Crossing Rd, Stone Mountain, GA 30088, USA",
+    "lat": 33.7728449,
+    "lng": -84.18312039999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A-Ride-Away LLC",
+    "queryAddress": "5415 Sugarloaf Parkway Lawrenceville,GA 30043",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5415 Sugarloaf Pkwy, Lawrenceville, GA 30043, USA",
+    "lat": 33.9683634,
+    "lng": -84.0704215,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Supreme Transportation Group LLC",
+    "queryAddress": "5825 Glenridge Drive Atlanta,GA 30328",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5825 Glenridge Dr, Atlanta, GA 30328, USA",
+    "lat": 33.9147968,
+    "lng": -84.3611056,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Blue Corp Financial Services LLC",
+    "queryAddress": "685 Royervista Drive Northeast Atlanta,GA 30342",
+    "status": "kept",
+    "formattedAddress": "685 Royervista Dr NE, Atlanta, GA 30342, USA",
+    "lat": 33.9054178,
+    "lng": -84.3665518,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "S1Tech Consulting LLC",
+    "queryAddress": "303 Perimeter Center North Atlanta,GA 30346",
+    "status": "kept",
+    "formattedAddress": "303 Perimeter Center N, Dunwoody, GA 30346, USA",
+    "lat": 33.92825380000001,
+    "lng": -84.33450359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Pethral Daniels, LLC",
+    "queryAddress": "260 Peachtree St. NW Atlanta,GA 30303",
+    "status": "kept",
+    "formattedAddress": "Coastal States Building, 260 Peachtree St NW, Atlanta, GA 30303, USA",
+    "lat": 33.7614903,
+    "lng": -84.3878952,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Next Stop Mobile Notary",
+    "queryAddress": "1700 Northside Drive NW Atlanta,GA 30318",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1700 Northside Dr NW, Atlanta, GA 30318, USA",
+    "lat": 33.8008454,
+    "lng": -84.4090592,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Wellness Spot",
+    "queryAddress": "3397 Main St College Park,GA 30337",
+    "status": "kept",
+    "formattedAddress": "3397 Main St, College Park, GA 30337, USA",
+    "lat": 33.6629729,
+    "lng": -84.4466223,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Burroughs Enterprises DC Inc.",
+    "queryAddress": "6000 Stewart Pkwy, #5092, Douglasville,GA 30135",
+    "status": "kept",
+    "formattedAddress": "6000 Stewart Pkwy #5092, Douglasville, GA 30135, USA",
+    "lat": 33.7200904,
+    "lng": -84.7715241,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PMP: Phenomenal Management Partners and Phenomenal Media Productions",
+    "queryAddress": "352 University Ave SW Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "352 University Ave SW, Atlanta, GA 30310, USA",
+    "lat": 33.7205023,
+    "lng": -84.3999441,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Embassy International Chamber of Commerce",
+    "queryAddress": "PO Box 777 Stonecrest,GA 30058",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Lithonia, GA 30058, USA",
+    "lat": 33.7344959,
+    "lng": -84.1118458,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "DRPfit LLC",
+    "queryAddress": "4550 Jonesboro Rd Ste A2-325 Union City,GA 30291",
+    "status": "kept",
+    "formattedAddress": "4550 Jonesboro Rd a2 325, Union City, GA 30291, USA",
+    "lat": 33.5661503,
+    "lng": -84.5360422,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Kindred Paper Company",
+    "queryAddress": "1700 Northside Drive Northwest Atlanta,GA 30318",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1700 Northside Dr NW, Atlanta, GA 30318, USA",
+    "lat": 33.8008454,
+    "lng": -84.4090592,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Essayon Progress Management",
+    "queryAddress": "560 Fairground Street N.E Marietta,GA 30060",
+    "status": "kept",
+    "formattedAddress": "560 Fairground St NE, Marietta, GA 30060, USA",
+    "lat": 33.964983,
+    "lng": -84.53658449999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Industrial Marketing and Graphics Corporation DBA Alphagraphics NE Atlanta",
+    "queryAddress": "2070 Peachtree Industrial Court Atlanta,GA 30341",
+    "status": "kept",
+    "formattedAddress": "2070 Peachtree Industrial Ct, Chamblee, GA 30341, USA",
+    "lat": 33.8998526,
+    "lng": -84.2972198,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Brown Farmer Media Group, Inc",
+    "queryAddress": "1390 Harlequin Way Stockbridge,GA 30281",
+    "status": "kept",
+    "formattedAddress": "1390 Harlequin Wy, Stockbridge, GA 30281, USA",
+    "lat": 33.5459482,
+    "lng": -84.1616614,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Staff My Nurse",
+    "queryAddress": "933 Branch Court Grovetown,GA 30813",
+    "status": "dropped_out_of_range_128mi",
+    "formattedAddress": "933 Branch Court, Grovetown, GA 30813, USA",
+    "lat": 33.4812162,
+    "lng": -82.1936601,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Yaya V-Steam",
+    "queryAddress": "2470 Spring Hill Pkwy SE Marietta,GA 30080",
+    "status": "kept",
+    "formattedAddress": "2470 Spring Hill Pkwy SE, Smyrna, GA 30080, USA",
+    "lat": 33.8826231,
+    "lng": -84.4734757,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "VenU2Go",
+    "queryAddress": "4827 Old National Parkway Atlanta,GA 30337",
+    "status": "kept",
+    "formattedAddress": "4827 Old National Pkwy, College Park, GA 30349, USA",
+    "lat": 33.6158375,
+    "lng": -84.46904049999999,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Decals Diva, LLC",
+    "queryAddress": "6450 Evans Drive Rex,GA 30273",
+    "status": "kept",
+    "formattedAddress": "6450 Evans Dr, Rex, GA 30273, USA",
+    "lat": 33.5786182,
+    "lng": -84.28141280000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Couture4U Womens Boutique",
+    "queryAddress": "800 Whitlock Avenue NW Suite 102 Marietta,GA 30064",
+    "status": "kept",
+    "formattedAddress": "800 Whitlock Ave NW UNIT 102, Marietta, GA 30064, USA",
+    "lat": 33.9529308,
+    "lng": -84.57661569999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "THE CHRIS JAMES JOURNEY",
+    "queryAddress": "2345 Cobb Pkwy Smyrna,GA 30080",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2345 Cobb Pkwy SE, Smyrna, GA 30080, USA",
+    "lat": 33.8957554,
+    "lng": -84.47796509999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Business 4 Social Change",
+    "queryAddress": "3365 Peidmont Rd NE #114 Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "3365 Piedmont Rd NE #114, Atlanta, GA 30305, USA",
+    "lat": 33.8473256,
+    "lng": -84.372163,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Design Duo and The Brown Brand",
+    "queryAddress": "3173 Abbey Place SW Atlanta,GA 30331",
+    "status": "kept",
+    "formattedAddress": "3173 Abbey Pl SW, Atlanta, GA 30331, USA",
+    "lat": 33.6655917,
+    "lng": -84.5104143,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Vital Turnkey Solutions, LLC",
+    "queryAddress": "3961 Floyd Rd, Ste 300363 Austell,GA 30106",
+    "status": "kept",
+    "formattedAddress": "3961 Floyd Rd, Austell, GA 30106, USA",
+    "lat": 33.8569895,
+    "lng": -84.5904164,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Stealth Tech Services",
+    "queryAddress": "741 Pecan Knoll Dr. Marietta,GA 30008",
+    "status": "kept",
+    "formattedAddress": "741 Pecan Knoll Dr, Marietta, GA 30008, USA",
+    "lat": 33.9341146,
+    "lng": -84.5473094,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Royal Trophies",
+    "queryAddress": "2145 Main Street East Point,GA 30344",
+    "status": "kept",
+    "formattedAddress": "2145 Main St, East Point, GA 30344, USA",
+    "lat": 33.69657249999999,
+    "lng": -84.4305395,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DNA Marketing",
+    "queryAddress": "6423 Queens Court Trace Mableton,GA 30126",
+    "status": "kept",
+    "formattedAddress": "6423 Queens Court Trace, Mableton, GA 30126, USA",
+    "lat": 33.7993362,
+    "lng": -84.5249576,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "American Financial Network, INC",
+    "queryAddress": "8328 Office Park Drive, Suite B Douglasville,GA 30134",
+    "status": "kept",
+    "formattedAddress": "8328 Office Park Dr b, Douglasville, GA 30134, USA",
+    "lat": 33.7532719,
+    "lng": -84.7324852,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Fearless Fund",
+    "queryAddress": "1623 Westwood Ave SW Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "1623 Westwood Ave SW, Atlanta, GA 30310, USA",
+    "lat": 33.73862380000001,
+    "lng": -84.4409957,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Glenda Y. Hicks, CPA",
+    "queryAddress": "2890 GA Hwy. 212 Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "2890 GA-212, Conyers, GA 30094, USA",
+    "lat": 33.6173328,
+    "lng": -84.08139919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MICAH BYRD BOOKKEEPING & TAX SVC",
+    "queryAddress": "PO BOX 2307 Stockbridge,GA 30281",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Stockbridge, GA 30281, USA",
+    "lat": 33.5494383,
+    "lng": -84.20679919999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "The sweet fusion experience",
+    "queryAddress": "1 glenlake parkway Atlanta,GA 30328",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1 Glenlake Pkwy NE, Atlanta, GA 30328, USA",
+    "lat": 33.9346996,
+    "lng": -84.360281,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "ACE Online Academy LLC",
+    "queryAddress": "506 Coral Street Marietta,GA 30064",
+    "status": "kept",
+    "formattedAddress": "506 Coral St, Marietta, GA 30064, USA",
+    "lat": 33.940051,
+    "lng": -84.55553789999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Mighty Cargo LLC",
+    "queryAddress": "5305 Hearn Rd Ellenwood,GA 30294",
+    "status": "kept",
+    "formattedAddress": "5305 Hearn Rd, Ellenwood, GA 30294, USA",
+    "lat": 33.6407811,
+    "lng": -84.2038863,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JKB Consulting Group",
+    "queryAddress": "65 streamside drive Covington,GA 30016",
+    "status": "kept",
+    "formattedAddress": "65 Streamside Dr, Covington, GA 30016, USA",
+    "lat": 33.6103947,
+    "lng": -83.9271783,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Hey Girly Wigs",
+    "queryAddress": "5193 Peachtree blcd Chamblee,GA 30341",
+    "status": "dropped_imprecise",
+    "formattedAddress": "5193 Peachtree Blvd, Atlanta, GA 30341, USA",
+    "lat": 33.8896722,
+    "lng": -84.3096599,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Rap Pluc Inc",
+    "queryAddress": "1103 Silvergate Lane Mableton,GA 30126",
+    "status": "kept",
+    "formattedAddress": "1103 Silvergate Ln SW, Mableton, GA 30126, USA",
+    "lat": 33.8464582,
+    "lng": -84.5896042,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TechChup, LLC",
+    "queryAddress": "PO Box 27263 Macon,GA 31221",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Macon, GA, USA",
+    "lat": 32.8362271,
+    "lng": -83.6320478,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Class-Act Security Protection & Training Academy",
+    "queryAddress": "3370 Sugarloaf Parkway Lawrenceville,GA 30044",
+    "status": "kept",
+    "formattedAddress": "3370 Sugarloaf Pkwy, Lawrenceville, GA 30044, USA",
+    "lat": 33.9214497,
+    "lng": -84.01840109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Koch Transportation Services, LLC",
+    "queryAddress": "4046 Water Mill Drive Buford,GA 30519",
+    "status": "kept",
+    "formattedAddress": "4046 Water Mill Dr, Buford, GA 30519, USA",
+    "lat": 34.0824201,
+    "lng": -83.8878376,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "EAST MUNI CONSULTING, LLC",
+    "queryAddress": "PO BOX 974 Conyers,GA 30012",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Conyers, GA 30012, USA",
+    "lat": 33.7177663,
+    "lng": -83.99558789999999,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Radiant Beauty All Natural hair salon",
+    "queryAddress": "1041 Misty Meadows ln Hampton,GA 30228",
+    "status": "kept",
+    "formattedAddress": "1041 Misty Meadows Ln, Hampton, GA 30228, USA",
+    "lat": 33.4641294,
+    "lng": -84.35757869999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Posh - A Contemporary Real Estate Experience, LLC.",
+    "queryAddress": "4279 Roswell Rd NE Atlanta,GA 30342",
+    "status": "kept",
+    "formattedAddress": "4279 Roswell Rd NE, Atlanta, GA 30342, USA",
+    "lat": 33.8712214,
+    "lng": -84.3792964,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Behind the black eye",
+    "queryAddress": "3879 Felton hill rd Smyrna,GA 30083",
+    "status": "kept",
+    "formattedAddress": "3879 Felton Hill Rd, Smyrna, GA 30082, USA",
+    "lat": 33.8595961,
+    "lng": -84.5747542,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Signarama of Decatur",
+    "queryAddress": "225 Laredo Dr Decatur,GA 30030",
+    "status": "kept",
+    "formattedAddress": "225 Laredo Dr, Decatur, GA 30030, USA",
+    "lat": 33.7816771,
+    "lng": -84.2688249,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "NEWYORKLIFE",
+    "queryAddress": "1149 chateau ter Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "1149 Chateau Terrace, McDonough, GA 30253, USA",
+    "lat": 33.4899539,
+    "lng": -84.1836336,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bomb Biscuit Company, LLC",
+    "queryAddress": "660 Irwin Street NE Atlanta,GA 30312",
+    "status": "kept",
+    "formattedAddress": "660 Irwin St NE, Atlanta, GA 30312, USA",
+    "lat": 33.7578357,
+    "lng": -84.36525379999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TranquiliTea House",
+    "queryAddress": "110 Yellowstone Lane Powder,GA 30127",
+    "status": "kept",
+    "formattedAddress": "110 Yellowstone Ln, Powder Springs, GA 30127, USA",
+    "lat": 33.818822,
+    "lng": -84.73158099999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A Sweet Taste",
+    "queryAddress": "9274 CLUB VIEW TRCE Riverdale,GA 30274",
+    "status": "kept",
+    "formattedAddress": "9274 Clb Vw Trce, Riverdale, GA 30274, USA",
+    "lat": 33.5032423,
+    "lng": -84.393727,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Marley Nonami Incorporated",
+    "queryAddress": "1445 Woodmont Ln NW Atlanta,GA 30318",
+    "status": "error_read ETIMEDOUT"
+  },
+  {
+    "name": "Blackbizfinderatl",
+    "queryAddress": "545 Summer Dr Atlanta,GA 30328",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "CITYSIDE REALTY LLC",
+    "queryAddress": "4363 Riverview Lane Lithonia,GA 30038",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Mental Fitness 21st Century Learning Inc",
+    "queryAddress": "149 SW Broad Street Fairburn,GA 30213",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Betts Financial",
+    "queryAddress": "3330 Cobb PKWY NW Acworth,GA 30101",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Realtor",
+    "queryAddress": "1016 Howell Mill Rd NW Atlanta,GA 30318",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Peachtree Cleaning Systems LLC",
+    "queryAddress": "3731 Northcrest Rd Suite 27 Doraville,GA 30340",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "UnmaskEDU, LLC.",
+    "queryAddress": "1655 Centerview Drive Duluth,GA 30096",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Cheryl Maree & Company LLC",
+    "queryAddress": "280 Merchants Drive Dallas,GA 30132",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "SkyRise Property Group, LLC",
+    "queryAddress": "1128 Cascade Rd SW Atlanta,GA 30311",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Signing Services of America",
+    "queryAddress": "1000 Parkwood Circle Southeast Atlanta,GA 30339",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Halo Squared LLC",
+    "queryAddress": "1775 Parker Rd SE Ste C210-507 Conyers,GA 30094",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "SerKy Consulting, LLC",
+    "queryAddress": "2090 Sugarloaf Pkwy Lawrenceville,GA 30045",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Revert Apparel",
+    "queryAddress": "2860 Cumberland Mall SE Atlanta,GA 30339",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Mind ReMapping Company LLC",
+    "queryAddress": "2480 Briarcliff rd suite 6-315 Atlanta,GA 30329",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Timeless Antiques & Collectibles",
+    "queryAddress": "1585 Derry Brooke Walk SE Symrna,GA 30082",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "PMI Atlanta OTP",
+    "queryAddress": "3372 Peachtree Rd NE Atlanta,GA 30326",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Tiffani McQueen Creative",
+    "queryAddress": "2185 Laurel Mill Way Roswell,GA 30076",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Team 8 Consulting",
+    "queryAddress": "1300 Ridenour Blvd Kennesaw,GA 30152",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "EFI Financial Education Services, LLC",
+    "queryAddress": "172 TONAWANDA DR SE Atlanta,GA 30315",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Gray Group",
+    "queryAddress": "1286 Channel Park Marietta,GA 30064",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Verbal Expressions, Inc.",
+    "queryAddress": "5300 MEMORIAL DR, SUITE 126 Stone Mountian,GA 30083",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "ANS Consulting Services, LLC",
+    "queryAddress": "245 N. Highland Ave. Atlanta,GA 30307",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Brown's Fulfillment Consulting & Accounting Firm",
+    "queryAddress": "1100 Peachtreet St NE Atlanta,GA 30309",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "LAB Innovative Business Network",
+    "queryAddress": "2185 Laurel Mill Way Roswell,GA 30076\\",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Misfit Mixsy",
+    "queryAddress": "2990 Rapids Dr Decatur,GA 30034-3260",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Main Street MarTech",
+    "queryAddress": "12461 Veterans Memorial Hwy, Suite #499 Douglasville,GA 30134",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "CLJ Media Corp",
+    "queryAddress": "150 CHURCH RD Stockbridge,GA 30281",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Kemunity Yoga",
+    "queryAddress": "1441 Woodmont Ln NW Marietta,GA 30318",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "T. Smith & Co",
+    "queryAddress": "1445 Woodmont Ln NW Atlanta,GA 30318",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Vancamry Home Inspections",
+    "queryAddress": "PO Box 965341 Marietta,GA 30066",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "BrJhai, LLC",
+    "queryAddress": "8109 Mall Pkwy Stonecrest,GA 30038",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The Prime Theory Company",
+    "queryAddress": "2312 Benjamin E. Mays Drive Atlanta,GA 30311",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Beyond Typical Images",
+    "queryAddress": "2221 Peachtree Street NE Atlanta,GA 30309",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "LCM Group, LLC",
+    "queryAddress": "3000 Old Alabama Road Johns Creek,GA 30022",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "JW Funding",
+    "queryAddress": "300 Colonial Center Parkway Roswell,GA 30076",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "CrashAD Digital Markets",
+    "queryAddress": "504 Fair St. SW Atlanta,GA 30313",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "AnneCorp Literary Works",
+    "queryAddress": "600 Westridge Pkwy Mcdonough,GA 30253",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The Strategic Hub, Inc.",
+    "queryAddress": "2330 Scenic Highway South Snellville,GA 30078",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Bespokuture LLC",
+    "queryAddress": "1596 W Cleveland Ave East Point,GA 30344",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Rodan+Fields",
+    "queryAddress": "2312 Benjamin E. Mays Drive Atlanta,GA 30311\\",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "404 Coffee",
+    "queryAddress": "847 Mcdaniel St Atlanta,GA 30310",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Malcmedia",
+    "queryAddress": "629 Saint Marys Court Ellenwood,GA 30294",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The Trucker's Auditor LLC",
+    "queryAddress": "320 West Lanier Ave Fayetteville,GA 30214",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "EVOL Business Solutions LLC",
+    "queryAddress": "5174 McGinnis Ferry Rd Alpharetta,GA 30005",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Cater Verse LLC",
+    "queryAddress": "90F Glenda Trace Newnan,GA 30265",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Regal Love Uniforms",
+    "queryAddress": "8075 Mall Pkwy Lithonia,GA 30038",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Abstract Cleaning Services, LLC",
+    "queryAddress": "2310 Parklake Drive Atlanta,GA 30345",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "REIGN",
+    "queryAddress": "366 McDonough Pkwy. Mcdonough,GA 30253",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Absolute Mortgage Lending, LLC",
+    "queryAddress": "1201 West Peachtree Street Atlanta,GA 30309",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The Ross Design Group",
+    "queryAddress": "8114 Amberfield Way Riverdale,GA 30296",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Fique Finance LLC",
+    "queryAddress": "1100 Peachtree St. NE Atlanta,GA 30309",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "NAM LLC DBA Chick'nCone, Emory Point",
+    "queryAddress": "1540 Avenue Place Atlanta,GA 30329",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Creed Consulting Services LLC",
+    "queryAddress": "401 Cranleigh Ridge SE Smyrna,GA 30080",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Billups Homes Inc.",
+    "queryAddress": "965 Main St Stone Mountain,GA 30083",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Client Relations Consultants",
+    "queryAddress": "1025 Veterans Memorial Hwy SE Mableton,GA 30126",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "4 Impact Consulting",
+    "queryAddress": "504 Fair St SW Atlanta,GA 30313",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "LBA Enterprises Inc. DBA I Am Style Agency",
+    "queryAddress": "96 James Lee Court Mcdonough,GA 30253",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Royal World Transport",
+    "queryAddress": "5555 Glenridge Connector Atlanta,GA 30342",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Evergreen Investments",
+    "queryAddress": "3675 Crestwood Pkwy NW Duluth,GA 30096",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "A20 Enterprises LLC",
+    "queryAddress": "PO Box 993 Duluth,GA 30096",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Q DEVAUGHAN",
+    "queryAddress": "1920 DRESDEN DRIVE NE Brookhaven,GA 30319",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "NEG2POS.LLC",
+    "queryAddress": "1594 Queen Elizabeth Drive Locust Grove,GA 30248",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Irresistible Pound Cakes",
+    "queryAddress": "530 Draycott Court Atlanta,GA 30331",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "GoHAM Entertainment, LLC",
+    "queryAddress": "2310 PARKLAKE DRIVE NE STE 163 Atlanta,GA 30345",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "TAKL Logistics, LLC",
+    "queryAddress": "141 Mangum St SW Atlanta,GA 30313",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "WFG/TransAmerica",
+    "queryAddress": "5104 Parkwood Oaks Ln Mableton,GA 30126",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Harvey Residential Home Builders",
+    "queryAddress": "4555 Mansell Road Suite 300 Alpharetta,GA 30022",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The Insurance Gurus",
+    "queryAddress": "4344 Southside Dr Acworth,GA 30101",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Strategic HR Consultants",
+    "queryAddress": "2483 Heritage Village Atlanta,GA 30078",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Dr. Smith & Associates, LLC",
+    "queryAddress": "1594 Queen Elizabeth Drive Locust Grove,GA 30248\\",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Paychex",
+    "queryAddress": "5901-B Peachtree Dunwoody Road Atlanta,GA 30328",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Healthcare Equity Solutions",
+    "queryAddress": "384 Northyards Blvd NW Atlanta,GA 30313",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Nyota Melanie",
+    "queryAddress": "352 University Ave SW Atlanta,GA 30310",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "enRICH.ED Consulting LLC",
+    "queryAddress": "2901 Drummond Point Hampton,GA 30228",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Isavvy Designs LLC",
+    "queryAddress": "1314 Chattahoochee Ave. NW. Atlanta,GA 30318",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "DEEG Consulting",
+    "queryAddress": "589 Rock Springs Rd NE Atlanta,GA 30324",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Stamina Workforce Solutions",
+    "queryAddress": "127 Jonesboro Road Jonesboro,GA 30236",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Vector Insurance Agency, LLC",
+    "queryAddress": "1970 Main St E. Snellville,GA 30078",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Bradley Alliance Group",
+    "queryAddress": "5555 Glenridge Connector Atlanta,GA 30342",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "PuroClean of Wolf Creek",
+    "queryAddress": "3481 Walnut Ridge Atlanta,GA 30349",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Silverbrook Mortgage LLC",
+    "queryAddress": "3330 Cumberland BLVB Suite 500 Atlanta,GA 30101",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "QTalent Solutions",
+    "queryAddress": "2483 Heritage Village Snellville,GA 30078",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "PFRYE CONSULTANTS LLC",
+    "queryAddress": "1000 Whitiker Ave Marietta,GA 30064",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Play And Eat Dinner Theater",
+    "queryAddress": "4386 Chamblee Dunwoody Rd. Atlanta,GA 30341",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Ancient Water Restoration Incorporated",
+    "queryAddress": "3330 Cumberland Blvd SE Atlanta,GA 30339",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Trade With Kenya, LLC",
+    "queryAddress": "504 Fairway Drive Woodstock,GA 30189",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Diligence Won Financial Solutions",
+    "queryAddress": "5200 Dallas Highway, Suite 200 Powder Springs,GA 30127",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "CinchIT",
+    "queryAddress": "1201 West Peachtree Street, #2300 Atlanta,GA 30309",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "The UPS Store #7506",
+    "queryAddress": "3408 Clairmont Road Brookhaven,GA 30319",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "EssenceTree",
+    "queryAddress": "655 Highland Avenue, NE Atlanta,GA 30312",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "GBM Instruction LLC",
+    "queryAddress": "2295 Wexford Drive Atlanta,GA 30349",
+    "status": "error_getaddrinfo ENOTFOUND maps.googleapis.com"
+  },
+  {
+    "name": "Jowys Fashion Consulting",
+    "queryAddress": "1907 Hudson Crossing Tucker,GA 30084",
+    "status": "kept",
+    "formattedAddress": "1907 Hudson Crossing, Tucker, GA 30084, USA",
+    "lat": 33.8394122,
+    "lng": -84.2624082,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Thomas Williams Management",
+    "queryAddress": "1015 Milstead Ave Conyers,GA 30012",
+    "status": "kept",
+    "formattedAddress": "1015 Milstead Ave NE, Conyers, GA 30012, USA",
+    "lat": 33.6702924,
+    "lng": -84.015945,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Joyce Kyles Consulting",
+    "queryAddress": "3203 Glynn Mill Drive Snellville,GA 30039",
+    "status": "kept",
+    "formattedAddress": "3203 Glynn Mill Dr, Snellville, GA 30039, USA",
+    "lat": 33.8279307,
+    "lng": -84.04001869999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "HR Brain for Hire",
+    "queryAddress": "115 E Main St Buford,GA 30518",
+    "status": "kept",
+    "formattedAddress": "115 E Main St NE, Buford, GA 30518, USA",
+    "lat": 34.1214983,
+    "lng": -84.00285199999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "YBiggs Commercial Real Estate",
+    "queryAddress": "Promenade II 1230 Peachtree Street Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1230 W Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7880853,
+    "lng": -84.3867164,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dr. Turanza W. Jackson Consulting, LLC",
+    "queryAddress": "1100 Peachtree St. NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1100 Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.78500150000001,
+    "lng": -84.3838555,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Skin Suite Medical Aesthetica",
+    "queryAddress": "3575 Durden Drive #305 Brookhaven,GA 30319",
+    "status": "kept",
+    "formattedAddress": "3575 Durden Dr NE #305, Atlanta, GA 30319, USA",
+    "lat": 33.8915786,
+    "lng": -84.3230743,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Peachtree Staffing",
+    "queryAddress": "5720 Hampton Court College Park,GA 30349",
+    "status": "kept",
+    "formattedAddress": "5720 Hampton Ct, College Park, GA 30349, USA",
+    "lat": 33.5980873,
+    "lng": -84.4777556,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tiffany Toxey & Co. LLC",
+    "queryAddress": "1201 W Peachtree Street Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1201 W Peachtree St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7873781,
+    "lng": -84.388059,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "SEAS Community Partners, Inc.",
+    "queryAddress": "3343 Peachtree Road, NE Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3343 Peachtree Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.8467308,
+    "lng": -84.3670124,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "BHX Management",
+    "queryAddress": "650 Sorrel Dr Fairburn,GA 30213",
+    "status": "kept",
+    "formattedAddress": "650 Sorrel Dr, Fairburn, GA 30213, USA",
+    "lat": 33.6204656,
+    "lng": -84.6268345,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "LLBJ Culinary and Wellness Enterprises LLC",
+    "queryAddress": "3575 Durden Drive #305 Brookhaven,GA 30319\\",
+    "status": "kept",
+    "formattedAddress": "3575 Durden Dr NE #305, Atlanta, GA 30319, USA",
+    "lat": 33.8915786,
+    "lng": -84.3230743,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ivy Drips Integrative Medicine and Wellness",
+    "queryAddress": "Atlanta,GA 30326\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30326, USA",
+    "lat": 33.849145,
+    "lng": -84.3620913,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Women Who Money Plan",
+    "queryAddress": "285 snowgoose ct Alpharetta,GA 30022\\",
+    "status": "kept",
+    "formattedAddress": "285 Snowgoose Ct, Alpharetta, GA 30022, USA",
+    "lat": 34.0528679,
+    "lng": -84.2638413,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "EZ Tax Co.",
+    "queryAddress": "1395 S Marietta Pkwy Marietta,GA 30067\\",
+    "status": "kept",
+    "formattedAddress": "1395 South Marietta Pkwy SE, Marietta, GA 30067, USA",
+    "lat": 33.942036,
+    "lng": -84.5126812,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Key Unity",
+    "queryAddress": "8486 Campbellton Street, Douglasville,GA 30133-0210\\",
+    "status": "kept",
+    "formattedAddress": "8486 Campbellton St, Douglasville, GA 30134, USA",
+    "lat": 33.7495675,
+    "lng": -84.7456935,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Georgia's House Of Etiquette",
+    "queryAddress": "4062 Peachtree Rd NE Atlanta,GA 30319\\",
+    "status": "kept",
+    "formattedAddress": "4062 Peachtree Rd NE, Atlanta, GA 30319, USA",
+    "lat": 33.8617761,
+    "lng": -84.3396514,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Government Procurement Innovators, LLC",
+    "queryAddress": "4025 Old Milton Parkway Alpharetta,GA 30005\\",
+    "status": "kept",
+    "formattedAddress": "4025 Old Milton Pkwy, Alpharetta, GA 30005, USA",
+    "lat": 34.060413,
+    "lng": -84.2437714,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A View2 ITS, Inc.",
+    "queryAddress": "102 lacey oak lane Bonaire,GA 31005\\",
+    "status": "dropped_out_of_range_94mi",
+    "formattedAddress": "102 Lacey Oak Ln, Bonaire, GA 31005, USA",
+    "lat": 32.5507938,
+    "lng": -83.6193297,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "AC Art Of Food",
+    "queryAddress": "1115 Mount Zion Road Morrow,GA 30260\\",
+    "status": "kept",
+    "formattedAddress": "1115 Mt Zion Rd, Morrow, GA 30260, USA",
+    "lat": 33.5708001,
+    "lng": -84.35396109999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Ledgers and Legends",
+    "queryAddress": "8735 Dunwoody Place Atlanta,GA 30350\\",
+    "status": "kept",
+    "formattedAddress": "8735 Dunwoody Pl, Atlanta, GA 30350, USA",
+    "lat": 33.9958862,
+    "lng": -84.3489474,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "PeopUp, LLC",
+    "queryAddress": "68 Atlanta St Mcdonough,GA 30253\\",
+    "status": "kept",
+    "formattedAddress": "68 Atlanta St, McDonough, GA 30253, USA",
+    "lat": 33.449659,
+    "lng": -84.1478644,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "AboveConstruction Services (ACS), a Division of AboveHR Solutions",
+    "queryAddress": "4700 West Village Crossing Smyrna,GA 30080\\",
+    "status": "kept",
+    "formattedAddress": "4700 W Village Xing, Smyrna, GA 30080, USA",
+    "lat": 33.8421835,
+    "lng": -84.4909989,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Luxury Life Counseling",
+    "queryAddress": "10 Glenlake Pkwy NE Atlanta,GA 30328\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "10 Glenlake Pkwy NE, Sandy Springs, GA 30328, USA",
+    "lat": 33.9360646,
+    "lng": -84.3616478,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Nancy's Chicago Pizza",
+    "queryAddress": "9070 Peridot Pkwy Stockbridge,GA 30281\\",
+    "status": "kept",
+    "formattedAddress": "9070 Peridot Pkwy, Stockbridge, GA 30281, USA",
+    "lat": 33.5482365,
+    "lng": -84.2736207,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "KSTB Enterprises, LLC",
+    "queryAddress": "9490 Clublands Dr. Alpharetta,GA 30022\\",
+    "status": "kept",
+    "formattedAddress": "9490 Clublands Dr, Alpharetta, GA 30022, USA",
+    "lat": 34.012311,
+    "lng": -84.2040833,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Acsential Group Inc",
+    "queryAddress": "541 Tenth St NW Atlanta,GA 30318\\",
+    "status": "kept",
+    "formattedAddress": "541 10th St NW, Atlanta, GA 30318, USA",
+    "lat": 33.7818264,
+    "lng": -84.4051156,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Signia Capital Group",
+    "queryAddress": "531 Roselane St. NW Marietta,GA 30060\\",
+    "status": "kept",
+    "formattedAddress": "531 Roselane St NW, Marietta, GA 30060, USA",
+    "lat": 33.9648713,
+    "lng": -84.5573521,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Not Just CPAS LLC",
+    "queryAddress": "1093 Cleveland Avenue Atlanta,GA 30344\\",
+    "status": "kept",
+    "formattedAddress": "1093 Cleveland Ave, East Point, GA 30344, USA",
+    "lat": 33.6816927,
+    "lng": -84.4246639,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JamGang Promotions, LLC",
+    "queryAddress": "4290 Bells Ferry Rd. - Suite 134 Kennesaw,GA 30144",
+    "status": "kept",
+    "formattedAddress": "4290 Bells Ferry Rd #134, Kennesaw, GA 30144, USA",
+    "lat": 34.0557736,
+    "lng": -84.5544661,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Realentless Realty Group",
+    "queryAddress": "5405 Tree Mountain Parkway Stone Mountain,GA 30083",
+    "status": "kept",
+    "formattedAddress": "5405 Tree Mountain Pkwy, Stone Mountain, GA 30083, USA",
+    "lat": 33.8212851,
+    "lng": -84.1784359,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Grace Medical Entreprises",
+    "queryAddress": "15 Montgomery Ct Covington,GA 30016",
+    "status": "kept",
+    "formattedAddress": "15 Montgomery Ct, Covington, GA 30016, USA",
+    "lat": 33.5996251,
+    "lng": -83.94261360000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Signature Contingent Management",
+    "queryAddress": "2300 W. Park Place Blvd. Stone Mountain,GA 30087",
+    "status": "kept",
+    "formattedAddress": "2300 W Park Pl. Blvd, Stone Mountain, GA 30087, USA",
+    "lat": 33.8149662,
+    "lng": -84.1122305,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Covered Elements Of Design",
+    "queryAddress": "1775 Parker Road Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "1775 Parker Rd SE, Conyers, GA 30094, USA",
+    "lat": 33.6436588,
+    "lng": -84.0234528,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ReSolve Consulting Services LLC",
+    "queryAddress": "275 10th Street NE Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "275 10th St NE, Atlanta, GA 30309, USA",
+    "lat": 33.7814275,
+    "lng": -84.3782466,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Draper-Johnson Accounting, LLC",
+    "queryAddress": "2386 Clower Street Snellville,GA 30078",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2386 Clower St SW, Snellville, GA 30078, USA",
+    "lat": 33.8583817,
+    "lng": -84.0155856,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Sierra Nicole Realty Inc",
+    "queryAddress": "2911 Piedmont Rd NE Atlanta,GA 30305",
+    "status": "kept",
+    "formattedAddress": "2911 Piedmont Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.834625,
+    "lng": -84.36753999999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Assurance Reconciliation Service Analysts LLC",
+    "queryAddress": "11 Teal Lake Drive Savannah,GA 31419",
+    "status": "dropped_out_of_range_217mi",
+    "formattedAddress": "11 Teal Lake Dr, Savannah, GA 31419, USA",
+    "lat": 31.9946928,
+    "lng": -81.28232659999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "TGK Trucking LLC",
+    "queryAddress": "3340 Peachtree Rd Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3340 Peachtree Rd, Atlanta, GA 30326, USA",
+    "lat": 33.8456761,
+    "lng": -84.35942159999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Tree Evolution LLC",
+    "queryAddress": "109 Anderson Street Marietta,GA 30060",
+    "status": "kept",
+    "formattedAddress": "109 Anderson St SE, Marietta, GA 30060, USA",
+    "lat": 33.951711,
+    "lng": -84.54933989999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The ELLEVEN",
+    "queryAddress": "6241 Centennial Lane Atlanta,GA 30349",
+    "status": "kept",
+    "formattedAddress": "6241 Centennial Ln, Atlanta, GA 30349, USA",
+    "lat": 33.5875285,
+    "lng": -84.47413929999999,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Play Pits",
+    "queryAddress": "110 SELIG DR SW Atlanta,GA 30336",
+    "status": "kept",
+    "formattedAddress": "110 Selig Dr SW, Atlanta, GA 30336, USA",
+    "lat": 33.7588076,
+    "lng": -84.5388897,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Conscious Anti-Racism, LLC",
+    "queryAddress": "837 Mentelle Dr NE Atlanta,GA 30308",
+    "status": "kept",
+    "formattedAddress": "837 Mentelle Dr NE, Atlanta, GA 30308, USA",
+    "lat": 33.7775464,
+    "lng": -84.37372959999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Seasons Change Designs,LLC",
+    "queryAddress": "1662 Lapland Drive Lawrenceville,GA 30045",
+    "status": "kept",
+    "formattedAddress": "1662 Lapland Dr, Lawrenceville, GA 30045, USA",
+    "lat": 33.9537412,
+    "lng": -83.90914169999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Emmerse LLC",
+    "queryAddress": "8058 Everwood Drive Douglasville,GA 30134",
+    "status": "kept",
+    "formattedAddress": "8058 Everwood Dr, Douglasville, GA 30134, USA",
+    "lat": 33.7626701,
+    "lng": -84.7676699,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Keshia M. White Designs, LLC",
+    "queryAddress": "4000 Dunwoody Park Dunwoody,GA 30338",
+    "status": "kept",
+    "formattedAddress": "4000 Dunwoody Park, Dunwoody, GA 30338, USA",
+    "lat": 33.9244108,
+    "lng": -84.31202359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "JLM INDUSTRIES LLC dba Torque Motorsports",
+    "queryAddress": "4691 Darlene Way Tucker,GA 30084",
+    "status": "kept",
+    "formattedAddress": "4691 Darlene Way, Tucker, GA 30084, USA",
+    "lat": 33.8611052,
+    "lng": -84.1967927,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Construction Data & Analytics",
+    "queryAddress": "160 Ludwell Court Johns Creek,GA 30022",
+    "status": "kept",
+    "formattedAddress": "160 Ludwell Ct, Alpharetta, GA 30022, USA",
+    "lat": 34.0263767,
+    "lng": -84.191429,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Trucker's Auditor, LLC",
+    "queryAddress": "320 West Lanier Ave Fayetteville,GA 30214",
+    "status": "kept",
+    "formattedAddress": "320 W Lanier Ave, Fayetteville, GA 30214, USA",
+    "lat": 33.4482115,
+    "lng": -84.4616073,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bausy Books Consulting dba CFO For Women",
+    "queryAddress": "285 West Wieuca Rd NE Atlanta,GA 30342",
+    "status": "kept",
+    "formattedAddress": "285 W Wieuca Rd NE, Atlanta, GA 30342, USA",
+    "lat": 33.8754092,
+    "lng": -84.37796159999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Dependable Screening Solutions",
+    "queryAddress": "2086 Jodeco Road Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "2086 Jodeco Rd, McDonough, GA 30253, USA",
+    "lat": 33.4825774,
+    "lng": -84.2251668,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "ACREE REAL ESTATE AND INVESTMENT LLC",
+    "queryAddress": "2889 SILVER HILL TER SE Atlanta,GA 30316-5700",
+    "status": "kept",
+    "formattedAddress": "2889 Silver Hill Terrace SE, Atlanta, GA 30316, USA",
+    "lat": 33.7073826,
+    "lng": -84.324389,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Red Door",
+    "queryAddress": "4600 Rockbridge Rd Stone Mountain,GA 30083",
+    "status": "kept",
+    "formattedAddress": "4600 Rockbridge Rd, Stone Mountain, GA 30083, USA",
+    "lat": 33.7867119,
+    "lng": -84.2059293,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Organic Living LLC",
+    "queryAddress": "4117 Village Crossing Circle Ellenwood,GA 30294",
+    "status": "kept",
+    "formattedAddress": "4117 Village Crossing Cir, Ellenwood, GA 30294, USA",
+    "lat": 33.6413877,
+    "lng": -84.3002928,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Rodan+Fields Skincare",
+    "queryAddress": "211 Colonial Homes Dr NW Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "211 Colonial Homes Dr NW, Atlanta, GA 30309, USA",
+    "lat": 33.8144376,
+    "lng": -84.3942483,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Living Light Hospice",
+    "queryAddress": "818 Pavilion  Ct. Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "818 Pavilion Ct, McDonough, GA 30253, USA",
+    "lat": 33.4310463,
+    "lng": -84.1714633,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Avery Financial Services",
+    "queryAddress": "2727 Paces Ferry Rd SE Atlanta,GA 30213",
+    "status": "dropped_imprecise",
+    "formattedAddress": "2727 Paces Ferry Rd SE, Atlanta, GA 30339, USA",
+    "lat": 33.8664059,
+    "lng": -84.4746857,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Wellness Sanctuary International Corp",
+    "queryAddress": "1003 E. Freeway Drive SE Suite B Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "1003 E Freeway Dr SE b, Conyers, GA 30094, USA",
+    "lat": 33.6511551,
+    "lng": -84.0139865,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "A Time For Care Home Care  Agency",
+    "queryAddress": "1911 Grayson Hwy Grayson,GA 30017",
+    "status": "kept",
+    "formattedAddress": "1911 Grayson Hwy, Grayson, GA 30017, USA",
+    "lat": 33.8977868,
+    "lng": -83.96093359999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Vision Works PR Firm, LLC",
+    "queryAddress": "1659 HWY 20 Mcdonough,GA 30253",
+    "status": "kept",
+    "formattedAddress": "1659 GA-20, McDonough, GA 30253, USA",
+    "lat": 33.4187737,
+    "lng": -84.1902297,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Strategic Framework LLC",
+    "queryAddress": "882 Cascade Xing SW Atlanta,GA 30331",
+    "status": "kept",
+    "formattedAddress": "882 Cascade Crossing, Atlanta, GA 30331, USA",
+    "lat": 33.7278655,
+    "lng": -84.5641156,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Komfortably Konnected Homes by Kanika B.",
+    "queryAddress": "1050 Crown Pointe Parkway Atlanta,GA 30338",
+    "status": "kept",
+    "formattedAddress": "1050 Crown Pointe Pkwy, Dunwoody, GA 30338, USA",
+    "lat": 33.9314134,
+    "lng": -84.3451382,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Blessings Kids LLC/ Blessings Hair Design/ Realtor",
+    "queryAddress": "1420 Peachtree St. NE Suite 100 Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1420 Peachtree St NE #100, Atlanta, GA 30309, USA",
+    "lat": 33.7933976,
+    "lng": -84.38733479999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DiverseCiti Atlanta, LLC",
+    "queryAddress": "467 W Ontario Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "467 W Ontario Ave SW, Atlanta, GA 30310, USA",
+    "lat": 33.7425062,
+    "lng": -84.44004369999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "24/7 Full Cycle Staffing Service",
+    "queryAddress": "3276 Buford Dr Buford,GA 30519",
+    "status": "kept",
+    "formattedAddress": "3276 Buford Dr, Buford, GA 30519, USA",
+    "lat": 34.0681979,
+    "lng": -83.9872528,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Hurry Logistics, Inc",
+    "queryAddress": "P.O. Box 213 Dacula,GA 30019",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Dacula, GA, USA",
+    "lat": 33.9887165,
+    "lng": -83.8979573,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Acquire Realty",
+    "queryAddress": "Mountain Rest Ct Mableton,GA 30126",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Mountain Rest Ct SE, Mableton, GA 30126, USA",
+    "lat": 33.7988526,
+    "lng": -84.5476417,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Green Toad",
+    "queryAddress": "825 McDaniel st Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "825 McDaniel St SW, Atlanta, GA 30310, USA",
+    "lat": 33.7323605,
+    "lng": -84.4022052,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "More-Land LLC",
+    "queryAddress": "621 North Avenue NE Atlanta,GA 30308",
+    "status": "dropped_imprecise",
+    "formattedAddress": "621 North Avenue NE, Atlanta, GA 30308, USA",
+    "lat": 33.7702358,
+    "lng": -84.3671841,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Bridging The Gap Financial Services",
+    "queryAddress": "6428 Caledon Court Locust Grove,GA 30248",
+    "status": "kept",
+    "formattedAddress": "6428 Caledon Ct, Locust Grove, GA 30248, USA",
+    "lat": 33.3420931,
+    "lng": -84.20358110000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Practical Education Solutions",
+    "queryAddress": "4008 N Hill Pkwy Atlanta,GA 30341",
+    "status": "kept",
+    "formattedAddress": "4008 N Hill Pkwy, Atlanta, GA 30341, USA",
+    "lat": 33.9140043,
+    "lng": -84.2943945,
+    "locationType": "RANGE_INTERPOLATED"
+  },
+  {
+    "name": "Tender Touch Health Solutions, LLC",
+    "queryAddress": "1441 Woodmont Ln NW Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "1441 Woodmont Ln NW, Atlanta, GA 30318, USA",
+    "lat": 33.8037779,
+    "lng": -84.4350894,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "mojaevans Consulting LLC",
+    "queryAddress": "964 Ralph D Abernathy SW Atlanta,GA 30310",
+    "status": "kept",
+    "formattedAddress": "964 Ralph David Abernathy Blvd SW, Atlanta, GA 30310, USA",
+    "lat": 33.7377185,
+    "lng": -84.4196465,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Taylored Elite Estates Georgia Real Estate",
+    "queryAddress": "620 Peachtree St NE Atlanta,GA 30308",
+    "status": "dropped_imprecise",
+    "formattedAddress": "620 Peachtree St NE, Atlanta, GA 30308, USA",
+    "lat": 33.7715041,
+    "lng": -84.38549789999999,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Primerica",
+    "queryAddress": "2556 Raindrop Ct Decatur,GA 30034",
+    "status": "kept",
+    "formattedAddress": "2556 Raindrop Ct, Decatur, GA 30034, USA",
+    "lat": 33.7128407,
+    "lng": -84.2332282,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The AjaPreneur Consulting Agency",
+    "queryAddress": "1359 Milstead Rd NE Conyers,GA 30012",
+    "status": "kept",
+    "formattedAddress": "1359 Milstead Rd NE, Conyers, GA 30012, USA",
+    "lat": 33.67933,
+    "lng": -84.00172909999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "AusDanBrook Properties, Inc",
+    "queryAddress": "11758 Hastings Bridge RD Hampton,GA 30228",
+    "status": "kept",
+    "formattedAddress": "Hastings Bridge Pavillion, 11758 Hastings Bridge Rd, Hampton, GA 30228, USA",
+    "lat": 33.4348415,
+    "lng": -84.3102212,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Atlanta Luxury Homes and Condos Corp.",
+    "queryAddress": "3340 PEACHTREE RD. Suite #1800 Atlanta,GA 30326",
+    "status": "kept",
+    "formattedAddress": "3340 Peachtree Rd #1800, Atlanta, GA 30326, USA",
+    "lat": 33.8474435,
+    "lng": -84.3708872,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Blue Scorpion Reputation Management",
+    "queryAddress": "P.O. Box 162872 Atlanta,GA 30321",
+    "status": "dropped_imprecise",
+    "formattedAddress": "Atlanta, GA 30321, USA",
+    "lat": 33.75,
+    "lng": -84.39,
+    "locationType": "APPROXIMATE"
+  },
+  {
+    "name": "Strong Creative Vision, LLC",
+    "queryAddress": "3000 Old Alabama Rd Alpharetta,GA 30022",
+    "status": "kept",
+    "formattedAddress": "3000 Old Alabama Rd, Alpharetta, GA 30022, USA",
+    "lat": 34.0221421,
+    "lng": -84.271373,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Chronicles Counseling & Coaching, LLC",
+    "queryAddress": "501 Ruths Drive Holly Springs,GA 30188",
+    "status": "kept",
+    "formattedAddress": "501 Ruths Dr, Woodstock, GA 30188, USA",
+    "lat": 34.1389151,
+    "lng": -84.50364230000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Designed for Greatness, LLC",
+    "queryAddress": "200 Long Needle Drive Mcdonough,GA 30252",
+    "status": "kept",
+    "formattedAddress": "200 Long Needle Dr, McDonough, GA 30252, USA",
+    "lat": 33.4538589,
+    "lng": -84.12393229999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Connoisseurs Imports LLC",
+    "queryAddress": "322 Bentley Place Tucker,GA 30084",
+    "status": "kept",
+    "formattedAddress": "322 Bentley Pl, Tucker, GA 30084, USA",
+    "lat": 33.885022,
+    "lng": -84.22093629999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Sharline S Green, P.C.",
+    "queryAddress": "1775 Parker Road SE Conyers,GA 30094",
+    "status": "kept",
+    "formattedAddress": "1775 Parker Rd SE, Conyers, GA 30094, USA",
+    "lat": 33.6436588,
+    "lng": -84.0234528,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Bodacious Black Woman",
+    "queryAddress": "2323 Ward St. SE Smyrna,GA 30080",
+    "status": "kept",
+    "formattedAddress": "2323 Ward St SE, Smyrna, GA 30080, USA",
+    "lat": 33.8931525,
+    "lng": -84.52649919999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cold Fire Systems",
+    "queryAddress": "1445 Woodmont Ln NW Atlanta,GA 30318",
+    "status": "kept",
+    "formattedAddress": "1445 Woodmont Ln NW, Atlanta, GA 30318, USA",
+    "lat": 33.8037896,
+    "lng": -84.435199,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Black Pretty and Paid, LLC",
+    "queryAddress": "900 Legacy Park Dr Lawrenceville,GA 30043",
+    "status": "dropped_imprecise",
+    "formattedAddress": "900 Legacy Park Dr, Lawrenceville, GA 30043, USA",
+    "lat": 33.9633625,
+    "lng": -84.0279776,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "The Self Love Chef",
+    "queryAddress": "1635 pirkle rd apt 322 Norcross,GA 30093",
+    "status": "kept",
+    "formattedAddress": "1635 Pirkle Rd #322, Norcross, GA 30093, USA",
+    "lat": 33.912538,
+    "lng": -84.19263169999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "NDIGO GERBI SALON ETC.",
+    "queryAddress": "4975 hwy 78 Lilburn,GA 30047",
+    "status": "kept",
+    "formattedAddress": "4975 US-78, Lilburn, GA 30047, USA",
+    "lat": 33.8257485,
+    "lng": -84.1008942,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Cratl Group",
+    "queryAddress": "1518 Endurance hill drive Kennesaw,GA 30152",
+    "status": "kept",
+    "formattedAddress": "1518 Endurance Hill Dr NW, Kennesaw, GA 30152, USA",
+    "lat": 33.991389,
+    "lng": -84.592659,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "J Luxe Brands LLC",
+    "queryAddress": "3645 Marketplace Blvd East Point,GA 30344",
+    "status": "kept",
+    "formattedAddress": "3645 Marketplace Blvd, East Point, GA 30344, USA",
+    "lat": 33.6581062,
+    "lng": -84.50352509999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Serenity Life Healthcare",
+    "queryAddress": "2470 Windy Hill Rd, ste 417 Marietta,GA 30067",
+    "status": "kept",
+    "formattedAddress": "2470 Windy Hill Rd SE Ste 417, Marietta, GA 30067, USA",
+    "lat": 33.90199820000001,
+    "lng": -84.48251499999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "The Anointed Group",
+    "queryAddress": "141 Holcomb Bridge 344 Norcross,GA 30071",
+    "status": "kept",
+    "formattedAddress": "141 Holcomb Bridge Rd #344, Norcross, GA 30071, USA",
+    "lat": 33.9403346,
+    "lng": -84.21124650000002,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Lawson Learning Academy, LLC",
+    "queryAddress": "110 Pamela Court Fayetteville,GA 30214",
+    "status": "kept",
+    "formattedAddress": "110 Pamela Ct, Fayetteville, GA 30214, USA",
+    "lat": 33.4627436,
+    "lng": -84.4155359,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Absolute Mortgage Lending, LLC",
+    "queryAddress": "1201 West Peachtree Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1201 W Peachtree St NW, Atlanta, GA 30309, USA",
+    "lat": 33.7872182,
+    "lng": -84.3873733,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "DEON DAVIS REAL ESTATE GROUP LLC",
+    "queryAddress": "1080 Peachtree St. NE 13B Atlanta,GA 30309",
+    "status": "kept",
+    "formattedAddress": "1080 Peachtree St NE Suite 13B, Atlanta, GA 30309, USA",
+    "lat": 33.7839725,
+    "lng": -84.38418399999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Red Hazel LLC",
+    "queryAddress": "2451 Cumberland Pkwy SE Atlanta,GA 30339",
+    "status": "kept",
+    "formattedAddress": "2451 Cumberland Pkwy SE, Atlanta, GA 30339, USA",
+    "lat": 33.8626738,
+    "lng": -84.4787029,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Southern Virtual LLC",
+    "queryAddress": "3645 Marketplace Blvd East Point,GA 30344\\",
+    "status": "kept",
+    "formattedAddress": "3645 Marketplace Blvd, East Point, GA 30344, USA",
+    "lat": 33.6581062,
+    "lng": -84.50352509999999,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "MMJ Trucking LLC",
+    "queryAddress": "1630 Scenic Highway N, Snellville, GA 30078 Snellville,GA 30078\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1630 Scenic Hwy N, Snellville, GA 30078, USA",
+    "lat": 33.8836423,
+    "lng": -84.0098019,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "All Our Children Elite Childcare Academy",
+    "queryAddress": "1700 Northside Drive Atlanta,GA 30318\\",
+    "status": "dropped_imprecise",
+    "formattedAddress": "1700 Northside Dr NW, Atlanta, GA 30318, USA",
+    "lat": 33.8008454,
+    "lng": -84.4090592,
+    "locationType": "GEOMETRIC_CENTER"
+  },
+  {
+    "name": "Mobile Beauty Bar ATL",
+    "queryAddress": "3255 Lawrenceville Suwanee Road Suwanee,GA 30024\\",
+    "status": "kept",
+    "formattedAddress": "3255 Lawrenceville-Suwanee Rd, Suwanee, GA 30024, USA",
+    "lat": 34.0375021,
+    "lng": -84.048447,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Seasons Change Designs LLC",
+    "queryAddress": "3455 Peachtree Rd NE Atlanta,GA 30326\\",
+    "status": "kept",
+    "formattedAddress": "3455 Peachtree Rd NE, Atlanta, GA 30326, USA",
+    "lat": 33.8511837,
+    "lng": -84.3609043,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Code Black Construction",
+    "queryAddress": "1643 Habershal Dr NW Atlanta, Ga 30318,GA 30318\\",
+    "status": "kept",
+    "formattedAddress": "1643 Habershal Dr NW, Atlanta, GA 30318, USA",
+    "lat": 33.7892217,
+    "lng": -84.44559070000001,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Too Groovy Salon",
+    "queryAddress": "3343 Peachtree Rd NE Atlanta,GA 30326\\",
+    "status": "kept",
+    "formattedAddress": "3343 Peachtree Rd NE, Atlanta, GA 30305, USA",
+    "lat": 33.8467308,
+    "lng": -84.3670124,
+    "locationType": "ROOFTOP"
+  },
+  {
+    "name": "Davis Coaching LLC",
+    "queryAddress": "300 noel way Hampton,GA 30228\\",
+    "status": "kept",
+    "formattedAddress": "300 Noel Way, Hampton, GA 30228, USA",
+    "lat": 33.4643751,
+    "lng": -84.2825696,
+    "locationType": "ROOFTOP"
+  }
+]
