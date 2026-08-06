@@ -304,6 +304,28 @@ class _KinSplashWidgetState extends State<KinSplashWidget>
               AnimatedBuilder(
                 animation: _controller,
                 builder: (context, _) {
+                  // Wordmark style, factored out so both the arc painter's
+                  // per-character measurement and the widget below use the
+                  // exact same TextStyle - a mismatch here would make the
+                  // painter's layout math wrong.
+                  final wordmarkStyle = theme.headlineSmall.override(
+                    // Fixed, not theme-aware - see the class doc comment:
+                    // this surface always renders the same dark gradient
+                    // regardless of the app's light/dark setting, so
+                    // accent1 (identical in both theme classes) is used
+                    // directly rather than a token that would otherwise
+                    // flip underneath it.
+                    color: theme.accent1,
+                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.none,
+                  );
+                  // Just outside the logo's own circular knotwork rather
+                  // than overlapping it, so the wordmark reads as a badge
+                  // rim around the mark instead of competing with it.
+                  final arcRadius = logoWidth / 2 + 18.0;
+                  final arcBoxSize = (arcRadius + 32.0) * 2;
+
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -312,6 +334,12 @@ class _KinSplashWidgetState extends State<KinSplashWidget>
                         height: logoWidth,
                         child: Stack(
                           alignment: Alignment.center,
+                          // The arc text is deliberately larger than this
+                          // box (it has to clear the logo's own radius plus
+                          // its own height) - without Clip.none the Stack's
+                          // default hardEdge clip would cut it off flush
+                          // with the logo's bounds.
+                          clipBehavior: Clip.none,
                           children: [
                             // Soft gold bloom behind the mark. Opacity is kept
                             // low deliberately - this should read as light
@@ -344,33 +372,30 @@ class _KinSplashWidgetState extends State<KinSplashWidget>
                                 ),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 22.0),
-                        child: Opacity(
-                          opacity: _wordmarkFade.value,
-                          child: Transform.translate(
-                            offset:
-                                Offset(0.0, 9.0 * (1 - _wordmarkFade.value)),
-                            child: Text(
-                              'The KIN App',
-                              style: theme.headlineSmall.override(
-                                // Fixed, not theme-aware - see the class doc
-                                // comment: this surface always renders the
-                                // same dark gradient regardless of the app's
-                                // light/dark setting, so accent1 (identical
-                                // in both theme classes) is used directly
-                                // rather than a token that would otherwise
-                                // flip underneath it.
-                                color: theme.accent1,
-                                letterSpacing: 0.5,
-                                fontWeight: FontWeight.w500,
-                                decoration: TextDecoration.none,
+                            // "The KIN App", curved along the bottom rim of
+                            // the mark like a seal/badge, rather than
+                            // sitting flat underneath it - was plain
+                            // left-aligned text below the logo, which read
+                            // as an afterthought next to the mark itself.
+                            Opacity(
+                              opacity: _wordmarkFade.value,
+                              child: OverflowBox(
+                                maxWidth: arcBoxSize,
+                                maxHeight: arcBoxSize,
+                                child: SizedBox(
+                                  width: arcBoxSize,
+                                  height: arcBoxSize,
+                                  child: CustomPaint(
+                                    painter: _ArcTextPainter(
+                                      text: 'The KIN App',
+                                      style: wordmarkStyle,
+                                      radius: arcRadius,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                       Padding(
@@ -433,4 +458,81 @@ class _KinSplashWidgetState extends State<KinSplashWidget>
       ),
     );
   }
+}
+
+/// Paints [text] curved along the bottom half of a circle of [radius],
+/// centered on this painter's own canvas - "The KIN App" wrapping the
+/// splash logo like text on a badge or seal, rather than sitting flat
+/// beneath it.
+///
+/// Per-character angular width is measured from real glyph metrics
+/// (`TextPainter.width` for each character in [style]) rather than
+/// assuming a fixed sweep - a hardcoded angle would either crowd the
+/// letters or leave them straggling apart depending on `logoWidth` (this
+/// scales with the shortest device edge, see the build method above), so
+/// the arc has to size itself to whatever text/radius it's actually
+/// given.
+class _ArcTextPainter extends CustomPainter {
+  _ArcTextPainter({
+    required this.text,
+    required this.style,
+    required this.radius,
+  });
+
+  final String text;
+  final TextStyle style;
+  final double radius;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final characters = text.split('');
+
+    final charPainters = [
+      for (final char in characters)
+        TextPainter(
+          text: TextSpan(text: char, style: style),
+          textDirection: TextDirection.ltr,
+        )..layout(),
+    ];
+    final charAngles = [
+      for (final painter in charPainters) painter.width / radius,
+    ];
+    final totalAngle = charAngles.fold<double>(0.0, (a, b) => a + b);
+
+    // Canvas angle 0 is 3 o'clock, increasing clockwise (y grows downward),
+    // so pi/2 is straight down - the bottom-center of the circle, and the
+    // natural anchor to sweep left/right from symmetrically. Starting at
+    // the left end of the arc (the larger angle - see the loop below,
+    // which walks the angle back down toward the right end) so characters
+    // lay out left-to-right in reading order.
+    var angle = math.pi / 2 + totalAngle / 2;
+
+    for (var i = 0; i < characters.length; i++) {
+      angle -= charAngles[i] / 2;
+
+      canvas.save();
+      canvas.translate(
+        center.dx + radius * math.cos(angle),
+        center.dy + radius * math.sin(angle),
+      );
+      // angle - pi/2 lands on zero rotation for a character sitting
+      // exactly at bottom-center (angle == pi/2), which is the sanity
+      // check this formula has to pass - that character should render
+      // perfectly upright, with every other character tilting to follow
+      // the tangent on either side of it.
+      canvas.rotate(angle - math.pi / 2);
+      final painter = charPainters[i];
+      painter.paint(canvas, Offset(-painter.width / 2, -painter.height / 2));
+      canvas.restore();
+
+      angle -= charAngles[i] / 2;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArcTextPainter oldDelegate) =>
+      oldDelegate.text != text ||
+      oldDelegate.style != style ||
+      oldDelegate.radius != radius;
 }
