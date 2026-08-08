@@ -32,6 +32,13 @@ const customerKindexNightly = require("./customer_kindex_nightly.js");
 exports.recomputeCustomerKindexScores =
   customerKindexNightly.recomputeCustomerKindexScores;
 
+// Maintains community_impact_stats/aggregate off spend_logs writes - see
+// firestore.rules' spend_logs comment for why this exists: the only path
+// a community-wide total is allowed to leave that owner-only collection.
+const spendLogAggregate = require("./spend_log_aggregate.js");
+exports.recordSpendLogAggregate = spendLogAggregate.recordSpendLogAggregate;
+exports.removeSpendLogAggregate = spendLogAggregate.removeSpendLogAggregate;
+
 const visitVerification = require("./visit_verification.js");
 exports.recordVerifiedVisit = visitVerification.recordVerifiedVisit;
 

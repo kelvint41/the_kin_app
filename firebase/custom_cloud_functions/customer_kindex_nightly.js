@@ -20,6 +20,46 @@ const CUSTOMER_MAX = 850;
 const WEIGHTS_DOC = { collection: "kindex_config", doc: "scoring_weights" };
 const WEIGHTS_CACHE_TTL_MS = 5 * 60 * 1000;
 
+// Community Impact & Spend Tracker feeds ranking, not the public score
+// verbatim - see spendBonusForWindow's doc comment for the privacy
+// constraint this shape exists to satisfy.
+const SPEND_BONUS_CAP = 40;
+const SPEND_BONUS_DOLLARS_PER_POINT = 25;
+
+/**
+ * Converts one customer's spend_logs total for this window into a ranking
+ * bonus, folded into `qualifying.total` alongside engagement points below.
+ *
+ * Product requirement: a customer's spend total must never be visible to
+ * anyone but themselves - not on the KINDEX leaderboard, not to another
+ * customer, not to admin tooling (see firestore.rules' spend_logs match
+ * block). It should still move their rank, though. Those two constraints
+ * are why this can't just add the raw dollar amount as points:
+ *
+ * - Capped at SPEND_BONUS_CAP, so no amount of spending buys an unlimited
+ *   score - it's a bounded nudge alongside engagement, the way one review
+ *   or one check-in is, not a way to outright purchase rank.
+ * - Bucketed into $25 increments via Math.floor, not applied continuously
+ *   - so a score can never be inverted back into an exact dollar figure.
+ *   Every amount in a $25 band produces the identical bonus, and the
+ *   score is additionally the sum of this bonus with engagement points
+ *   the observer has no way to separate out.
+ *
+ * Windowed the same WINDOW_DAYS as engagement events, and folded into the
+ * same target-seeking/decay machinery below (applyNightlyMovement) rather
+ * than written as a separate permanent addition - so a burst of spending
+ * nudges this week's target exactly like a burst of engagement does, and
+ * fades the same way if the customer goes quiet, instead of permanently
+ * inflating the baseline off one purchase.
+ */
+function spendBonusForWindow(totalSpentThisWindow) {
+  if (!(totalSpentThisWindow > 0)) return 0;
+  return Math.min(
+    SPEND_BONUS_CAP,
+    Math.floor(totalSpentThisWindow / SPEND_BONUS_DOLLARS_PER_POINT),
+  );
+}
+
 let cachedWeights = null;
 let cachedWeightsAt = 0;
 
@@ -122,6 +162,24 @@ async function recomputeAll(db, now) {
     eventsByUser.get(key).push(data);
   }
 
+  // Admin SDK read - bypasses firestore.rules' owner-only restriction on
+  // spend_logs by design, the same way this whole job already reads every
+  // customer's UserEngagementEvents. Nothing derived from this leaves the
+  // function except the bucketed, capped bonus computed below; the raw
+  // per-user totals here never get written anywhere.
+  const spendSnap = await db
+    .collection("spend_logs")
+    .where("spent_at", ">=", windowStart)
+    .get();
+
+  const spendTotalByUser = new Map();
+  for (const doc of spendSnap.docs) {
+    const data = doc.data();
+    if (!data.user_ref || typeof data.amount !== "number") continue;
+    const key = data.user_ref.id;
+    spendTotalByUser.set(key, (spendTotalByUser.get(key) || 0) + data.amount);
+  }
+
   // Every customer who already has a score doc must be visited, not just
   // those active this window - otherwise inactive customers would never
   // decay.
@@ -137,6 +195,14 @@ async function recomputeAll(db, now) {
     const scoreData = scoreDoc.data();
     const events = eventsByUser.get(scoreDoc.id) || [];
     const qualifying = qualifyingPointsForCustomer(events, weights);
+    const spendBonus = spendBonusForWindow(spendTotalByUser.get(scoreDoc.id) || 0);
+    // Folded straight into the same total that seeds the target below -
+    // see spendBonusForWindow's doc comment. hasActivity/countedEvents
+    // deliberately does NOT include spend: a spend-only week still moves
+    // the target upward, but it isn't "activity" for the
+    // inactivity-decay clock, which stays keyed to engagement events the
+    // same as before this change.
+    qualifying.total += spendBonus;
 
     const scoreBefore =
       typeof scoreData.score === "number" ? scoreData.score : CUSTOMER_BASELINE;

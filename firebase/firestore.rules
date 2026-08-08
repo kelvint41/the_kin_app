@@ -459,7 +459,12 @@ service cloud.firestore {
         && request.resource.data.rating is number
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5
-        && request.resource.data.edit_count == 0;
+        && request.resource.data.edit_count == 0
+        // photo_url is optional - the V1 review photo attachment. When
+        // present it must be a string; absent is fine, since the field
+        // predates this and the attachment itself is optional.
+        && (!('photo_url' in request.resource.data)
+            || request.resource.data.photo_url is string);
       allow read: if true;
 
       // Owners may edit their own review, capped at 2 edits purely as an
@@ -476,9 +481,84 @@ service cloud.firestore {
         && request.resource.data.rating >= 1
         && request.resource.data.rating <= 5
         && resource.data.edit_count < 2
-        && request.resource.data.edit_count == resource.data.edit_count + 1;
+        && request.resource.data.edit_count == resource.data.edit_count + 1
+        && (!('photo_url' in request.resource.data)
+            || request.resource.data.photo_url is string);
 
       allow delete: if false;
+    }
+
+    // V1 Favorites/Saved Places. Composite id `{userId}_{businessId}` (see
+    // SavedBusinessesRecord.docId) makes a save idempotent and "is this
+    // saved?" a direct doc read - the client never queries this collection
+    // to find out its own state, only reads/writes the one doc it already
+    // knows the id of. Not readable by anyone but the saver: what someone
+    // has bookmarked is exactly as personal as their spend log below, and
+    // has no legitimate reason to be visible to another user or an admin.
+    match /saved_businesses/{document} {
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.business_ref is path;
+      // Nothing to edit - unsaving is a delete, not an update.
+      allow update: if false;
+      allow delete: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    // Community Impact & Spend Tracker - "Log a Visit / Spend" entries.
+    //
+    // Strictly owner-only, on every verb, with no admin carve-out - unlike
+    // uservisits above, which an owner can read for their own business's
+    // check-ins. Product direction for this collection was explicit: what
+    // a customer has spent is theirs alone, never visible to another
+    // customer, never surfaced on the KINDEX leaderboard, and not read
+    // here by admin tooling either. The one aggregate that does need to
+    // leave this collection - a community-wide total for the Executive
+    // Dashboard - is produced server-side by the Admin SDK (which bypasses
+    // these rules) into community_impact_stats below, as a number with no
+    // per-user attribution, rather than by relaxing read access here.
+    //
+    // business_ref is intentionally allowed to be absent: the logging
+    // sheet accepts a free-text business name for a spend at a business
+    // not yet in KIN's directory, and that entry still counts.
+    match /spend_logs/{document} {
+      allow read: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+      allow create: if request.auth != null
+        && request.resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid)
+        && request.resource.data.business_name is string
+        && request.resource.data.business_name.size() > 0
+        && request.resource.data.amount is number
+        && request.resource.data.amount >= 0
+        && (!('business_ref' in request.resource.data)
+            || request.resource.data.business_ref is path)
+        // business_city/business_category are denormalized off the
+        // matched business at log time, for the Executive Dashboard's
+        // by-city/by-category aggregate - see recordSpendLogAggregate.
+        // Optional: a free-text entry with no matched business has
+        // neither.
+        && (!('business_city' in request.resource.data)
+            || request.resource.data.business_city is string)
+        && (!('business_category' in request.resource.data)
+            || request.resource.data.business_category is string);
+      // No edit flow yet - only add and delete.
+      allow update: if false;
+      allow delete: if request.auth != null
+        && resource.data.user_ref == /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    // Community-wide Community Impact totals for the Executive Dashboard -
+    // total dollars logged and total visits, with zero per-user
+    // attribution. Written only by the recordSpendLogAggregate Cloud
+    // Function trigger on spend_logs (Admin SDK, bypasses these rules);
+    // never by a client, which is what keeps this consistent with
+    // spend_logs being unreadable by anyone but its owner above.
+    match /community_impact_stats/{document} {
+      allow read: if request.auth != null
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.is_admin == true;
+      allow write: if false;
     }
 
     match /signup_feed/{document} {
