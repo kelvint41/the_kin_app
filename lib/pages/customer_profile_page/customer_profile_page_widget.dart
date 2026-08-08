@@ -11,6 +11,7 @@ import '/components/feedback_sheet_widget.dart';
 import '/components/kindex_engagement_nudge.dart';
 import '/components/promo_card_widget.dart';
 import '/components/edit_bio_sheet.dart';
+import '/components/member_since_badge.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
@@ -426,6 +427,11 @@ class _CustomerProfilePageWidgetState extends State<CustomerProfilePageWidget> {
                         style: FlutterFlowTheme.of(context).headlineSmall,
                       ),
                     ),
+                  Padding(
+                    padding:
+                        EdgeInsetsDirectional.fromSTEB(24.0, 4.0, 24.0, 0.0),
+                    child: Center(child: const MemberSinceBadge()),
+                  ),
                   _bioSection(context),
                   Padding(
                     padding: EdgeInsets.all(24.0),

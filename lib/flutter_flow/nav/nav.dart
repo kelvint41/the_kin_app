@@ -240,6 +240,23 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           builder: (context, params) => GrowthToolsPageWidget(),
         ),
+        // V1 Favorites/Saved Places (draft - see FavoritesLocalStore doc
+        // comment). Reachable from the hamburger menu and Customer Profile.
+        FFRoute(
+          name: SavedPlacesWidget.routeName,
+          path: SavedPlacesWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => SavedPlacesWidget(),
+        ),
+        // Community Impact & Spend Tracker (draft - see
+        // CommunityImpactLocalStore doc comment). Reachable from the
+        // hamburger menu and Customer Profile.
+        FFRoute(
+          name: CommunityImpactDashboardWidget.routeName,
+          path: CommunityImpactDashboardWidget.routePath,
+          requireAuth: true,
+          builder: (context, params) => CommunityImpactDashboardWidget(),
+        ),
         FFRoute(
           name: NotificationsWidget.routeName,
           path: NotificationsWidget.routePath,

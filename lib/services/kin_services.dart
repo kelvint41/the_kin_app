@@ -1,11 +1,13 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/auth/firebase_auth/google_auth.dart';
 import '/backend/backend.dart';
+import '/backend/firebase_storage/storage.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/geohash_util.dart';
 import '/flutter_flow/kindex_ticker_util.dart';
 import '/flutter_flow/place.dart';
 import '/flutter_flow/revenue_cat_util.dart' as revenue_cat;
+import 'dart:typed_data';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
@@ -912,6 +914,14 @@ class KinServices {
     required DocumentReference businessRef,
     required double rating,
     required String reviewText,
+    // Optional V1 photo attachment. The caller uploads the bytes to
+    // Storage first (see BusinessProfileV2 -> "Submit Review", which does
+    // this via uploadReviewPhoto below) and passes the resulting download
+    // URL here - this method itself never touches Storage, same division
+    // of labor as ImageUploadButton/onUploaded elsewhere in the app.
+    // Passing null on an edit leaves any existing photo_url untouched
+    // rather than clearing it.
+    String? photoUrl,
   }) async {
     final userRef = currentUserReference;
     if (userRef == null) {
@@ -930,6 +940,7 @@ class KinServices {
           reviewText: reviewText,
           timestamp: getCurrentTimestamp,
           editCount: 0,
+          photoUrl: photoUrl,
         ));
         return const ServiceResult.success();
       }
@@ -949,11 +960,29 @@ class KinServices {
         'review_text': reviewText,
         'timestamp': getCurrentTimestamp,
         'edit_count': currentEdits + 1,
+        if (photoUrl != null) 'photo_url': photoUrl,
       });
       return const ServiceResult.success();
     } catch (_) {
       return const ServiceResult.failure(
           'Could not submit your review. Please try again.');
+    }
+  }
+
+  /// Uploads a review's attached photo to Storage under the reviewer's own
+  /// `users/{uid}/` path - the one path storage.rules opens for writing,
+  /// same as ImageUploadButton - and returns the download URL. Runs before
+  /// [submitReview] so the URL is ready to write in the same document,
+  /// rather than the review existing briefly without its photo.
+  static Future<String?> uploadReviewPhoto(Uint8List bytes) async {
+    final userRef = currentUserReference;
+    if (userRef == null) return null;
+    final path = 'users/${userRef.id}/review_photos/'
+        '${DateTime.now().microsecondsSinceEpoch}.jpg';
+    try {
+      return await uploadData(path, bytes);
+    } catch (_) {
+      return null;
     }
   }
 

@@ -35,6 +35,8 @@ import 'schema/kin_feed_events_record.dart';
 import 'schema/notifications_record.dart';
 import 'schema/business_categories_record.dart';
 import 'schema/business_items_record.dart';
+import 'schema/saved_businesses_record.dart';
+import 'schema/spend_logs_record.dart';
 
 export 'dart:async' show StreamSubscription;
 export 'package:cloud_firestore/cloud_firestore.dart' hide Order;
@@ -75,6 +77,8 @@ export 'schema/system_counters_record.dart';
 export 'schema/notifications_record.dart';
 export 'schema/business_categories_record.dart';
 export 'schema/business_items_record.dart';
+export 'schema/saved_businesses_record.dart';
+export 'schema/spend_logs_record.dart';
 
 /// Functions to query BusinessesRecords (as a Stream and as a Future).
 Future<int> queryBusinessesRecordCount({
@@ -945,6 +949,80 @@ Future<List<ReviewsRecord>> queryReviewsRecordOnce({
     queryCollectionOnce(
       ReviewsRecord.collection,
       ReviewsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query SavedBusinessesRecords (as a Stream and as a Future).
+Future<int> querySavedBusinessesRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      SavedBusinessesRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<SavedBusinessesRecord>> querySavedBusinessesRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      SavedBusinessesRecord.collection,
+      SavedBusinessesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<SavedBusinessesRecord>> querySavedBusinessesRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      SavedBusinessesRecord.collection,
+      SavedBusinessesRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+/// Functions to query SpendLogsRecords (as a Stream and as a Future).
+Future<int> querySpendLogsRecordCount({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+}) =>
+    queryCollectionCount(
+      SpendLogsRecord.collection,
+      queryBuilder: queryBuilder,
+      limit: limit,
+    );
+
+Stream<List<SpendLogsRecord>> querySpendLogsRecord({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollection(
+      SpendLogsRecord.collection,
+      SpendLogsRecord.fromSnapshot,
+      queryBuilder: queryBuilder,
+      limit: limit,
+      singleRecord: singleRecord,
+    );
+
+Future<List<SpendLogsRecord>> querySpendLogsRecordOnce({
+  Query Function(Query)? queryBuilder,
+  int limit = -1,
+  bool singleRecord = false,
+}) =>
+    queryCollectionOnce(
+      SpendLogsRecord.collection,
+      SpendLogsRecord.fromSnapshot,
       queryBuilder: queryBuilder,
       limit: limit,
       singleRecord: singleRecord,

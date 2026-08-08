@@ -1,5 +1,6 @@
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
+import '/components/business_qr_code_card.dart';
 import '/components/compact_action_list_widget.dart';
 import '/components/kin_back_button.dart';
 import '/components/metric_card4_widget.dart';
@@ -878,6 +879,22 @@ class _OwnerProfileWidgetState extends State<OwnerProfileWidget> {
                     return MysteryRewardPanelWidget(
                       businessRef: snapshot.data!.reference,
                     );
+                  },
+                ),
+              ),
+              // Business Profile QR Code Generator (draft - see
+              // BusinessQrCodeCard's doc comment for what's local-only vs.
+              // pending backend deep-link routing).
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(20.0, 0.0, 20.0, 12.0),
+                child: StreamBuilder<BusinessesRecord>(
+                  stream: BusinessesRecord.getDocument(
+                      currentUserDocument!.ownedBusiness!),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const SizedBox.shrink();
+                    }
+                    return BusinessQrCodeCard(business: snapshot.data!);
                   },
                 ),
               ),

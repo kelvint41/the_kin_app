@@ -296,6 +296,30 @@ void showMainMenuSheet(BuildContext context,
                           );
                         },
                       ),
+                      // V1 Favorites/Saved Places (draft - see
+                      // FavoritesLocalStore doc comment).
+                      ListTile(
+                        leading: Icon(Icons.favorite_border_rounded,
+                            color: theme.primaryText),
+                        title: Text('Saved Places', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(SavedPlacesWidget.routeName);
+                        },
+                      ),
+                      // Community Impact & Spend Tracker (draft - see
+                      // CommunityImpactLocalStore doc comment).
+                      ListTile(
+                        leading: Icon(Icons.volunteer_activism_outlined,
+                            color: theme.primaryText),
+                        title:
+                            Text('Community Impact', style: theme.bodyLarge),
+                        onTap: () {
+                          Navigator.pop(sheetContext);
+                          context.pushNamed(
+                              CommunityImpactDashboardWidget.routeName);
+                        },
+                      ),
                       // Same role-branch as the row above, but the
                       // destination is the same widget either way -
                       // KindexScoreHistoryWidget renders the owner's

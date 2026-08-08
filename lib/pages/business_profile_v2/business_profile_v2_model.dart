@@ -15,6 +15,8 @@ import '/index.dart';
 import 'business_profile_v2_widget.dart' show BusinessProfileV2Widget;
 import 'package:map_launcher/map_launcher.dart' as $ml;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -34,6 +36,16 @@ class BusinessProfileV2Model extends FlutterFlowModel<BusinessProfileV2Widget> {
   String? Function(BuildContext, String?)? textControllerValidator;
   // Stores action output result for [Custom Action - calculateRealTimeKindex] action in Column widget.
   double? updatedKindexResult;
+  // V1 review section: optional photo attachment (draft - kept local for
+  // preview only, not yet uploaded to Firebase Storage; see
+  // KinServices.submitReview call site for the pending-approval note).
+  // Stored as decoded bytes (rather than the picker's XFile/File) so the
+  // thumbnail renders the same way on web and mobile.
+  Uint8List? attachedReviewPhotoBytes;
+  String? attachedReviewPhotoName;
+  // Guards Submit Review against a double-tap while a photo upload (or the
+  // review write itself) is in flight.
+  bool isSubmittingReview = false;
   // Models for the owner-only "Manage Your Business" action row.
   late ActionBtnModel ownerSetupActionModel;
   late ActionBtnModel ownerPricingActionModel;

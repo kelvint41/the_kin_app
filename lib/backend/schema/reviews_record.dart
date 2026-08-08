@@ -47,6 +47,15 @@ class ReviewsRecord extends FirestoreRecord {
   int get editCount => _editCount ?? 0;
   bool hasEditCount() => _editCount != null;
 
+  // "photo_url" field. Optional customer photo attached to the review,
+  // uploaded to Firebase Storage under the reviewer's own
+  // users/{uid}/ path (the one path storage.rules opens for writing).
+  // Empty on the overwhelming majority of reviews - this shipped after
+  // them, and the attachment is optional regardless.
+  String? _photoUrl;
+  String get photoUrl => _photoUrl ?? '';
+  bool hasPhotoUrl() => _photoUrl != null;
+
   void _initializeFields() {
     _businessRef = snapshotData['business_ref'] as DocumentReference?;
     _userRef = snapshotData['user_ref'] as DocumentReference?;
@@ -54,6 +63,7 @@ class ReviewsRecord extends FirestoreRecord {
     _reviewText = snapshotData['review_text'] as String?;
     _timestamp = snapshotData['timestamp'] as DateTime?;
     _editCount = castToType<int>(snapshotData['edit_count']);
+    _photoUrl = snapshotData['photo_url'] as String?;
   }
 
   static CollectionReference get collection =>
@@ -97,6 +107,7 @@ Map<String, dynamic> createReviewsRecordData({
   String? reviewText,
   DateTime? timestamp,
   int? editCount,
+  String? photoUrl,
 }) {
   final firestoreData = mapToFirestore(
     <String, dynamic>{
@@ -106,6 +117,7 @@ Map<String, dynamic> createReviewsRecordData({
       'review_text': reviewText,
       'timestamp': timestamp,
       'edit_count': editCount,
+      'photo_url': photoUrl,
     }.withoutNulls,
   );
 

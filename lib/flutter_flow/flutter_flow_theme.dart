@@ -188,7 +188,20 @@ class LightModeTheme extends FlutterFlowTheme {
   // 0xFF7D5F16 this used to be, and is what headings, links and emphasis
   // should use. The difference is that they now have to ask for it.
   late Color primaryText = const Color(0xFF241F17);
-  late Color secondaryText = const Color(0xFF14181B);
+  // Was 0xFF14181B - a near-black that measured *darker* than primaryText
+  // itself (0.014 relative luminance vs. primaryText's 0.017), so every
+  // caption, label, and timestamp using this token rendered heavier than
+  // the primary text it was supposed to sit quietly beneath. "Secondary"
+  // was the most visually dominant text color on the page.
+  //
+  // This is the same warm muted brown-gray already used for de-emphasized
+  // captions elsewhere in the design system (matches the review doc's
+  // ink-soft token), chosen to sit between primaryText and hint
+  // (0xFF827358) rather than beside primaryText in weight. 0.123 relative
+  // luminance - clearly lighter than primaryText's 0.014 - while still
+  // holding 5.2:1 on primaryBackground and 6.1:1 on secondaryBackground,
+  // both comfortably past the 4.5:1 AA floor for normal text.
+  late Color secondaryText = const Color(0xFF6B6152);
   // Light mode had no elevation ramp at all: the page was 0xFFFCFCFC and
   // cards were pure white, which is 1.03:1 - indistinguishable. Every
   // surface melted into one sheet of white and the only thing separating
@@ -199,8 +212,8 @@ class LightModeTheme extends FlutterFlowTheme {
   // This is a warm off-white rather than a neutral grey, because the brand
   // is gold and green: a cool grey ground turns the gold slightly sickly.
   // It measures 1.17:1 against the white cards - the usual ratio for light
-  // elevation - and holds 5.11:1 for primaryText, 15.28:1 for
-  // secondaryText and 10.44:1 for the dark green, so nothing loses AA.
+  // elevation - and holds 5.11:1 for primaryText, 5.2:1 for secondaryText
+  // and 10.44:1 for the dark green, so nothing loses AA.
   late Color primaryBackground = const Color(0xFFF1EDE4);
   late Color secondaryBackground = const Color(0xFFFFFFFF);
   late Color accent1 = const Color(0xFFD4AF37);

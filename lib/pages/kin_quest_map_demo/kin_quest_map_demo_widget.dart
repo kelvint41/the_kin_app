@@ -20,7 +20,8 @@ import '/flutter_flow/lat_lng.dart' as ff_lat_lng;
 // show, not a plain import - flutter_flow_util.dart re-exports lat_lng.dart
 // itself, which would reintroduce the exact collision the hide above
 // avoids. This pulls in only the one function actually needed.
-import '/flutter_flow/flutter_flow_util.dart' show getCurrentUserLocation;
+import '/flutter_flow/flutter_flow_util.dart'
+    show getCurrentUserLocation, launchMap, getCurrentTimestamp;
 import '/services/kin_services.dart';
 import '/services/nearby_feed.dart';
 import '/services/quest_eligibility.dart';
@@ -161,11 +162,9 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
         _pins = pins;
         _loadingPins = false;
       });
-      // Pins may finish loading well after onMapCreated already fired (and
-      // therefore after the last camera event) - without this, newly
-      // loaded pins would have no screen position until the user next
-      // pans/zooms.
-      _updatePinPositions();
+      // Pin positions are derived during build from _camera, so pins that
+      // arrive after the last camera event place themselves on the next
+      // frame - the setState above is all that's needed.
       _listenForNearbyActivity();
     } catch (e) {
       if (!mounted) return;
@@ -260,22 +259,11 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     });
   }
 
-  /// Screen-space position for every pin, recomputed on camera
-  /// move/idle via GoogleMapController.getScreenCoordinate - this is what
-  /// lets the badges be real Flutter widgets (real BoxShadow glow/soft
-  /// drop-shadow, instant repaint on state change) instead of baked
-  /// BitmapDescriptor marker icons, which can't do either cheaply.
-  final Map<String, Offset> _pinScreenPositions = {};
-
-  /// Same idea as [_pinScreenPositions], for the "you are here" pulse
-  /// marker - it used to sit fixed at the screen's literal center
-  /// regardless of where the map panned, which meant there was no real
-  /// way to see your exact position on the map, just a badge that never
-  /// moved. Tracking a real screen coordinate off [_userLocation] instead
-  /// makes it a real marker, and native `myLocationButtonEnabled` below
-  /// gives an explicit way to recenter on it.
-  Offset? _userScreenPosition;
-  bool _updatingPositions = false;
+  /// The live camera, captured synchronously from `onCameraMove`. Pin
+  /// screen positions are derived from this by [_projectToScreen] during
+  /// build rather than being stored - see that method's doc comment for
+  /// why the previous stored-and-fetched approach could not work.
+  CameraPosition? _camera;
 
   // 'kin_quest_map_rules_seen_v1' rather than a bare name - versioned so a
   // future rewrite of the rules copy can re-show it once, the same
@@ -330,62 +318,129 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
     super.dispose();
   }
 
-  /// True while a screen-coordinate batch is in flight; set alongside
-  /// [_updatingPositions] when another update is requested mid-batch (see
-  /// below) rather than starting an overlapping second batch.
-  bool _positionUpdatePending = false;
+  /// Web Mercator forward projection: lat/lng to world coordinates on the
+  /// zoom-0 tile plane (256x256, origin top-left). Pure math, no platform
+  /// call - which is the entire point, see [_projectToScreen].
+  static Offset _projectToWorld(LatLng ll) {
+    final x = (ll.longitude + 180.0) / 360.0 * 256.0;
+    // Clamped just shy of the poles: tan() diverges at +/-90, and a NaN
+    // here would silently propagate into a Positioned and throw during
+    // layout rather than just misplacing one pin.
+    final lat = ll.latitude.clamp(-85.05112878, 85.05112878);
+    final sinLat = math.sin(lat * math.pi / 180.0);
+    final y = (0.5 - math.log((1 + sinLat) / (1 - sinLat)) / (4 * math.pi)) *
+        256.0;
+    return Offset(x, y);
+  }
 
-  /// Recomputes every pin's (and the user marker's) screen position for
-  /// the *current* camera frame.
+  /// Screen position for [target] under the current camera, computed
+  /// locally every build.
   ///
-  /// Previously this just no-op'd (`_updatingPositions` short-circuit)
-  /// whenever a batch was already in flight - during a fast pinch-zoom,
-  /// Google Maps fires onCameraMove many times a second, each one much
-  /// faster than a getScreenCoordinate round trip resolves, so most of
-  /// those calls were silently dropped. The batch that *did* eventually
-  /// finish then applied positions computed against whatever camera frame
-  /// was current when it started, which could be several frames stale by
-  /// the time setState ran - pins would render at wherever they used to
-  /// be, which at typical zoom deltas is easily off-screen. That's what
-  /// read as pins "not stationary" and "disappearing" while zooming.
+  /// This replaces `GoogleMapController.getScreenCoordinate`, which was the
+  /// cause of both reported pin bugs:
   ///
-  /// Now a request that arrives mid-batch is recorded rather than dropped,
-  /// and the loop below re-runs once more after the in-flight batch
-  /// finishes - always ending on a fetch against the camera's current
-  /// state, without stacking up unbounded overlapping batches the way
-  /// firing a fresh one on every single onCameraMove tick would.
-  Future<void> _updatePinPositions() async {
-    if (_updatingPositions) {
-      _positionUpdatePending = true;
-      return;
+  /// 1. It returns **physical** pixels on Android while `Positioned` lays
+  ///    out in **logical** pixels. On a 3x-density phone every pin was
+  ///    placed three times too far right and down, which for anything but
+  ///    the top-left corner of the map is off-screen entirely. That is the
+  ///    "pins float all over the screen and disappear" report.
+  ///
+  /// 2. It is an async platform round-trip, so it can never track a live
+  ///    gesture. Google Maps fires onCameraMove many times a second and
+  ///    each round-trip resolves slower than that, so the pins always
+  ///    rendered against a camera frame that had already moved on - they
+  ///    visibly lagged and swam behind the map during a pinch. Batching or
+  ///    de-duplicating those calls (the previous attempt) only fixes where
+  ///    the pins land *after* the gesture ends; it cannot fix the drift
+  ///    during it.
+  ///
+  /// Mercator is exactly the projection Google Maps uses, so doing it here
+  /// is not an approximation - it is the same answer, synchronously, in
+  /// the right units, for zero platform calls.
+  ///
+  /// Tilt would break this (it needs a perspective transform, not a flat
+  /// one), which is why tilt gestures are disabled on the map below.
+  /// Bearing is handled - it is just a rotation about the camera target.
+  Offset? _projectToScreen(LatLng target, Size size) {
+    final camera = _camera;
+    if (camera == null) return null;
+
+    final scale = math.pow(2.0, camera.zoom).toDouble();
+    final worldWidth = 256.0 * scale;
+    final centerWorld = _projectToWorld(camera.target);
+    final pointWorld = _projectToWorld(target);
+
+    var dx = (pointWorld.dx - centerWorld.dx) * scale;
+    final dy = (pointWorld.dy - centerWorld.dy) * scale;
+
+    // Take the shorter way round the antimeridian, so a pin doesn't fly
+    // the long way across the world when the camera sits near +/-180.
+    if (dx > worldWidth / 2) {
+      dx -= worldWidth;
+    } else if (dx < -worldWidth / 2) {
+      dx += worldWidth;
     }
+
+    var offsetX = dx;
+    var offsetY = dy;
+    if (camera.bearing != 0) {
+      final r = -camera.bearing * math.pi / 180.0;
+      final cosR = math.cos(r);
+      final sinR = math.sin(r);
+      offsetX = dx * cosR - dy * sinR;
+      offsetY = dx * sinR + dy * cosR;
+    }
+
+    return Offset(size.width / 2 + offsetX, size.height / 2 + offsetY);
+  }
+
+  /// Whether [pos] is close enough to the viewport to be worth building.
+  /// The margin covers a badge's own size plus its glow, so a pin never
+  /// pops in visibly at the edge.
+  static bool _isNearViewport(Offset pos, Size size) {
+    const margin = 120.0;
+    return pos.dx >= -margin &&
+        pos.dy >= -margin &&
+        pos.dx <= size.width + margin &&
+        pos.dy <= size.height + margin;
+  }
+
+  /// One pin's positioned badge, or nothing when it projects off-screen.
+  /// Returns a list so the caller can spread it into the Stack.
+  List<Widget> _buildPin(_QuestPin pin, Size mapSize) {
+    final pos = _projectToScreen(pin.position, mapSize);
+    if (pos == null || !_isNearViewport(pos, mapSize)) return const [];
+    return [
+      Positioned(
+        // Offset so the badge's point, not its top-left, lands on the
+        // coordinate: half its 40px width across, and its full height
+        // plus the pointer tail up.
+        left: pos.dx - 22,
+        top: pos.dy - 44,
+        child: _QuestPinBadge(
+          isVerified: pin.isVerified,
+          isDarkMode: _isDarkMode,
+          seasonalEmoji: _season.rareMarkerEmoji,
+          onTap: () => _confirmStart(pin),
+        ),
+      ),
+    ];
+  }
+
+  /// Steps the camera by [delta] zoom levels. The map had
+  /// `zoomControlsEnabled: false` and no other zoom affordance, and the
+  /// pin badges sit on top of the map as their own hit-test targets - so a
+  /// pinch that happened to start on or near a pin was swallowed by the
+  /// badge instead of reaching the map. That is the "can't zoom in or out"
+  /// report. These buttons are an explicit path that works regardless of
+  /// where a finger lands, and unlike `zoomControlsEnabled` they render on
+  /// iOS too (that flag is Android-only).
+  Future<void> _zoomBy(double delta) async {
     final controller = _mapController;
     if (controller == null) return;
-    _updatingPositions = true;
-    try {
-      do {
-        _positionUpdatePending = false;
-        final entries = await Future.wait(_pins.map((pin) async {
-          final sc = await controller.getScreenCoordinate(pin.position);
-          return MapEntry(pin.id, Offset(sc.x.toDouble(), sc.y.toDouble()));
-        }));
-        final userSc = await controller.getScreenCoordinate(_userLocation);
-        if (!mounted) return;
-        setState(() {
-          _pinScreenPositions
-            ..clear()
-            ..addEntries(entries);
-          _userScreenPosition =
-              Offset(userSc.x.toDouble(), userSc.y.toDouble());
-        });
-      } while (_positionUpdatePending);
-    } catch (_) {
-      // A screen coordinate lookup can fail transiently mid-gesture (map
-      // not yet laid out, or disposed while awaiting) - next camera event
-      // retries, so this is safe to just drop.
-    } finally {
-      _updatingPositions = false;
-    }
+    await controller.animateCamera(CameraUpdate.zoomBy(delta));
+    // zoomBy animates natively; onCameraMove/onCameraIdle keep _camera in
+    // step, so there is nothing to update by hand here.
   }
 
   double _distanceMeters(LatLng a, LatLng b) {
@@ -695,7 +750,14 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
           const SizedBox(width: 4),
         ],
       ),
-      body: Stack(
+      // LayoutBuilder, because the projection needs the map's real painted
+      // size to place anything relative to its center. MediaQuery would be
+      // the whole window, which is taller than this body by the app bar.
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final mapSize = Size(constraints.maxWidth, constraints.maxHeight);
+          final userPos = _projectToScreen(_userLocation, mapSize);
+          return Stack(
         children: [
           GoogleMap(
             initialCameraPosition:
@@ -711,38 +773,41 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
             myLocationButtonEnabled: true,
             zoomControlsEnabled: false,
             mapToolbarEnabled: false,
+            // Tilt would put the map into a perspective projection, which
+            // the flat Mercator math in _projectToScreen cannot follow -
+            // pins would sit correctly only at zero tilt. Rotation is
+            // fine and stays enabled; the projection handles bearing.
+            tiltGesturesEnabled: false,
             onMapCreated: (controller) {
               _mapController = controller;
-              _updatePinPositions();
+              // Seeds _camera so pins can place themselves before the
+              // user has touched the map at all.
+              setState(() {
+                _camera = CameraPosition(target: _userLocation, zoom: 16);
+              });
             },
-            onCameraMove: (_) => _updatePinPositions(),
-            onCameraIdle: _updatePinPositions,
+            onCameraMove: (position) => setState(() => _camera = position),
           ),
-          // Quest pins, positioned via the screen coordinates computed
-          // above. IgnorePointer isn't used here - each pin is its own
-          // tap target, on top of the map's own pan/zoom gestures.
-          for (final pin in _pins)
-            if (_pinScreenPositions[pin.id] != null)
-              Positioned(
-                left: _pinScreenPositions[pin.id]!.dx - 22,
-                top: _pinScreenPositions[pin.id]!.dy - 44,
-                child: _QuestPinBadge(
-                  isVerified: pin.isVerified,
-                  isDarkMode: _isDarkMode,
-                  seasonalEmoji: _season.rareMarkerEmoji,
-                  onTap: () => _confirmStart(pin),
-                ),
-              ),
-          // User location - real screen coordinate off _userLocation, same
-          // pattern as the quest pins above, rather than a marker fixed to
-          // the screen's center regardless of where the map is panned.
-          // Layers on top of the native blue dot (myLocationEnabled above)
-          // as the app's own branded radar-pulse treatment of the same
-          // real point, not a competing indicator.
-          if (_userScreenPosition != null)
+          // Quest pins, placed from the synchronous projection above so
+          // they stay locked to their real coordinates through pan, zoom,
+          // and rotation.
+          //
+          // Each badge is its own tap target rather than being wrapped in
+          // IgnorePointer, because tapping a pin is how a quest starts.
+          // Off-screen pins are culled inside _buildPin - without that, a
+          // dense city would build a widget per business every frame, most
+          // of them outside the viewport.
+          for (final pin in _pins) ..._buildPin(pin, mapSize),
+          // User location - projected off _userLocation the same way as
+          // the quest pins, rather than a marker fixed to the screen's
+          // center regardless of where the map is panned. Layers on top of
+          // the native blue dot (myLocationEnabled above) as the app's own
+          // branded radar-pulse treatment of the same real point, not a
+          // competing indicator.
+          if (userPos != null && _isNearViewport(userPos, mapSize))
             Positioned(
-              left: _userScreenPosition!.dx - 45,
-              top: _userScreenPosition!.dy - 45,
+              left: userPos.dx - 45,
+              top: userPos.dy - 45,
               child: IgnorePointer(
                 child: AnimatedBuilder(
                   animation: _pulseController,
@@ -751,6 +816,31 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
                 ),
               ),
             ),
+          // Explicit zoom controls - see _zoomBy's doc comment for why the
+          // map's own gestures were not enough on their own. Sits above
+          // the native recenter button's bottom-right corner.
+          Positioned(
+            right: 12,
+            bottom: 120,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _MapZoomButton(
+                  icon: Icons.add_rounded,
+                  tooltip: 'Zoom in',
+                  isDarkMode: _isDarkMode,
+                  onPressed: () => _zoomBy(1),
+                ),
+                const SizedBox(height: 8),
+                _MapZoomButton(
+                  icon: Icons.remove_rounded,
+                  tooltip: 'Zoom out',
+                  isDarkMode: _isDarkMode,
+                  onPressed: () => _zoomBy(-1),
+                ),
+              ],
+            ),
+          ),
           if (_loadingPins || _loadError != null)
             Positioned(
               top: 12,
@@ -835,6 +925,51 @@ class _KinQuestMapDemoWidgetState extends State<KinQuestMapDemoWidget>
               ),
             ),
         ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// A round zoom button for the map overlay. The map's own
+/// `zoomControlsEnabled` is Android-only, so this is the cross-platform
+/// equivalent - see _zoomBy's doc comment for why an explicit control is
+/// needed at all.
+class _MapZoomButton extends StatelessWidget {
+  const _MapZoomButton({
+    required this.icon,
+    required this.tooltip,
+    required this.isDarkMode,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool isDarkMode;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = isDarkMode ? const Color(0xFF242424) : Colors.white;
+    final fg = isDarkMode ? const Color(0xFFD4AF37) : const Color(0xFF0B3D2E);
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: bg,
+        shape: const CircleBorder(),
+        elevation: 3,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: SizedBox(
+            // 44x44 - the minimum comfortable touch target, and the same
+            // size as a quest badge.
+            width: 44,
+            height: 44,
+            child: Icon(icon, color: fg, size: 22),
+          ),
+        ),
       ),
     );
   }
@@ -1000,6 +1135,35 @@ class _UserPulseMarker extends StatelessWidget {
 
 /// The proximity-verification bottom sheet - status badge, business
 /// details, live distance, and the gated "Verify Location" action.
+/// Opens the device's map app with directions to [pin] - same launchMap()
+/// call Business Profile's own "Directions" button uses (location plus
+/// address, so the pin lands precisely rather than only geocoding the
+/// address string), and the same map_tap engagement event, best-effort
+/// exactly like that button's - a failed log shouldn't undo a tap that
+/// already opened the user's map app.
+///
+/// Omits that button's city/session_id fields - _QuestPin doesn't carry
+/// either separately (city is folded into the concatenated address
+/// string), and event_type/business_ref alone are what the Kindex weights
+/// lookup and per-business dedup actually key off.
+Future<void> _openDirections(_QuestPin pin) async {
+  await launchMap(
+    location: ff_lat_lng.LatLng(pin.position.latitude, pin.position.longitude),
+    address: pin.address,
+    title: pin.name,
+  );
+  try {
+    await ActivityLogsRecord.collection.doc().set(createActivityLogsRecordData(
+          eventType: 'map_tap',
+          userRef: currentUserReference,
+          businessRef: pin.businessRef,
+          timestamp: getCurrentTimestamp,
+        ));
+  } catch (_) {
+    // Best-effort - see doc comment above.
+  }
+}
+
 class _QuestBottomSheet extends StatelessWidget {
   const _QuestBottomSheet({
     required this.pin,
@@ -1090,8 +1254,34 @@ class _QuestBottomSheet extends StatelessWidget {
                   color: onSurface, fontWeight: FontWeight.w800, fontSize: 20),
             ),
             const SizedBox(height: 4),
-            Text(pin.address,
-                style: TextStyle(color: onSurfaceMuted, fontSize: 13.5)),
+            // Tappable - opens the device's map app with directions to
+            // this pin, same launchMap() used by Business Profile's own
+            // "Directions" button (and the same map_tap engagement event,
+            // so this earns Kindex credit the same way that button does).
+            // Previously plain text - a shopper had to retype the address
+            // by hand into a maps app to actually get there.
+            InkWell(
+              onTap: () => _openDirections(pin),
+              borderRadius: BorderRadius.circular(4),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Flexible(
+                    child: Text(
+                      pin.address,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 13.5,
+                        decoration: TextDecoration.underline,
+                        decorationColor: statusColor.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.directions_rounded, size: 16, color: statusColor),
+                ],
+              ),
+            ),
             const SizedBox(height: 8),
             Row(
               children: [

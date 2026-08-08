@@ -106,6 +106,9 @@ dependencies:
   image_picker_windows: 0.2.1+1
   intl: 0.20.2
   json_path: 0.7.2
+  # Added for the Business Profile QR Code Generator (owner view) - local,
+  # client-side QR rendering only, no backend dependency.
+  qr_flutter: 4.1.0
   map_launcher: 3.5.0
   mask_text_input_formatter: 2.9.0
   mime_type: 1.0.0
@@ -113,6 +116,10 @@ dependencies:
   package_info_plus_platform_interface: 3.0.1
   page_transition: 2.2.2
   path_provider: 2.1.4
+  # Added for the Executive Dashboard's investor PDF export - pdf builds
+  # the document, printing hands it to the OS share/print/save sheet.
+  pdf: 3.11.1
+  printing: 5.13.4
   path_provider_android: 2.2.10
   path_provider_foundation: 2.4.0
   path_provider_linux: 2.2.1

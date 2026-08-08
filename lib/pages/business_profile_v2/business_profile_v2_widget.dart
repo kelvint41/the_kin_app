@@ -4,6 +4,7 @@ import '/services/kin_services.dart';
 import '/components/action_btn_widget.dart';
 import '/components/ai_marketing_sheet_widget.dart';
 import '/components/business_image_widget.dart';
+import '/components/favorite_heart_button.dart';
 import '/components/kin_back_button.dart';
 import '/components/main_menu_button.dart';
 import '/components/kindex_trend_indicator.dart';
@@ -24,6 +25,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'business_profile_v2_model.dart';
 export 'business_profile_v2_model.dart';
@@ -477,6 +479,12 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  // V1 Favorites/Saved Places (draft, local-only
+                                  // - see FavoritesLocalStore doc comment).
+                                  FavoriteHeartButton(
+                                    businessId: businessProfileV2BusinessesRecord
+                                        .reference.id,
+                                  ),
                                   FlutterFlowIconButton(
                                     borderColor: Colors.transparent,
                                     borderRadius: 20.0,
@@ -514,7 +522,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       }
                                     },
                                   ),
-                                ],
+                                ].divide(SizedBox(width: 8.0)),
                               ),
                             ),
                           ),
@@ -2010,8 +2018,26 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                               Align(
                                 alignment: AlignmentDirectional(-1.0, 0.0),
                                 child: RatingBar.builder(
-                                onRatingUpdate: (newValue) => safeSetState(
-                                    () => _model.ratingBarValue = newValue),
+                                onRatingUpdate: (newValue) async {
+                                  safeSetState(
+                                      () => _model.ratingBarValue = newValue);
+                                  // Live KINDEX preview: recompute on every
+                                  // star tap so "how would this affect the
+                                  // score" is visible before Submit, not
+                                  // just after. Same calculateRealTimeKindex
+                                  // used by the real submit-time recompute,
+                                  // so the preview and the eventual nightly
+                                  // result agree.
+                                  _model.updatedKindexResult =
+                                      await actions.calculateRealTimeKindex(
+                                    businessProfileV2BusinessesRecord
+                                        .kindexScore,
+                                    newValue.round(),
+                                    businessProfileV2BusinessesRecord
+                                        .isPremium,
+                                  );
+                                  safeSetState(() {});
+                                },
                                 // Filled stars were theme.primary (fixed dark
                                 // green) and unrated stars were accent1
                                 // (bright gold) - backwards, since the
@@ -2039,6 +2065,57 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                     FlutterFlowTheme.of(context).accentOnSurface,
                               ),
                               ),
+                              // Live KINDEX-impact preview. Shows as soon as
+                              // the shopper taps a star, before Submit -
+                              // makes visible what calculateRealTimeKindex
+                              // was already computing silently (previously
+                              // only reachable by tapping the "Customer
+                              // Reviews" header, a debug leftover left in
+                              // place below rather than removed).
+                              if (_model.updatedKindexResult != null)
+                                Padding(
+                                  padding: EdgeInsetsDirectional.fromSTEB(
+                                      0.0, 0.0, 0.0, 4.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        _model.updatedKindexResult! >=
+                                                businessProfileV2BusinessesRecord
+                                                    .kindexScore
+                                            ? Icons.trending_up_rounded
+                                            : Icons.trending_down_rounded,
+                                        color: _model.updatedKindexResult! >=
+                                                businessProfileV2BusinessesRecord
+                                                    .kindexScore
+                                            ? FlutterFlowTheme.of(context)
+                                                .success
+                                            : FlutterFlowTheme.of(context)
+                                                .error,
+                                        size: 16.0,
+                                      ),
+                                      Padding(
+                                        padding: EdgeInsetsDirectional.fromSTEB(
+                                            4.0, 0.0, 0.0, 0.0),
+                                        child: Text(
+                                          'This review would move the KINDEX '
+                                          'Score to '
+                                          '${_model.updatedKindexResult!.round()}',
+                                          style: FlutterFlowTheme.of(context)
+                                              .labelSmall
+                                              .override(
+                                                font:
+                                                    GoogleFonts.plusJakartaSans(),
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .secondaryText,
+                                                letterSpacing: 0.0,
+                                              ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               Container(
                                 // Was a hardcoded width: 200, which floated a
                                 // narrow box in the middle of a full-width
@@ -2165,24 +2242,189 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       .asValidator(context),
                                 ),
                               ),
+                              // Optional photo attachment (draft). The
+                              // thumbnail is kept device-local for this
+                              // preview - Submit Review below still only
+                              // sends rating + text, exactly as before.
+                              // Wiring the photo into KinServices.submitReview
+                              // needs a Firebase Storage upload, which is a
+                              // backend change held for approval alongside
+                              // the rest of this feature set.
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  InkWell(
+                                    splashColor: Colors.transparent,
+                                    focusColor: Colors.transparent,
+                                    hoverColor: Colors.transparent,
+                                    highlightColor: Colors.transparent,
+                                    onTap: () async {
+                                      final picked = await ImagePicker()
+                                          .pickImage(
+                                        source: ImageSource.gallery,
+                                        imageQuality: 70,
+                                      );
+                                      if (picked == null) return;
+                                      final bytes = await picked.readAsBytes();
+                                      safeSetState(() {
+                                        _model.attachedReviewPhotoBytes = bytes;
+                                        _model.attachedReviewPhotoName =
+                                            picked.name;
+                                      });
+                                    },
+                                    child: Container(
+                                      height: 32.0,
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          10.0, 0.0, 10.0, 0.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.transparent,
+                                        borderRadius:
+                                            BorderRadius.circular(8.0),
+                                        border: Border.all(
+                                          color: FlutterFlowTheme.of(context)
+                                              .alternate,
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.add_a_photo_outlined,
+                                            color: FlutterFlowTheme.of(context)
+                                                .secondaryText,
+                                            size: 16.0,
+                                          ),
+                                          Padding(
+                                            padding:
+                                                EdgeInsetsDirectional.fromSTEB(
+                                                    6.0, 0.0, 0.0, 0.0),
+                                            child: Text(
+                                              _model.attachedReviewPhotoBytes ==
+                                                      null
+                                                  ? 'Add photo (optional)'
+                                                  : 'Change photo',
+                                              style: FlutterFlowTheme.of(
+                                                      context)
+                                                  .labelSmall
+                                                  .override(
+                                                    font: GoogleFonts
+                                                        .plusJakartaSans(),
+                                                    color: FlutterFlowTheme.of(
+                                                            context)
+                                                        .secondaryText,
+                                                    letterSpacing: 0.0,
+                                                  ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  if (_model.attachedReviewPhotoBytes != null)
+                                    Padding(
+                                      padding: EdgeInsetsDirectional.fromSTEB(
+                                          8.0, 0.0, 0.0, 0.0),
+                                      child: Stack(
+                                        alignment: AlignmentDirectional(1, -1),
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(6.0),
+                                            child: Image.memory(
+                                              _model.attachedReviewPhotoBytes!,
+                                              width: 32.0,
+                                              height: 32.0,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () => safeSetState(() {
+                                              _model.attachedReviewPhotoBytes =
+                                                  null;
+                                              _model.attachedReviewPhotoName =
+                                                  null;
+                                            }),
+                                            child: Container(
+                                              width: 16.0,
+                                              height: 16.0,
+                                              decoration: BoxDecoration(
+                                                color: FlutterFlowTheme.of(
+                                                        context)
+                                                    .primaryBackground,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.close_rounded,
+                                                color:
+                                                    FlutterFlowTheme.of(context)
+                                                        .error,
+                                                size: 12.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                ],
+                              ),
                               FFButtonWidget(
-                                onPressed: () async {
+                                onPressed: _model.isSubmittingReview
+                                    ? null
+                                    : () async {
                                   final businessRef = widget!.businessDocument;
                                   if (businessRef == null) {
                                     return;
                                   }
+                                  safeSetState(
+                                      () => _model.isSubmittingReview = true);
+
+                                  // Upload the attached photo first (if
+                                  // any) so its URL lands in the same
+                                  // review write rather than the review
+                                  // existing briefly without it. A failed
+                                  // upload doesn't block the review itself
+                                  // - it still submits with rating and
+                                  // text, just without the photo.
+                                  final photoBytes =
+                                      _model.attachedReviewPhotoBytes;
+                                  final photoUrl = photoBytes == null
+                                      ? null
+                                      : await KinServices.uploadReviewPhoto(
+                                          photoBytes);
+
                                   final result = await KinServices.submitReview(
                                     businessRef: businessRef,
                                     rating: _model.ratingBarValue ?? 0,
                                     reviewText: _model.textController.text,
+                                    photoUrl: photoUrl,
                                   );
-                                  if (!result.isSuccess && mounted) {
+                                  if (!mounted) return;
+                                  safeSetState(
+                                      () => _model.isSubmittingReview = false);
+
+                                  if (!result.isSuccess) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text(result.error!)),
                                     );
+                                  } else {
+                                    if (photoBytes != null && photoUrl == null) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content: Text('Review submitted - '
+                                                'the photo failed to upload.')),
+                                      );
+                                    }
+                                    safeSetState(() {
+                                      _model.attachedReviewPhotoBytes = null;
+                                      _model.attachedReviewPhotoName = null;
+                                    });
                                   }
                                 },
-                                text: 'Submit Review',
+                                text: _model.isSubmittingReview
+                                    ? 'Submitting...'
+                                    : 'Submit Review',
                                 options: FFButtonOptions(
                                   height: 40.0,
                                   padding: EdgeInsetsDirectional.fromSTEB(
@@ -2267,6 +2509,25 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       .orderBy('timestamp', descending: true),
                                 ),
                                 builder: (context, snapshot) {
+                                  // A failed query (e.g. permission-denied)
+                                  // lands here too - without this branch
+                                  // hasData stays false forever and the
+                                  // spinner below never resolves.
+                                  if (snapshot.hasError) {
+                                    return Text(
+                                      'Unable to load reviews right now.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts
+                                                .plusJakartaSans(),
+                                            color: FlutterFlowTheme.of(
+                                                    context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                          ),
+                                    );
+                                  }
                                   // Customize what your widget looks like when it's loading.
                                   if (!snapshot.hasData) {
                                     return Center(
@@ -2287,6 +2548,22 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       listViewReviewsRecordList =
                                       snapshot.data!;
 
+                                  if (listViewReviewsRecordList.isEmpty) {
+                                    return Text(
+                                      'No reviews yet.',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            font: GoogleFonts
+                                                .plusJakartaSans(),
+                                            color: FlutterFlowTheme.of(
+                                                    context)
+                                                .secondaryText,
+                                            letterSpacing: 0.0,
+                                          ),
+                                    );
+                                  }
+
                                   return ListView.builder(
                                     padding: EdgeInsets.zero,
                                     shrinkWrap: true,
@@ -2303,8 +2580,10 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                           stream: UsersRecord.getDocument(
                                               listViewReviewsRecord.userRef!),
                                           builder: (context, snapshot) {
-                                            // Customize what your widget looks like when it's loading.
-                                            if (!snapshot.hasData) {
+                                            // Loading, not yet errored or
+                                            // resolved - show the spinner.
+                                            if (!snapshot.hasData &&
+                                                !snapshot.hasError) {
                                               return Center(
                                                 child: SizedBox(
                                                   width: 50.0,
@@ -2323,8 +2602,19 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                               );
                                             }
 
-                                            final containerUsersRecord =
-                                                snapshot.data!;
+                                            // The reviewer's profile failed
+                                            // to load (e.g. permission-denied
+                                            // reading another user's doc as a
+                                            // logged-out viewer) - render the
+                                            // review anyway with a fallback
+                                            // name rather than spinning
+                                            // forever on a lookup that will
+                                            // never succeed.
+                                            final reviewerDisplayName =
+                                                snapshot.hasData
+                                                    ? snapshot.data!
+                                                        .displayName
+                                                    : 'KIN Member';
 
                                             return Container(
                                               width: double.infinity,
@@ -2380,8 +2670,7 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                                       .start,
                                                               children: [
                                                                 Text(
-                                                                  containerUsersRecord
-                                                                      .displayName,
+                                                                  reviewerDisplayName,
                                                                   style: FlutterFlowTheme.of(
                                                                           context)
                                                                       .titleSmall
@@ -2532,6 +2821,22 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                                                 lineHeight: 1.5,
                                                               ),
                                                     ),
+                                                    if (listViewReviewsRecord
+                                                        .hasPhotoUrl())
+                                                      ClipRRect(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10.0),
+                                                        child:
+                                                            BusinessImage(
+                                                          imageUrl:
+                                                              listViewReviewsRecord
+                                                                  .photoUrl,
+                                                          width: 96.0,
+                                                          height: 96.0,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
                                                   ].divide(
                                                       SizedBox(height: 8.0)),
                                                 ),

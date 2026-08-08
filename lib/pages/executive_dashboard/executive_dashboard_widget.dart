@@ -5,9 +5,11 @@ import '/components/kpi_card_widget.dart';
 import '/components/main_menu_button.dart';
 import '/components/signup_item_widget.dart';
 import '/components/admin_beacon_metrics_card.dart';
+import '/components/admin_community_impact_metrics_card.dart';
 import '/components/admin_discovery_metrics_card.dart';
 import '/components/admin_job_board_metrics_card.dart';
 import '/components/admin_kin_quest_metrics_card.dart';
+import '/components/investor_report_export_button.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
 import '/flutter_flow/flutter_flow_google_map.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -231,6 +233,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
               ),
               actions: [
                 MainMenuButton(),
+                // Investor PDF export - see InvestorReportExportButton's
+                // doc comment for what it gathers and why it lives here
+                // rather than inside a specific card.
+                Tooltip(
+                  message: 'Export investor report (PDF)',
+                  child: InvestorReportExportButton(),
+                ),
                 FlutterFlowIconButton(
                   borderRadius: 8.0,
                   buttonSize: 40.0,
@@ -484,6 +493,13 @@ class _ExecutiveDashboardWidgetState extends State<ExecutiveDashboardWidget> {
                           Padding(
                             padding: EdgeInsets.symmetric(vertical: 12.0),
                             child: AdminKinQuestMetricsCard(),
+                          ),
+                          // Community Impact & Spend Tracker - community-
+                          // wide totals only, never per-customer. See
+                          // AdminCommunityImpactMetricsCard's doc comment.
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12.0),
+                            child: AdminCommunityImpactMetricsCard(),
                           ),
                           // Entry point to the submission review queue.
                           // business_submissions had no exit before this -
