@@ -6,6 +6,12 @@
       "runtimeExecutable": "flutter",
       "runtimeArgs": ["run", "-d", "iphone", "--dart-define-from-file=.env"],
       "port": 5000
+    },
+    {
+      "name": "the_kin_app_web",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port=5050", "--dart-define=SCREENSHOT_THEME=light"],
+      "port": 5050
     }
   ]
 }
