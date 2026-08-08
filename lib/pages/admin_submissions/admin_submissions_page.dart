@@ -1,8 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '/auth/firebase_auth/auth_util.dart';
+import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
 
 /// Admin review queue for `business_submissions`.
 ///
@@ -15,6 +18,15 @@ import '/flutter_flow/flutter_flow_theme.dart';
 /// callable, which re-checks `is_admin` server-side and creates the listing
 /// itself (including the geohash the map needs). Nothing here writes to
 /// `businesses` directly.
+///
+/// `business_submissions` is read-gated to admins only in firestore.rules,
+/// so a non-admin who lands here (deep link, typed URL, stale bookmark)
+/// never actually saw submission data - the stream's own `hasError` branch
+/// already caught the resulting permission-denied error with an "admin
+/// only" message. The redirect below just makes that consistent with
+/// AdminClaimReviewPage/ExecutiveDashboardWidget's own admin gates: bounce
+/// away immediately instead of briefly sitting on this admin-titled screen
+/// waiting for the query to fail.
 class AdminSubmissionsPage extends StatefulWidget {
   const AdminSubmissionsPage({super.key});
 
@@ -26,7 +38,27 @@ class AdminSubmissionsPage extends StatefulWidget {
 }
 
 class _AdminSubmissionsPageState extends State<AdminSubmissionsPage> {
+  bool _confirmedAdmin = false;
   final _busy = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userRef = currentUserReference;
+      if (userRef == null) {
+        context.goNamed(OnboardingSelectionCardWidget.routeName);
+        return;
+      }
+      final userDoc = await UsersRecord.getDocumentOnce(userRef);
+      if (!mounted) return;
+      if (userDoc.isAdmin != true) {
+        context.goNamed(OnboardingSelectionCardWidget.routeName);
+        return;
+      }
+      safeSetState(() => _confirmedAdmin = true);
+    });
+  }
 
   Future<void> _resolve(String submissionId, String action, String name) async {
     setState(() => _busy.add(submissionId));
@@ -59,6 +91,19 @@ class _AdminSubmissionsPageState extends State<AdminSubmissionsPage> {
   @override
   Widget build(BuildContext context) {
     final theme = FlutterFlowTheme.of(context);
+
+    // Don't fire the admin-only business_submissions query until admin
+    // status is confirmed - the redirect above runs in a post-frame
+    // callback, so without this guard the very first frame would still
+    // attempt it (same reasoning as ExecutiveDashboardWidget).
+    if (!_confirmedAdmin) {
+      return Scaffold(
+        backgroundColor: theme.primaryBackground,
+        body: Center(
+          child: CircularProgressIndicator(color: theme.primary),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: theme.primaryBackground,

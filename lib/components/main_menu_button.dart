@@ -308,9 +308,14 @@ void showMainMenuSheet(BuildContext context,
                         },
                       ),
                       // Community Impact & Spend Tracker (draft - see
-                      // CommunityImpactLocalStore doc comment).
+                      // CommunityImpactLocalStore doc comment). Deliberately
+                      // not volunteer_activism_outlined - Community Events
+                      // above already owns that glyph, and reusing it here
+                      // made the two rows read as the same destination at a
+                      // glance. savings_rounded ties to what this screen
+                      // actually tracks (logged spend).
                       ListTile(
-                        leading: Icon(Icons.volunteer_activism_outlined,
+                        leading: Icon(Icons.savings_rounded,
                             color: theme.primaryText),
                         title:
                             Text('Community Impact', style: theme.bodyLarge),

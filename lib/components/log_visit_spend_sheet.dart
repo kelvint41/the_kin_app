@@ -8,9 +8,9 @@ import '/services/local/community_impact_local_store.dart';
 
 /// V1 Community Impact & Spend Tracker - "Log a Visit / Spend" modal.
 ///
-/// DRAFT SCOPE: writes only to [CommunityImpactLocalStore] (device-local).
-/// There is no `spend_logs` Firestore collection yet - see that store's doc
-/// comment for the plan once this is approved.
+/// Writes through [CommunityImpactLocalStore], which is Firestore-backed
+/// (`spend_logs`, owner-only) with a SharedPreferences cache for instant
+/// rendering - see that store's doc comment for the full sync design.
 ///
 /// The business field is free text with autosuggest against the existing
 /// directory (same "fetch once, filter client-side" pattern
