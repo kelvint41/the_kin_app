@@ -8,26 +8,23 @@ import '/services/kin_services.dart';
 
 /// Business Profile QR Code Generator (owner view).
 ///
-/// Encodes a deep link to the business's profile using the app's already
-/// -registered `thekinapp://thekinapp.com` scheme (see
-/// android/app/src/main/AndroidManifest.xml's intent-filter and
-/// ios/Runner/Info.plist's CFBundleURLTypes), so a scan opens straight into
-/// KIN on a device that has the app installed, or falls back to a normal
-/// web link otherwise.
+/// Encodes the same canonical link KinServices.businessProfileUrl produces
+/// - see its doc comment for the full scan-to-open-app story and what's
+/// still missing (Universal/App Links verification on thekinapp.com
+/// itself). `/business/:businessId` (see nav.dart) is a real route now,
+/// so a tap that reaches the app - already installed, opened via the
+/// thekinapp:// scheme, or a future web build - lands on this exact
+/// business.
 ///
-/// DRAFT SCOPE: the QR code itself renders 100% client-side (qr_flutter,
-/// no network call), so it's safe to preview as-is. What isn't wired up
-/// yet: nav.dart doesn't parse `/business/:id` from a cold-start deep link
-/// back into a BusinessProfileV2Widget push - that routing is a follow-up
-/// once this UI is approved, tracked alongside the rest of this feature
-/// set's backend work.
+/// The QR code itself renders 100% client-side (qr_flutter, no network
+/// call).
 class BusinessQrCodeCard extends StatelessWidget {
   const BusinessQrCodeCard({super.key, required this.business});
 
   final BusinessesRecord business;
 
   String get _profileUrl =>
-      'https://thekinapp.com/business/${business.reference.id}';
+      KinServices.businessProfileUrl(business.reference);
 
   @override
   Widget build(BuildContext context) {

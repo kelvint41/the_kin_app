@@ -506,11 +506,19 @@ class _BusinessProfileV2WidgetState extends State<BusinessProfileV2Widget> {
                                       // throws.
                                       final box = context.findRenderObject()
                                           as RenderBox?;
+                                      // BUG FIX: this used to share just the
+                                      // business name (plus its own external
+                                      // website, if it had one) with no link
+                                      // back into KIN at all - a recipient
+                                      // had nothing to actually tap through
+                                      // to this business's profile. Now
+                                      // always includes the real KIN deep
+                                      // link (see KinServices.
+                                      // businessProfileUrl's doc comment),
+                                      // same URL the QR code card produces.
                                       await KinServices.shareApp(
-                                        text: business.website.isNotEmpty
-                                            ? '${business.businessName} on KIN - '
-                                                '${business.website}'
-                                            : '${business.businessName} on KIN',
+                                        text: '${business.businessName} on '
+                                            'KIN - ${KinServices.businessProfileUrl(business.reference)}',
                                         sharePositionOrigin: box == null
                                             ? null
                                             : box.localToGlobal(Offset.zero) &

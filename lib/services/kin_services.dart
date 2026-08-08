@@ -1526,6 +1526,31 @@ class KinServices {
     await launchURL(attributedUri.toString());
   }
 
+  /// The canonical shareable link to a business's KIN profile - shared by
+  /// the Business Profile share button and the owner-facing QR code card
+  /// so both ever produce exactly one URL for a given business, not two
+  /// slightly-different ones.
+  ///
+  /// `https://`, not the `thekinapp://` custom scheme registered in
+  /// AndroidManifest.xml/Info.plist: SMS/Messages apps only auto-linkify
+  /// http(s) URLs as tappable, so a custom-scheme link pasted into a text
+  /// message would just sit there as plain text. `/business/:businessId`
+  /// is a real route (see nav.dart) that resolves straight to this
+  /// business's BusinessProfileV2Widget - flutter_deeplinking_enabled
+  /// means a tap that reaches the app (already installed, opened via the
+  /// thekinapp:// scheme, or a future web build) lands on this exact
+  /// business, not just the app's home screen.
+  ///
+  /// What this does NOT do yet: make a bare https tap open the installed
+  /// app instead of a browser on a device that's never launched KIN
+  /// before. That needs Android App Links/iOS Universal Links, which are
+  /// verified against files hosted at thekinapp.com itself
+  /// (.well-known/assetlinks.json, apple-app-site-association) - server
+  /// infrastructure outside this repo, not something addable from the
+  /// Flutter/Firebase side alone.
+  static String businessProfileUrl(DocumentReference businessRef) =>
+      'https://thekinapp.com/business/${businessRef.id}';
+
   /// Opens the native share sheet with [text], then records a
   /// `share_app` Kindex engagement event for the signed-in user - the
   /// event feeds the same processUserEngagementEvent pipeline as

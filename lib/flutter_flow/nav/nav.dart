@@ -168,6 +168,29 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
             ),
           ),
         ),
+        // The clean, shareable link KinServices.businessProfileUrl and the
+        // owner QR code card both produce (`/business/{id}`, as opposed to
+        // BusinessProfileV2Widget's own `/businessProfileV2` above, which
+        // needs a serialized DocumentReference query param and isn't
+        // something you'd ever want to hand someone in a text message).
+        // A plain path segment, not a serialized param, so it's
+        // constructed directly against the known `businesses` collection
+        // rather than going through deserializeParam/collectionNamePath -
+        // no async resolution needed, same as passing any other
+        // DocumentReference into this widget. No requireAuth: viewing a
+        // profile has never needed sign-in, deep link or not, and this is
+        // deliberately the on-ramp for a signed-out recipient to land
+        // somewhere real before hitting the (now auth-gated) claim flow
+        // below.
+        FFRoute(
+          name: 'BusinessProfileShareLink',
+          path: '/business/:businessId',
+          builder: (context, params) => BusinessProfileV2Widget(
+            businessDocument: BusinessesRecord.collection.doc(
+              params.getParam('businessId', ParamType.String) as String,
+            ),
+          ),
+        ),
         FFRoute(
           // Same requireAuth as TheExchange - this is the same content, just
           // aggregated across nearby businesses.
@@ -263,9 +286,23 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
           requireAuth: true,
           builder: (context, params) => NotificationsWidget(),
         ),
+        // requireAuth added: submitClaimRequest has always rejected a
+        // signed-out caller ("You need to be signed in to claim a
+        // business"), but the route itself never enforced that, so a
+        // signed-out visitor - the exact case a shared, unclaimed
+        // business's link is for - could fill out the entire claim form
+        // only to be told to sign in at the very last step, losing
+        // everything they'd typed. requireAuth's existing
+        // redirect-then-return mechanism (see FFRoute.toRoute below)
+        // already round-trips through OnboardingSelectionCardWidget's
+        // sign-up/sign-in and back to this exact URL, businessRef and all
+        // - the same pattern every other auth-gated route here already
+        // relies on - so nothing else needed to be built for "share ->
+        // sign up or sign in -> land back on the claim form."
         FFRoute(
           name: ClaimBusinessWidget.routeName,
           path: ClaimBusinessWidget.routePath,
+          requireAuth: true,
           builder: (context, params) => ClaimBusinessWidget(
             businessRef: params.getParam(
               'businessRef',
